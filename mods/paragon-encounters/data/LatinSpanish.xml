@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <content contentuid="h3cd5b276g7833g6a61gf9a9gb7c2d1fc331e" version="1">Paragón</content>
+  <content contentuid="h67f70ea0gcec5g504bg4010g4ee6914a8ae9" version="3">Este personaje es un Paragón. Puede realizar una Acción adicional por turno, recibe la mitad de daño de todas las fuentes y es competente en Atletismo y Acrobacias.</content>
+  <content contentuid="hdf71fd1fg07a9g4e48gd9dfg7d2085f2a499" version="1">Refuerzo</content>
+  <content contentuid="ha77f4336gc479gfd70g24eeg9e7cd3aacc0e" version="1">El personaje es un aliado de apoyo de su líder.</content>
+  <content contentuid="ha3c8d64cg9d77g8c78gc034g37b95e214e75" version="1">Resistencia a los Conjuros</content>
+  <content contentuid="h3423beeeg0f1bg5b19g9476g5b04b3b661a7" version="1">El personaje tiene resistencia al daño de los conjuros.</content>
+  <content contentuid="hece1b01bgffc3gb53fg9785g99cd9750dd6f" version="1">Golpes Mortales</content>
+  <content contentuid="h66087bb6g545cgd0dcgf2a4gf82eece14f58" version="1">Los ataques con arma de este personaje infligen [1] adicional. </content>
+  <content contentuid="h0cdc2214gb3a2g201fg52cbg528de2cdf13f" version="1">Golpes Infernales</content>
+  <content contentuid="ha84cc757g8abdg0707g908agebd9290f26ca" version="1">Resguardo: Físico</content>
+  <content contentuid="h36ed98ffgd22dg00c3gd990g70952c4e0e7d" version="2">El resguardo protege parcialmente al inventor del daño físico este turno.&lt;br&gt;El siguiente turno, el inventor obtiene &lt;LSTag Type="Status" Tooltip="ShiftingWardElemental_Paragon_Flare"&gt;Resguardo: Energía&lt;/LSTag&gt;.</content>
+  <content contentuid="hf88a75c3gde67g0981g6930g8fea81fae89c" version="1">Resguardo: Energía</content>
+  <content contentuid="h5f63a30fg3c69gbeecge8a1g19c7256504a8" version="2">El resguardo protege parcialmente al inventor del daño elemental este turno.&lt;br&gt;El siguiente turno, el inventor obtiene &lt;LSTag Type="Status" Tooltip="ShiftingWardPhysical_Paragon_Flare"&gt;Resguardo: Físico&lt;/LSTag&gt;.</content>
+  <content contentuid="h7a6a75degd107gac75g7f87g3d1bca111fb6" version="1">Resguardo Cambiante</content>
+  <content contentuid="h67fa363cg4533g0868g8712gdba5b77f5de5" version="2">El avanzado resguardo tecnológico de este personaje alterna entre &lt;LSTag Type="Status" Tooltip="ShiftingWardPhysical_Paragon_Flare"&gt;Físico&lt;/LSTag&gt; y &lt;LSTag Type="Status" Tooltip="ShiftingWardElemental_Paragon_Flare"&gt;Energía&lt;/LSTag&gt; cada turno.</content>
+  <content contentuid="h42565896g95f1g66acg232agf50c5e07359d" version="1">Inmunidad a los Abismos</content>
+  <content contentuid="hf2dbb16dg40d0g5c85g635dg3a8652d9d39b" version="1">Al entrar en cualquier abismo regresará sin morir si no está Incapacitado.</content>
+  <content contentuid="h2bb0fc6cg4084g5d63g486egd1f3fe1f8397" version="1">Inmunidad a los Abismos</content>
+  <content contentuid="hef664134gdaa9g429dg245fg0562731941fd" version="1">Al entrar en cualquier abismo, regresará sin morir si no está Incapacitado.</content>
+  <content contentuid="h1feb553fgcf26gc344g8640g9db89cdb8178" version="1">Refuerzos</content>
+  <content contentuid="h82e1d47bgfa63ge59cg683eg2e41888977c2" version="1">Llama refuerzos para ayudar en tu combate.</content>
+  <content contentuid="hffb85011ga66fge489g386fg2d65640953ab" version="1">Llamas de Avernus</content>
+  <content contentuid="h49643b21gd3deg3fafgae0bgd23ef4d58b4f" version="1">El personaje está envuelto en las llamas infernales de Avernus y es inmune a quemarse.</content>
+  <content contentuid="ha7115fcfg8023gb12cg2c0dga953a4972b33" version="1">Llamas de Avernus</content>
+  <content contentuid="hcdaddbf8g498dga6e6g9572gf7db4a207842" version="1">El personaje está envuelto en las llamas infernales de Avernus.</content>
+  <content contentuid="he61ba581gccfcga7b7gd918gb5136a6b0997" version="1">Apuntado Superior</content>
+  <content contentuid="h90a1c0b8g0fbbgd458g830ag3244999a42df" version="1">Rayos de Fuego</content>
+  <content contentuid="h5575394age81dg9463g9351g3842ca45c647" version="1">Lanza [2] rayos de fuego. Cada rayo inflige [1] de daño.</content>
+  <content contentuid="hc219ac7bgaac2g1d63g57d5g2a01a1306483" version="1">Tu forma salvaje tiene [1].</content>
+  <content contentuid="h0777eff6ge0a9g76dfgbdf6gf39c9a0076f4" version="1">Refuerzos</content>
+  <content contentuid="h4eac4204g9d17g2245g9121ga5a91b1dae0c" version="1">Cuántos refuerzos quedan en reserva.</content>
+  <content contentuid="hc62bb428g5728g0a8cg215bg281ca00eb1ff" version="1">Canalizar Divinidad</content>
+  <content contentuid="hc262cdb1g85f8g4de9g1d92g08078e050b3b" version="1">El número de veces que puedes canalizar tus poderes divinos.</content>
+  <content contentuid="h36165308g3297g97f7gf9d1g4159cf5189f4" version="1">Toque Hórrido</content>
+  <content contentuid="h6318d346g75dagede9gfaf1g7b5110e9aa38" version="1">Haz que una criatura se pudra con tu toque, infligiendo [1] y &lt;LSTag Type="Status" Tooltip="HORRIDTOUCH_POISON_PARAGON_FLARE"&gt;Envenenándola&lt;/LSTag&gt;. Mientras está envenenada de esta forma, el objetivo también está &lt;LSTag Type="Status" Tooltip="BLINDED"&gt;Cegado&lt;/LSTag&gt;.</content>
+  <content contentuid="hba9a49e6g4f60g99b2gf614g31c74e474c2f" version="1">El objetivo puede repetir la tirada de salvación al final de cada uno de sus turnos, terminando el efecto si tiene éxito.</content>
+  <content contentuid="hebc5904bg65aag8820g9ed2gc2fcc03b7aef" version="1">Toque Hórrido</content>
+  <content contentuid="h78299185g9421g9b48gc677ge67226b8e522" version="1">Sufre &lt;LSTag Tooltip="Disadvantage"&gt;Desventaja&lt;/LSTag&gt; en las &lt;LSTag Tooltip="AttackRoll"&gt;Tiradas de Ataque&lt;/LSTag&gt; y &lt;LSTag Tooltip="AbilityCheck"&gt;pruebas de característica&lt;/LSTag&gt;. El alcance de ataques y conjuros se reduce a [1]. &lt;br&gt;&lt;br&gt;Las Tiradas de Ataque contra criaturas Cegadas tienen &lt;LSTag Tooltip="Advantage"&gt;Ventaja&lt;/LSTag&gt;.</content>
+  <content contentuid="hd275f961gbc02g4c46g4bbdga041df0a4eb1" version="1">Sufre &lt;LSTag Tooltip="Disadvantage"&gt;Desventaja&lt;/LSTag&gt; en las &lt;LSTag Tooltip="AttackRoll"&gt;Tiradas de Ataque&lt;/LSTag&gt; y &lt;LSTag Tooltip="AbilityCheck"&gt;pruebas de característica&lt;/LSTag&gt;, y está &lt;LSTag Type="Status" Tooltip="BLINDED"&gt;Cegado&lt;/LSTag&gt; mientras está envenenado de esta forma.</content>
+  <content contentuid="hd370d6ecgbcefgdacag2193ga6a7a9566634" version="7">Guardián de Tumbas</content>
+  <content contentuid="hdf456463g3cecg9439ge84fgf9c1019a98bd" version="11">Torra</content>
+  <content contentuid="h366187f2g9f4agbd54g51acg54d15af5d0f6" version="3">Invocador de Demonios Goblin</content>
+  <content contentuid="h9668f648g62b0gdfefg7355gd47778b9135b" version="4">Diablillo</content>
+  <content contentuid="h230a7b8dg3c2fg0ebcg0e04g5e74f21d5a67" version="1">Presencia Horripilante</content>
+  <content contentuid="h178b7220g1e37g3dc5g0152gb68c36040b1e" version="2">La horrible presencia de Verillius Receptor infunde terror que quiebra la mente incluso a través de su disfraz. Los objetivos hostiles reciben [1], sueltan todo y se vuelven &lt;LSTag Type="Status" Tooltip="FEARED"&gt;Aterrorizados&lt;/LSTag&gt;: tienen &lt;LSTag Tooltip="Disadvantage"&gt;Desventaja&lt;/LSTag&gt; en las &lt;LSTag Tooltip="AbilityCheck"&gt;pruebas de característica&lt;/LSTag&gt; y &lt;LSTag Tooltip="AttackRoll"&gt;Tiradas de Ataque&lt;/LSTag&gt;.</content>
+  <content contentuid="h4673e4adg3b88gc253g6314g98264dd29c5b" version="1">Ardilla</content>
+  <content contentuid="h91ec5393g1961gd02bg22f2g76c56ea2812e" version="2">Ardilla</content>
+  <content contentuid="hd8d6df92g8a03gb938g0e93gc57731a70918" version="5">Campeón Goblin</content>
+  <content contentuid="h14499e1agc743gfc53g91d0ga4b4af6d4133" version="5">Devoto de Maglubiyet</content>
+  <content contentuid="h74e51b2cg4a2ega9bege3f2g5b93bc9fb5df" version="4">Leal a Maglubiyet</content>
+  <content contentuid="hdea6e5afg4ae5g45d4g638ag1763f51260b8" version="7">Invocador de Demonios Goblin</content>
+  <content contentuid="h3b7cdcddg3514gb009g8dedg01bf8efe1478" version="7">Brujo de Verillius Receptor</content>
+  <content contentuid="h336edb59g2c5dga8fag8a90gd7cb5bc1727d" version="8">Vagabundo</content>
+  <content contentuid="h4081717cg38aeg7853g93bfg423720b718b0" version="3">Guardián de los Escribas</content>
+  <content contentuid="h1f9f7687g60f5g7de0g20bfga745ac09ac4f" version="5">Expedicionario Tiefling</content>
+  <content contentuid="h11905008g4e5ege4f2g844eg4b706c000934" version="5">Jinete Infernal Caído en Desgracia</content>
+  <content contentuid="h37313bb6g23b3gd435gea5bg8b27e8956d79" version="2">Explorador Tiefling</content>
+  <content contentuid="he7ce54d7ge458gb6c3ga06dg7bb099c006c9" version="3">Duelista Goblin</content>
+  <content contentuid="h1b2b53bag4721gdc61g4027gf70cde112247" version="3">Campeón de Caza de Pollos</content>
+  <content contentuid="h0c5666e0g8646gc05dgcb5agc215df4ba103" version="2">Rastreador Goblin</content>
+  <content contentuid="hd72153f7g9562gd302gc316g82e67296f34a" version="2">Seguidor Kobold</content>
+  <content contentuid="h83420c71gd9ddg1132g625eg1c604f4ed1ee" version="5">Señor de la Guerra Kobold</content>
+  <content contentuid="h29813968ga06fg2545gf9d0g753dc74a9c79" version="5">Dragón Rojo Ancestral</content>
+  <content contentuid="hf1585999g2edbg8b32gd57dgacd818627b9a" version="8">Pedestal</content>
+  <content contentuid="hfb0a43c3g99a4gc7adg0d4agbd7cc6994a71" version="8">Sociedad de la Brillantez</content>
+  <content contentuid="h76cbd234g291dg9733g242agef381a4d6060" version="4">Explorador de la Sociedad</content>
+  <content contentuid="hcba62366g0d9eg6078g179cg07735f4d9681" version="3">Justiciar Abandonado</content>
+  <content contentuid="h6567110dg9c29g3c4bgc8ccgfca6f1aa7c49" version="3">Hoja Perdida</content>
+  <content contentuid="hd4b03fe0g2035g8d2bg0293gab0511bf72e0" version="1">Justiciar Fracasado</content>
+  <content contentuid="h0d04ba31g8939g9eddg0bc1g99f32ee05ef5" version="7">B'rakan</content>
+  <content contentuid="hd2a3570dgeeabgabb8g090bg612a0eeddffa" version="7">Tormenta Astral</content>
+  <content contentuid="hcb4a87f3g7749g614egc202g972ff34b6ec1" version="4">Adepto Githyanki</content>
+  <content contentuid="ha99559f7g1bdeg847egcb48g837f5945e0ad" version="12">Askell Stockhold</content>
+  <content contentuid="hae301d1fgfd65g6749gdcbcgb0290df5200e" version="12">Maestro del Amanecer</content>
+  <content contentuid="h69d968abg2f5dg4ee9g35efg8e28a456aa52" version="5">Acólito de Lathander</content>
+  <content contentuid="hd575c9edg81dcg5f2dg4fb6g50f887bdd501" version="1">Proeza Táctica</content>
+  <content contentuid="h4bb71639g0809gea99g3bb2gff5d04e409e7" version="1">Maestría Táctica</content>
+  <content contentuid="h0a9faea3g85e1gee31g5bb9g083fd66f7128" version="1">Habilidad Táctica</content>
+  <content contentuid="ha0a32286g87f0gfefagd585g61d90477da2d" version="1">Gana [1] Puntos de Táctica y recupera [2] cada turno.</content>
+  <content contentuid="hc143ec78g7b4agbe4agfad8g08be2ef7502f" version="1">Maestría Táctica</content>
+  <content contentuid="haf9b4b8eg4fc1ga076gec30g0f2c8303a45d" version="1">Proeza Táctica</content>
+  <content contentuid="h4bc1ef2cg67bcg09dfgcdbcga951107eca65" version="4">Zapatos de Paso Veloz</content>
+  <content contentuid="hf8973e29g357agcee9gf12bg76718cd70bd7" version="4">Botas del Planificador</content>
+  <content contentuid="he1accb9cg25ceg0f83g6a98gdc1b046c7338" version="2">Botas del Caminante Infernal</content>
+  <content contentuid="hc95666cfg9f3fg5b80ga166g74efd7b1ab14" version="4">Amuleto del Señor del Asesinato</content>
+  <content contentuid="h6348282egcd21ga8bcg1686g372fe319c585" version="4" />
+  <content contentuid="ha3a5f733g43cfg7883g40f5g9ca8a1f15b24" version="4">Yelmo Robusto</content>
+  <content contentuid="hc834f493ga757ga470g27b5g209f106eb9c0" version="4" />
+  <content contentuid="h7a94aed6ga506g451dgc550ga77a4621baa9" version="4">Casco de Protección Arcana</content>
+  <content contentuid="h91680e94g4403g10ddg4690gcd01bfcd3311" version="4" />
+  <content contentuid="hd19ff803g37d7g6e66g2fa7gb124e6ddafdc" version="4">Capucha Malevolente</content>
+  <content contentuid="h92fbaee0g52e8g8aa6g0fc8g3ad9b03dec46" version="6" />
+  <content contentuid="hc1ad7eeeged2cg924eg720bgede2dbfd7b6d" version="5" />
+  <content contentuid="h54b07a08g6649ga770g8c09g75433cacdf4b" version="5" />
+  <content contentuid="h345e1bd2ged8fg5833gff39gfb923be1c39f" version="6">Esta capa llena al portador de valor y tenacidad para persistir ante cualquier desafío, por sombrío que sea.</content>
+  <content contentuid="h029ef5d0g2f62gbb95gaf7dg0b3581e108a5" version="3">Espada Larga del Estratega</content>
+  <content contentuid="hb5119e21g9378g8ccfg6201gc07207373be7" version="3" />
+  <content contentuid="h7cd84b2ag8c33g115bg1d2fg3793ee3d6409" version="3">Estoque de Conducto Elemental</content>
+  <content contentuid="hf418f6e6g10f7gb640g1da3g2536e8cdcfb6" version="3" />
+  <content contentuid="h6c8cf691g1c77ga412gfcbbg62420e215638" version="2">Maza Aplastalmas</content>
+  <content contentuid="hee18a8deg05begf9d5g7276g226bf3f6fce4" version="2" />
+  <content contentuid="h06098368g98dbg7555g446ege1d144db6b65" version="3">Hoja del Táctico</content>
+  <content contentuid="h01a7611cg1b5fg6560gcfaag240cf5f41a46" version="3" />
+  <content contentuid="h49c9db95g4727gdf05ga93dgf163ccaeee36" version="3">Ballesta de Mano Modular</content>
+  <content contentuid="ha4dc76f8gf865g1043g47e4gcf97d5a23183" version="3">Esta ballesta carga automáticamente virotes especialmente diseñados, permitiendo al portador estar preparado para cualquier cosa si tiene tiempo de prepararse.</content>
+  <content contentuid="h598e09fbg5dd3g5ae6gd246g5c61b4d9ed77" version="1">Collar de Piedra de Sangre</content>
+  <content contentuid="h642ab8bcgc2f9g96c0gfc98gb1f24c52a889" version="3">Capa de la Última Resistencia</content>
+  <content contentuid="h9db213e7g7894g609agaa32gb5c25ba7c0f4" version="2">Capa de Fuerza de Voluntad</content>
+  <content contentuid="hdf23dff6ge231g368dgc7a2g4df0bc695653" version="2">Manto del Guardián</content>
+  <content contentuid="he58bb677g415bgb057g618bg4f32cc2d65da" version="3">Capa Vengativa</content>
+  <content contentuid="h96302fa8g5dd1gde9fg3fd7g398c560b16f4" version="1">Guanteletes de Caparazón de Acero</content>
+  <content contentuid="h4195fadag3139g18bfg334eg644c85e4864c" version="1">Guantes de Erosión</content>
+  <content contentuid="hb561d3aeg0a23gb672ge139gd0fb9b7fc98f" version="1">Guantes Helados</content>
+  <content contentuid="h1545a9dfgcc68ga4f4g0322gf02b38777efc" version="1">Guantes de Espionaje</content>
+  <content contentuid="h10f52ddfg3408gbc7eg257eg66ea08cf768c" version="1">Anillo de la Tierra</content>
+  <content contentuid="h33a9eb8bgb915g7072g1856g946db233b26c" version="1">Anillo del Más Allá</content>
+  <content contentuid="h69a688fdgc430gab55g4082gd716342313ff" version="1">Anillo de Precisión</content>
+  <content contentuid="h2e6d22d5gf0ecgd535g22c9g93bd5eb15dfe" version="2">Anillo del Cielo</content>
+  <content contentuid="he18bd154g7c88g8109g0368g0767eb0a2648" version="1">Anillo Eterno</content>
+  <content contentuid="hf46188c6g8635ga4ebg6a1aga3fd1ab07354" version="1">Anillo del Robaalmas</content>
+  <content contentuid="hd5ddd989g8d6fga6a7ga942g6a42b1e0c284" version="7">Zombi</content>
+  <content contentuid="h295610b3ge6beg40b1gea2bg121d796739e7" version="15">Esqueleto Probador de Pociones</content>
+  <content contentuid="h3ac97236g29d6gfc99gf38fg85dac2c347fb" version="9">Esqueleto Borracho</content>
+  <content contentuid="h633c18eag6193g5ef7gd567g07bb70f4d41f" version="8">Vengador Justiciar</content>
+  <content contentuid="h39180342g16edg4eb9g1e39g6efe2e3bb1b4" version="11">Justiciar Veterano</content>
+  <content contentuid="h5bf031f4gb604g71a7g1af1gc21a7e912b55" version="8">Justiciar Veterano</content>
+  <content contentuid="h11baf024gdf5bg53a2g92fcg97bd29054587" version="9">Justiciar Veterano</content>
+  <content contentuid="h5fdc17fcgf6eeg4b7dg6100g8dd277d2491c" version="12">El Inventor</content>
+  <content contentuid="h0ad45844g48d6gb275gde12gfef9821252bd" version="9">Guardia del Taller</content>
+  <content contentuid="h44a3b95dg9e4ag17ffg7baag79ec785bfc28" version="8">La Caída del Hombre</content>
+  <content contentuid="h4e957e4cg354eg03e3g28fcg63b723ccccbd" version="8">Contramedida: Paragón</content>
+  <content contentuid="hd3149702ge6ddg3632ga998g33d51515a11e" version="11">Arcanista Mind Flayer</content>
+  <content contentuid="h63db0a95g8b8cgb788g6083g4879f6339b2d" version="1">Llamas de Avernus</content>
+  <content contentuid="h7d0ff49cg6a4cg3b27gd6e2g6a15bc6581e0" version="1">El personaje está envuelto en las llamas infernales de Avernus.</content>
+  <content contentuid="hd9cee463g5595g83c8g0070ge585c65958df" version="1">Persecución Sin Fin</content>
+  <content contentuid="hfa20d86cg194fged40g0951gd679fd19e446" version="1">El Inquisidor puede usar esta habilidad para escapar de abismos sin fondo.</content>
+  <content contentuid="hef1392a1g2cbfg95d9g4699gd7e45761d727" version="1">Onda Destructiva: Psíquica</content>
+  <content contentuid="h7d645debg9a46gb095gd4bcgc0d6aa1083a9" version="1">Tácticas Infinitas</content>
+  <content contentuid="hfdcb5840ge666g3c57ge481g350d557ed846" version="1">El personaje recupera todos los Puntos de Táctica cada turno.</content>
+  <content contentuid="h625c3fecgf059gc62ag815ag8b3ba8143765" version="1">Manto del Guardián</content>
+  <content contentuid="h50e9cd19g0b14gd0eeg6338g4591c1d9937f" version="1">Manto del Guerrero Sagrado</content>
+  <content contentuid="h119467abg8d73gbb8cgb4ccg4a5cebab0878" version="1">Esta capa llena al portador de valor y tenacidad para persistir ante cualquier desafío, por sombrío que sea.</content>
+  <content contentuid="h81bb07fcg873eg6eecgb15ag1a232a571602" version="1">Capa Vengativa</content>
+  <content contentuid="h6751aeb8g5ab8g7a50gc53agd0f06ffde5f9" version="1">Capa de Fuerza de Voluntad</content>
+  <content contentuid="h20e2efc8gf39ag6a0cg154ega6f6d5427f6e" version="1">Druida</content>
+  <content contentuid="hf36f0f44g6fc6g0d43g54b4gf3ebfe56f1fc" version="3">Druida Ancestral</content>
+  <content contentuid="h78660c7ag7a5agb343g414bg4aa10836f03f" version="3">Guardián Eterno</content>
+  <content contentuid="h245910c5gf45fg14degd236g2ed8cc1d18fd" version="3">Cabeza de la Muerte de Bhaal</content>
+  <content contentuid="h3cef9a2dg0db2g5d58g4e2bgf9a192375dc9" version="4">Asesina Profana Esmé</content>
+  <content contentuid="h78a9c4fbgd764g6619gdb9eg74064e7bdb6e" version="4">Látigo de Bhaal</content>
+  <content contentuid="h16018fbcgc015g7e79ge25fgf64baef993b4" version="6">Harngar</content>
+  <content contentuid="h1a61fc9bge411g0bdfg72eeg80017046be26" version="6">El Destructor</content>
+  <content contentuid="h6019e873g7e20g412cg697dgaff48a7ec03c" version="2">Acólito de la Destrucción</content>
+  <content contentuid="hd28e5ad9g673dg6227gb8ccg8bd8cc4e1284" version="5">Espíritu de Espíritus</content>
+  <content contentuid="h0a04d75bg6854ga4e7ga2bfg221c1a866cae" version="2">Pícaro Harper</content>
+  <content contentuid="h35ce08a2g1b21g2940g3bceg5ec041623929" version="2">Druida del Mar</content>
+  <content contentuid="h2afe7c70g3a26g2692gc9ffg2c8a066ee983" version="1">Pícaro Harper</content>
+  <content contentuid="hce8a07f4gbbd2gc63fg81bdg925ec86d7857" version="3">El Inquisidor</content>
+  <content contentuid="h2703be90g0671gbff2g6ccdg50cdb9220074" version="3">Sabueso de los Patriarcas</content>
+  <content contentuid="hb635fb7cg1f45gd62cgff70g365c977b9700" version="3">Ayudante del Inquisidor</content>
+  <content contentuid="h17fa3bfagdf7eg4208g2f6dg596d7e60cf6f" version="3">Maestro Manipulador Excéntrico</content>
+  <content contentuid="h06a6ef1fg2d38ge5e1g998ag9aca6533a997" version="3">Centinela del Carisma</content>
+  <content contentuid="h8c7f57d0g46fcg47dcg539agf72dbcde36c0" version="1">Centinela de la Inteligencia</content>
+  <content contentuid="h599dedf3g4340g016ag207bge986c20d4ec2" version="1">Centinela de la Sabiduría</content>
+  <content contentuid="h841b0a5dg6ea3gff07gc79fgbc6cedf25f87" version="3">Médico Desesperado</content>
+  <content contentuid="h3efb2862g11eagfe60gd755gc3fb55b39225" version="3">Ninguno Puede Ser Salvado</content>
+  <content contentuid="ha93d0c5eg09e7g64d9g9ec9g72b37c3d17cd" version="3">Enfermera Desesperada</content>
+  <content contentuid="h06bbca1ag957eg8bf7ga4f1ge4593cb4daa9" version="8">Centinela de Myrkul</content>
+  <content contentuid="h927161dfg3fd2g1456g2470g1facff14c0b9" version="8">Señora de las Almas</content>
+  <content contentuid="hba7c8b83ge26dg9361g1f02g8c26477704e8" version="3">Justiciar Favorecido</content>
+  <content contentuid="h2f9d5921g4598gba98g3705ge37fa76b34ef" version="3">El Honrado Perdido</content>
+  <content contentuid="h627af56bg5acbgc54bgcf71g8f8cf4af0de0" version="3">Ardilla</content>
+  <content contentuid="hd269f9f0g778cg6e55gd992g1b80a7b8e60d" version="2">Manip Cleargem</content>
+  <content contentuid="h50bb7de6ga8fege99eg52begc37d537d237d" version="2">Estratega del Puño Llameante</content>
+  <content contentuid="hfbc84320g0501g48e9ga459g01e9ce5d9f68" version="1">Protector del Puño Llameante</content>
+  <content contentuid="h204a96f8g27dcg047fgcb99g2719cb4cc139" version="3">Verillius Receptor</content>
+  <content contentuid="h81759dedg4a05g95d3gf981g09c97d17c8b3" version="3">Alto Inquisidor de Zariel</content>
+  <content contentuid="h90ab500bg9518g34c2g428fg629d4be6a843" version="2">Brujo de Zariel</content>
+  <content contentuid="h0346925ag4bffgc089gf593g4898b8325e1f" version="1">Forma Salvaje: Mirmidón de Agua</content>
+  <content contentuid="h217befc3g7d60gdbbdgeb10ga3e030a76902" version="1">Asume la forma de un Mirmidón de Agua.</content>
+  <content contentuid="h582e3620gf8dag4966g2d22g8e0338efc4c7" version="1">Dados de Superioridad</content>
+  <content contentuid="ha63d069fg92fcgc33agbc4cg6a2b0102eda5" version="1">El personaje gana [1] Dados de Superioridad adicionales.</content>
+  <content contentuid="h6a26bf85ga702g8b73g4786g64906a7f0130" version="1">Los ataques con arma de este personaje infligen [1] y [2] adicionales. </content>
+</contentList>

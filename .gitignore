@@ -72,6 +72,8 @@ mods/*
 !mods/more-enemies-in-basic-fights/**
 !mods/nightmare-difficulty/
 !mods/nightmare-difficulty/**
+!mods/paragon-encounters/
+!mods/paragon-encounters/**
 !mods/requiem-for-the-absolute/
 !mods/requiem-for-the-absolute/**
 !mods/unlocklevelcurve/
