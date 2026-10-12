@@ -99,10 +99,14 @@ After launching the subagents, the Orchestrator stops calling tools and waits fo
 Once all subagents have reported back, the Orchestrator executes [`scripts/update_library_catalog.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/update_library_catalog.py):
 
 ```bash
+# 1. Update markdown catalog
 python3 scripts/update_library_catalog.py --write
+
+# 2. Warm the mechanics & gear database cache
+python3 scripts/query_mod_database.py --reindex
 ```
 
-This automatically scans all specifications under `mods/`, extracts titles, descriptions, and feature counts, categorizes them into standard tables (**Gear**, **Spells**, **Classes & Subclasses**, **Progression & Rules**, **Utilities & Cheats**), and regenerates [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md).
+This automatically scans all specifications under `mods/`, extracts titles, descriptions, and feature counts, categorizes them into standard tables (**Gear**, **Spells**, **Classes & Subclasses**, **Progression & Rules**, **Utilities & Cheats**), regenerates [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md), and rebuilds the high-speed query cache in `.cache/mod_database.json` for [`bg3_query_gear`](file:///home/jpstroud/projects/BaldursGate3/.agents/skills/bg3_query_gear/SKILL.md).
 
 ---
 
