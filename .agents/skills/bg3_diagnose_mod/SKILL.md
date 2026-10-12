@@ -67,6 +67,14 @@ python3 scripts/sync_localization.py --mod <mod_slug> --check --json
 python3 scripts/inspect_save_game.py --audit --json
 ```
 
+> [!TIP]
+> **Tool Discovery & Schema Inspection**:
+> To discover additional automation tools or inspect CLI flags dynamically, run:
+> ```bash
+> python3 scripts/tools.py --search "<intent or issue>" --json
+> python3 scripts/tools.py --info <tool_name> --json
+> ```
+
 ### Step 3: Synthesis & Problem Categorization
 
 Map discovered issues to standard root causes:

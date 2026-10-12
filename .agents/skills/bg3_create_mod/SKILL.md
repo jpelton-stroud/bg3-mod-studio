@@ -171,6 +171,14 @@ The Orchestrator launches specialized subagents in parallel to author the mod's 
 }
 ```
 
+> [!TIP]
+> **Subagent Tool Discovery**:
+> Subagents can query and inspect the studio tooling registry dynamically at any time:
+> ```bash
+> python3 scripts/tools.py --search "<intent>" --json
+> python3 scripts/tools.py --info <tool_name> --json
+> ```
+
 ---
 
 ## Step 5: Reactive Supervision, Validation & Metadata Generation
