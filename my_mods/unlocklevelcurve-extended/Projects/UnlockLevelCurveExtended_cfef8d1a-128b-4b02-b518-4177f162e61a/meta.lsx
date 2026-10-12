@@ -26,7 +26,7 @@
                     </children>
                 </node>
                 <node id="ModuleInfo">
-                    <attribute id="Author" type="LSString" value="jpstroud"/>
+                    <attribute id="Author" type="LSString" value="MTGHillGiant"/>
                     <attribute id="CharacterCreationLevelName" type="FixedString" value=""/>
                     <attribute id="Description" type="LSString" value="UnlockLevelCurveExtended: Implements missing 5e features for levels 13-20, including Monk Diamond Soul &amp; Empty Body, Fighter Action Surge 2, Paladin Cleansing Touch &amp; 30ft Auras, Wizard Spell Mastery, Ranger Vanish &amp; Foe Slayer, and core subclass passives."/>
                     <attribute id="FileSize" type="uint64" value="0"/>

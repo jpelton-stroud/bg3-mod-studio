@@ -1,6 +1,6 @@
 # Mod Specification: UnlockLevelCurveExtended (Level 13-20 5e Feature Expansion)
 
-**Category**: Classes, Progression & Bugfixes | **Author**: jpstroud | **Parent Dependency**: `UnlockLevelCurve` (`a2ffd0e4-c407-8642-2611-c934ea0b0a77`)  
+**Category**: Classes, Progression & Bugfixes | **Author**: MTGHillGiant | **Parent Dependency**: `UnlockLevelCurve` (`a2ffd0e4-c407-8642-2611-c934ea0b0a77`)  
 **Toolkit Target**: Patch 7 / Patch 8 Native Toolkit Drag-and-Drop Structure
 
 ---
@@ -88,4 +88,24 @@ In BG3 Mod Manager or the in-game mod loader, ensure the following load order:
 | **Bard (College of Swords)** | 14 | **Master's Flourish** | At-will 1d6 variants of Slashing, Defensive, and Mobile Flourishes costing zero Bardic Inspiration charges. |
 | **Druid (All Circles)** | 18 | **Beast Spells** | Eliminates Wild Shape polymorph mute restrictions, allowing spellcasting while wildshaped. |
 | **Druid (Circle of the Moon)** | 16 | **Wild Shape Epic Scaling** | Epic scaling boost granting +1 Wild Shape charge, +1 attack roll bonus, and +1d6 bonus damage. |
+
+---
+
+## Not Planned
+
+> [!NOTE]
+> **Console Compatibility Justification**: The features below cannot be implemented purely through static engine data (`.lsx` and `.txt` files) and require Osiris story scripting, Script Extender (Lua) runtime hooks, dynamic physics spawning, or tabletop narrative adjudication. Because I only play on Console—where Script Extender is strictly unsupported—these features are not planned for this mod. A PC player or community modder is more than welcome to create a companion mod or fork to fill this gap!
+
+| Class / Subclass | Level | 5e Feature | 5e Mechanics | Why Pure Data Modding Fails (Console Constraint) |
+| :--- | :---: | :--- | :--- | :--- |
+| **Sorcerer (Wild Magic)** | 14 | **Controlled Chaos** | Whenever you roll on the Wild Magic Surge table, roll twice and choose which effect to use. | **UI Modal Limitation**: BG3 surges roll automatically via background engine tables. The game has no native interactive modal to present two simultaneous surge options to the player without Script Extender UI hooks. |
+| **Rogue (Arcane Trickster)** | 17 | **Spell Thief** | Reaction to negate a spell targeting you, force a save, and temporarily steal the spell to cast it for 8 hours. | **Runtime Spell Injection**: Dynamically inspecting an arbitrary incoming spell ID at runtime, learning that exact spell ID, storing it in memory for 8 hours, and suppressing it from the enemy caster strictly requires Script Extender/Lua. |
+| **Rogue (Thief)** | 13 | **Use Magic Device** | Ignore all class, race, and level requirements on the use of magic items. | **Hardcoded Item Validation**: Equip restrictions (armor proficiencies, race locks, class locks) are hardcoded in engine item validation without a passive boost hook. Requires Script Extender engine hooks. |
+| **Wizard (Illusion)** | 14 | **Illusory Reality** | Choose one inanimate, nonmagical object that is part of an illusion and make it real for 1 minute. | **Dynamic Physics Spawning**: Creating real physical geometry (bridges, walls, stairs) from an illusion requires runtime 3D object instantiation and navigation mesh modification. |
+| **Wizard (Enchantment)** | 14 | **Alter Memories** | Make a creature unaware it was charmed by you, and alter its memories of the event. | **Osiris Story DB Interaction**: NPC memory, charm awareness, and hostility reactions are governed by Osiris story databases (`DB_GLO_Attitude`) and crime scripts, not combat status boosts. |
+| **Ranger (Beast Master)** | 15 | **Share Spells** | Spells you cast targeting yourself automatically also affect your beast companion if within 30 ft. | **Summon Spell Redirection**: Replicating and casting identical spell payloads onto a specific summoned entity requires an Osiris/Script Extender `OnSpellCast` event hook. |
+| **Wizard (Transmutation)** | 14 | **Master Transmuter** | Consume your Transmuter's Stone to cast Raise Dead, Panacea, or major transformation. | **Inventory Consumption Hooks**: Consuming a specific inventory item object (`LOOT_Transmutation_Stone`) as an action casting cost and re-crafting it requires Osiris item-tracking scripts. |
+| **Cleric (Knowledge)** | 17 | **Visions of the Past** | Read psychic history and past events of an object or surrounding area. | **Tabletop Narrative Feature**: Pure roleplay divination with no combat equivalent. Would require bespoke dialogue and quest scripting across every location in the game. |
+| **Barbarian (Wild Magic)** | 14 | **Unstable Backlash** | Reaction when taking damage or failing a save while raging to roll a new surge and replace your current one. | **State Machine Re-rolling**: Dynamically clearing an active Barbarian surge and invoking a fresh roll on the surge table during an interrupt requires script-level state tracking. |
+
 
