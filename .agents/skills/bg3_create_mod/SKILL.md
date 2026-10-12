@@ -72,6 +72,7 @@ Before drafting any plan or generating UUIDs/folders, the Orchestrator **MUST un
    - **Branch B (Classes & Progression)**: Target classes/subclasses, level bounds (e.g. 1-12 vanilla vs. 13-20 `UnlockLevelCurve`), and progression unlock levels.
    - **Branch C (Spells, Passives & Abilities)**: Action economy (Action, Bonus Action, Reaction), resource costs (Ki, Spell Slots, Action Surge), and damage/status effects.
    - **Branch D (Parent Dependencies)**: Base game only (`GustavDev`) or companion frameworks like `UnlockLevelCurve` (`a2ffd0e4-c407-8642-2611-c934ea0b0a77`).
+   - **Branch E (In-Game Acquisition & Item Drops)**: For equipment or item mods, identify container drop locations (Tutorial Chest on Nautiloid, Camp Chest, or Act 1-3 vendors like Arron or Dammon) for `scripts/inject_treasure_table.py`.
 3. **Format Options**: Prefix the recommended option with `(Recommended)` and list it first. Format all options as direct user responses.
 
 ---
@@ -141,7 +142,7 @@ The Orchestrator launches specialized subagents in parallel to author the mod's 
     {
       "TypeName": "self",
       "Role": "Stats & Spells Specialist - <ModName>",
-      "Prompt": "Author the BG3 stat entries in <stats_dir>. Mod: <ModName>, UUID: <UUID>.\nFiles to create/populate:\n- Stats/Generated/Data/Spell_Target.txt (or Spell_Shout.txt, Spell_Projectile.txt)\n- Stats/Generated/Data/Passive.txt\n- Stats/Generated/Data/Status_BOOST.txt\nUse standard Larian syntax:\nnew entry \"<SpellName>\"\ntype \"SpellData\"\ndata \"SpellType\" \"Target\"\ndata \"DisplayName\" \"<Handle_DisplayName>\"\ndata \"Description\" \"<Handle_Description>\"\n...\nRefer to the approved plan for exact mechanics.",
+      "Prompt": "Author the BG3 stat entries in <stats_dir>. Mod: <ModName>, UUID: <UUID>.\nTo ensure 100% engine compliance and valid localization handle allocation, use:\n  python3 scripts/scaffold_stat_entry.py --mod <ModName> --type <weapon|armor|amulet|ring|spell_target|passivedata> --name <Id> --display-name \"<Name>\" --description \"<Desc>\" --props \"<Props>\"\nFor custom item container/vendor drops, inject drops using:\n  python3 scripts/inject_treasure_table.py --mod <ModName> --item <ItemName> --container <tutorial_chest|camp_chest|vendor_...>\nRefer to the approved plan for exact mechanics.",
       "Workspace": "inherit",
       "Model": "inherit"
     },
