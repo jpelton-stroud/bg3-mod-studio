@@ -213,6 +213,14 @@ data "SpellProperties" "AI_IGNORE:Ground:Summon(6ab0e8c5-0645-4824-aa26-2da6265f
 data "TargetConditions" "CanStand('6ab0e8c5-0645-4824-aa26-2da6265f2af2') and not Character() and not Self();"
 data "Icon" "Action_EndGameAlly_VeteranSummon"
 
+new entry "Target_Tiefling2_Reinforcement_Paragon_Flare"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_Tiefling_Reinforcement_Paragon_Flare"
+data "Cooldown" "OncePerCombat"
+data "SpellProperties" "AI_IGNORE:Ground:Summon(e5f88035-0d1d-4bd2-a26c-4d472878f833, -1,Projectile_AiHelper_Summon_Strong,,,UNSUMMON_ABLE,SHADOWCURSE_SUMMON_CHECK);AI_ONLY:Ground:Summon(e5f88035-0d1d-4bd2-a26c-4d472878f833, -1,Projectile_AiHelper_Summon_Strong,,,UNSUMMON_ABLE,SHADOWCURSE_SUMMON_CHECK,KNOCKED_OUT_SUMMON_DISMISS);AI_ONLY:CAST:ApplyStatus(SELF,AI_HELPER_BUFF_LARGE,100,10);"
+data "TargetConditions" "CanStand('e5f88035-0d1d-4bd2-a26c-4d472878f833') and not Character() and not Self();"
+
 new entry "Target_Kobold_Reinforcement_Paragon_Flare"
 type "SpellData"
 data "SpellType" "Target"
@@ -305,11 +313,6 @@ data "SpellProperties" "AI_IGNORE:Ground:Summon(56b1a9bc-afea-48b6-b2b5-6786c575
 data "TargetConditions" "CanStand('56b1a9bc-afea-48b6-b2b5-6786c5754645') and not Character() and not Self();"
 data "Icon" "Action_EndGameAlly_ShadowAdepts"
 
-new entry "Target_Justiciar2_Reinforcement_Paragon_Flare"
-type "SpellData"
-data "SpellType" "Target"
-using "Target_Justiciar_Reinforcement_Paragon_Flare"
-
 new entry "Target_Intelligence_Reinforcement_Paragon_Flare"
 type "SpellData"
 data "SpellType" "Target"
@@ -364,6 +367,9 @@ new entry "Target_Bhaal2_Reinforcement_Paragon_Flare"
 type "SpellData"
 data "SpellType" "Target"
 using "Target_Bhaal_Reinforcement_Paragon_Flare"
+data "Cooldown" "OncePerCombat"
+data "SpellProperties" "AI_IGNORE:Ground:Summon(9f6d1add-593e-4a7e-aa89-a3c1d5e92d6d, -1,Projectile_AiHelper_Summon_Strong,,,UNSUMMON_ABLE,SHADOWCURSE_SUMMON_CHECK);AI_ONLY:Ground:Summon(9f6d1add-593e-4a7e-aa89-a3c1d5e92d6d, -1,Projectile_AiHelper_Summon_Strong,,,UNSUMMON_ABLE,SHADOWCURSE_SUMMON_CHECK,KNOCKED_OUT_SUMMON_DISMISS);AI_ONLY:CAST:ApplyStatus(SELF,AI_HELPER_BUFF_LARGE,100,10);"
+data "TargetConditions" "CanStand('9f6d1add-593e-4a7e-aa89-a3c1d5e92d6d') and not Character() and not Self();"
 
 new entry "Target_Inquisitor_Reinforcement_Paragon_Flare"
 type "SpellData"
