@@ -1,6 +1,6 @@
 ---
 name: bg3_create_mod
-description: Orchestrates concurrent subagents to grill, plan, scaffold, author, validate, and sync Baldur's Gate 3 mods into my_mods/<ModName>_<UUID> and game Data. Triggers on /bg3_create_mod or requests to create a new BG3 mod.
+description: Orchestrates concurrent subagents to grill, plan, scaffold, author, validate, and sync Baldur's Gate 3 mods into my_mods/<ModSlug> and game Data. Triggers on /bg3_create_mod or requests to create a new BG3 mod.
 ---
 
 # BG3 Mod Creation Orchestrator (`bg3_create_mod`)
@@ -10,7 +10,7 @@ This skill defines the **Orchestrator Persona** and automated parallel subagent 
 The Orchestrator coordinates the complete lifecycle:
 1. Conducts an interactive **`grill-me`** interview to resolve all design branches.
 2. Drafts a technical mod plan and pauses for **interactive user approval**.
-3. Scaffolds `my_mods/<ModName>_<UUID>` and metadata via [`scripts/create_mod_scaffold.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/create_mod_scaffold.py).
+3. Scaffolds `my_mods/<ModSlug>` with internal `<ModName>_<UUID>` Larian subdirectories via [`scripts/create_mod_scaffold.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/create_mod_scaffold.py).
 4. Dispatches specialized **concurrent subagents in parallel** to author stats, progressions, localization, and documentation.
 5. Reactively cross-validates file syntax and identifiers.
 6. Synchronizes mod assets to the game's `Data/` directory via [`scripts/sync_to_game_data.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/sync_to_game_data.py).
@@ -114,14 +114,16 @@ After user approval, run [`scripts/create_mod_scaffold.py`](file:///home/jpstrou
 ```bash
 python3 scripts/create_mod_scaffold.py \
   --name "<ModName>" \
-  --author "jpstroud" \
+  [--slug "<mod-slug>"] \
+  --author "MTGHillGiant" \
   --description "<Description>" \
   [--unlock-level-curve] \
   --json
 ```
 
 Capture the JSON response containing:
-- `folder_name`: `<ModName>_<UUID>`
+- `mod_slug`: Main workspace folder under `my_mods/<mod-slug>`
+- `larian_folder` / `folder_name`: Larian module directory `<ModName>_<UUID>`
 - `uuid`: Module UUID
 - `stats_dir`, `progressions_dir`, `lists_dir`
 - `localization_file`

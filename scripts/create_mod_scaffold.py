@@ -2,7 +2,7 @@
 """
 create_mod_scaffold.py
 ----------------------
-Generates a standard Baldur's Gate 3 mod project scaffold under `my_mods/<ModName>_<UUID>`.
+Generates a standard Baldur's Gate 3 mod project scaffold under `my_mods/<ModSlug>` with internal Larian structures under `<ModName>_<UUID>`.
 
 Features:
 - Generates valid UUIDv4 for module identity and pre-allocated localization handles
@@ -52,6 +52,22 @@ def sanitize_mod_name(name: str) -> str:
     if not cleaned:
         raise ValueError(f"Invalid mod name: '{name}'. Must contain alphanumeric characters.")
     return cleaned
+
+
+def slugify_mod_name(name: str) -> str:
+    """
+    Converts PascalCase, CamelCase, or spaced/underscored names to a clean kebab-case slug.
+    Example: 'EldritchApotheosis' -> 'eldritch-apotheosis'
+             'PactOfTheBladeUnleashed' -> 'pact-of-the-blade-unleashed'
+             'Paladins_Call' -> 'paladins-call'
+    """
+    s = re.sub(r"([a-z0-9])([A-Z])", r"\1-\2", name.strip())
+    s = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1-\2", s)
+    s = re.sub(r"[^a-zA-Z0-9]+", "-", s)
+    slug = s.lower().strip("-")
+    if not slug:
+        raise ValueError(f"Unable to generate valid slug from '{name}'.")
+    return slug
 
 
 def generate_uuid() -> str:
@@ -182,12 +198,19 @@ def build_localization_xml(mod_name: str, placeholder_handles: list) -> str:
 
 
 def build_readme_content(
-    mod_name: str, mod_uuid: str, folder_name: str, author: str, description: str, dependencies: list
+    mod_name: str,
+    mod_uuid: str,
+    folder_name: str,
+    mod_slug: str,
+    author: str,
+    description: str,
+    dependencies: list,
 ) -> str:
     dep_list_str = "\n".join(f"- `{d.get('Name')}` ({d.get('UUID')})" for d in dependencies)
     return f"""# {mod_name}
 **Module UUID**: `{mod_uuid}`  
-**Folder Name**: `{folder_name}`  
+**Mod Slug**: `{mod_slug}`  
+**Larian Folder**: `{folder_name}`  
 **Author**: `{author}`  
 **Toolkit Target**: Patch 7 / Patch 8 Native Toolkit Drag-and-Drop Structure
 
@@ -208,7 +231,7 @@ def build_readme_content(
 ### Method 1: Automatic Sync (Recommended)
 Sync mod files directly into your Baldur's Gate 3 `Data/` folder using:
 ```bash
-python3 scripts/sync_to_game_data.py --mods {folder_name}
+python3 scripts/sync_to_game_data.py --mods {mod_slug}
 ```
 
 ### Method 2: Manual Toolkit Workspace Import
@@ -232,7 +255,8 @@ python3 scripts/sync_to_game_data.py --mods {folder_name}
 def scaffold_mod(
     name: str,
     mod_uuid: str = None,
-    author: str = "jpstroud",
+    mod_slug: str = None,
+    author: str = None,
     description: str = "",
     version_str: str = "1.0.0.0",
     dependencies: list = None,
@@ -243,8 +267,15 @@ def scaffold_mod(
     if not mod_uuid:
         mod_uuid = generate_uuid()
 
-    folder_name = f"{clean_name}_{mod_uuid}"
-    mod_root = output_dir / folder_name
+    if not mod_slug:
+        mod_slug = slugify_mod_name(name)
+
+    env_vars = load_env_defaults()
+    if not author:
+        author = os.environ.get("BG3_MOD_AUTHOR") or env_vars.get("BG3_MOD_AUTHOR") or "MTGHillGiant"
+
+    larian_folder = f"{clean_name}_{mod_uuid}"
+    mod_root = output_dir / mod_slug
 
     # Parse version
     v_parts = [int(p) for p in (version_str.split(".") + [0, 0, 0, 0])[:4]]
@@ -275,9 +306,9 @@ def scaffold_mod(
         description = f"{clean_name}: Custom mod for Baldur's Gate 3."
 
     # Directories
-    projects_dir = mod_root / "Projects" / folder_name
-    mods_dir = mod_root / "Mods" / folder_name
-    public_dir = mod_root / "Public" / folder_name
+    projects_dir = mod_root / "Projects" / larian_folder
+    mods_dir = mod_root / "Mods" / larian_folder
+    public_dir = mod_root / "Public" / larian_folder
     stats_dir = public_dir / "Stats" / "Generated" / "Data"
     progressions_dir = public_dir / "Progressions"
     lists_dir = public_dir / "Lists"
@@ -299,14 +330,14 @@ def scaffold_mod(
     meta_xml = build_meta_lsx_content(
         mod_name=clean_name,
         mod_uuid=mod_uuid,
-        folder_name=folder_name,
+        folder_name=larian_folder,
         author=author,
         description=description,
         version64=version64,
         dependencies=resolved_deps,
     )
     loc_xml = build_localization_xml(clean_name, allocated_handles[:2])
-    readme_md = build_readme_content(clean_name, mod_uuid, folder_name, author, description, resolved_deps)
+    readme_md = build_readme_content(clean_name, mod_uuid, larian_folder, mod_slug, author, description, resolved_deps)
     png_data = generate_png_bytes(512, 512, 45, 52, 64)
 
     files_to_write = {
@@ -330,7 +361,9 @@ def scaffold_mod(
     return {
         "name": clean_name,
         "uuid": mod_uuid,
-        "folder_name": folder_name,
+        "mod_slug": mod_slug,
+        "folder_name": larian_folder,
+        "larian_folder": larian_folder,
         "root_dir": str(mod_root),
         "projects_dir": str(projects_dir),
         "mods_dir": str(mods_dir),
@@ -364,10 +397,11 @@ def load_env_defaults() -> dict:
 
 def main():
     env_vars = load_env_defaults()
-    default_author = os.environ.get("BG3_MOD_AUTHOR") or env_vars.get("BG3_MOD_AUTHOR") or "default"
+    default_author = os.environ.get("BG3_MOD_AUTHOR") or env_vars.get("BG3_MOD_AUTHOR") or "MTGHillGiant"
 
     parser = argparse.ArgumentParser(description="Scaffold a new Baldur's Gate 3 mod directory under my_mods/")
     parser.add_argument("--name", required=True, help="Mod name (PascalCase/CamelCase, e.g. ArcaneProgression)")
+    parser.add_argument("--slug", default=None, help="Main folder slug under my_mods/ (e.g. arcane-progression; auto-generated if omitted)")
     parser.add_argument("--uuid", default=None, help="Specific UUIDv4 (auto-generated if omitted)")
     parser.add_argument("--author", default=default_author, help=f"Mod author name (default: {default_author})")
     parser.add_argument("--description", default="", help="Mod description")
@@ -402,6 +436,7 @@ def main():
     result = scaffold_mod(
         name=args.name,
         mod_uuid=args.uuid,
+        mod_slug=args.slug,
         author=args.author,
         description=args.description,
         version_str=args.version,
@@ -414,10 +449,12 @@ def main():
         print(json.dumps(result, indent=2))
     else:
         print(f"\n Mod scaffold successfully created for '{result['name']}':")
-        print(f"  UUID:        {result['uuid']}")
-        print(f"  Folder:      {result['folder_name']}")
-        print(f"  Root Dir:    {result['root_dir']}")
-        print(f"  Dependencies:{', '.join(result['dependencies'])}")
+        print(f"  UUID:           {result['uuid']}")
+        print(f"  Mod Slug:       {result['mod_slug']}")
+        print(f"  Larian Folder:  {result['larian_folder']}")
+        print(f"  Author:         {args.author}")
+        print(f"  Root Dir:       {result['root_dir']}")
+        print(f"  Dependencies:   {', '.join(result['dependencies'])}")
         print(f"  Allocated Handles: {len(result['allocated_handles'])} handles ready for localization")
         print(f"\nReady to build assets in: {result['public_dir']}")
 
