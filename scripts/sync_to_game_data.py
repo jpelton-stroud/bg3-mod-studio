@@ -238,7 +238,14 @@ def clean_legacy(data_dir: Path, dry_run: bool = False) -> int:
     return removed_count
 
 
-def run_sync(source_dir: Path, data_dir: Path, mod_filter: list = None, dry_run: bool = False, clean: bool = False):
+def run_sync(
+    source_dir: Path,
+    data_dir: Path,
+    mod_filter: list = None,
+    dry_run: bool = False,
+    clean: bool = False,
+    bump_build: bool = False,
+):
     if not source_dir.exists():
         print(f"❌ Error: Source directory does not exist: {source_dir}", file=sys.stderr)
         sys.exit(1)
@@ -266,6 +273,15 @@ def run_sync(source_dir: Path, data_dir: Path, mod_filter: list = None, dry_run:
     if not mod_folders:
         print("No mod directories found to synchronize.")
         return
+
+    # Auto-bump build number if requested
+    if bump_build:
+        try:
+            from bump_mod_version import bump_version
+            for mod_path in sorted(mod_folders):
+                bump_version(mod_path.name, action="build", dry_run=dry_run)
+        except Exception as e:
+            print(f"⚠️ Warning: Failed to auto-bump build version: {e}")
 
     total_stats = {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0}
     for mod_path in sorted(mod_folders):
@@ -331,6 +347,11 @@ def main():
         help="Disable automatic cleaning of legacy mod folders/files",
     )
     parser.add_argument(
+        "--bump-build",
+        action="store_true",
+        help="Automatically increment build number (+1) in meta.lsx before syncing",
+    )
+    parser.add_argument(
         "--watch",
         action="store_true",
         help="Watch source directory and sync continuously",
@@ -347,7 +368,14 @@ def main():
     if args.watch:
         watch_and_sync(args.source_dir, args.data_dir, args.mods, args.interval, clean=args.clean_legacy)
     else:
-        run_sync(args.source_dir, args.data_dir, args.mods, args.dry_run, clean=args.clean_legacy)
+        run_sync(
+            args.source_dir,
+            args.data_dir,
+            args.mods,
+            args.dry_run,
+            clean=args.clean_legacy,
+            bump_build=args.bump_build,
+        )
 
 
 if __name__ == "__main__":
