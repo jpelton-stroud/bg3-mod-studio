@@ -137,3 +137,13 @@ Supported resolution strategies:
 - `override_mod1`: Explicitly prioritizes values from Mod 1.
 - `override_mod2`: Explicitly prioritizes values from Mod 2.
 
+> [!TIP]
+> **Tool Discovery & Schema Inspection**:
+> To inspect all conflict analyzer and patch generation flags dynamically:
+> ```bash
+> python3 scripts/tools.py --info check-conflicts --json
+> python3 scripts/tools.py --info compat-patch --json
+> python3 scripts/tools.py --search "conflict" --json
+> ```
+
+

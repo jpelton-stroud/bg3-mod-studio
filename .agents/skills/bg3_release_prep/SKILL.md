@@ -83,6 +83,16 @@ python3 scripts/pack_mod_pak.py --mod <mod_slug> --output-dir dist/
 ```
 This produces a byte-verified, zlib-compressed `.pak` file compatible with the BG3 Mod Manager and game engine.
 
+> [!TIP]
+> **Tool Discovery & Schema Inspection**:
+> To inspect all packaging, versioning, or metadata generation options dynamically:
+> ```bash
+> python3 scripts/tools.py --info pack-pak --json
+> python3 scripts/tools.py --info bump-version --json
+> python3 scripts/tools.py --info gen-metadata --json
+> python3 scripts/tools.py --search "release" --json
+> ```
+
 ---
 
 ## Step 5: Presentation to User

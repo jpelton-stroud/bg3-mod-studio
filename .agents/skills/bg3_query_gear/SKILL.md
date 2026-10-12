@@ -68,4 +68,12 @@ Here are the top options from your cataloged community mods:
 ---
 
 💡 *To add any of these items to early-game containers, use `python3 scripts/inject_treasure_table.py --mod <your_mod> --item <ItemID> --container tutorial_chest`.*
+
+> [!TIP]
+> **Tool Discovery & Schema Inspection**:
+> To inspect all query filters or discover companion authoring tools, query the studio registry:
+> ```bash
+> python3 scripts/tools.py --info query-db --json
+> python3 scripts/tools.py --search "<intent>" --json
+> ```
 ```

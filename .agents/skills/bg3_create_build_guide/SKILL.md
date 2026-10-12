@@ -56,6 +56,14 @@ If the user invoked `/bg3_create_build_guide` with a full description (e.g., `/b
      ```
    - Use the simulated metrics to populate Section 5 (Turn 1 Combat Sequence) with verified damage numbers.
 
+> [!TIP]
+> **Tool Discovery & Schema Inspection**:
+> To inspect simulator parameters or discover gear search tools, query the studio registry:
+> ```bash
+> python3 scripts/tools.py --info simulate-build --json
+> python3 scripts/tools.py --search "gear database" --json
+> ```
+
 ---
 
 ## Step 3: Feat Strategy & Stat Conventions

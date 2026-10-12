@@ -58,6 +58,14 @@ The script will:
    - Rewrites [`mods/<slug>/README.md`](file:///home/jpstroud/projects/BaldursGate3/mods) with semantic versioning (`modfile.version`).
    - Updates the catalog entry in [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md).
 
+> [!TIP]
+> **Tool Discovery & Schema Inspection**:
+> To inspect all update flags or discover related mod.io tools:
+> ```bash
+> python3 scripts/tools.py --info modio-update --json
+> python3 scripts/tools.py --search "update" --json
+> ```
+
 ---
 
 ## Step 3: Standardized Return Messages

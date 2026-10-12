@@ -31,7 +31,11 @@ python3 scripts/tools.py run query-db --slot Weapon --limit 5 --json
 
 # 5. Verify registry integrity and test all script entry points
 python3 scripts/tools.py --verify
+
+# 6. Audit agent skills for registry integration and tool discovery
+python3 scripts/tools.py --audit-skills
 ```
+
 
 ---
 
@@ -134,7 +138,11 @@ When an AI agent or subagent receives a request that does not match a hardcoded 
 Run the automated integrity test at any time:
 
 ```bash
+# Verify tooling registry integrity
 python3 scripts/tools.py --verify
+
+# Audit agent skills for registry integration
+python3 scripts/tools.py --audit-skills
 ```
 
 This verifies that:
@@ -142,3 +150,5 @@ This verifies that:
 2. Every registered tool exists on disk.
 3. Every script compiles without Python syntax errors.
 4. Every script cleanly handles `--help` CLI invocation.
+5. Every agent skill in `.agents/skills/` uses valid registered scripts and provides dynamic tool discovery guidance.
+

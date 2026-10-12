@@ -51,6 +51,14 @@ The script will:
 
 If the command fails (e.g., mod not found on mod.io or network failure), formulate a clear error message and proceed to **Step 5 (Failure Reporting)**.
 
+> [!TIP]
+> **Tool Discovery & Schema Inspection**:
+> To inspect extraction flags or discover related cataloging tools:
+> ```bash
+> python3 scripts/tools.py --info modio-extract --json
+> python3 scripts/tools.py --search "extract" --json
+> ```
+
 ---
 
 ## Step 3: In-Game Implementation Validation

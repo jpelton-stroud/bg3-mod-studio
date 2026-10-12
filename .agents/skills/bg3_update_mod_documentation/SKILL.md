@@ -60,7 +60,16 @@ If no mod list or arguments were provided, resolve all currently tracked mods by
 python3 scripts/modio_update.py --list-tracked --json
 ```
 
+> [!TIP]
+> **Tool Discovery & Schema Inspection**:
+> To inspect all update checker options or discover related tools:
+> ```bash
+> python3 scripts/tools.py --info modio-update --json
+> python3 scripts/tools.py --search "update mod" --json
+> ```
+
 Or by inspecting [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md) and extracting all slugs. Add every tracked mod to the target batch.
+
 
 ---
 
