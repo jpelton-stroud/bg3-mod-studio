@@ -20,6 +20,7 @@ dist/
 build/
 *.egg-info/
 .eggs/
+.cache/
 
 # Virtual Environments
 .venv/
