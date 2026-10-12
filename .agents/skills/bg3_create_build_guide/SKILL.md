@@ -44,6 +44,17 @@ If the user invoked `/bg3_create_build_guide` with a full description (e.g., `/b
    - **Prioritize Modded Items**: If documentation in [`mods/`](file:///home/jpstroud/projects/BaldursGate3/mods) describes items, sets, or passives that elevate the build (such as *Sets of Faerun* Thalindra Set, custom weapons, or specialized gear), place them in the BiS table.
    - **Vanilla Fallbacks**: Where no superior mod item exists or [`mods/`](file:///home/jpstroud/projects/BaldursGate3/mods) is empty, populate slots with top-tier vanilla BG3 endgame gear (e.g., *Helm of Balduran*, *Armour of Persistence*, *Helldusk Boots*, *Viconia's Walking Fortress*, *Amulet of Greater Health*, *Phalar Aluve*, *Rhapsody*, *Markoheshkir*).
    - In the **Mod / Vanilla Source** column, explicitly state whether each item is from a specific mod (e.g., `*Sets of Faerun*`, `*UnlockLevelCurve*`) or vanilla (e.g., `*Vanilla (House of Hope)*`, `*Vanilla (Act 3 Dammon)*`).
+3. **Simulate Build Synergies & Turn 1 DPR**:
+   - Run [`scripts/simulate_build_synergy.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/simulate_build_synergy.py) to calculate exact Turn 1 DPR, Spell Save DC ceilings, and spell slot matrices:
+     ```bash
+     python3 scripts/simulate_build_synergy.py \
+       --classes "<Class=Level,...>" \
+       --stats "<Str=N,Dex=N,Con=N,Int=N,Wis=N,Cha=N>" \
+       --gear "<Item1,Item2,...>" \
+       --dpr-sequence <melee_burst|eldritch_blast> \
+       --json
+     ```
+   - Use the simulated metrics to populate Section 5 (Turn 1 Combat Sequence) with verified damage numbers.
 
 ---
 
