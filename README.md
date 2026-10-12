@@ -7,6 +7,10 @@
 
 An all-in-one workspace for authoring, cataloging, synchronizing, and testing **Baldur's Gate 3** mods on **mod.io**, backed by autonomous AI development workflows.
 
+I started this with the intention of learning how to use AI by helping me keep track of what all the different BG3 mods I had installed actually did, then I started using it to help me theorycraft modded character builds. _Then_ I decided I wanted to make my _own_ mods that built on top of other mods without conflicts.
+
+It has since snowballed into an entire agentic mod studio that runs (almost) completely within VS Code! (you still need to install the official Larian Mod Toolkit in order to actually publish your mods to mod.io)
+
 ---
 
 ## Features
@@ -16,7 +20,7 @@ An all-in-one workspace for authoring, cataloging, synchronizing, and testing **
 - **🔄 Live Game Data Synchronization (`sync_to_game_data.py`)**:
   Idempotently mirrors mods authored under `my_mods/` directly into your Steam Baldur's Gate 3 `Data/` folder. Supports continuous live-reloading (`--watch`) during mod development.
 - **🌐 mod.io Search & Deconstruction (`modio_*.py`)**:
-  Search mod.io with natural language and console filters (PS5, Xbox, PC). Download and extract PAK files into clean, readable XML/TXT definitions and rich markdown specifications.
+  Search mod.io with natural language and console filters (PS5, Xbox, Console, or PC). Download and extract PAK files into clean, readable XML/TXT definitions and rich markdown specifications.
 - **📚 Curated Mod Library (`mods/library.md`)**:
   Maintains detailed feature documentation and stat specifications for documented community mods across Gear, Spells, Classes, Progression, and Utilities.
 - **🤖 Autonomous AI Agent Skills (`.agents/skills/`)**:
@@ -27,17 +31,21 @@ An all-in-one workspace for authoring, cataloging, synchronizing, and testing **
 ## Quickstart
 
 ### 1. Prerequisites
+
 - **Python 3.10+** (uses standard library only—no external pip dependencies required).
 - **Baldur's Gate 3** (installed via Steam on WSL, Linux, or Windows).
 - **mod.io Account** (API Key & Personal Access Token from [mod.io/me/access](https://mod.io/me/access)).
 
 ### 2. Run the Interactive Setup Wizard
+
 Run the setup script to configure your environment variables:
+
 ```bash
 ./setup.sh
 ```
 
 The wizard will:
+
 1. Prompt for your `MODIO_API_KEY` and optionally test it live against the mod.io Baldur's Gate 3 API.
 2. Prompt for your `MODIO_PAT` (Personal Access Token).
 3. Detect your OS/WSL environment and configure your game's `Data` path (`BG3_DATA_DIR`).
@@ -46,6 +54,7 @@ The wizard will:
 6. (Optional) Link a remote GitHub repository via GitHub CLI (`gh`).
 
 You can review your configuration anytime with:
+
 ```bash
 ./setup.sh --check
 ```
@@ -82,6 +91,7 @@ BaldursGate3/
 ## CLI Reference
 
 ### Mod Creation & Scaffolding
+
 ```bash
 # Scaffold a new mod
 python3 scripts/create_mod_scaffold.py --name "ArcaneProgression" --description "Expanded arcane progression"
@@ -91,6 +101,7 @@ python3 scripts/create_mod_scaffold.py --name "EldritchAscension" --unlock-level
 ```
 
 ### Live Syncing to Game Data
+
 ```bash
 # Preview files that would be synced
 python3 scripts/sync_to_game_data.py --dry-run
@@ -103,6 +114,7 @@ python3 scripts/sync_to_game_data.py --watch
 ```
 
 ### mod.io Exploration & Extraction
+
 ```bash
 # Search for mods on mod.io
 python3 scripts/modio_search.py "paladin"
