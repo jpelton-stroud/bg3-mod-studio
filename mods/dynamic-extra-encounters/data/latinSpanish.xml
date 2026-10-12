@@ -1,0 +1,464 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <content contentuid="h3b21f2a3g5e47gd63bgdbecga6b764e932bf" version="1">Comprobador de Poderes Illithid</content>
+  <content contentuid="h4c2bfb9dgd52cg55dfge2eeg0482f463c83f" version="1">Comprueba si has usado un poder illithid.</content>
+  <content contentuid="h7fcd8a99g4d11g157bg058eg7c34c7137598" version="2">Encuentros Extra Dinámicos - Disparador de Poder Illithid</content>
+  <content contentuid="h4b8134ffg1314g6c27g5c17g91d85eabe46a" version="1">Bloqueador de Encuentros Extra Dinámicos</content>
+  <content contentuid="hf9c9a061g0f2bge6beg20f0g0049a0dfeecf" version="1">Escalado de Nivel en Encuentros Extra Dinámicos</content>
+  <content contentuid="h5a6e4e72g114cg5434g4bc7g4bb6d7cb5e58" version="1">Disparador de No-Muertos en Encuentros Extra Dinámicos</content>
+  <content contentuid="h0227bc31g403agb5c1g8ebagd1bd227a13c6" version="3">Marcado por los Fallecidos</content>
+  <content contentuid="h0b008d58ge290g10a3g513bgfbaf62415361" version="1">Generar Fantasma en Encuentros Extra Dinámicos</content>
+  <content contentuid="h976ae69dg2429g914bg9f2ega7aaf94b9ec7" version="7">Asaltante</content>
+  <content contentuid="h7eb81909g3d5eg471fg7558g9e45867985d5" version="6">Asaltante</content>
+  <content contentuid="h08d3e6ddgc1f9g4d94gde0ag87ad24f4acde" version="5">Guerrero Githyanki</content>
+  <content contentuid="h88e993d8g26d8g225fg6164g0c7216724522" version="5">Guerrero Githyanki</content>
+  <content contentuid="h7a32e7deg8f29ge81cg6c4cge920a3ff6183" version="1">Disparador para subir de nivel.</content>
+  <content contentuid="haf41b1f8gcb80g4284g5166g565150bf566f" version="1">Bono de Escalado de Nivel en Encuentros Extra Dinámicos</content>
+  <content contentuid="h038f5f29g65feg2d3fgf88agafa26a2fb682" version="1">Estadísticas al Subir de Nivel</content>
+  <content contentuid="ha37056aag56aage938gaf3agf8511d4be8d3" version="1">Bono de Escalado de Nivel</content>
+  <content contentuid="hb578e62ag7047g2f41g6b1cg422702c49da3" version="3">Gish'ra</content>
+  <content contentuid="h3c7187d5g017fg1ebag03afg70e34d9e205d" version="5">Gish'ra</content>
+  <content contentuid="hcb4f791ag0f7bg31aag647ag80ea5813eeca" version="1">Estadísticas de Fantasma en Encuentros Extra Dinámicos</content>
+  <content contentuid="h95d9054ag3469gb476g082cg54c3d73b6b86" version="1">Generación de No-Muertos en Encuentros Extra Dinámicos</content>
+  <content contentuid="h62bff688gdba9geccagd266g09cb1ad0dba5" version="8">Elemental de Aire</content>
+  <content contentuid="haeac339bg85e6g4d38g7590g5dca359aea11" version="8">Elemental de Fuego</content>
+  <content contentuid="ha3f06eecg03d3gd987g797dg9fbe36e20450" version="8">Elemental de Agua</content>
+  <content contentuid="h237c6864g273agdc8fg764cged2ed3214940" version="9">Elemental de Tierra</content>
+  <content contentuid="h836f4de1gb778gb526g249fg181f57c72112" version="1">VFX de Elementales de Tierra</content>
+  <content contentuid="h94d4c9f9g4b8bg8f5agdbc1gf1e71f8fc819" version="2">El velo es fino, y los inocentes no olvidan. Una presencia vengativa está atada a tu alma, esperando el momento adecuado para reclamar lo que le corresponde. No estás solo.</content>
+  <content contentuid="heea57484g22e7ga0b9gbcbbgafe559d0f416" version="4">Llevas un artefacto robado de Averno. La energía demoníaca que fluye a través de ti te otorga un +[1] permanente a &lt;LSTag Tooltip="Strength"&gt;Fuerza&lt;/LSTag&gt;, pero el faro que crea atrae la ira de Cambiones y Diablos.</content>
+  <content contentuid="hcf4a911bgd252ged2cgb5cfgc5528d771784" version="4">Tus reflejos se agudizan por la penumbra circundante, otorgándote un +[1] permanente a &lt;LSTag Tooltip="Dexterity"&gt;Destreza&lt;/LSTag&gt;. Desafortunadamente, esta oscuridad concentrada es un imán para la Dama de la Pérdida, atrayendo Sombras violentas y Justicieros Oscuros espectrales.</content>
+  <content contentuid="hab6a4db3g39c7g9a75gadc8g75549ba18fc8" version="4">La fuerza vital cruda y sin filtrar que bombea este órgano fortalece tu sangre, otorgándote un +[1] permanente a &lt;LSTag Tooltip="Constitution"&gt;Constitución&lt;/LSTag&gt;. Sin embargo, el aroma de esta magia robada atrae a Capas Rojas sedientos de sangre y Wood Woads podridos.</content>
+  <content contentuid="hf55c4da5gfa52gb77cgae01ge20f91410899" version="9">Mirada de Maglubiyet</content>
+  <content contentuid="hef948498g1d2eg5ae7gc4c2gcd0cc39af904" version="9">Un ojo enorme e inyectado en sangre suspendido en un fluido turbio y de olor nauseabundo. Las tribus locales lo veneran como un artefacto sagrado de su feroz dios de la guerra, aunque su verdadero origen biológico sigue siendo un misterio macabro.</content>
+  <content contentuid="h814b2261g82a3g5ac9gbea3g9ca6f26aca2b" version="8">Prisma del Falso Yo</content>
+  <content contentuid="hc6c94d86g1c93gfd97ge841gf1d59d216946" version="8">Un fragmento de cristal irregular y luminiscente que refracta la luz de formas imposibles y mareantes. Al mirarlo, ves un reflejo ligeramente idealizado y sonriente eternamente de ti mismo que se mueve una fracción de segundo después que tú.</content>
+  <content contentuid="h6945cbf1g22d1gad31gb8a4gfc20889bd9f2" version="9">Grimorio Infernal</content>
+  <content contentuid="h7139cb1fg3093g012dg5633gdd36b6ceb261" version="9">Un pesado tomo encuadernado en metal oscuro, cuya cubierta se asemeja a una puerta de hierro forjado que contiene un vórtice giratorio de fuego infernal. Las páginas están incómodamente cálidas al tacto y siempre huelen a azufre y cobre quemado.</content>
+  <content contentuid="h28b447f3g458eg69a6gc494g4d850aaa6b82" version="8">Cerebro Suspendido</content>
+  <content contentuid="hf11bfb79g2ae1g6cc6g3d35gdc9d1f6e5af4" version="8">Un cerebro notablemente intacto flotando dentro de un sofisticado recipiente de vidrio con púas lleno de fluido preservante verde brillante. Pulsa débilmente con energía psíquica pura, enviando ocasionalmente un dolor sordo a las sienes de quien lo sostiene.</content>
+  <content contentuid="habbb5b69g60efg0f4fga2cdg8419933b1153" version="10">Perla del Eclipse</content>
+  <content contentuid="he012562cg2ea6g47f9g1feagfed71d7adfa9" version="10" />
+  <content contentuid="he6b11ad7g6787g7c93g4bfcg728a6c48dc09" version="2">Marca del Infierno</content>
+  <content contentuid="h5952bc81g937dg187bg2b1egdb351da6789c" version="2">Velo del Vacío</content>
+  <content contentuid="ha9780f16gc586g51fcg71acgb9d157a163d4" version="2">Venganza del Pantano</content>
+  <content contentuid="h7158061ag133fg6f41g50aagc3105d8b7ff6" version="2">Faro Psiónico</content>
+  <content contentuid="h6e79c943g6ffcg5fadg6d28gfa701dcdd18e" version="3">La resonancia mental de este recipiente expande tu mente, otorgándote un +[1] permanente a &lt;LSTag Tooltip="Intelligence"&gt;Inteligencia&lt;/LSTag&gt;. El terrible costo es que transmite tu ubicación a través de la red psiónica, alertando a Devoradores de Intelecto y Azotamentes.</content>
+  <content contentuid="h5c6304b5g61f0gfb50gf479g8fb26f3aa2ec" version="2">La Ira del Señor de la Guerra</content>
+  <content contentuid="h7f47b7f0g3c21g2888g50f2g0b590eb19ea7" version="3">La perspicacia penetrante de este macabro trofeo otorga un +[1] permanente a &lt;LSTag Tooltip="Wisdom"&gt;Sabiduría&lt;/LSTag&gt;. Sin embargo, poseerlo te convierte en objetivo principal de goblins frenéticos y sus Worgs.</content>
+  <content contentuid="hbd6dc304gb106g92a0g38b2g504fbc16df6c" version="2">Reflejo Fracturado</content>
+  <content contentuid="hbc866e95g81dcg9a0ag4b47g66ca830dc175" version="3">La confianza antinatural que irradia el cristal otorga un +[1] permanente a &lt;LSTag Tooltip="Charisma"&gt;Carisma&lt;/LSTag&gt;. Ten cuidado con el cristal, ya que la magia ocasionalmente rompe la realidad para generar duplicados hostiles y sombríos de ti y tus aliados que desean reemplazar a los originales.</content>
+  <content contentuid="ha52ecfc6gce47g0889gd8a4g2679da0b544e" version="8">Corazón de Bruja Momificado</content>
+  <content contentuid="h05f14f8fg02cfga716g1024g0d8b20869822" version="8">Una masa endurecida del tamaño de un puño que aún late débilmente contra tu palma. Huele intensamente a agua de pantano y podredumbre, irradiando una vitalidad repugnante pero increíblemente potente.</content>
+  <content contentuid="h60cc6345g950cgcfcega40bgd7e6c7edaef7" version="9">Una pesada y fría esfera de piedra oscura veteada con tenues venas cian brillantes. Parece absorber la luz inmediatamente a su alrededor, dejando un permanente y antinatural penumbra dentro de tu mochila.</content>
+  <content contentuid="h71b914c7gab0eged74g5023g9996cd679f4b" version="1">Marca del Infierno</content>
+  <content contentuid="hb7827257g3c0ag8ab8g89c4g25fb59b4cd82" version="2">Se te otorga +[1] permanente a &lt;LSTag Tooltip="Strength"&gt;Fuerza&lt;/LSTag&gt;.</content>
+  <content contentuid="h83b15b94gd02bg4ddcg10ffgd78646aa85e1" version="1">Velo del Vacío</content>
+  <content contentuid="h5e18f391ga507gd853g98a1g944282b7ce7d" version="2">Se te otorga +[1] permanente a &lt;LSTag Tooltip="Dexterity"&gt;Destreza&lt;/LSTag&gt;.</content>
+  <content contentuid="ha8d5dab0ge897g3adage6efg163343a4b11d" version="1">Venganza del Pantano</content>
+  <content contentuid="hefdce986gb624g9e93gaec9geb0c04d5dcd4" version="2">Se te otorga +[1] permanente a &lt;LSTag Tooltip="Constitution"&gt;Constitución&lt;/LSTag&gt;.</content>
+  <content contentuid="h630b3e0ag066ag7ca6g25e1g114cc282675b" version="1">Faro Psiónico</content>
+  <content contentuid="h04200047g0fd9gf2cagd34ag2bf3b102ddea" version="2">Se te otorga +[1] permanente a &lt;LSTag Tooltip="Intelligence"&gt;Inteligencia&lt;/LSTag&gt;.</content>
+  <content contentuid="he9a0a1eeg6ef4g2c9dg91c6g14637972e26f" version="1">La Ira del Señor de la Guerra</content>
+  <content contentuid="ha635b121g7950g9196g1020g45bd6d8ce842" version="2">Se te otorga +[1] permanente a &lt;LSTag Tooltip="Wisdom"&gt;Sabiduría&lt;/LSTag&gt;.</content>
+  <content contentuid="h8d3d3c68gfdb9g2c1fg784cg2d8e8669d849" version="1">Reflejo Fracturado</content>
+  <content contentuid="hb112b8d3ga546g6afeg0555g33fcb8801998" version="2">Se te otorga +[1] permanente a &lt;LSTag Tooltip="Charisma"&gt;Carisma&lt;/LSTag&gt;.</content>
+  <content contentuid="hefb69008g6740gb4fcgdd2cgb8a38256f001" version="1">Disparador de Objeto Maldito</content>
+  <content contentuid="h2cd39fd2gbc7dgf7b6g629eg18532fdb526d" version="1">Disparador de Objeto Maldito</content>
+  <content contentuid="ha5079d0dge6b3g5dbbg124cg991ab9e213f5" version="1">Disparador de Objeto Maldito</content>
+  <content contentuid="ha03bc6e3g63f9g3a1bg6876ged2cb6f53d4b" version="1">Disparador de Objeto Maldito</content>
+  <content contentuid="h1d68b768g0769g227bg3f94gbcebd748c952" version="1">Disparador de Objeto Maldito</content>
+  <content contentuid="h434598b5g5f3eg42a6ge8d2g6c90dce70d53" version="1">Disparador de Objeto Maldito</content>
+  <content contentuid="h094d8750gf4d8gfb13g1ebfg358f580fd594" version="6">Cambion Vengativo</content>
+  <content contentuid="h24d20e55g48cdg72fag0c81gf0bd5713ccca" version="6">Diablillo Vengativo</content>
+  <content contentuid="h24d930f9gf93ag6bf6gd78cg7eafbdb046cf" version="9">Yo Espejo</content>
+  <content contentuid="h20fb8ba7gdba1gf868g002egc4f9e17eabbb" version="6">Cambion Vengativo</content>
+  <content contentuid="he52303e6g5e7dg1deeg8c01gec9ec08ebd65" version="1">Goblin Booyahg</content>
+  <content contentuid="hd65bcba7gd3d7gb8fcg7848gcda3e921b4fc" version="1">Púgil Goblin</content>
+  <content contentuid="h46a2dd08gf7f8g8be4g4e92g869e767a6c94" version="4"> rastreador Goblin</content>
+  <content contentuid="h241d066ag70adge012gb1d6g3329259bcdbb" version="1">Ojo-Afilado Goblin</content>
+  <content contentuid="h1a37e91cg083ag59d3geee4gd04031367cce" version="4"> Tejedor Nocturno Justiciero</content>
+  <content contentuid="h0a20c311ga4efg4b9bg2eccg9dcef48e0311" version="4">Vengador Justiciero</content>
+  <content contentuid="h63d0fe3egc116gb033gee36gb4ef34e9a99a" version="4">Cazador de Almas Justiciero</content>
+  <content contentuid="h2d1f2d80g20aaga7ddg8a10g26068b2fe68b" version="4">Sombra</content>
+  <content contentuid="hb724cbd3gd7f1ge1f4g5241gf0cb64ba5a92" version="4">Espectro</content>
+  <content contentuid="hb4e267f1g5d21g6319gda7bgc0febbd5582d" version="4">Capa Roja</content>
+  <content contentuid="h2f2e43c6g87a5g6d6agbb5cg15aa1b4c549c" version="4">Sabio de Sangre Capa Roja</content>
+  <content contentuid="h5272e333g448ag1666gb951gfab42b22cd72" version="6">Capa Roja</content>
+  <content contentuid="h1cadd1efg9619ge773g746fg1df2944a5276" version="4">Meenlock</content>
+  <content contentuid="h94b99395g942dg319dga645g413a41ab1312" version="4">Wood Woad</content>
+  <content contentuid="h3c1be0c6g8843g9f80gaf67ge05b2e426a94" version="3">Devorador de Intelecto</content>
+  <content contentuid="hc1936342g080cg4f08g47afg4546903bc9b9" version="5">Glotón de Intelecto</content>
+  <content contentuid="h4af3d31fgdc9fg8cb8g9078g10e408a66ee1" version="9">Arconte Cerebral</content>
+  <content contentuid="h982317ebg88b5g2f5eg6a10g14e95bb73663" version="9">Guardián del Pensamiento Perdido</content>
+  <content contentuid="hf4c4d5edg8548gc923g949fg008000d19de8" version="8">Centinela Cerebral</content>
+  <content contentuid="h62ad91a3g0e7dg46deg3e24g228ef2820e09" version="8">Mano de Reclamación</content>
+  <content contentuid="hf2f3008eg4173g4b32g2c41g8785e9e7d4e9" version="8">Cantor Cerebral</content>
+  <content contentuid="h453bf2ecgbf46g1d62ge7e3gad2692f4f404" version="8">Voz de la Persecución</content>
+  <content contentuid="hc3804c58gb01fg8949gbf02gce5786de3692" version="1">Rastreador Goblin</content>
+  <content contentuid="he924441cg2012g88f8gad83g707b839915a3" version="5">Ojo-Afilado Goblin</content>
+  <content contentuid="h49a64820g6e98ge6b4g002dg7baf0521e1aa" version="5">Guerrero Goblin</content>
+  <content contentuid="hf37875e6g374eg51b8gb7e5gd6f8630ef5e4" version="5">Goblin Booyahg</content>
+  <content contentuid="h58a41954gbae9g6259g1a60geb9274273c26" version="4">Worg</content>
+  <content contentuid="h5b5fbe48g52b7g6012g3f82g7d035becc4cd" version="4">Jabalí Infernal</content>
+  <content contentuid="h2b5d6f89g7b43ge279g7960g4f5df1abd0c0" version="6">Jabalí Vengativo</content>
+  <content contentuid="hceded001g8fe1gcc61g20c5g023e26d289fa" version="5">Púgil Goblin</content>
+  <content contentuid="h89d6f83agb70dg7092g129fg8b8e2feea3c2" version="5">Yo Espejo</content>
+  <content contentuid="hd012bf7egeb09gcc21gedfbg5ba75a9ed47f" version="6">Yo Espejo</content>
+  <content contentuid="h6e68007fga638g3d9cg47edgc58c4db0ec5e" version="1">VFX de Clon Maldito</content>
+  <content contentuid="hc7e80843g2993g2c96g1b11g25b6fd403a8d" version="3">Cambion</content>
+  <content contentuid="h7d0007ddgd654g2040gf968g3b64307f6039" version="1">Arquetipo de Bárbaro</content>
+  <content contentuid="h81f66e85g9c0ag7ec0gebb7g3d2a83e63cf2" version="1">Arquetipo de Bardo</content>
+  <content contentuid="hafbdf72fgb34bg971cgcf0dg341cf8b9f9f2" version="1">Arquetipo de Clérigo</content>
+  <content contentuid="he751a855gc2b9g8553g220agbaeed87ef2fc" version="1">Arquetipo de Druida</content>
+  <content contentuid="ha3dd89d6g0b06g8887g5d38g8570d0e02565" version="1">Arquetipo de Guerrero</content>
+  <content contentuid="h33a81932gd4eag8639g2044gbeca9f2d63fd" version="1">Arquetipo de Monje</content>
+  <content contentuid="ha4b49e74g492agd6e3g7581g26ab9a7f659e" version="1">Arquetipo de Paladín</content>
+  <content contentuid="h00a6d69fgcb8fg69dcg133bg2efd4f3fb3f8" version="1">Arquetipo de Explorador</content>
+  <content contentuid="h01a5a2a3g9412g7c7bgf346g04b8b0b147e9" version="1">Arquetipo de Pícaro</content>
+  <content contentuid="ha270b254g40a1g70efg39a3g1d93a6913707" version="1">Arquetipo de Hechicero</content>
+  <content contentuid="ha23648fag1ac9gccc9g91dfgd130d7db3e4c" version="1">Arquetipo de Brujo</content>
+  <content contentuid="hf4ac18cagde30g0684gfb54g88cca10c678b" version="1">Arquetipo de Mago</content>
+  <content contentuid="he76e255dg31a0gf87agced1g077003cb5fee" version="5">Hobgoblin</content>
+  <content contentuid="h7674e871g6870gbd46g5c3cgeee155569b97" version="3">Worg Blanco</content>
+  <content contentuid="he887c83bg77f1g4ae6g647dg3867d9ea932c" version="1">Objeto Maldito</content>
+  <content contentuid="h4e53b20fg728egcbbcgf2f5g2374f76e502d" version="5">&lt;LSTag Type="Image" Info="TutorialRedWarning"/&gt; ¡Este objeto está maldito! ¡Cuidado al recogerlo!</content>
+  <content contentuid="hee27ff5fga0e6g0576g7b84gd710b34192cd" version="1">Explosión de Salmuera Morfica</content>
+  <content contentuid="h22867e7cgd380g8313g8ae4g6251f27eec96" version="1">Rocía a las criaturas cercanas con salmuera mórfica que inflige daño y recubre superficies.</content>
+  <content contentuid="hbe159a64g18d5gfc00gfe25g2c420d4c05c6" version="1">A Punto de Estallar</content>
+  <content contentuid="h31969ac7ga588g0fbcg60cfg0ecab9e22549" version="1">Cuando el glotón de intelecto muere, estalla en una &lt;LSTag Type="Spell" Tooltip="Projectile_DEE_DeathBurst_IntellectDetonator"&gt;Explosión de Salmuera Morfica&lt;/LSTag&gt;. </content>
+  <content contentuid="hd527b7b6ge686gcff3ga93bgc641f53645a0" version="1">Reaver Justiciero</content>
+  <content contentuid="h9217223agb1d4gbd6ag3961g85264425e5f7" version="1">Seguidor de Maglubiyet</content>
+  <content contentuid="hf624a41cgcf33g03c4g54abg47eaab476dfa" version="1">Seguidor de Maglubiyet</content>
+  <content contentuid="h8871bd4egdeccg0a6cge9bbgb72c431cfe72" version="1">Seguidor de Maglubiyet</content>
+  <content contentuid="h1aeb0634gb338g9373g8a34gf87e8fb23fe7" version="1">Seguidor de Maglubiyet</content>
+  <content contentuid="h41a80284g429ag3f24g18bdgc2f791ad5067" version="1">Seguidor de Maglubiyet</content>
+  <content contentuid="h0dfb6e32g1a3cg921dge932gb9a628a588d2" version="1">Seguidor de Maglubiyet</content>
+  <content contentuid="ha80adb82g8109ge863ge024g2b6c50562050" version="2">Seguidor de Maglubiyet</content>
+  <content contentuid="h7df7ccdegf6f3g76c8gab27g4d80153e22fd" version="6">Carroñero</content>
+  <content contentuid="hc8233a22g666bgc7b2g716fgb6edb22113ef" version="5">Carroñero</content>
+  <content contentuid="haeb86ab5gefb9gc831ge3bfge474059b4306" version="6">Carroñero</content>
+  <content contentuid="h62b9a531g2089g95a5g2ec6g570975ffb2a0" version="2">Saqueando</content>
+  <content contentuid="h00e35903g2424gae97g3a99gf118691c0aef" version="1">Comprobando botín.</content>
+  <content contentuid="ha7148df9ga664gb5efgc63fg8f644ca378b4" version="2">Bloqueo de Carroñeros Activado</content>
+  <content contentuid="haca97ff0g43d2g225bgc647ge8a60e0e0e3b" version="1">Detiene el spawn de Carroñeros.</content>
+  <content contentuid="he2f76790geddeg21eeg5972g6b4a011a71c4" version="1">Carroñeros de Campo de Batalla</content>
+  <content contentuid="hf756be23ga43cg895dg97afg24d15f155078" version="1">Esto activa o desactiva los Carroñeros. (Encuentros Extra Dinámicos).</content>
+  <content contentuid="h9be54691g589agf8e4g1399ge4b32157e507" version="2">Características de Encuentros Extra Dinámicos</content>
+  <content contentuid="h67b04144g816bg3a79g1abeg2566edf3daea" version="1">Activar Características de Encuentros Extra Dinámicos</content>
+  <content contentuid="h4502abf5ga682g1281g17c8gf26538813cf4" version="1">Desactivar Características de Encuentros Extra Dinámicos</content>
+  <content contentuid="h395c26ddg521bg9752g10f9gffd72e49a297" version="2">Te permite Activar o Desactivar las características de Encuentros Extra Dinámicos</content>
+  <content contentuid="h01d7e712g516bg9e01g33c2gaace360abda6" version="4">Características de Carroñeros de Campo de Batalla</content>
+  <content contentuid="h3b9d1566gf22fg2a6fg4f13g2520e1d30b1a" version="1">Oculta las características de Encuentros Extra Dinámicos</content>
+  <content contentuid="hca4adfbagd392g58a8g9ab7g4a39a81e0a81" version="1">Gestor de Encuentros Extra Dinámicos</content>
+  <content contentuid="h7b10e334ga1f1g93b2g9b78gf5b11e50e9b1" version="1">Te permite activar o desactivar las características de Encuentros Extra Dinámicos.</content>
+  <content contentuid="hda916fe8g3901g26afg34d2g29a409d445be" version="2">Bloqueo de Elementales Activado</content>
+  <content contentuid="h618eeac4g0ed9g4889g13f4g0c8c5a874367" version="1">Detiene el spawn de Elementales.</content>
+  <content contentuid="had369665gce87gb3eagd714gd54a0d7aab3c" version="2">Bloqueo de No-Muertos Activado</content>
+  <content contentuid="ha80e79fdg0f62g8607g3334g9e273c35222c" version="2">Detiene el spawn de No-Muertos Enterrados al desenterrar cofres.</content>
+  <content contentuid="hd732a942gc726g909eg8e61g22bf1ae5b3f4" version="2">Bloqueo de Fantasmas Activado</content>
+  <content contentuid="h5a0fa1begd2e6g9b39gdf41gad1f37075373" version="1">Detiene el spawn del Espíritu Vengativo.</content>
+  <content contentuid="heb1acaecg9c34g49c2gefecg7449ee3003f1" version="2">Bloqueo de Cazadores Githyanki Activado</content>
+  <content contentuid="hcc75450eg67a5g1d56gd152gb17ef66cfb1d" version="2">Detiene el spawn de Cazadores Githyanki tras usar tus poderes Illithid.</content>
+  <content contentuid="h96e64a1fg9874g8be9g19ffg5480c6228dcf" version="1">Terrores Enterrados</content>
+  <content contentuid="hfac1a2efgbdf5gea2cgd3c9g34109e8e8d69" version="1">Activa o desactiva los no-muertos al desenterrar cofres. (Encuentros Extra Dinámicos).</content>
+  <content contentuid="hab1686a6g4c7dg6747gbcc2g57220ea2f11e" version="1">Convergencia Elemental</content>
+  <content contentuid="h3c77c84dg3a9bg1d5bg2b8cgad647316f916" version="1">Activa o desactiva los Elementales al infligir daño elemental específico. (Encuentros Extra Dinámicos).</content>
+  <content contentuid="h40bd2db6g498bg5dbcgfb4dg8bb05550dd35" version="1">Cazado por los Githyanki</content>
+  <content contentuid="h231a27a7ga5c7g8e77gb27ageb1f6fd4f7a9" version="1">Activa o desactiva los Cazadores Githyanki al usar poderes Illithid. (Encuentros Extra Dinámicos).</content>
+  <content contentuid="h0d05afa4g414ege13eg9e71gb14f6028a0c9" version="1">Marcado por los Fallecidos</content>
+  <content contentuid="hc35fd235gb6adg5569gdc15gbbd3fda90d4c" version="1">Activa o desactiva los Espíritus Vengativos al matar civiles. (Encuentros Extra Dinámicos).</content>
+  <content contentuid="hdf44e6fdg1dadg0920g509eg7fb440166878" version="1">Desactivar Carroñeros de Campo de Batalla</content>
+  <content contentuid="h918e3f66g8980g9410g52c1gca468bf9d7ed" version="2">Características de Convergencia Elemental</content>
+  <content contentuid="h75165e29g3fe5g801fg255fg157a677f20d4" version="1">Desactivar Convergencia Elemental</content>
+  <content contentuid="h917cd336gb892g5dbeg3c17g4160e3869e22" version="2">Características de Marcado por los Fallecidos</content>
+  <content contentuid="h268cd5bcgb8b8g3bcbgf6e5ga057498108e6" version="3">Características de Terror Enterrado</content>
+  <content contentuid="h75d265a5g3429gf115g3135g16c340bfe072" version="1">Desactivar Terrores Enterrados</content>
+  <content contentuid="h44e9e888gd0e3gc2cag2542g0e16e26ef3f5" version="1">Desactivar Marcado por los Fallecidos</content>
+  <content contentuid="hdee75b8dg9f2dg0619ge3e6g2d59f40817a7" version="2">Características de Cazado por los Githyanki</content>
+  <content contentuid="h387f5c95ga973g54fegf46eg7fe59375df64" version="1">Desactivar Cazado por los Githyanki</content>
+  <content contentuid="h5f71addeg78e9ga977g8083gbe39dc1e2bad" version="1">Activar o Desactivar Carroñeros de Campo de Batalla</content>
+  <content contentuid="h39ef2a57g4b51gdb8dg30feg010af2526129" version="1">Activar o Desactivar Convergencia Elemental</content>
+  <content contentuid="ha76cf575g8c8fga794gb26bgaba7e63cae71" version="1">Activar o Desactivar Marcado por los Fallecidos</content>
+  <content contentuid="h1898a1b4g00bbg4748g80f5g199797db925b" version="1">Activar o Desactivar Terrores Enterrados</content>
+  <content contentuid="h88b386b8g1cb4gdbf1g294dg9ad42bbdda51" version="1">Activar o Desactivar Cazado por los Githyanki</content>
+  <content contentuid="ha6292208g2240g5446gc414gdc84e44f9405" version="1">Añade Hechizo Contenedor</content>
+  <content contentuid="heb384c60ga87cg5fbfg06d7ga0c58a3cc1cb" version="1">Contenedor de hechizo para activar o desactivar características.</content>
+  <content contentuid="h23bbe22egac78g08dag4213gd36c0bca5d22" version="2">Raíces de Sombra</content>
+  <content contentuid="hf78be6afgc536g2c71ge115g0f17320a57c4" version="3">Al matar a los infiltrados en la Arboleda, has atraído la atención de los muchos Druidas de la Sombra aún activos en los bosques. Te seguirán implacablemente hasta que alcances las Tierras Malditas por las Sombras, un lugar demasiado oscuro incluso para quienes caminan entre las sombras.</content>
+  <content contentuid="h1451e95ege3e7g6627g0fc6g3190bdc3b5e1" version="1">Disparador de Druida de la Sombra en Encuentros Extra Dinámicos</content>
+  <content contentuid="h2aff056bgbe0bg517bg9488g28c7947d5eaa" version="1">VFX de Druida de la Sombra</content>
+  <content contentuid="h7174f13dg7217g2de1g3eafg1f3ea1778565" version="1">Dríade</content>
+  <content contentuid="h74f4ee17g39ceg69f1g11d7g9d01967076bc" version="2">Druida</content>
+  <content contentuid="h51193c32g27beg202fgdd6agd5a627ab2b57" version="2">Tocado por las Sombras</content>
+  <content contentuid="he2fef81ag8a6dg7722g0801g89bcaf23f476" version="2">Druida</content>
+  <content contentuid="hbe93bf05ge8a1g80f0g8bacg0a9f86d9832c" version="2">Tocado por las Sombras</content>
+  <content contentuid="h284374bag90ceg0ca2gfb67g43cb8f4c6e5d" version="3">Druida</content>
+  <content contentuid="hb11e4c7ag6f51g643dg2c07g1827579039ca" version="3">Tocado por las Sombras</content>
+  <content contentuid="h98907d6bgde53g61f1g040dgdeea48f59261" version="3">Druida</content>
+  <content contentuid="ha37cac9fgf38cgdbd0g53e1gac7487e2cc5d" version="3">Tocado por las Sombras</content>
+  <content contentuid="h50a2aed4gf8d5gf167ga82fgfdbea1a1d3af" version="3">Druida</content>
+  <content contentuid="h29c5378egc54dgf4c8gcf39gfcdb4d4573a4" version="3">Portador de Espinas</content>
+  <content contentuid="hd69cebcag6155gee38g5c9cg4eaa54830bdc" version="2">Bloqueo de Druidas de la Sombra Activado</content>
+  <content contentuid="h1d34c2ccg19e7ge071gf3a3gb5b7a47d7d3b" version="1">Detiene el spawn de Druidas de la Sombra.</content>
+  <content contentuid="h37bc7c56g2a77g249dg41a7g48582ed76f2f" version="2">Características de Paso Sombrío</content>
+  <content contentuid="hbc58f905g638bg0b09g8803gf44f5bc61518" version="1">Activar o Desactivar Emboscadas de Druidas de la Sombra</content>
+  <content contentuid="ha907844dgd013gf27ag56e9g8d7430e52a7f" version="4">Moneda de los Condenados</content>
+  <content contentuid="h4f6f876eg2e4fg08d1g7a65g23ea5209f371" version="4">Los comerciantes ven esta pieza con profunda sospecha y suben los precios por instinto. Sin embargo, su verdadero propósito revela que es un símbolo de alto prestigio que eventualmente otorga gran favor.</content>
+  <content contentuid="h550f2e61g0642gea0egf63fg815dcfbc8660" version="3">Percepciones Malditas</content>
+  <content contentuid="h18abf22cg285egd8d6g503cgf53f4f9b1026" version="3">Moneda Dummy</content>
+  <content contentuid="h4d649cabga6d4g386cg1c83g22cff7ae48f6" version="2">Percepciones Malditas</content>
+  <content contentuid="h4458d1dcgd7d5g3600gab92gb244b394b704" version="1">No hace nada.</content>
+  <content contentuid="hcb80ab25ge12ag73e5g6085g241a41171cb5" version="1">Un aura persistente y perturbadora distorsiona las percepciones de quienes te rodean. Los mercaderes se alejan de tu presencia y exigen precios significativamente más altos. Esta distorsión se invierte una vez que se levanta la maldición, haciendo que los vendedores te vean como un cliente muy favorecido y te ofrezcan un pequeño descuento.</content>
+  <content contentuid="ha991434ag5ba1g346egb677g51b603386b2f" version="1">Actitud Positiva del Comerciante</content>
+  <content contentuid="h651e081cg6037gdf67g195dg9deac2806e9a" version="1">Bloqueo de Ogros del Campamento Activado</content>
+  <content contentuid="hd82908fcg0254gc901g7adbgc62b87d492ec" version="2">Detiene el spawn de Ogros del Campamento tras Descanso Largo.</content>
+  <content contentuid="hfbe9608ag84cbgd672gcf23ga17d15a13f06" version="1">Aroma del Glotón</content>
+  <content contentuid="h0dd67b15g3a14gd884g5c68g9f768a616541" version="1">Activar o Desactivar Ogros del Campamento</content>
+  <content contentuid="hf22b0f1bgb298gd585g70b5gdce9ec2d7464" version="2">Armadura Animada</content>
+  <content contentuid="h94accc33g47c4g1105g73ffg744a02977356" version="2">Armadura Animada</content>
+  <content contentuid="h7b3c867ag3407gff99ga04ag1e23f6761676" version="2">Armadura Animada</content>
+  <content contentuid="h7bc27244gdaa1gdccbg13abga46ea8134d5c" version="1">Bloqueo de Armadura Animada Activado</content>
+  <content contentuid="h6f0f27d9gdfcdge2e6g294eg932ee3dc4fa6" version="2">Detiene el spawn de Armadura Animada al saquear piezas de cofre.</content>
+  <content contentuid="h59ea0e06ga549gc70eg7bf4gfad06817bd8e" version="1">Acero Consciente</content>
+  <content contentuid="h92764be4g8164g00feg147dg2d15e47dc26a" version="1">Activar o Desactivar Armadura Animada</content>
+  <content contentuid="h2bc182b7g4db5gc61ag5e42g11a650174ae0" version="2">Humo y Dagas</content>
+  <content contentuid="he4c50448gc51ega84cgf743g56c996bdcd9e" version="1">Activar o Desactivar Ladrones de Forzar Cerraduras</content>
+  <content contentuid="h45f96d3fgf3bcgd4d1g8dfdga2f7c1ad5bf3" version="1">Bloqueo de Ladrones de Forzar Cerraduras Activado</content>
+  <content contentuid="h95027b33g3503g8518gefedg35d72b526bca" version="1">Detiene el spawn de Ladrones al forzar cerraduras.</content>
+  <content contentuid="h10b427edg4c7fg6a7ag0a0dg0243ca1e0f16" version="2">Rencor del Superviviente</content>
+  <content contentuid="he6d33038g6f4bgd2b8gdf1dg7ff39a637cf1" version="2">Forjado en la Derrota</content>
+  <content contentuid="hd672aca1gf8ccg54a4g5207g2e109027fab6" version="2">Avatar de la Venganza</content>
+  <content contentuid="h559dccd2g0c7bg323dgb134g87c24ad788ed" version="2">Vendetta: Ecos de la Perdida</content>
+  <content contentuid="h67402540g5e0eg9212g96feg29b3285bb129" version="2">Bloqueo de Ecos de la Derrota Activado</content>
+  <content contentuid="h72196accg4372g4c54ge484g6aa620e23d26" version="1">Detiene que los enemigos inicien una Vendetta contra el jugador.</content>
+  <content contentuid="h4637800bg5d75g5653g4206gdd4c8ddbef08" version="2">Ecos de la Derrota</content>
+  <content contentuid="h262d09c7g6e60g922dgf11dg76cad63b87eb" version="1">Activar o Desactivar Enemigos de Vendetta</content>
+  <content contentuid="h27bab316g0af5g70e2geb21g9fe6f0837f47" version="3">Alimentado por el amargo recuerdo de tu casi muerte, tu odio te empuja más allá de tus límites naturales.&lt;br&gt;&lt;br&gt;Amenaza de Vendetta: Normal</content>
+  <content contentuid="h454dd925gf376gad72gf47bgc229a1a37b30" version="2">Lo que no te mató solo ha afilado tu espada. Has estudiado meticulosamente a tu presa, regresando con precisión letal y contramedidas adaptativas.&lt;br&gt;&lt;br&gt;Amenaza de Vendetta: Élite</content>
+  <content contentuid="h5af92dc6g5240g45cfgedc9g37d2c0dbc430" version="2">A través de pura fuerza de voluntad, has trascendido la fragilidad mortal para convertirte en una encarnación imparable de la venganza. No descansarás hasta que tu objetivo sea completamente destruido.&lt;br&gt;&lt;br&gt;Amenaza de Vendetta: Minijefe</content>
+  <content contentuid="h2f13015bg64c8g6ab7g9ea4g5c6be3cb461e" version="1">Golpes Rencorosos</content>
+  <content contentuid="haa81a6edg8c1cg83f3gbd78geed94105a2d8" version="1">Todos los ataques infligen [1] adicional.</content>
+  <content contentuid="h8d55216egc85ag63d6g5273g01eb10cc9a8a" version="1">Resolución Fortalecida</content>
+  <content contentuid="h1abb80d9gb367g6584g1ec6ge66d10ba0bad" version="2">Obtienes +[1] a &lt;LSTag Tooltip="ArmourClass"&gt;Clase de Armadura&lt;/LSTag&gt; y &lt;LSTag Tooltip="SavingThrow"&gt;Tiradas de Salvación&lt;/LSTag&gt; mientras estés por encima del [2]% de &lt;LSTag Tooltip="HitPoints"&gt;puntos de vida&lt;/LSTag&gt;.</content>
+  <content contentuid="hbbe600a6g01cbg868eg8ae7g1605692b80f3" version="1">Zancada Vindicativa</content>
+  <content contentuid="h0d676457g6c25gcb92g81a0g2550082371b7" version="2">Obtienes +[1] de &lt;LSTag Tooltip="MovementSpeed"&gt;velocidad de movimiento&lt;/LSTag&gt; y te vuelves inmune a &lt;LSTag Tooltip="OpportunityAttack"&gt;Ataques de Oportunidad&lt;/LSTag&gt;.</content>
+  <content contentuid="h41937a66gdbd6g4efcg5a92gcb70b740780c" version="1">Oleada de Adrenalina</content>
+  <content contentuid="h24696dd4g2583gd4afg219dg436f60172cfa" version="2">Recupera [1] al inicio de cada turno.</content>
+  <content contentuid="hba6421fdg547dg322dg3a52g9181c14fe219" version="1">Piel Gruesa</content>
+  <content contentuid="hc01c1fa8g64e8g2540gd970g9620a6b69cb5" version="2">Todos los ataques cuerpo a cuerpo contra ti se reducen en [1].</content>
+  <content contentuid="ha3d2686ag11cfg52fagf504g3d0cf85d3e8a" version="1">Precisión Letal</content>
+  <content contentuid="hd37b8f69gbe17g6352g4d95g18b5902a280c" version="1">Reduce el número necesario para conseguir un Golpe Crítico en [1].</content>
+  <content contentuid="hc1d3a323g1402g04a3g12a7gdefc06ca2d0b" version="1">Caparazón Adaptativo</content>
+  <content contentuid="hea309fbege947g669egd48bgc1f4fca2f691" version="2">Otorga &lt;LSTag Tooltip="Resistance"&gt;Resistencia&lt;/LSTag&gt; a daño Cortante, Perforante y Contundente. Esta resistencia se rompe temporalmente durante [1] turno si reciben daño de Fuego, Frío o Ácido.</content>
+  <content contentuid="h5013ca63g6334g3c44g6532g4df97287aeea" version="1">Miasma Corrupto</content>
+  <content contentuid="hac8d9926gd6c0g911fgcfd1g32293d7d9b68" version="2">Una vez por turno, tienes un [1]% de probabilidad de aplicar &lt;LSTag Type="Status" Tooltip="DEE_VENDETTA_ELITE_03_MIASMA"&gt;Miasma Enloquecedor&lt;/LSTag&gt; durante [2] turnos.</content>
+  <content contentuid="h2aa1dfb5g820fg8870g8bf4g1a0ff2f8a599" version="1">Rompehechizos</content>
+  <content contentuid="h8fefe3d9g1f49g1a27g411cgd1a170d6d9df" version="2">Tienes &lt;LSTag Tooltip="Advantage"&gt;Ventaja&lt;/LSTag&gt; en todas las &lt;LSTag Tooltip="SavingThrow"&gt;Tiradas de Salvación&lt;/LSTag&gt; contra Hechizos, y los hechizos que infligen daño reducen su daño en [1].</content>
+  <content contentuid="h71660ebdgc735g99f4gdb2eg27b8d5d4c6ac" version="1">Sangre Retaliatoria</content>
+  <content contentuid="h52b2cff8gfdaagc78fg3aedgc0985e090d9a" version="2">Cuando te golpean con un ataque cuerpo a cuerpo, tu sangre quema al atacante, infligiendo [1].</content>
+  <content contentuid="hf35aa904g7fc0gef99ga17fgc1ce1acc1921" version="1">Fuerza Imparable</content>
+  <content contentuid="hc6238c74g6bfbgece6g990fgfab3402196db" version="2">Otorga inmunidad a las condiciones &lt;LSTag Type="Status" Tooltip="PRONE"&gt;Derribado&lt;/LSTag&gt;, &lt;LSTag Type="Status" Tooltip="PARALYZED"&gt;Paralizado&lt;/LSTag&gt;, &lt;LSTag Type="Status" Tooltip="FRIGHTENED"&gt;Asustado&lt;/LSTag&gt;, &lt;LSTag Type="Status" Tooltip="CHARMED"&gt;Encantado&lt;/LSTag&gt;, &lt;LSTag Type="Status" Tooltip="DOMINATE_PERSON"&gt;Dominado&lt;/LSTag&gt; y &lt;LSTag Type="Status" Tooltip="STUNNED"&gt;Aturdido&lt;/LSTag&gt;.</content>
+  <content contentuid="h1aeec157gfbe7g7a77g21d0g77821ae9b3a3" version="1">Precio de Sangre</content>
+  <content contentuid="h55ac79acg02dagdafeg9944g0963c4cb8f69" version="2">Infliges [1] de daño adicional y te curas un [2]% del daño infligido. (Una vez por ataque).</content>
+  <content contentuid="h06cb7a5bg75beg1d41gf29cg5d0b5999c873" version="1">Espejo de Agonía</content>
+  <content contentuid="h36dba3e2g8143g0620gc5f0g560128ee5a7d" version="2">Un manto de magia vindicativa te protege. Siempre que recibes daño, el atacante recibe [1] igual al [2]% del daño infligido.</content>
+  <content contentuid="he0ae62acg1147g61f1gb199g4882b9f8f2ab" version="1">Tejido Cicatricial</content>
+  <content contentuid="h9f304028g2337ga5e5g0b89g61297d715205" version="1">Obtienes &lt;LSTag Tooltip="TemporaryHitPoints"&gt;puntos de vida temporales&lt;/LSTag&gt; iguales a la mitad de tus &lt;LSTag Tooltip="HitPoints"&gt;puntos de vida&lt;/LSTag&gt; totales.</content>
+  <content contentuid="h40c2ac49g552ag5118g423bged763ae88924" version="1">Represalia Frenética</content>
+  <content contentuid="hd5cbf54bg3162g4875g050ag191cb14daff3" version="1">Obtienes un &lt;LSTag Type="ActionResource" Tooltip="ActionPoint"&gt;Punto de Acción&lt;/LSTag&gt; adicional y tus &lt;LSTag Tooltip="OpportunityAttack"&gt;Ataques de Oportunidad&lt;/LSTag&gt; tienen &lt;LSTag Tooltip="Advantage"&gt;Ventaja&lt;/LSTag&gt;.</content>
+  <content contentuid="h22a577ddg0495g6430g0248gd1ae4777dcc6" version="2">Caparazón Adaptativo Eliminado</content>
+  <content contentuid="h0c4d9596gec3fg964egd2d5g9d3b2636ace7" version="2">Daño reciente de Fuego, Frío o Ácido. Mientras tengas este estado, no obtienes los beneficios de &lt;LSTag Type="Status" Tooltip="DEE_VENDETTA_ELITE_02"&gt;Caparazón Adaptativo&lt;/LSTag&gt;.</content>
+  <content contentuid="h1a52d212gd2b8g969ega291gb4e9a2b69ead" version="1">Precio de Sangre</content>
+  <content contentuid="h0fa0f33cg1093ga618g250dgec38a6022d6c" version="1">Curar la mitad del daño infligido (mecánica).</content>
+  <content contentuid="hba3c05dfgccc8g81ceg65fcg1d9671c01a81" version="1">Sangre Retaliatoria</content>
+  <content contentuid="hf6472076g7e49ge383g96fagb31629a7161f" version="1">Devolver daño a atacantes cuerpo a cuerpo.</content>
+  <content contentuid="hffde5030gfc05gffb9g8e33g9ba02b8ae57a" version="1">Miasma Corrupto</content>
+  <content contentuid="hf70925deg9a14g3812g5eeag9b23d792ed1b" version="1">Locura + Daño en el tiempo.</content>
+  <content contentuid="h7dd45bbfg6b9bg1bcegaab6gff318e72be0d" version="1">Miasma Enloquecedor</content>
+  <content contentuid="hbf5f372ag22c9g5c71g2025g50d7ad2cd3fb" version="1">Hostil a todos y recibe [1] al final de tu turno.</content>
+  <content contentuid="hdd1b60bdgd1ddg126egbaf9gd308529abc04" version="1">Caparazón Adaptativo</content>
+  <content contentuid="hde8e15b5g92e9gcdc9gd172gc1a0933648e2" version="1">Resolución Fortalecida</content>
+  <content contentuid="hcc61511agd80dgab9bg4f14g702f157ca3ae" version="1">Tendones Explosivos</content>
+  <content contentuid="h627f5944g91cdg1449g8349g8a473f0865f8" version="1">Explota un cadáver, haciendo que empale a los que están alrededor.</content>
+  <content contentuid="h2eda160cg91f1gdf84g3099g557d3f2c9d8b" version="1">Tañer a los Muertos</content>
+  <content contentuid="hfb6d9363gcbabg5ee0gd84dg7d6027b35724" version="1">Toca la campana de la fatalidad inminente. Si el objetivo está a plena salud, infliges [1] en su lugar.</content>
+  <content contentuid="haf5033cfgd039g2a7cg3e6eg1cb19785ba91" version="1">Helado de Hueso</content>
+  <content contentuid="h3e4d7f3age83ag55c7g6579g8353b55fe8ec" version="1">No puede recuperar &lt;LSTag Tooltip="HitPoints"&gt;puntos de vida&lt;/LSTag&gt;. No puede ayudar a personajes &lt;LSTag Tooltip="Downed"&gt;Caídos&lt;/LSTag&gt;.&lt;br&gt;&lt;br&gt;Si es No-Muerto, tiene &lt;LSTag Tooltip="Disadvantage"&gt;Desventaja&lt;/LSTag&gt; en &lt;LSTag Tooltip="AttackRoll"&gt;Tiradas de Ataque&lt;/LSTag&gt;.</content>
+  <content contentuid="h5388b16egf4adg2856g0061gcbcf09e5e043" version="1"> Aullido de los Muertos</content>
+  <content contentuid="h12fd4d31gfa71g494egcda5g85c0ae9b5139" version="1">Emite un aullido helador que &lt;LSTag Type="Status" Tooltip="MOO_MAG_KETHERIC_STUPEFIED"&gt;Entumece&lt;/LSTag&gt; a todas las criaturas cercanas.</content>
+  <content contentuid="h3d56e1cagb90agdf26g0c06g49ea4ba0c642" version="4">Murciélago</content>
+  <content contentuid="hfd4bad4cg8aa4g21e2ga3b3gbabdf60b80fa" version="5">Novicia Sharran</content>
+  <content contentuid="h2ea1903eg553cg30abgb50dg623cd5aa2463" version="5">Fideliano Sharran </content>
+  <content contentuid="h78e65534g164dg4b97g6e66gb3159d986ba4" version="5">Novicia Sharran</content>
+  <content contentuid="hba49663bg936dgbbb0gb9e6g4fcd416f9d40" version="5">Fideliano Sharran</content>
+  <content contentuid="hcc3ab16bg07dbg4f3eg01d0gf34c5f918056" version="5">Gremishka</content>
+  <content contentuid="ha954ca66ge7c1g8329g86ceg0be0d99dfc46" version="4">Elemental de Lava</content>
+  <content contentuid="h7b5086d6g5555g494eg0325g3717ecb117b8" version="4">Mefito de Lodo</content>
+  <content contentuid="h6e78de64g7127g5222g7766ge79153a9b0fa" version="6">Puño de Bane</content>
+  <content contentuid="haf1488ebg565cg46ddg5751g072752e20623" version="6">Puño de Bane</content>
+  <content contentuid="h3622d67dg1529gce4bg485dgb40e25804204" version="6">Cónsul de Hierro de Bane</content>
+  <content contentuid="hdebfaaf2g51cfg4c71ga6e8ge285e01783f0" version="6">Cónsul de Hierro de Bane</content>
+  <content contentuid="h53466c0bge417gd838gbd12g6a90a048f077" version="1">Voz de Mando</content>
+  <content contentuid="h2abcfd3fg64edg8a64g96b7gc0ff76ae3447" version="1">Ordena a un aliado en nombre del Señor Oscuro, permitiéndole canalizar &lt;LSTag Type="Spell" Tooltip="Target_DEE_NPC_BanesWrath"&gt;Ira de Bane&lt;/LSTag&gt;.</content>
+  <content contentuid="hffa691e2g4af4g9e9dgcd78g3bae5f7596e4" version="1">Ira de Bane</content>
+  <content contentuid="hc14c993ag695fg81a0g5a03g1586c120d51b" version="1">Golpea con la ira de la Mano Negra, infligiendo más daño y &lt;LSTag Type="Status" Tooltip="FRIGHTENED"&gt;Asustando&lt;/LSTag&gt; a tu objetivo.</content>
+  <content contentuid="hbd5cb6b8g61f7g2be2ge793g63e57214b681" version="1">Mando de Bane</content>
+  <content contentuid="h8cc7214cgab4fgdbacgbe34gd4337c14a8c6" version="1">Esta criatura puede canalizar &lt;LSTag Type="Spell" Tooltip="Target_BanesWrath"&gt;Ira de Bane&lt;/LSTag&gt; — es la voluntad de la Mano Negra.</content>
+  <content contentuid="h27c6ef04g9db3g5747g19f7g7acb7ca367b6" version="1">Regeneración Vampírica</content>
+  <content contentuid="hba8d5b62g69abg1522gc2b9gb1065f1b615f" version="1">El vampiro recupera [1] al inicio de su turno si no está bajo la luz del sol, o ha recibido [2] o daño de agua bendita, en cuyo caso este rasgo no funciona hasta el inicio de su siguiente turno.</content>
+  <content contentuid="h93ab7c7eg1679gb52bge57fg37bb5785a4f5" version="2">Lazos de Sangre</content>
+  <content contentuid="hb13f6724gb167g5508gd7afgfe4e0a68cf60" version="2">Ira de la Dama Oscura</content>
+  <content contentuid="h0ed19373ga863ge104g790eg9630a11cf885" version="2">Resonancia Inestable</content>
+  <content contentuid="h14ad8824g033fgd36fgcb60gb69b1c58955a" version="2">Corazón Humeante</content>
+  <content contentuid="h400f9105g4796gae7cg090fg909a764cfbdb" version="2">El Heredero del Duque</content>
+  <content contentuid="h8c8e6c9cg35f0g2752g5281gaa5a2a98c672" version="2">Purgar la Debilidad</content>
+  <content contentuid="h5d64b189g4502gf1f7g80cegdf43121eba3b" version="1">Destinos Entrelazados: Disparador de Astarion</content>
+  <content contentuid="h964b1493g4de6ge6f0gc932gc1c8572edb59" version="1">Destinos Entrelazados: Disparador de Shadowheart</content>
+  <content contentuid="h7226ab40g9711gf9a4gdf26gdb18b6455632" version="1">Destinos Entrelazados: Disparador de Gale</content>
+  <content contentuid="haa66bed3g6317g45afg1038gea83eebb0227" version="1">Destinos Entrelazados: Disparador de Karlach</content>
+  <content contentuid="h3d7bb33cg9b6dg0f91g3faag94b68450e3cd" version="1">Destinos Entrelazados: Disparador de Wyll</content>
+  <content contentuid="h7da31b7aga222g4675gda0dgfe6befa516c1" version="1">Destinos Entrelazados: Disparador de Lae'zel</content>
+  <content contentuid="h78507f66g6377g359bg2246gc50cb000104c" version="1">Destinos Entrelazados</content>
+  <content contentuid="h717e31c6g9ba4g7707g63d9gd9853e563d20" version="1">Detiene el spawn de enemigos basado en la historia de fondo de tus compañeros.</content>
+  <content contentuid="h8a6dcc9ag7133gc6c1g0229gf03941838631" version="1">Destinos Entrelazados</content>
+  <content contentuid="had18765dg65e1g78eeg5c3cg5cbf26ada6d5" version="1">Activar o Desactivar Enemigos Basados en la Historia de Compañeros</content>
+  <content contentuid="h96834084g6472g5a86g5b12geee82726a008" version="1">Activar Astarion</content>
+  <content contentuid="hc8c46f16g2c15g5a09g963bgd24cef49c492" version="1">Activar Shart</content>
+  <content contentuid="h96f2d348g1d93gf4cagb0e2g2e6f11d216d4" version="1">Activar Gale</content>
+  <content contentuid="hd3fdae09g26e9g144cgf648gc6cff9d5bee9" version="1">Desactivar Gale</content>
+  <content contentuid="h99b59c1bgf890g7987gf196g431c9f31e288" version="1">Activar Karlach</content>
+  <content contentuid="h2134708dg8287g85c0g7683g1e1ef6df95b7" version="1">Desactivar Karlach</content>
+  <content contentuid="h10733fa5g44fag97d6g1336g2983a224147b" version="1">Activar Wyll</content>
+  <content contentuid="h186a5058gaaa5ge2e5ga8c4g07adc836d772" version="1">Activar Lae'zel</content>
+  <content contentuid="h4a5202dfga9fdg1f51ge8d9g9918618e0768" version="1">Tu amo no te ha olvidado. Tus compañeros engendros han captado tu aroma y vienen a arrastrarte de vuelta a la oscuridad.</content>
+  <content contentuid="he51141c8g7ccdg679eg50ecge62bbf3ed4ab" version="1">Al dar la espalda a la oscuridad, te has pintado un objetivo en la espalda. Devotos seguidores de la Dama de la Pérdida te rastrean incansablemente para castigar tu traición.</content>
+  <content contentuid="h3d1d84a6g1fe6g9376gebf0gef160ded4189" version="1">La magia volátil que se filtra de tu pecho actúa como un faro. Criaturas hambrientas de magia son atraídas directamente al orbe, ansiosas por alimentarse de su magia.</content>
+  <content contentuid="h77e33ab0ge810ga863g6b28gaa01813ff814" version="1">El intenso calor descontrolado que irradia tu motor infernal está atrayendo seres de calor intenso a tu ubicación.</content>
+  <content contentuid="hb1b6abfdg88aeg6551gb639g15de3c165683" version="1">Tu verdadero linaje ha sido expuesto, convirtiéndote en un objetivo de alto valor para cultistas despiadados que buscan manipular el futuro político de la ciudad.</content>
+  <content contentuid="h2f68cc1eg203fg85f2g3659g98e1a4b21450" version="1">Viajar con istik te ha marcado como una vulnerabilidad. Guerreros excesivamente celosos de tu propia especie buscan demostrar su valía purgándote violentamente de sus filas.</content>
+  <content contentuid="hfc1aa05cgbedagd967gc75dga4dbb95770ab" version="1">Comprobador de modificaciones de revisión de energía Illithid</content>
+  <content contentuid="h5986c521g6d97g2de9gaf45ge3290363ae88" version="1">Comprueba si has utilizado un poder illithid del Mod de revisión de poderes illithid.</content>
+  <content contentuid="h6ca0ede6g0da6g4aa4gd08agf735c4d3a6b3" version="1">Clon maldito</content>
+  <content contentuid="h9336897eg3904g8a92g8acbg275432f13ab4" version="1">El clon copiará los hechizos que lanza este personaje.</content>
+  <content contentuid="h9af9bfacg2efbgd27ageaeag0870c05bf360" version="1">Clona Hechizos libremente</content>
+  <content contentuid="h28cc35degf448geea0gdf26gf99401b24be8" version="1">Permite lanzar hechizos libremente.</content>
+  <content contentuid="h0acfabf9g5129g0c7cge90dgd418b6552482" version="1">Clonar hechizo Usado</content>
+  <content contentuid="hb3245967g3987g5a52gb4aag99c293e1d498" version="1">Registra si un clon usó un hechizo.</content>
+  <content contentuid="ha4631b0ag4e01g19d2g2848g6a757dc4398d" version="2">Mimetismo impecable</content>
+  <content contentuid="h3afe91c4g115bg3286gc46eg7f2ca529ae2b" version="2">Cuando la entidad a la que imita lanza un hechizo, este clon brilla y al instante aprende el hechizo por sí mismo.</content>
+  <content contentuid="hcfffb89bg2cd6ga165g84b3gbf6e723c53da" version="2">Enemigos malditos (ocultos)</content>
+  <content contentuid="h0db7a8d0gf155g8bdag9673g6e55d2859c39" version="1">Se aplica como bloqueador para evitar que aparezcan enemigos malditos durante [1] minutos.</content>
+  <content contentuid="h41d20b6fg138ag09c8ge49cg6773175dc2a1" version="2">Cofre de Prueba de Desbloqueo</content>
+  <content contentuid="h9c086796gb133gd443g73a2g45b82161bb10" version="2">Aunque simple y desgastado por el clima, este cofre parece lo bastante resistente.</content>
+  <content contentuid="he3f5c031g7b51geb69g1eedg541e0086fb33" version="1">Este PNJ ha huido de la batalla para tramar su venganza contra ti.&lt;br&gt;&lt;br&gt;Cuando cambies de Acto, este PNJ perderá tu rastro y ya no intentará emboscarte.</content>
+  <content contentuid="hb2fbedb6g9d17g48edg3767g4408f853536a" version="1">Raíces de Sombra</content>
+  <content contentuid="h12b17c7dg472bgb0f5gc14ag7e9795cf5326" version="1">Los Druidas de la Sombra te están rastreando. ¡Cuando se elimine este estado, los Druidas de la Sombra te emboscarán!</content>
+  <content contentuid="ha5c38f58g2679ga366g932bg4c0acdd7d4df" version="1">Enfriamiento de Raíces de Sombra</content>
+  <content contentuid="h3c84e1c5g938dg0ce6g5ff4g742028a05a65" version="1">Aplicado para que Raíces de Sombra no siga activándose. Se reinicia con un descanso corto.</content>
+  <content contentuid="h4aa41518g710fg4cebg55degd748b543c86e" version="1">Iniciador del Temporizador de Raíces de Sombra</content>
+  <content contentuid="hbe9ea902gb033ge95cg21b5g46972012b9e0" version="1">Cuando se aplica, Osiris lo detecta e inicia el temporizador.</content>
+  <content contentuid="hf6f1f363g6c04g88a7g3dc3g564c238751b1" version="1">Temporizador de la Marca del Infierno</content>
+  <content contentuid="hce9d845dgba8bg5cccg1a07gd4d14b39c9d1" version="1">Temporizador del Velo del Vacío</content>
+  <content contentuid="hd7536201gb4d2g14e7g525eg5774b28ae498" version="1">Temporizador de la Venganza del Pantano</content>
+  <content contentuid="ha1bec12ag5d67g5a4fg3b03g199c19fe7028" version="1">Temporizador del Faro Psiónico</content>
+  <content contentuid="hdb055f20ge294gfa47gb29ag6b07d79346f9" version="1">Temporizador de la Ira del Señor de la Guerra</content>
+  <content contentuid="hfc7602e9g6d10ge0fegcc94g3d461317f74e" version="1">Temporizador del Reflejo Fracturado</content>
+  <content contentuid="hb112adb2g8693g681dg52d8g1d89bd5f5cb3" version="1">Abrir Menú</content>
+  <content contentuid="h33f28206g4540g49a5gab98g2e90745eeacd" version="1">Abre el Menú</content>
+  <content contentuid="h8737fb0fg834cgd04cg017bg471ddefdc656" version="1">Alternar Carroñero</content>
+  <content contentuid="h0221ac83g0e36g2ae7ge8e8g7b12c4899530" version="1">Activa/Desactiva la función Carroñero</content>
+  <content contentuid="h19ab6936g85dagb8d2g3941g5b43e470ac40" version="1">Alternar Zombis</content>
+  <content contentuid="hbb3b6618gaaacg7e6cgb3cdgfff2ef72c829" version="1">Activa/Desactiva la función Terrores Enterrados</content>
+  <content contentuid="hf6493baag83d8gc946ge19bgb9d255158ebb" version="1">Alternar Elementales</content>
+  <content contentuid="h2247d9d8g4d38g7d5fg86d6g1608eb7517b9" version="1">Activa/Desactiva la función Convergencia Elemental</content>
+  <content contentuid="hcf32d4f6ga79ag70b7g8d7bg6041a8984734" version="1">Alternar Fantasmas</content>
+  <content contentuid="haf842d4agce67g828fga7cbg092ba458588b" version="1">Activa/Desactiva la función Marcado por los Difuntos</content>
+  <content contentuid="h5cd7a58bg5cafg314age104g229129bd3e55" version="1">Alternar Emboscada Gith</content>
+  <content contentuid="hfcfd4202gbfe7g7f2dg8d3dgfd1a37049cd2" version="1">Activa/Desactiva la función Cazado por los Githyanki</content>
+  <content contentuid="h7a23a00cg630dg9d98gf773g2bf6626e96b9" version="1">Alternar Druidas de la Sombra</content>
+  <content contentuid="h247da530g5826g2a97g78f9gad91158ed816" version="1">Activa/Desactiva la función Raíces de Sombra</content>
+  <content contentuid="h21144915gdb1eg3b58gd724gba32f97ab40d" version="1">Alternar Ogro del Campamento</content>
+  <content contentuid="h4b664b7fg791ag011dg5aaag5f880f1e5149" version="1">Activa/Desactiva la función Olor del Glotón</content>
+  <content contentuid="h1c05ed33g11c9gdf97ga01fg95158d42e19e" version="1">Alternar Armadura Animada</content>
+  <content contentuid="hf972b5f9g1466gab31g1158g786c9363f9a8" version="1">Activa/Desactiva la función Acero Consciente</content>
+  <content contentuid="h5c420f47g9191g75e4g1bc1g0ce3e2483616" version="1">Alternar Ladrones</content>
+  <content contentuid="hf07b265ag9038g5968g97e4gc203a96245a6" version="1">Activa/Desactiva la función Humo y Dagas</content>
+  <content contentuid="hc545f306g8356g5b4bg7b89g0dd71fd6ea88" version="1">Alternar Vendetta</content>
+  <content contentuid="ha8f7575bg60b1g3b01g3f28gad8311dd7e8e" version="1">Activa/Desactiva la función Ecos de la Derrota</content>
+  <content contentuid="hf4e136b7geac5gf1a4gd2a3g50c38dbadc5b" version="1">Alternar Destinos de Compañeros</content>
+  <content contentuid="h31851fc2g4433g540fg0f4dg6b1d26cbc0bb" version="1">Activa/Desactiva la función Destinos Atados</content>
+  <content contentuid="hc068dacfg7d01g2c57gfa0fg12905b8cb417" version="1">Menú de Encuentros Dinámicos</content>
+  <content contentuid="hae71b12cg8766g58f2g6f1fg893d36063a57" version="1">Abre el panel de configuración de Dynamic Encounters Expanded.</content>
+  <content contentuid="h69abf59cg74b6g0711g55dage77e1972ea2d" version="1">Abre el Menú de DEE</content>
+  <content contentuid="hd79e0d7dg7036gd557ge986g5e1a2754ce66" version="1">Carroñeros del Campo de Batalla</content>
+  <content contentuid="h2ab64b44g8badg8f90g12e8ge5ac8c6ce73d" version="1">Terrores Enterrados</content>
+  <content contentuid="h4b770e15g9c62gabd1g3373ga05e1735129d" version="1">Convergencia Elemental</content>
+  <content contentuid="h992d9d2dg94c3gfc6dged25g58b74085ca97" version="1">Marcado por los Difuntos</content>
+  <content contentuid="h3182861dgc41fgd12dg0a32g4e18fd249bbd" version="1">Cazado por los Githyanki</content>
+  <content contentuid="hade6ed59g1ea6ge309gd46dg3b5c90c0455a" version="1">Raíces de Sombra</content>
+  <content contentuid="hf0624931g34e4g9733g29afg74c9e9a64cb4" version="1">Olor del Glotón</content>
+  <content contentuid="hc8cdb83agb9c6gceefgbe7eg071fed5c53b0" version="1">Acero Consciente</content>
+  <content contentuid="hc1e085aegb376gef6fg92c6gafa9edbd7b56" version="1">Humo y Dagas</content>
+  <content contentuid="hd840398cg37e9g5496gf1b0g71dc6f70277a" version="1">Ecos de la Derrota</content>
+  <content contentuid="h8e370a38g4053g2e69g0eb5gc96e83af4a55" version="1">Destinos Atados</content>
+  <content contentuid="hdaacc5f5g6693gb1d4gc813gc21cb96b9bf3" version="1">Encuentros Extra Dinámicos</content>
+  <content contentuid="h22591b45gc836gce7bgb43agb6c63a7687b3" version="1">Activa/Desactiva los Eventos Dinámicos.</content>
+  <content contentuid="he2043e49g599fg011cga434g8f4b1ad4fb7c" version="1">Los carroñeros kobold tienen una probabilidad de llegar 10 minutos después de cada encuentro de combate para saquear los restos de lo que quede en el campo de batalla.</content>
+  <content contentuid="h4ff663fdg3658g9f7ag0d98g0429e27da1b9" version="1">Desenterrar cofres enterrados tiene una probabilidad de perturbar a los muertos.</content>
+  <content contentuid="h772cc416gfc07g29e7gc373g4f03a8788f0f" version="1">Liberar magia atrae la atención de los planos elementales. Infligir suficiente daño de un tipo elemental específico en un solo turno tiene una probabilidad de invocar un elemental del elemento correspondiente.</content>
+  <content contentuid="h890cd7afgd174g9813g0f4dgc7d63b1855df" version="1">El asesinato tiene consecuencias. Matar civiles tiene una probabilidad de que se conviertan en espíritus vengativos. Estos espíritus esperarán su momento y te emboscarán poco después.</content>
+  <content contentuid="h5891ffceg4955gb796g1281g71faadac1fc2" version="1">Cada vez que usas tus Poderes Illithid, existe una probabilidad de que un grupo de caza githyanki detecte la ondulación psiónica y se teletransporte para eliminar a tu grupo.</content>
+  <content contentuid="he3752d78g2041gb09fgbd95g73065e23450a" version="1">Matar a los tres Druidas de la Sombra infiltrados en el Bosque de los Druidas atrae la atención de los demás Druidas de la Sombra que aún actúan en el Páramo.</content>
+  <content contentuid="h0aceb754g906cgdcb4gd1e7gfe64b4f14dd4" version="1">Al completar un Descanso Largo, existe una probabilidad de que el olor de tu festín atraiga a un Ogro Hambriento a tu campamento.</content>
+  <content contentuid="h499ee627g5b18gae29g468dgd5f0cb88f75c" version="1">Algunas reliquias descartadas se niegan a ser usadas por los indignos. Equipar una pieza de armadura de pecho de metal no probada ahora tiene una probabilidad de despertar magia latente en la armadura.</content>
+  <content contentuid="hce4ff973g646dg47f9g6e3fg1fa3517670e9" version="1">Algunas cerraduras no solo están pensadas para mantenerte fuera: son un cebo. Forzar con éxito una cerradura ahora tiene una probabilidad de activar una trampa oculta, invocando a un ladrón oportunista.</content>
+  <content contentuid="h17e52ec4gca0fge447g4723gdb058c719dee" version="1">Cada vez que un enemigo baja del 20 % de salud, existe una probabilidad de que huya del campo de batalla para tramar su venganza. Estos enemigos escapados empezarán a acechar a tu grupo, con probabilidades crecientes de emboscarte en futuros encuentros de combate.</content>
+  <content contentuid="h05a306b1g5d46g48c8g17fegf7b55b8fc85e" version="1">Viajar con aliados significa compartir sus cargas. Dependiendo de quién esté activamente en tu grupo y de los eventos que se hayan desarrollado durante tu viaje, amenazas únicas vinculadas directamente a sus circunstancias actuales te rastrearán ocasionalmente.</content>
+  <content contentuid="h7e588084g2e0dgd1a4g6a8agb39f8076f7e1" version="1">Cerrar</content>
+  <content contentuid="h5e3f1bbagcfe9g07e3ga0e4g183d8e923c7f" version="1">Cierra el Texto Local</content>
+  <content contentuid="hffdb23ecgbaafg5999ge24ega187f7dd0f52" version="2">Kuo-Toa Perdido</content>
+  <content contentuid="he551ad27g3994ga5b4g580agc87c4606b35f" version="5">Araña de Risco</content>
+  <content contentuid="h0ae7b24dg0d45gbe9eg0e2eg78713c8c7888" version="1">Ayudante Invisible Araña Minúscula</content>
+  <content contentuid="h10b4b5b5gf853g072dg597bg838b2e3d8427" version="4">Carroñero Gnoll</content>
+  <content contentuid="he35c886dgc8edgacebg2177g0b1c323d74cb" version="10">Sir Hugglesworth</content>
+  <content contentuid="h3b3df5b9gefbfg89dfg7b8ag37c4050eeea6" version="10" />
+  <content contentuid="h3baa0869gba19g4804gf79bg4999e1fde3f9" version="4">Araña de Risco</content>
+  <content contentuid="h0227962fg4a49gd32eg5522g99f87cf6dfb5" version="4">Araña de Risco</content>
+  <content contentuid="h2ae464e2g273aga4a4g2304gbf38604268fb" version="2">Sed de Sangre</content>
+  <content contentuid="hfcb03391g3c26g8bd0g5f48g30cb426ff2f8" version="1">Los metalizados deben morir.</content>
+  <content contentuid="hf00d017dg08edg4948gf29eg804a4811fa64" version="4">Devastador Gnoll</content>
+  <content contentuid="hb0999867gc77ag8dd1g6487gf632f5538b98" version="1">Devastador Gnoll</content>
+  <content contentuid="h6d8c124fgf4f0g6bd8g1531g73f0ae07c558" version="3">Hiena</content>
+  <content contentuid="h01dbfa9eg12cdgcfbcgda99g82899b5a1df8" version="1">Skittles</content>
+  <content contentuid="ha95df5a5gf93bg628egb3bagbe7df90a0165" version="4">Sir Hugglesworth</content>
+  <content contentuid="h600c0366ga5e7g0cf4g7e9dgcc952d96959f" version="7">Lord Fluffington</content>
+  <content contentuid="h9f789c3dgcac4gf458gb4b4gc3efa9643e7a" version="5">Sir Hugglesworth</content>
+  <content contentuid="h89276ea7g5094g4f29g8954gd40aa144e7c9" version="1">Aullido del Terror</content>
+  <content contentuid="hb693a123g3662g90e4ga29egd7a5d59c4e59" version="1">Emite un aullido, que tiene probabilidad de &lt;LSTag Type="Status" Tooltip="FRIGHTENED"&gt;Asustar&lt;/LSTag&gt; a los enemigos dentro de [1].</content>
+  <content contentuid="h0ef7c1b0geed0g2c1cg86d3g8c60ab916dca" version="1">Salto del Anciano</content>
+  <content contentuid="h9daa3addg65ecgc338gc255g023ddb8047c3" version="1">Salta sobre una sola criatura infligiendo [1] y potencialmente derribando al objetivo si falla una Tirada de Salvación de Fuerza.</content>
+  <content contentuid="h631b39adgbdd3g2711g8912g4796a6d5a8fd" version="1">Vínculo Leal</content>
+  <content contentuid="h3f1e2795gbb7agbf00gb604gf2d9ea88892b" version="2">Mientras Lord Fluffington esté vivo, tienes &lt;LSTag Tooltip="Advantage"&gt;Ventaja&lt;/LSTag&gt; en las &lt;LSTag Tooltip="SavingThrow"&gt;Tiradas de Salvación&lt;/LSTag&gt; de Sabiduría y Carisma.</content>
+  <content contentuid="h39fe6825g4d91g9c46gf0d0g664bec073fec" version="1">Pelaje Curtido</content>
+  <content contentuid="he8bf740eg0d7bg4dbcg4f1bg6f048e60efe7" version="1">Reduce el daño Contundente, Perforante y Cortante en [1].</content>
+  <content contentuid="he0ebeed1g8108g0766gc8f5ge16c6119166b" version="1">¡Mi Mejor Chico!</content>
+  <content contentuid="hc5f8f700g21ccgb417g5a77gd258a36b6992" version="2">Cuando Lord Fluffington muere, Sir Hugglesworth gana &lt;LSTag Type="Status" Tooltip="DEE_BUGBEAR_BLOODLUST"&gt;Sed de Sangre&lt;/LSTag&gt;.</content>
+  <content contentuid="hcb1a2c64ga0e9g4633g2ab7g3c335aaed91b" version="1">Duelo sin Amo</content>
+  <content contentuid="he69c291fg4c4eg500cg0d1cg4689f366aef0" version="2">Cuando Sir Hugglesworth muere, Lord Fluffington gana &lt;LSTag Type="Status" Tooltip="DEE_BUGBEAR_WORG_GRIEF"&gt;Frenesí de Duelo&lt;/LSTag&gt;.</content>
+  <content contentuid="h74894337g63b6g5a35g2755g695c3d149adc" version="3">Lord Fluffington ha muerto, entras en un estado de Sed de Sangre que te otorga un &lt;LSTag Type="ActionResource" Tooltip="ActionPoint"&gt;Punto de Acción&lt;/LSTag&gt; adicional, pero tu &lt;LSTag Tooltip="ArmourClass"&gt;Clase de Armadura&lt;/LSTag&gt; se reduce en [1].</content>
+  <content contentuid="h6ce6927eg13dbge4feg76d0g9581e645ab87" version="1">Frenesí de Duelo</content>
+  <content contentuid="h272a2dbcg823dg93a9g7ccbg6e53e621492b" version="2">Sir Hugglesworth ha muerto, te vuelves Frenético. Todas las &lt;LSTag Tooltip="AttackRoll"&gt;Tiradas de Ataque&lt;/LSTag&gt; tienen &lt;LSTag Tooltip="Advantage"&gt;Ventaja&lt;/LSTag&gt; e infliges [1] de daño adicional.</content>
+  <content contentuid="h8bcf4f7eg3d7bg13d7g951ag80b730500f91" version="1">Vínculo Leal</content>
+  <content contentuid="hfd0c3407gcfa5g4874g0881g045b5b1c8ee4" version="1">Mientras Lord Fluffington esté vivo, tienes &lt;LSTag Tooltip="Advantage"&gt;Ventaja&lt;/LSTag&gt; en las &lt;LSTag Tooltip="SavingThrow"&gt;Tiradas de Salvación&lt;/LSTag&gt; de Sabiduría y Carisma.</content>
+  <content contentuid="hbe9c29b5g0341g8bdagff27g27b9ae96dc3c" version="1">¡A por Él, Chico!</content>
+  <content contentuid="hb43d3906g5ec7gb4d2g0bebg3b9d0ef7de7e" version="1">Otorga a Lord Fluffington un bonificador de +[1] en todas las &lt;LSTag Tooltip="AttackRoll"&gt;Tiradas de Ataque&lt;/LSTag&gt; y +[2] de &lt;LSTag Tooltip="MovementSpeed"&gt;velocidad de movimiento&lt;/LSTag&gt;.</content>
+  <content contentuid="hc4cc7bb1g9957g1d61g7838g1ba86bc554db" version="1">¡A por Él, Chico!</content>
+  <content contentuid="hbe374c7dg6991g8591gfecdg8d5d9fdc6306" version="1">¡Sir Hugglesworth te ha dado una orden! Tienes un bonificador de +[1] en todas las &lt;LSTag Tooltip="AttackRoll"&gt;Tiradas de Ataque&lt;/LSTag&gt; y +[2] de &lt;LSTag Tooltip="MovementSpeed"&gt;velocidad de movimiento&lt;/LSTag&gt;.</content>
+  <content contentuid="hff83a2d2g2d70g18c3g5787g71d60fc5159f" version="7">Guardiana de la Prole Xullrae</content>
+  <content contentuid="h0d23f21fg204cgfe30ga382g8dcc5957ec79" version="1">Caminante de Telarañas Avanzado</content>
+  <content contentuid="hac5438e3g43b7g3c41g4a69g0435eebddef5" version="2">Inmune a quedar Enredado en Telaraña. Tu &lt;LSTag Tooltip="MovementSpeed"&gt;velocidad de movimiento&lt;/LSTag&gt; no se ve afectada por las superficies de telaraña y, mientras estás sobre una superficie de telaraña, tienes &lt;LSTag Tooltip="Advantage"&gt;Ventaja&lt;/LSTag&gt; en las &lt;LSTag Tooltip="AttackRoll"&gt;Tiradas de Ataque&lt;/LSTag&gt;.</content>
+  <content contentuid="h62aa47fag6a50g83a5g7a00gcbd884b8abcc" version="1">Tierras ocupadas</content>
+  <content contentuid="hec6a436cg2dc9g0299g22feg6fb8e4756ab8" version="1">Puebla el mapa con nuevos encuentros fijos, patrullas y minijefes.</content>
+  <content contentuid="ha069ebf6g3e3ag1558g14f4g80610e2c2bf7" version="1">Caminante de Telarañas Avanzado</content>
+</contentList>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <content contentuid="hf04e76a6gbfe1g6efbg60afgca7635d0286f" version="1">Pact Blade</content>
+  <content contentuid="h7df69e7ege7b4gdc2cgbb67g9ba8ee4d1e3d" version="1">Bind the weapons in both your main hand and off-hand. You become proficient with them, and they use your Spellcasting Ability Modifier for attack and damage rolls, gain a +2 enchantment bonus, and deal scaling Force damage.</content>
+  <content contentuid="h8287df75ge311g3066g35c0gcef8150b426d" version="1">Devouring Blade</content>
+  <content contentuid="h00471c8cg34ebg428dg8c2dgb92898e511c9" version="1">Your bond with your weapon deepens. You can attack three times, instead of twice, whenever you take the Attack action with your pact weapon.</content>
+  <content contentuid="h087e2694g8c4bg34a3gc7c9g64524a3b8741" version="1">Devouring Blade: Apex</content>
+  <content contentuid="h77827ef0g04bagbd90ge0e8gf608c852c9da" version="1">You achieve ultimate mastery with your pact weapon. You can attack four times whenever you take the Attack action.</content>
+  <content contentuid="h1d38f215g1367g331bg7f10g4df4d89d906b" version="1">Lifedrinker</content>
+  <content contentuid="h4f61e84bg40afg0746g2a10g59efb955e31e" version="1">When you hit a creature with your pact weapon, it takes additional Necrotic damage equal to your Charisma Modifier plus [1], and you regain hit points equal to your Charisma Modifier.</content>
+  <content contentuid="h0902d9f0g5fe6gca28gb162g864e14e19520" version="1">Eldritch Synergy</content>
+  <content contentuid="h41da7610gc905g5c1bgef03ga5623599dbea" version="1">Your martial strikes are suffused with planar magic. You add your Charisma Modifier to weapon damage rolls.</content>
+  <content contentuid="h73cd332eg277egc200ge5dcg9fef3d0ace3b" version="1">Eldritch Weaving</content>
+  <content contentuid="he14e49dbg30bdgc825g5385g6c6e196e26d6" version="1">When you hit a target with your Pact Weapon, you can cast Eldritch Blast as a Bonus Action until the end of your turn.</content>
+  <content contentuid="hf5cf62a4g8fe9ga55ega713g31cc5a0384e4" version="1">Eldritch Weave: Blast</content>
+  <content contentuid="hf4313616g0411g0ebage989gea2a745375d2" version="1">Unleash eldritch power with your off-hand following a successful melee strike.</content>
+  <content contentuid="h994de449gf2cbg5ba1g8921ga35b644aee43" version="1">Eldritch Weave Ready</content>
+  <content contentuid="h903b38acgfdc2g4aeeg7170g5b4ea135c8cf" version="1">Your off-hand crackles with eldritch energy. You can cast Eldritch Blast as a Bonus Action.</content>
+  <content contentuid="h50779e16gb4d6g775fge144gfab581d75a6e" version="1">This weapon is bound to its master. It uses the wielder's Spellcasting Ability Modifier for attack and damage rolls, gains a +2 enchantment bonus, and deals additional Force damage based on your level.</content>
+  <content contentuid="h30e18b70gbf7dge01bg13c3gfccfa4ac0873" version="1">Deal additional Necrotic damage to the hexed target whenever you hit it with an attack.</content>
+</contentList>

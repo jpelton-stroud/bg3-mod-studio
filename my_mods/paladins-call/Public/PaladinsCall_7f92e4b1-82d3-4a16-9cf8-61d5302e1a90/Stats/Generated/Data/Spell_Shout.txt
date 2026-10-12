@@ -1,0 +1,4 @@
+new entry "Shout_SacredWeapon"
+type "SpellData"
+using "Shout_SacredWeapon"
+data "UseCosts" "BonusActionPoint:1;ChannelOath:1"

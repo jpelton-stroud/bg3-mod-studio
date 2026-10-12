@@ -1,0 +1,37 @@
+// ==============================================================================
+// UnlockLevelCurveExtended - Spell_Shout
+// Shout spells for Level 13-20 mechanics and Spell Mastery
+// ==============================================================================
+
+new entry "Shout_EmptyBody"
+type "SpellData"
+data "SpellType" "Shout"
+data "DisplayName" "h5586742bg5c01g4729g81efg68eba20b647e;1"
+data "Description" "h701c0902gd458g4709g8422g1d176596b7cd;1"
+data "Icon" "Spell_Illusion_Invisibility"
+data "SpellAnimationIntentType" "Buff"
+data "UseCosts" "ActionPoint:1;KiPoint:4"
+data "CooldownType" "None"
+data "SpellProperties" "ApplyStatus(SELF, EMPTY_BODY, 100, 10)"
+
+// ------------------------------------------------------------------------------
+// Wizard Spell Mastery - Shout Variants (At-Will, No Spell Slot)
+// ------------------------------------------------------------------------------
+
+new entry "Shout_FalseLife_Mastery"
+type "SpellData"
+data "SpellType" "Shout"
+using "Shout_FalseLife"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Shout_MirrorImage_Mastery"
+type "SpellData"
+data "SpellType" "Shout"
+using "Shout_MirrorImage"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Shout_Blur_Mastery"
+type "SpellData"
+data "SpellType" "Shout"
+using "Shout_Blur"
+data "UseCosts" "ActionPoint:1"

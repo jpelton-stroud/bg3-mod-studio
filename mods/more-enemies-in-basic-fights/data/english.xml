@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <content contentuid="h01f10febg6655gcb50ga575gc14a4aab7520" version="1">Intellect Devourer</content>
+  <content contentuid="hd28f821fgd082g3e39gd79cg641a15b7a907" version="1">Intellect Devourer</content>
+  <content contentuid="hc91f5f12g12d2g9d6aga5b3gd7fab7839fdb" version="1">Goblin Tracker</content>
+  <content contentuid="h6737e6fdg1067g64c1gab87g0f9d9989d83b" version="4">Redcap</content>
+  <content contentuid="h588e19beg513eg46a1gdbb5g0a3653f64685" version="2">Ettercap</content>
+  <content contentuid="h3e800d32ga2f7g62a8g3d96g3ca373bc54ad" version="1">Flind's Champion</content>
+  <content contentuid="hde1a1fbeg3694gd35eg353eg8f1713bc3159" version="4">Mask of Unforgiveness</content>
+  <content contentuid="haeb668c6g90adg733ag74c6gad07b656b0fb" version="1">Booyahg Vex</content>
+  <content contentuid="h0c17f4c0gf83age71eg78cegcfc67fbaeff2" version="1">Ogre Smasher</content>
+  <content contentuid="h278aae91g5492gcf81g51b0g2ef2bb6c93b5" version="5">Harpy</content>
+  <content contentuid="h2b4e8304g4dbbg0dbeg3cbcg192e9124fd56" version="5">Entombed Warrior</content>
+  <content contentuid="h94549959g4a93g49b9g2678g85c5acc05b33" version="6">Karlos</content>
+  <content contentuid="h6d54fba8g1a2aga987gbafeg065bf4341db0" version="2">Merregon Legionnaire</content>
+  <content contentuid="hdd4d6d4eg313fg2851gd41cg678cab39deee" version="2">Merregon Legionnaire</content>
+  <content contentuid="h0db3c2a4gdd0bg4dc4g8968g135fbe5afaed" version="4">Gorsan</content>
+  <content contentuid="h7a00dd77g3774g929cga5a0g19988e9d72bc" version="4">Marwyn</content>
+  <content contentuid="h91c626b9geb1fg4275g827fg58c77af2daa6" version="4">Entombed Warrior</content>
+  <content contentuid="h16dfba9dg3416g57e7gc7a7g0029d3bbc240" version="3">Warrior Spruce</content>
+  <content contentuid="hbbe4eefcgc5f6g1c8fga8cfged15b9da4907" version="3">Novice of the Absolute</content>
+  <content contentuid="h62310843g97a8g9ddbgf9aegf0ca883c7938" version="4">Tracker Scramble</content>
+  <content contentuid="h3611af82gb60ag2c7fg878bg84cb63be5708" version="4">Novice of the Absolute</content>
+  <content contentuid="h5d019869g1bccgcf49ga699g53e6be1547b1" version="2">Guard Morkon</content>
+  <content contentuid="ha59b00bcgbac7gfecbg9cfdg3a0b44bb87c6" version="6">Alain</content>
+  <content contentuid="h5148d82ag8a8dg4e60gf89egf3605c0b2d11" version="1">Kuo-Toa Hunter</content>
+  <content contentuid="h32e55a48gacc4g0928g709egd1eca8932246" version="2">Raider Cre'shendo</content>
+  <content contentuid="hc22ae785g73d7ga984gf338g2529490f5aa8" version="2">Officer Sharr'k</content>
+  <content contentuid="hcfbdd910gc2ccgb293g9c5fg2e73197f8f29" version="1">Youth Travva'an</content>
+  <content contentuid="hc028f00dg72c7gbf66g3e86gd3fea68343f4" version="1">Youth Squi'irrel</content>
+  <content contentuid="h406c6cd5gcc57gdd53g3354gdcbe99f94ed4" version="1">Kobold Scout</content>
+  <content contentuid="hd4848924ge481g9bbdg47d7g70cdf9ddf3ca" version="1">Kobold Looter</content>
+  <content contentuid="h06c80041g7b47gcdccgda96gf0f3dd70e6aa" version="1">Kobold Looter</content>
+  <content contentuid="ha2bbdb4cgdc94g49aeg27cag7578e59defc0" version="1">Kobold Looter</content>
+  <content contentuid="h861611fege914gd3d8gffe2g41a8df2ef261" version="1">Kobold Looter</content>
+  <content contentuid="he5f078abg2a34g66f7g5555g450bc858422b" version="1">Entombed Scribe</content>
+  <content contentuid="h650f3afbgd542gc781g380dg023c3aafe955" version="7">Amallia</content>
+  <content contentuid="h4483f72cg0820g4184gd6f3gbd5fb53f41d7" version="1">Third Wheel</content>
+  <content contentuid="hcd76f3a0ga059gd3e8g56f9gaf64cd8ee7de" version="1">Warrior Tresh</content>
+  <content contentuid="h5abeeb92g85cfg9533g586cg8693a3276fbb" version="2">Booyahg Shank</content>
+  <content contentuid="h71c8c287g7e4eg1a83ged52g7af9626ebf6d" version="1">Gorm</content>
+  <content contentuid="h2908093ag3438g2bbegdaf9g9440d0290c5f" version="1">Bodyguard of the High Priestess</content>
+  <content contentuid="h0e752520g349bg4425g9ae1g2d4d36c71ba7" version="7">Gish For'reth</content>
+  <content contentuid="h4275696cg1cbfg4829gf59dgc0ef58ea6b72" version="3">Raider Sha'sla</content>
+  <content contentuid="ha290280fg8aefg1482g8426gd506255dbcce" version="1">Frair</content>
+  <content contentuid="h2c2f8a70g38f0g1863ge7f2g12412c4366c7" version="1">Novice of the Absolute</content>
+  <content contentuid="h1e602608g7a9eg26d0ge25fgdb6e6501d173" version="3">Cambion Scout</content>
+  <content contentuid="h4e039cc4g5a26g14efg3a6cg06f66f3b5e0a" version="2">Cambion Scout</content>
+  <content contentuid="hd825bf53g3ed5g9174g1748g81e3508ded12" version="1">Meazel</content>
+  <content contentuid="hba83da24gb0e3gb689g9cc3g4025130d95cf" version="1">Meazel</content>
+  <content contentuid="h5ae5d81bg45eaga4caga6f0gd3e261c4ae92" version="1">Zombie</content>
+  <content contentuid="h8f3ea480g306cgb066ge0e9g7280441e7dbf" version="1">Zombie</content>
+  <content contentuid="he031baabg994fg1f00ge877g04daf196b904" version="1">Greater Zombie</content>
+  <content contentuid="h53d1cc18g15edgc7dbg8d6eg721bed2e297d" version="1">Zombie</content>
+  <content contentuid="hdeadf18cg2364g7a6fg8aa1ge1a5d5eb6ca0" version="1">Myconid Cannibal</content>
+  <content contentuid="h9215ab48gf2a6g553egf7f5g728d48c2e0d5" version="1">Ancient Mud Mephit</content>
+  <content contentuid="h67e03160g5b38g9177g601dg1c756ce6f8c7" version="1">Ancient Mud Mephit</content>
+  <content contentuid="hb2582b3cg3fc4g0355g0ac6gc52593c3f6af" version="1">Steel Watcher</content>
+  <content contentuid="h36cc700cg92f2g4db5g5463gc39a6ef1ed28" version="1">Steel Watcher</content>
+  <content contentuid="hfe51aa5fgd07bgc0e9ge107g926d4d9fffb9" version="2">High Gish'ra K'i'lar</content>
+  <content contentuid="h0534aeebgff88gb2a2gaf29g14b698db2faa" version="2">High Gish'ra Sh'ari</content>
+  <content contentuid="h8c0cb5aegac36g34bfgbe6agdc7f4cd29801" version="1">Ember Gish'ra M'i'hayk</content>
+</contentList>

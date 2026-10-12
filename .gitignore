@@ -1,0 +1,78 @@
+# ==============================================================================
+# Baldur's Gate 3 Mod Studio & Mod.io Toolkit - Git Ignore Rules
+# ==============================================================================
+
+# Secrets & Environment Configurations
+.env
+*.env
+.env.*.local
+!.env.example
+
+# Python runtime & caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE & Editor Files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build artifacts, logs & archives
+*.log
+*.tmp
+*.bak
+*.pak
+*.zip
+
+# Scratch / temporary experimental folders
+scratch/
+
+# Build Guides (User sandbox for level 20 build crafting)
+build_guides/*
+!build_guides/.gitkeep
+
+# Tracked Mod Reference Specifications (Selective Whitelist)
+mods/*
+!mods/library.md
+
+# Whitelisted mod directories tracked in Git
+!mods/dynamic-difficulty-scaling/
+!mods/dynamic-difficulty-scaling/**
+!mods/dynamic-extra-encounters/
+!mods/dynamic-extra-encounters/**
+!mods/enemy-legends-patch/
+!mods/enemy-legends-patch/**
+!mods/enemy-tacticians/
+!mods/enemy-tacticians/**
+!mods/extra-encounters-and-minibosses/
+!mods/extra-encounters-and-minibosses/**
+!mods/more-enemies-in-basic-fights/
+!mods/more-enemies-in-basic-fights/**
+!mods/nightmare-difficulty/
+!mods/nightmare-difficulty/**
+!mods/requiem-for-the-absolute/
+!mods/requiem-for-the-absolute/**
+!mods/unlocklevelcurve/
+!mods/unlocklevelcurve/**

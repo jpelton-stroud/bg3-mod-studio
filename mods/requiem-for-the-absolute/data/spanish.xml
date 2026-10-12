@@ -1,0 +1,599 @@
+﻿<?xml version="1.0"?>
+<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <content contentuid="h0012eb96ge891g41begb0d1g6e7573edf0e4" version="1">Marca de la Absoluta</content>
+  <content contentuid="h76cd8245ga03fg4d01g9071g820b584f41e9" version="1">Lo sostiene la marca a fuego del Portaestandarte. Mientras el portador viva, este esclavo lucha sin miedo ni dolor. Abate al portador para romper la Marca.</content>
+  <content contentuid="hdc8fb289g7a41g4712gb4fcg1c0bb0013b61" version="1">Marca de la Absoluta</content>
+  <content contentuid="he7fded57g0bfbg4ceega9d8g765a590e191a" version="1">La marca del Portaestandarte alcanza a todo esclavo a 9 m y mantiene a los títeres sujetos a su voluntad.</content>
+  <content contentuid="h75f09567g0681g4b76g93eeg8c4828f3b34a" version="1">Sostenido por la Marca</content>
+  <content contentuid="hf781c5aeg1084g456ag9748g320950082113" version="1">Marca rota</content>
+  <content contentuid="h18800669g718bg4bc2gb07eg893f3a846d46" version="1">Muerto el portador, la Absoluta pierde su presa. El títere liberado se tambalea y golpea a ciegas hasta sacudirse la locura.</content>
+  <content contentuid="h06285744g1210g4233g844dg8d7655b995d2" version="1">Ceremorfosis</content>
+  <content contentuid="h1b9e8228g1b93g49e8gbb27g8ec9d54c8c41" version="1">Un renacuajo se agita dentro. Acaba con él rápido: si madura, se convierte en algo mucho peor.</content>
+  <content contentuid="h7c1e9a40g2b3dg4f5ag8e6cg1d0f3a2b5c77" version="1">Alma Verdadera de la Absoluta</content>
+  <content contentuid="he1fa0029gaa11g4bb1g8cc1g0d1e2f3a4c29" version="1">[DBG] A1-H06 · Vanguardia de los Heraldos Infectados</content>
+  <content contentuid="h073670f2g62ecg4529g8850g81e52add9625" version="1">Marca rota</content>
+  <content contentuid="h3f0e9d0fg6490g4bcbgaf96g496a4327270c" version="1">Muerto el portador, la Absoluta pierde su presa. El títere liberado se tambalea y golpea a ciegas hasta sacudirse la locura.</content>
+  <content contentuid="h970febe4gdeb1g4002gac27gc487b6516886" version="1">Marca rota</content>
+  <content contentuid="h963ba2d7g5871g4fb8gadbeg597da21d36c4" version="1">Muerto el portador, la Absoluta pierde su presa. El títere liberado se tambalea y golpea a ciegas hasta sacudirse la locura.</content>
+  <content contentuid="hab23695egaa91g474agbc34g3dec63641e8f" version="1">Marca rota</content>
+  <content contentuid="h648b0820g9e4dg4b8dg87f5gec927164f225" version="1">Muerto el portador, la Absoluta pierde su presa. El títere liberado se tambalea y golpea a ciegas hasta sacudirse la locura.</content>
+  <content contentuid="hf510e1e6gbf6fg4ae8g8117g4f96121e667e" version="1">Galvanizar</content>
+  <content contentuid="h3f2c2500g31b9g4279gb97cgccb4dac4f2f5" version="1">El rugido del Portaestandarte lleva al frenesí a un esclavo cercano y le concede una acción adicional este turno.</content>
+  <content contentuid="he1f00001gaa11g4bb1g8cc1g0d1e2f3a4b01" version="1">[DBG] A1-L01 · Batidores bajo el Estandarte (Heraldo)</content>
+  <content contentuid="he1f00002gaa12g4bb2g8cc2g0d1e2f3a4b02" version="1">[DBG] A1-L02 · Patrulla de camino (True Soul)</content>
+  <content contentuid="he1f00003gaa13g4bb3g8cc3g0d1e2f3a4b03" version="1">[DBG] A1-L03 · Emboscada en el bosque (Goblin Boss)</content>
+  <content contentuid="he2f10001gbb21g4cc1g8dd1g1e2f3a4b5c10" version="1">Frenesí</content>
+  <content contentuid="he2f10002gbb22g4cc2g8dd2g1e2f3a4b5c20" version="1">Herido, el cazador se ha entregado al frenesí. Gana una acción y una acción adicional de más cada turno, más movimiento, +2 a Fuerza y +2 a Clase de Armadura durante el resto del combate.</content>
+  <content contentuid="he1f00004gaa14g4bb4g8cc4g0d1e2f3a4b04" version="1">[DBG] A1-L04 · Banda frenética (Cazador infectado)</content>
+  <content contentuid="he1f00005gaa15g4bb5g8cc5g0d1e2f3a4b05" version="1">[DBG] A1-L05 · Guardia de puesto avanzado (Heraldo)</content>
+  <content contentuid="he1f00006gaa16g4bb6g8cc6g0d1e2f3a4b06" version="1">[DBG] A1-L06 · Patrulla de caza de bestias (Cazador)</content>
+  <content contentuid="he1f00007gaa17g4bb7g8cc7g0d1e2f3a4b07" version="1">[DBG] A1-L07 · Acecho en la senda (Bugbear)</content>
+  <content contentuid="he1f00008gaa18g4bb8g8cc8g0d1e2f3a4b08" version="1">[DBG] A1-L08 · Columna de saqueo (Heraldo+Ogro)</content>
+  <content contentuid="he1f0e101gaa11g4b11g8c11g0d1e2f3a4c11" version="1">[DBG] ESC-A1-L01 · Milicia tiefling vs atacantes sorteados (Escaramuza)</content>
+  <content contentuid="he1f0e102gaa12g4b12g8c12g0d1e2f3a4c12" version="1">[DBG] ESC-A1-L02 · Arpistas vs atacantes sorteados (Escaramuza)</content>
+  <content contentuid="he1f0e103gaa13g4b13g8c13g0d1e2f3a4c13" version="1">[DBG] ESC-A1-L03 · Leñadores vs atacantes sorteados (Escaramuza)</content>
+  <content contentuid="he1f0e104gaa14g4b14g8c14g0d1e2f3a4c14" version="1">[DBG] ESC-A1-L04 · Druidas del bosque vs atacantes sorteados (Escaramuza)</content>
+  <content contentuid="he1f0e105gaa15g4b15g8c15g0d1e2f3a4c15" version="1">[DBG] ESC-A1-L05 · Milicia local vs atacantes sorteados (Escaramuza)</content>
+  <content contentuid="he1f0e106gaa16g4b16g8c16g0d1e2f3a4c16" version="1">[DBG] ESC-A1-L06 · Cazadores zhentarim vs atacantes sorteados (Escaramuza)</content>
+  <content contentuid="he1f0e107gaa17g4b17g8c17g0d1e2f3a4c17" version="1">[DBG] ESC-A1-L07 · Comerciante y escolta vs atacantes sorteados (Escaramuza)</content>
+  <content contentuid="he1f0e108gaa18g4b18g8c18g0d1e2f3a4c18" version="1">[DBG] ESC-A1-L08 · Aldeanos vs atacantes sorteados (Escaramuza)</content>
+  <content contentuid="h42e01dd3gd13dg4a11g9b26g29d59e763513" version="1">Hasta ahí. Hoy ya hemos enterrado a bastantes amigos como para sumar a un desconocido que se queda rondando.</content>
+  <content contentuid="hea59f9bagce4eg454egadc6g0d751458b5fa" version="1">Solo vine a ayudar.</content>
+  <content contentuid="hb69249fcg6703g4227g91c4gcb1e7af03399" version="1">Os superan en número. Deberíais huir.</content>
+  <content contentuid="hc236864cg43feg434fg90a0gbb2834c5397f" version="1">Ayuda. Todo el mundo trae ayuda, hasta que saca el cuchillo. Pero estuviste con nosotros, o casi. Así que gracias. Ahora déjame llorar a mis muertos en paz.</content>
+  <content contentuid="h76cc74f8g376bg421eg8dc9gf882d07a80e1" version="1">Huir. Eso fue lo que se comió a media Elturel. Corrimos hasta aquí. Esta tierra vale tanto como cualquier otra para plantar los pies, y para plantarlos a ellos. Sigue tu camino, aventurero. Nosotros aguantamos.</content>
+  <content contentuid="h1ee0691fg0a8eg481dg92ffg25b03ee29f1b" version="1">¡Benditos sean los dioses, vivos! ¡Estamos vivos! Y tú, amigo, entero, armado y a todas luces persona de gusto y de posibles.</content>
+  <content contentuid="hf0408838g5705g4074ga6c0g1a837789bd89" version="1">Terrible cosa, una emboscada. Maravillosa cosa, un cliente.</content>
+  <content contentuid="he4a1c623g842fg4f6dg80e2g38742931fefd" version="1">Ya que los dos seguimos respirando, ¿te interesaría un poco de... comercio? Todo está en venta menos las ruedas.</content>
+  <content contentuid="h70ce30fcgd994g4383gb783g946d6a54ed3e" version="1">Tercera pelea en esta década. Empecé a marcar la cuenta en el asta de la lanza. Me estoy quedando sin asta.</content>
+  <content contentuid="h69e3af60g3fa8g4538ga43dgc9c88c67597a" version="1">Nos viste sangrar antes de decidir que valíamos la pena. Tranquilo, ahora todo el mundo calcula las probabilidades. Pero no esperes que te dé la espalda.</content>
+  <content contentuid="h85217d59ga322g4fb9g96bdg37f413014c72" version="1">Todos ellos llevan esa marca como si fuera una bendición. Hoy le metí una flecha a una y me sonrió mientras se desangraba. Sonrió.</content>
+  <content contentuid="hd3f08253g45e1g4d0fgb408g85342e8ec77e" version="1">Malditos infiernos. Las manos no me empezaron a temblar hasta que acabó. Eso es normal, ¿verdad? ...Eso es normal.</content>
+  <content contentuid="h23c783abg62f5g4f39g8949gc6e1dd7ed115" version="1">Antes de todo esto emplumaba flechas para cazar gansos. Gansos. Y mírame ahora.</content>
+  <content contentuid="h0c0e85afge964g4d69g8b77geeda5637c84c" version="1">Lo sentí cuando cayeron: algo los soltó, como una mano que se abre. Los dioses no sueltan tan fácil.</content>
+  <content contentuid="hbd38d2f4g18b1g4e00gb39eg8e450a2d5e39" version="1">Llevo un siglo viendo malos augurios ir y venir. Este es el primero que marcha en formación.</content>
+  <content contentuid="hb679673cgc25cg4d1ag9849g755b82b50586" version="1">Cincuenta años en este oficio y lo peor nunca cambia: enterrar. La pelea se acaba en minutos. Enterrar lleva todo el día.</content>
+  <content contentuid="hd1139de4g7279g49d5g9938ge03ecf752de1" version="1">Tres virotes, tres de los suyos. Yo a eso lo llamo aritmética, no heroísmo.</content>
+  <content contentuid="h6dd027c8g0a43g4babg9b47ge970beb8f717" version="1">No te acerques tanto, amigo. El último desconocido que nos vio pelear con esa calma resultó que estaba contando nuestras flechas.</content>
+  <content contentuid="hfcf79b8bg837fg448bgba29g4dec01efd4d6" version="1">Sus mentes estaban... calladas. Todas, con el mismo silencio. Como diez instrumentos sosteniendo una sola nota. Le prendí fuego y, aun ardiendo, seguía zumbando.</content>
+  <content contentuid="h7a790fcage3feg45b9g80c9g809ce72df177" version="1">Los cuervos no los tocan. Dan vueltas todo el día y se posan en todo lo demás. Hasta la carroña sabe que esa carne tiene algo malo.</content>
+  <content contentuid="h79f39d8fgf8fag4f9ag9903g3a7b4a780779" version="1">El trabajo era «recorrer el camino, vigilar las cajas». Nadie le puso precio a una guerra santa. Va a haber renegociación.</content>
+  <content contentuid="hcfe919a3g5383g4732g80dag050f87f5d7ea" version="1">Me han disparado rivales, guardias y un ganso muy comprometido. Estos son los primeros que no se inmutaron. Antinatural.</content>
+  <content contentuid="ha879751bgb9bbg4099ga256g2d919c694ad9" version="1">Ahórrate las preguntas. Las respuestas cuestan monedas, y al género de hoy le ha caído sangre encima.</content>
+  <content contentuid="h56324718g7669g4b4dg8322g28398570d4ac" version="1">No gritan bien, ¿sabes? Golpeas a un hombre y grita por sí mismo. Estos gritan como si lo hicieran en nombre de otro.</content>
+  <content contentuid="h811eb27ag1914g45c8g8adcg5fbe2d75ae6b" version="1">Le lancé un contrahechizo a uno en plena plegaria. Lo que le respondió no era un dios. Los dioses tienen mejor dicción.</content>
+  <content contentuid="hb8334e90g23e7g4e6cgbc67g90258199d98f" version="1">Es la primera vez que le doy con esto a algo que devuelve el golpe. Los árboles tampoco sangraban. Esta noche voy a tener opiniones sobre eso.</content>
+  <content contentuid="h934d78a4g15dcg4875gbb38ge84057c91726" version="1">Es el hacha de mi abuelo. Cortó tejados, cunas y una mesa de boda. Supongo que ahora también corta historia.</content>
+  <content contentuid="h8a5feae8gbad0g4eb3ga6d6ge8d18643c98e" version="1">El foso de aserrar está destrozado, la mula se ha largado y las manos no me dejan de temblar. ¡Pero la carreta está bien! La carreta está bien.</content>
+  <content contentuid="hf72c3512gb206g4f62gbd4cgd45233b8b0bb" version="1">Conozco este bosque mejor que mi propia casa. Fuera lo que fuera aquello hacia lo que marchaban, no está en ningún mapa que yo haya pisado.</content>
+  <content contentuid="h4ad402e5g14f8g45d3g9e1bge5dfcf38efd2" version="1">Me miraron los cuernos y me llamaron «hermano». ¡Hermano! Yo corto leña, lunáticos de ojos muertos.</content>
+  <content contentuid="h2b22a73egc7d4g45bfgb967g6d8439c6adb5" version="1">Ya huimos de una guerra. Aquí planté un huerto. Zanahorias. Este iba a ser el año de las zanahorias.</content>
+  <content contentuid="h50b8d2e0gb816g4bf2ga690gae4aeec543dd" version="1">Todos dicen «milicia» como si fuera algo que somos. Es una campana y un cobertizo con lanzas dentro. Esa es toda la milicia.</content>
+  <content contentuid="h9d1375d5gc769g4301g8506g9f800afb3537" version="1">Me escondí en el pozo. No me avergüenza. Desde ahí abajo la batalla entera eran botas y gritos, y luego silencio. El silencio fue peor.</content>
+  <content contentuid="h612dd3adg83ddg4c12g9d1fg5149a664c95f" version="1">Mi padre defendió esta puerta el año de la peste. Yo la defendí hoy. Puertas, por lo visto. Esa es la guerra entera de mi familia.</content>
+  <content contentuid="h10a192c2gda57g48a9ga35fg06f7ba0c7729" version="1">No gritaron «al ataque» ni «a la carga» ni nada de nada. Simplemente... empezaron. Todos a la vez. Como una sola cosa vestida con treinta cuerpos.</content>
+  <content contentuid="hb0c1b48ag0785g4a2aga601g9662da28d0c3" version="1">Nadie se acuerda del guardia pequeño hasta que a alguien le cortan el tendón. Entonces todo es «ah, AHÍ estabas».</content>
+  <content contentuid="h0e9f2a8bgc7f4g43dfg9303g148d97b81a79" version="1">El truco está en mirarles los pies, no los ojos. Estos lo tenían al revés: ojos muertos, pies firmes. No me divierte aprender trucos nuevos en plena pelea.</content>
+  <content contentuid="hff024d21g2056g481ag9024g59f27831f463" version="1">El cliente paga la escolta y el milagro se lo lleva gratis. Hoy el milagro hizo el trabajo pesado.</content>
+  <content contentuid="h38cb950fg59bbg491fg9db9g3911ea333b9b" version="1">Doscientos años de comercio y no me he muerto ni una sola vez. Hoy el récord aguantó, por poco. Ven, mira: sobrevivió todo menos mis nervios.</content>
+  <content contentuid="hdea6ec21g124ag4b87gabaegfbcac2bddfbe" version="1">¿Sabes qué sobrevive a una emboscada? El inventario, amigo. El inventario y el optimismo. Y da la casualidad de que los dos están en venta.</content>
+  <content contentuid="h38f6ca92g3ba9g4ad6g9280ge43cdb75877a" version="1">Aquí no has visto nada que merezca repetirse, forastero. Un camino, una pelea, unos cadáveres. Esa es toda la historia.</content>
+  <content contentuid="h817d4260g451ag40e8gad05g8da33edb312b" version="1">Sois Arpistas, ¿verdad?</content>
+  <content contentuid="h0bcf5f7ag1603g40a7gaa05g0d5e0f11bdd1" version="1">¿Quiénes eran?</content>
+  <content contentuid="h40a3f4c4g5864g49abgaa10g3eb759eb6754" version="1">He dicho que no has visto nada. ...Pero tienes buen oído. Cada uno de estos muertos aceptó esa marca por voluntad propia. Eso es lo que me quita el sueño, no que mueran. Que se ofrezcan.</content>
+  <content contentuid="h437dbc32g39e0g42feg8fc4g6fddb8e00d71" version="1">Fanáticos con la marca de alguien encima. En algún sitio hay un libro con todos sus nombres tachados, y la mano que los tachó no ha terminado de escribir.</content>
+  <content contentuid="hed7bc21eg841eg4534g9252g496c471a17a4" version="1">Bueno. O eres testigo o eres cliente, y yo a los testigos no les pago.</content>
+  <content contentuid="h11ede7cfgd58eg42f4gba27gbcae101183ab" version="1">Sois Zhentarim.</content>
+  <content contentuid="hff4e95fbg9754g4f2bg9894gd4621bfc32b9" version="1">¿Por qué iban unos cultistas a atacar a mercenarios?</content>
+  <content contentuid="h7c107186g7df0g49dfgaf2bgf3c6c5b51135" version="1">Y lo dices como si eso fuera un problema. Hoy significa la única compañía armada de este camino que paga sus deudas. Esos fanáticos me han costado dos contratos y un buen sombrero.</content>
+  <content contentuid="hc80089f1gd67cg400cg8169g4a273ca1738a" version="1">Porque su Absoluta no compra: toma. Malo para el negocio, peor para el tomado. Devolvemos el fuego por principio. El principio se llama «margen».</content>
+  <content contentuid="h84bf0306g6f5bg41f0g8121gb447396536f3" version="1">¡JA! ¡Vivo! Doce años talando robles y resulta que el hachazo funciona igual con... lo que fueran esas cosas.</content>
+  <content contentuid="h5d4c263bg4c33g4b60g9a85gd1c2aadc97dc" version="1">Os habéis defendido bien.</content>
+  <content contentuid="hfeb34698g50d4g4a64g94d4gfa9864a2405b" version="1">¿Qué ha pasado aquí?</content>
+  <content contentuid="h21fb1779ga463g48bfgaff7g8badbf3e0383" version="1">Nos defendimos FATAL, amigo, ese es el milagro. Berk, el de ahí, tiró el hacha. La TIRÓ. ¡Y funcionó! Que nadie le diga que no debería haber funcionado.</content>
+  <content contentuid="h8619f510g05e7g42bfga3cagb3ae008dbcb0" version="1">Estábamos cortando madera. Salieron de la linde con esa mirada, como si el bosque les debiera algo. Pues bien. El bosque tenía hachas dentro.</content>
+  <content contentuid="hdef3ccecg11e9g4982g8057gc3b7e97f60d1" version="1">¿Se acabó? Se... acabó. Ya no lo distingo. Mis oídos siguen en mitad de la pelea.</content>
+  <content contentuid="hd7ef3cabg62dcg43e3g88dcg854f623512a6" version="1">¿Estás herido?</content>
+  <content contentuid="hb3fb927cg3a11g484ag8319g553921040039" version="1">Has luchado bien.</content>
+  <content contentuid="h0b9fa10agd089g4eb4ga038gcd4ffb07eb55" version="1">No. No, eso es lo raro: ni un rasguño. Mi vecino se comió una lanza que iba para mí y ni siquiera recuerdo su cara al hacerlo. Solo sus manos.</content>
+  <content contentuid="he6d50ccbgba3dg4ec4g9608gd898f59cd9f6" version="1">Cerré los ojos en el segundo golpe. Le diera a lo que le diera, le di con los ojos cerrados. No se lo digas a los demás.</content>
+  <content contentuid="h03f6f24ag984fg4bf6ga6a6g501c4929f18f" version="1">La carga está intacta. El cliente respira. Todo lo demás del día que se vaya al infierno.</content>
+  <content contentuid="h577e790cgedd7g4c66g9637g3b8d5e203b73" version="1">¿Sois guardias a sueldo?</content>
+  <content contentuid="h4d6807d5g58f7g4e9fg9045ga888874d5300" version="1">¿Pelea dura?</content>
+  <content contentuid="hac3eb471g5efdg4882gb59dg655e226033be" version="1">A sueldo, sí. Lo de «guardia» se ha vuelto ambicioso hoy. El contrato cubre bandidos, lobos y «actos del clima». Los fanáticos con marca entran en la próxima redacción.</content>
+  <content contentuid="ha324451bg856cg4cd7ga93cg89f9338e77ad" version="1">Llevo nueve años recorriendo este camino. Nunca antes me había devuelto el golpe. Se supone que los caminos son la parte aburrida.</content>
+  <content contentuid="he1fa0001gaa11g4bb1g8cc1g0d1e2f3a4c01" version="1">[DBG] A1-M01 · Pelotón de choque goblinoide (Heraldo+Ogro+Bugbear [T:MindFlayer])</content>
+  <content contentuid="he1fa0002gaa11g4bb1g8cc1g0d1e2f3a4c02" version="1">[DBG] A1-M02 · Escuadrón de reconocimiento (True Soul)</content>
+  <content contentuid="he1fa0003gaa11g4bb1g8cc1g0d1e2f3a4c03" version="1">[DBG] A1-M03 · Unidad de gnolls reclutados (Cazador) [T:Frenesi]</content>
+  <content contentuid="he1fa0004gaa11g4bb1g8cc1g0d1e2f3a4c04" version="1">[DBG] A1-M04 · Patrulla mercenaria (True Soul+Duergar+Boss)</content>
+  <content contentuid="he1fa0005gaa11g4bb1g8cc1g0d1e2f3a4c05" version="1">[DBG] A1-M05 · Guardia de santuario (Portador)</content>
+  <content contentuid="he1fa0006gaa11g4bb1g8cc1g0d1e2f3a4c06" version="1">[DBG] A1-M06 · Cazadores de supervivientes (True Soul) EMBOSCADA</content>
+  <content contentuid="he1fa0007gaa11g4bb1g8cc1g0d1e2f3a4c07" version="1">[DBG] A1-M07 · Mercenarios del subsuelo (True Soul+Duergar)</content>
+  <content contentuid="he1fa0008gaa11g4bb1g8cc1g0d1e2f3a4c08" version="1">[DBG] A1-M08 · Jauría de las profundidades (Cazador+HookHorror)</content>
+  <content contentuid="he1fa0009gaa11g4bb1g8cc1g0d1e2f3a4c09" version="1">[DBG] A1-M09 · Vanguardia subterránea (True Soul+Minotaur)</content>
+  <content contentuid="he1fa0010gaa11g4bb1g8cc1g0d1e2f3a4c10" version="1">[DBG] A1-H01 · Fuerza de asalto principal (Portador+Heraldo+Ogro)</content>
+  <content contentuid="he1fa0011gaa11g4bb1g8cc1g0d1e2f3a4c11" version="1">[DBG] A1-H02 · Horda de gnolls (Cazador)</content>
+  <content contentuid="he1fa0012gaa11g4bb1g8cc1g0d1e2f3a4c12" version="1">[DBG] A1-H03 · Destacamento de élite (True Soul+2 Boss)</content>
+  <content contentuid="he1fa0013gaa11g4bb1g8cc1g0d1e2f3a4c13" version="1">[DBG] A1-H04 · Cacería del depredador (True Soul+Bulette) EMBOSCADA</content>
+  <content contentuid="he1fa0014gaa11g4bb1g8cc1g0d1e2f3a4c14" version="1">[DBG] A1-H05 · Nido de emboscada (True Soul+Arañas+Drider) EMBOSCADA</content>
+  <content contentuid="he1fa0015gaa11g4bb1g8cc1g0d1e2f3a4c15" version="1">[DBG] ESC-A1-M01 · Def: 3x Milicia tiefling (atacante sorteado banda M)</content>
+  <content contentuid="he1fa0016gaa11g4bb1g8cc1g0d1e2f3a4c16" version="1">[DBG] ESC-A1-M02 · Def: 2x Druida del bosque (atacante sorteado banda M)</content>
+  <content contentuid="he1fa0017gaa11g4bb1g8cc1g0d1e2f3a4c17" version="1">[DBG] ESC-A1-M03 · Def: 2x Arpista (atacante sorteado banda M)</content>
+  <content contentuid="he1fa0018gaa11g4bb1g8cc1g0d1e2f3a4c18" version="1">[DBG] ESC-A1-M04 · Def: 3x Zhentarim (atacante sorteado banda M)</content>
+  <content contentuid="he1fa0019gaa11g4bb1g8cc1g0d1e2f3a4c19" version="1">[DBG] ESC-A1-M05 · Def: 3x Peregrino (sustituto de aldeano) (atacante sorteado banda M)</content>
+  <content contentuid="he1fa0020gaa11g4bb1g8cc1g0d1e2f3a4c20" version="1">[DBG] ESC-A1-M06 · Def: 3x Superviviente + 1x Arpista (atacante sorteado banda M)</content>
+  <content contentuid="he1fa0021gaa11g4bb1g8cc1g0d1e2f3a4c21" version="1">[DBG] ESC-A1-M07 · Def: 2x Aldeano + Mercader (TRADE) (atacante sorteado banda M)</content>
+  <content contentuid="he1fa0022gaa11g4bb1g8cc1g0d1e2f3a4c22" version="1">[DBG] ESC-A1-M08 · Def: 2x Zhent + 1x Guía (atacante sorteado banda M)</content>
+  <content contentuid="he1fa0023gaa11g4bb1g8cc1g0d1e2f3a4c23" version="1">[DBG] ESC-A1-M09 · Def: 2x Gnomo (sustituto de aldeano) (atacante sorteado banda M)</content>
+  <content contentuid="he1fa0024gaa11g4bb1g8cc1g0d1e2f3a4c24" version="1">[DBG] ESC-A1-H01 · Def: 4x Arpista (sustituto de Fist+Paladín) (atacante sorteado banda H)</content>
+  <content contentuid="he1fa0025gaa11g4bb1g8cc1g0d1e2f3a4c25" version="1">[DBG] ESC-A1-H02 · Def: 2x Paladín (sustituto) + 1x Zhent (atacante sorteado banda H)</content>
+  <content contentuid="he1fa0026gaa11g4bb1g8cc1g0d1e2f3a4c26" version="1">[DBG] ESC-A1-H03 · Def: 3x Arpista de élite + 1x Explorador (atacante sorteado banda H)</content>
+  <content contentuid="he1fa0027gaa11g4bb1g8cc1g0d1e2f3a4c27" version="1">[DBG] ESC-A1-H04 · Def: 3x Zhentarim (atacante sorteado banda H)</content>
+  <content contentuid="he1fa0028gaa11g4bb1g8cc1g0d1e2f3a4c28" version="1">[DBG] ESC-A1-H05 · Def: 2x Drow rebelde (sustituto) + 1x Explorador (atacante sorteado banda H)</content>
+  <content contentuid="he1fb0001gaa11g4bb1g8cc1g0d1e2f3a4d01" version="1">Atención de la Absoluta I</content>
+  <content contentuid="he1fc0001gaa11g4bb1g8cc1g0d1e2f3a4e01" version="1">La Absoluta apenas repara en tu existencia. Alguna patrulla suelta peina la región.</content>
+  <content contentuid="he1fb0002gaa11g4bb1g8cc1g0d1e2f3a4d02" version="1">Atención de la Absoluta II</content>
+  <content contentuid="he1fc0002gaa11g4bb1g8cc1g0d1e2f3a4e02" version="1">Tus golpes se han notado. Las bandas de guerra de la Absoluta marchan ya con fieles devotos.</content>
+  <content contentuid="he1fb0003gaa11g4bb1g8cc1g0d1e2f3a4d03" version="1">Atención de la Absoluta III</content>
+  <content contentuid="he1fc0003gaa11g4bb1g8cc1g0d1e2f3a4e03" version="1">La Absoluta ha ordenado tu caza. Los sucesos son más frecuentes y hay guerreros reforzando cada banda.</content>
+  <content contentuid="he1fb0004gaa11g4bb1g8cc1g0d1e2f3a4d04" version="1">Atención de la Absoluta IV</content>
+  <content contentuid="he1fc0004gaa11g4bb1g8cc1g0d1e2f3a4e04" version="1">Eres objetivo prioritario. Bugbears de choque escoltan a las bandas de guerra.</content>
+  <content contentuid="he1fb0005gaa11g4bb1g8cc1g0d1e2f3a4d05" version="1">Atención de la Absoluta V</content>
+  <content contentuid="he1fc0005gaa11g4bb1g8cc1g0d1e2f3a4e05" version="1">Toda la ira de la Absoluta. Devoradores de intelecto acechan junto a cada banda enviada tras de ti.</content>
+  <content contentuid="hdf43c3a8g8336g41e5g8bd6ge38b84dd1042" version="1">Paz, forastero, o tanta como permite este camino. Vamos a un santuario a tres días de aquí. El camino pone a prueba a los fieles; hoy nos ha puesto a prueba más que de costumbre.</content>
+  <content contentuid="hd77527c7g41d3g474cgabefgb1eb5bb4feb3" version="1">¿Sois peregrinos?</content>
+  <content contentuid="h902bdd93g4d93g4ff6ga755gd6f6a8435519" version="1">¿Qué eran?</content>
+  <content contentuid="h3d68eeaag8ed8g402dg9543g28a06ea3ab77" version="1">Armados, ahora. La fe no me puso el bastón en la mano, eso lo hizo el camino. Pero fue la fe la que lo mantuvo firme cuando llegaron. No me quejaré del trato.</content>
+  <content contentuid="h824e3445gc759g4e45gaf26g4e720b82f659" version="1">Devoción, torcida. Llevaban la marca de su dios como una herida de la que estar orgullosos. Llevo toda la vida arrodillándome ante un dios y jamás he querido sangrar por el placer de hacerlo. Esa es la diferencia, y no hay más.</content>
+  <content contentuid="h6749fd62g4faeg4f7dg91b2g36493d47e850" version="1">Recé todo el rato, no por salvación, sino por firmeza. La firmeza llegó. Que discutan los sacerdotes qué significa eso. Yo solo agradezco que las manos me dejaran de temblar antes de la segunda oleada.</content>
+  <content contentuid="h367d13bbg2a4fg48a2gb625g4fb61a586d87" version="1">Mi dios es paciente y está tallado en piedra de montaña. Sea lo que sea el suyo, tiene una prisa terrible: marchar, marcar a fuego, devorar. Los años te enseñan a desconfiar de todo lo sagrado que va con prisa.</content>
+  <content contentuid="hf72eff2bg3773g473cg8a93g70c2c84bf2b1" version="1">El santuario sigue a tres días. Tres días más ligeros ahora, sin los dos que dejamos en el barro. Llevaremos sus nombres el resto del camino. Una peregrinación admite unas cuantas oraciones más.</content>
+  <content contentuid="hd2620ef4gf45eg4a74gadafgfc588ad29694" version="1">La superficie es ruidosa. Aquello lo era más. Prefiero un derrumbe cualquier día: un derrumbe al menos no reza mientras te mata.</content>
+  <content contentuid="h062fb3d3g73b8g453bg9652g7917072f3b99" version="1">Estás muy lejos de la Infraoscuridad.</content>
+  <content contentuid="h50c05376g9a22g4c70ga427g74ed116ca8f1" version="1">Peleas bien, para ser gnomo.</content>
+  <content contentuid="h22b27072g3cd2g444ag9bdbgd3a3feaf7d34" version="1">Los Ironhand no se dispersan sin motivo. El motivo está aquí arriba ahora, con una marca a fuego encima y llamándolo fe. Subimos a respirar. Resulta que el aire de aquí arriba también muerde.</content>
+  <content contentuid="hc7534855g1b99g4a36g859fg345247e7b542" version="1">Blanco pequeño, cuchillo afilado, expectativas bajas. Tres ventajas que vosotros, los altos, nunca aprendéis. Todo el mundo se olvida de las rodillas, y todo el mundo lo lamenta.</content>
+  <content contentuid="ha4537d71g703fg40abgab91g150dd5a6f14b" version="1">Ahí abajo aprendes a disparar al brillo de unos ojos en la oscuridad. Los ojos de estos no brillaban bien: apagados, como un pez sobre hielo. Apunté un palmo bajo por costumbre y acerté igual. Pequeñas misericordias.</content>
+  <content contentuid="h87926cb4g6b1fg4d01ga94dg679e4a1ed014" version="1">Puño Llameante. Nosotros sostenemos la línea, incluso aquí fuera, incluso cuando la línea es solo barro y los dos que quedamos en pie sobre él.</content>
+  <content contentuid="hca233c02g307ag4239g946dg788d7ee681a8" version="1">Estás muy lejos de Puerta de Baldur.</content>
+  <content contentuid="h26858616gf9a5g49a9g83e0g77f9d090bbd5" version="1">¿Pelea dura?</content>
+  <content contentuid="h1701f72eg3e1bg4f05g92aeg090cda35de1a" version="1">El alcance de la ciudad llega más lejos que sus murallas: esa es toda la idea de lo que somos. Alguien tiene que plantarse en los caminos para que los caminos sigan siendo caminos. Hoy ese alguien fuimos nosotros. Mañana, si los dioses quieren, será una compañía más grande y un turno más corto.</content>
+  <content contentuid="ha1b3b43cge952g47b1gae41g219cac2edbc7" version="1">Toda pelea es dura cuando al otro lado no le da miedo morir. La disciplina le gana al fervor casi siempre; te cuesta cara, pero le gana. Hoy nos costó dos. La línea aguantó. Como aguanta siempre.</content>
+  <content contentuid="hc2ed0a39g5874g4110g9e8cgb984040982ee" version="1">¿Quieres saber por qué el Puño no huye? Un día como hoy no es por la ciudad, diga lo que diga el juramento. Es por el pobre desgraciado que sangra a tu izquierda y que muere en cuanto te des la vuelta. Aguantas por él. Todo lo demás es solo lo que pone en el informe.</content>
+  <content contentuid="h5c0cf90dga249g4c1bga1c8g2d347b8f3110" version="1">Entrenas con dianas de paja y bandidos borrachos. Nada te entrena para uno de esos que se come un virote en el pecho y sigue andando. Así que le metí un segundo. Luego un tercero. La puntería no es más que insistencia con mejor ojo.</content>
+  <content contentuid="hae5256e7g8c60g4c11gb657g80341b3b7912" version="1">En la ciudad esto sería una mala guardia nocturna y un informe matinal peor. Aquí fuera es la guerra entera, y no viene relevo hasta el amanecer. Si es que el amanecer sigue en la lista.</content>
+  <content contentuid="h51927685g0f31g46f1gbe99g43e8448cbab1" version="1">Descansa, forastero. El Ecuánime ve esa marca por lo que es, y ahora tú también. Aquí se ha hecho justicia, aunque hiciera falta una mano dura para hacerla.</content>
+  <content contentuid="h06168412gc0fcg4dcbgb47fg65a6cebd80b3" version="1">¿Sirves a Tyr?</content>
+  <content contentuid="h95cc4736gcad8g4208g9339g2031e846cb85" version="1">¿Ha merecido la pena?</content>
+  <content contentuid="h6b2bc237g6c9dg4c56g8432ge1abe4773248" version="1">Juré interponerme entre el cruel y el agraviado. No elijo el día en que llegan los crueles, ni cuántos son. El juramento no se encoge para caber en una pelea más fácil. Así que me planté, y volvería a plantarme.</content>
+  <content contentuid="hbde868c4g3814g4acfgae35g6d3e74e39534" version="1">Dos de los nuestros yacen aquí. Los peso contra el juramento, como Tyr pesa todas las cosas: por el acto, no por el sentimiento. El acto fue justo. Eso no aligera el peso. Solo lo hace soportable.</content>
+  <content contentuid="h585a95f8ga7eeg4546g9640g1e8a8304e5eb" version="1">Hay caballeros que golpean por gloria. Otros golpean por duelo. Yo intento no golpear por ninguna de las dos cosas, solo por el hueco entre el cruel y el agraviado, despejado un día más. La venganza es un fuego. El juramento es un muro. Los muros son más aburridos. Los muros aguantan.</content>
+  <content contentuid="hf82a452fg848eg4d00gb4e4g5dda492404da" version="1">Tyr es ciego, dicen, así que juzga por el peso del acto y nunca por la cara que lo lleva. Yo juzgué a estos, golpeé, y esta noche dormiré sin sueños. Ese es el don de la conciencia limpia: no hace preguntas en la oscuridad.</content>
+  <content contentuid="h137f6dbbg7bacg4d86gadafgd7e241dc13eb" version="1">A tres de ellos les di la extremaunción mientras intercambiaba golpes: misericordia para el alma, acero para el cuerpo. El Dios Mutilado me pide las dos cosas y no me deja elegir cuál es más fácil. No lo es ninguna.</content>
+  <content contentuid="hb790a52fgcdffg4682ga02bgabf12c0619c6" version="1">Me miras fijamente. Todo el mundo lo hace. Sí: una drow, en la superficie, con la hoja apuntando a los perros de la Absoluta y no a los tuyos. El mundo es más raro que tus prejuicios, forastero.</content>
+  <content contentuid="h632ddd7ag36a3g4d8bgb966g8a00e7c6bb19" version="1">Casi todos los de tu pueblo sirven a algo.</content>
+  <content contentuid="h80020547gc396g4947ga7a3g5dda23deeca6" version="1">¿Ahora eres una drow de superficie?</content>
+  <content contentuid="hc8ac48f9g5652g4625gae9cg955987c1f9ea" version="1">Casi todos los míos sirven a una araña que devora a los suyos. Corté ese hilo hace un siglo, y no subí todo este camino hacia el sol para ponerme yo misma una correa nueva. La crueldad de una diosa ya fue bastante educativa.</content>
+  <content contentuid="h68216645gab5cg4fceg9311gb90cce09849d" version="1">No pertenezco a nadie ni a ningún sitio: demasiado oscura para el sol, demasiado tocada por el sol para las profundidades. Es un país solitario, la libertad. Pero es el mío, y hoy sangré por él igual que estos pobres diablos sangraron por sus granjitas.</content>
+  <content contentuid="h2e4f4aa5gf6efg4204ga7fdg6dc1d66b9961" version="1">Pasé cien años enseñando a un arco a hacer exactamente lo que le digo: sin diosa, sin látigo, sin marca susurrándome al oído. Esa es la única obediencia que conservo, la de la flecha hacia mí. Resulta que basta para construir una vida.</content>
+  <content contentuid="h8b9c456cg867dg4ac9gad72ge7319b6d143e" version="1">Talan una arboleda y creen que es una victoria. La raíz recuerda. La semilla recuerda. Dale diez años a este camino y será espino y zarza, y cada marca que quemaron será una cicatriz de corteza tragada entera. Lo silvestre no pierde contra gente así. Solo espera, y jamás ha tenido prisa.</content>
+  <content contentuid="hadc4ae02gb24ag4afegb881g53d59048b9a8" version="1">Tres del círculo salieron conmigo esta mañana. El roble que plantamos el día de mis votos sigue en pie. De los tres no puedo decir lo mismo. La naturaleza lleva un libro de cuentas cruel: siempre cuadra, nunca cuando se lo pedirías.</content>
+  <content contentuid="he1e88110g0f3bg4e12gab71g9fc2504411aa" version="1">¿Eres druida?</content>
+  <content contentuid="h3fb1e395gccffg4e32gb1d3gae4517c55617" version="1">¿Quiénes eran?</content>
+  <content contentuid="h30e95b6cgd7e1g4db8g8d98g0bd461d28743" version="1">Del viejo círculo, sí. Nosotros no marchamos. No conquistamos. Cuidamos: entablillamos la rama partida, enterramos al ciervo caído. Pero no se puede cuidar algo que llega ardiendo mientras reza. Así que hoy hice la otra cosa que un druida sabe hacer. No estoy orgullosa de lo bien que me salió.</content>
+  <content contentuid="hd39cd7e8gb3eeg4720ga8b6g62aba5ae1a0d" version="1">Dolor con cara de dios. Vinieron marcados y cantando, huecos detrás de los ojos, y dejaron a los míos fríos entre la hojarasca. Los devolví a la tierra como haría con cualquier criatura muerta. A la tierra le da igual qué los mató. Solo a mí me importa.</content>
+  <content contentuid="h3556a218g4a01g451ag9416g8a36ebb88531" version="1">Silvanus nos pide una sola cosa: mantener el equilibrio. Depredador y presa, fuego y verde, el giro de las estaciones. Y entonces llega algo que no pertenece a ningún giro, que solo toma y marca a fuego y llama sagrado al hecho de tomar. Un depredador tiene hambre, forastero, y luego se sacia. Aquello no iba a saciarse nunca. Así que me le opuse, y al diablo el equilibrio. A veces mantener el equilibrio consiste en ser el peso que lo inclina de vuelta.</content>
+  <content contentuid="he2fa0002gaa11g4bb1g8cc1g0d1e2f3a4c02" version="1">[DBG] A2-M02 · Pelotón de línea (Portador + 4 Soldado)</content>
+  <content contentuid="he2fa0004gaa11g4bb1g8cc1g0d1e2f3a4c04" version="1">[DBG] A2-M04 · Patrulla de infectados (True Soul + Soldado + No muerto)</content>
+  <content contentuid="he2fa0001gaa11g4bb1g8cc1g0d1e2f3a4c01" version="1">[DBG] A2-M01 · Patrulla de la maldición (Sombra portadora)</content>
+  <content contentuid="he2fa0003gaa11g4bb1g8cc1g0d1e2f3a4c03" version="1">[DBG] A2-M03 · Escuadrón nigromántico [Guarnicao/T]</content>
+  <content contentuid="he2fa0005gaa11g4bb1g8cc1g0d1e2f3a4c05" version="1">[DBG] A2-M05 · Ronda alada (Winged Horror)</content>
+  <content contentuid="he2fa0006gaa11g4bb1g8cc1g0d1e2f3a4c06" version="1">[DBG] A2-M06 · Vanguardia mortuoria</content>
+  <content contentuid="he2fa0007gaa11g4bb1g8cc1g0d1e2f3a4c07" version="1">[DBG] A2-M07 · Destacamento mixto [T Mind Flayer]</content>
+  <content contentuid="he2fa0008gaa11g4bb1g8cc1g0d1e2f3a4c08" version="1">[DBG] A2-M08 · Guardia de Reithwin [Guarnicao]</content>
+  <content contentuid="he2fa0009gaa11g4bb1g8cc1g0d1e2f3a4c09" version="1">[DBG] A2-M09 · Jauría de ghouls</content>
+  <content contentuid="he2fa0010gaa11g4bb1g8cc1g0d1e2f3a4c10" version="1">[DBG] A2-M10 · Patrulla de los Olvidados</content>
+  <content contentuid="he2fa0011gaa11g4bb1g8cc1g0d1e2f3a4c11" version="1">[DBG] A2-H01 · Pelotón de asalto nocturno [T]</content>
+  <content contentuid="he2fa0012gaa11g4bb1g8cc1g0d1e2f3a4c12" version="1">[DBG] A2-H02 · Patrulla de la muerte</content>
+  <content contentuid="he2fa0013gaa11g4bb1g8cc1g0d1e2f3a4c13" version="1">[DBG] A2-H03 · Marcha de la Absoluta</content>
+  <content contentuid="he2fa0014gaa11g4bb1g8cc1g0d1e2f3a4c14" version="1">[DBG] A2-H04 · Procesión del Pastor [Guarnicao]</content>
+  <content contentuid="he2fa0015gaa11g4bb1g8cc1g0d1e2f3a4c15" version="1">[DBG] A2-H05 · Carnicería de Reithwin</content>
+  <content contentuid="he2fa0016gaa11g4bb1g8cc1g0d1e2f3a4c16" version="1">[DBG] A2-H06 · El cortejo fúnebre [Emb]</content>
+  <content contentuid="he2fa0021gaa11g4bb1g8cc1g0d1e2f3a4c21" version="1">[DBG] A2-X01 · El caballero caído [DEATH KNIGHT]</content>
+  <content contentuid="he2fa0022gaa11g4bb1g8cc1g0d1e2f3a4c22" version="1">[DBG] A2-X02 · La aberración de carne [FLESH GOLEM]</content>
+  <content contentuid="he2fa0023gaa11g4bb1g8cc1g0d1e2f3a4c23" version="1">[DBG] A2-X03 · La corte de los condenados</content>
+  <content contentuid="he4fa0001gaa11g4bb1g8cc1g0d1e2f3a4c01" version="1">[DBG] ESC-A2-M01 · Def: Prisioneros fugitivos (atacante sorteado banda M)</content>
+  <content contentuid="he4fa0002gaa11g4bb1g8cc1g0d1e2f3a4c02" version="1">[DBG] ESC-A2-M02 · Def: Arpistas + FF (atacante sorteado banda M)</content>
+  <content contentuid="he4fa0003gaa11g4bb1g8cc1g0d1e2f3a4c03" version="1">[DBG] ESC-A2-M03 · Def: Selunitas (atacante sorteado banda M)</content>
+  <content contentuid="he4fa0004gaa11g4bb1g8cc1g0d1e2f3a4c04" version="1">[DBG] ESC-A2-M04 · Def: Arpistas + FF (atacante sorteado banda M)</content>
+  <content contentuid="he4fa0005gaa11g4bb1g8cc1g0d1e2f3a4c05" version="1">[DBG] ESC-A2-M05 · Def: Centinelas arpistas (atacante sorteado banda M)</content>
+  <content contentuid="he4fa0006gaa11g4bb1g8cc1g0d1e2f3a4c06" version="1">[DBG] ESC-A2-M06 · Def: Gnomos Ironhand (atacante sorteado banda M)</content>
+  <content contentuid="he4fa0007gaa11g4bb1g8cc1g0d1e2f3a4c07" version="1">[DBG] ESC-A2-M07 · Def: Arpistas + Refugiado (atacante sorteado banda M)</content>
+  <content contentuid="he4fa0008gaa11g4bb1g8cc1g0d1e2f3a4c08" version="1">[DBG] ESC-A2-M08 · Def: Selunitas + Investigador (atacante sorteado banda M)</content>
+  <content contentuid="he4fa0009gaa11g4bb1g8cc1g0d1e2f3a4c09" version="1">[DBG] ESC-A2-M09 · Def: Kelemvoritas + Paladín (atacante sorteado banda M)</content>
+  <content contentuid="he4fa0010gaa11g4bb1g8cc1g0d1e2f3a4c10" version="1">[DBG] ESC-A2-M10 · Def: Refugiados + Arpista (atacante sorteado banda M)</content>
+  <content contentuid="he4fa0011gaa11g4bb1g8cc1g0d1e2f3a4c11" version="1">[DBG] ESC-A2-H01 · Def: Arpistas de élite (atacante sorteado banda H)</content>
+  <content contentuid="he4fa0012gaa11g4bb1g8cc1g0d1e2f3a4c12" version="1">[DBG] ESC-A2-H02 · Def: Refugiados + Arpista de élite (atacante sorteado banda H)</content>
+  <content contentuid="he4fa0013gaa11g4bb1g8cc1g0d1e2f3a4c13" version="1">[DBG] ESC-A2-H03 · Def: FF + Paladín de Tyr (atacante sorteado banda H)</content>
+  <content contentuid="he4fa0014gaa11g4bb1g8cc1g0d1e2f3a4c14" version="1">[DBG] ESC-A2-H04 · Def: Arpistas de élite (Comandante) (atacante sorteado banda H)</content>
+  <content contentuid="he4fa0015gaa11g4bb1g8cc1g0d1e2f3a4c15" version="1">[DBG] ESC-A2-H05 · Def: Selunitas (atacante sorteado banda H)</content>
+  <content contentuid="he4fa0016gaa11g4bb1g8cc1g0d1e2f3a4c16" version="1">[DBG] ESC-A2-H06 · Def: CARAVANA (Mercader TRADE + escolta) (atacante sorteado banda H)</content>
+  <content contentuid="he4fa0017gaa11g4bb1g8cc1g0d1e2f3a4c17" version="1">[DBG] ESC-A2-X01 · Def: Arpistas de élite + Paladines (atacante sorteado banda X)</content>
+  <content contentuid="he4fa0018gaa11g4bb1g8cc1g0d1e2f3a4c18" version="1">[DBG] ESC-A2-X02 · Def: Arpistas de élite + FF (atacante sorteado banda X)</content>
+  <content contentuid="he4fa0019gaa11g4bb1g8cc1g0d1e2f3a4c19" version="1">[DBG] ESC-A2-X03 · Def: Selunitas + Kelemvoritas (atacante sorteado banda X)</content>
+  <content contentuid="hfaec5b51g8226g411ag8fb1gb34f5190a231" version="1">Aquí fuera te conviene el farol cerca y la voz baja, forastero. La oscuridad no es solo oscuridad: tiene hambre, y es más vieja que aquello que la despertó. Casi nos unimos a los que caminan sin luz. Casi.</content>
+  <content contentuid="h19e7d847g0c33g4592g9a17g9caa702b78d3" version="1">¿Eres Arpista?</content>
+  <content contentuid="hfebe5ab0ge35eg4214ga453g647c35a6a273" version="1">¿Qué hay aquí fuera que merezca protección?</content>
+  <content contentuid="h3c5d1111g2634g44c9ga7acg5ecdb8bf5257" version="1">Los Arpistas sobre todo vigilan: caminos, rumores, la calma antes de lo malo. Pero esto no se vigila desde una distancia segura; la maldición no respeta al observador. Así que llevamos luz y acero a la vez y recorremos los caminos que nadie más pisa. Alguien tiene que saber qué baja por ellos.</content>
+  <content contentuid="h516683e1g1b0bg454cga773g0fd7ecd68ffc" version="1">Un camino. Un solo camino, a una sola posada, con una sola luz aún encendida al final. Todo lo que la maldición no se ha tragado se apiña ahora bajo esa luz. Corta el camino y cortas la última arteria. Eso es lo que pretenden. Eso es lo que no les dejamos.</content>
+  <content contentuid="hc979fad4g07fcg44a2g8220g9b91722bdd9e" version="1">He visto doscientos inviernos. Ninguno tan oscuro. La sombra de aquí no cae: alcanza. Mantengo el farol entre ella y mi piel y me recuerdo que hasta la noche más larga de las crónicas acabó rompiendo en mañana. Esta también lo hará. Puede que yo no la vea. La mañana no me necesita para llegar.</content>
+  <content contentuid="hbf046502ge950g4531gb64ag215ee3a74d92" version="1">Aquí fuera aprendes a disparar a la luz del farol: todo lo que queda fuera de su círculo es conjetura y plegaria. Suelto flechas a los sonidos, casi siempre: un paso húmedo, una rama que no suena bien. Espero que lo que los hacía me quisiera mal. Casi todos lo querían. La maldición no deja muchas cosas amables en la oscuridad.</content>
+  <content contentuid="hac99b0a9gb8a4g41c6g98a1ga97a69904142" version="1">La suerte se marchó de esta tierra hace mucho, así que no cuento con ella. Me he colado por huecos delante de los cuales murieron Arpistas más altos, agachada, callada y con luz, mientras la oscuridad se iba a buscar presa más fácil. No es astucia y no es valor. Es solo negarse a ser la que atrapa.</content>
+  <content contentuid="h1729f9ffg2119g4234g8a96g30b8d22731ba" version="1">Dicen que los muertos de aquí no descansan, que simplemente trabajan para quien maldijo la tierra. He visto siluetas con broches de Arpista arrastrarse por delante de mí sin ningún derecho a seguir andando. Recuperé los broches. Alguien tiene que recordar que fueron nuestros antes de ser de la oscuridad.</content>
+  <content contentuid="h2bbe4c7bgd965g47c7gbe59gf0f483b85e8c" version="1">Guardián es una palabra pesada. Sobre todo significa que me planto donde la línea es más fina y no me muevo. Una vez sostuve un puente yo sola lo que dura un himno. Hoy sostuve este camino menos tiempo y costó más. La línea aguantó. Pregúntame cuánto costó y cambiaré de tema.</content>
+  <content contentuid="h1d7b8a35g9e9bg463ag87cfgbe1df5fe4f6d" version="1">Aquí fuera la luz es un hechizo y también una religión: si la lanzas mal, mueres; si crees poco en ella, mueres. Llevo una llama en la palma y la duda detrás de los dientes. La oscuridad pone a prueba las dos. Hoy las puso a prueba a fondo y las dos aguantaron. Mañana habrá examen nuevo.</content>
+  <content contentuid="h29528f90ge786g4812gab58gbd8d7e21c596" version="1">Comandante, me llaman, lo que en el fondo significa que decido quién se planta donde la oscuridad es más espesa. Hoy decidí. Dos de aquellos por los que decidí no volverán andando. Ese es el trabajo. No se aligera con el rango. Se hace más pesado.</content>
+  <content contentuid="hc1d8cf0dge8b7g416dg932eg6b213c5d32b4" version="1">¿Diriges a los Arpistas de aquí?</content>
+  <content contentuid="h2615237cgecabg486fgb6b2gd54671af044d" version="1">¿Se puede salvar esta tierra?</content>
+  <content contentuid="h4079b78bg1c1eg4565g989ag18f454d44918" version="1">Esta célula, sí. Somos los ojos del camino entre la última luz y la peor oscuridad. En un extremo está Levaluna, agazapada como una araña; en el otro se apiña todo lo que amamos. Yo mando en el hilo de camino que hay en medio. Un mando muy corto y una guerra muy larga.</content>
+  <content contentuid="hf1cbebc4gdadfg45c2g98a1gba120140e1fa" version="1">¿Salvarla? No planifico tan lejos. Planifico hasta el siguiente farol, la siguiente milla, el siguiente amanecer que nos fabricamos nosotros a base de aceite y negativa. Salvar la tierra es una historia para quien vive para contarla. Primero mantenemos un camino abierto. Pienso ser de los que la cuenten. Sin promesas.</content>
+  <content contentuid="h1298463ag95e6g43dfga186g56a0886feb32" version="1">Desde ahí arriba lo ves todo: la oscuridad moviéndose como agua, las líneas de faroles de los vivos, los sitios donde la luz se ha apagado para siempre. Soy centinela. Mi único propósito es ver lo malo antes de que llegue. Hoy lo vi y aun así no pude impedir que llegara. Ver no es impedir.</content>
+  <content contentuid="hf883f724g09bfg4172gb423g7fc70c694916" version="1">¿Vigilas desde arriba?</content>
+  <content contentuid="h8417a5aag322fg4336gabd9gb74becce1cb5" version="1">¿Qué viste venir?</content>
+  <content contentuid="hc2e49a66g1eeeg4225g9b40ged3addd8b5a2" version="1">Las alturas, las crestas, las viejas torres. Aéreos nos llaman, aunque ninguno vuela: solo trepamos hasta donde se ve más lejos, con los faroles encendidos contra la oscuridad, y contamos lo que viene. Número, dirección, cuánta luz llevan. Luego soltamos flechas y mandamos aviso. El aviso importa más que las flechas. Las flechas solo matan lo que ya está aquí.</content>
+  <content contentuid="h429e84a2g3756g4c38gb0b5g21a81abebb5b" version="1">Más que ayer. Siempre más que ayer. El extremo oscuro del camino es paciente y va bien abastecido, y cada día las líneas de faroles de mi mapa se acortan. Esa parte no se la cuento a los de abajo. Ya cargan bastante. El mapa lo cargo yo sola.</content>
+  <content contentuid="h0034b8b0g0170g46f3gb911g130c5d6e4858" version="1">Solté mi última flecha contra una silueta a tres crestas de distancia y me iré a la tumba sin saber si acertó, y esa no es la peor de las cosas que nunca sabré aquí fuera. La atalaya es fría. Las noches son largas y solitarias, y la oscuridad se guarda lo suyo. Aun así subo, y vigilo. Alguien tiene que ser los ojos.</content>
+  <content contentuid="h7184a041gbc7ag402eg94cfgff2d25080336" version="1">Selûne es la luna, y la luna es lo único que este cielo maldito no puede tragarse del todo. Visto su plata y me planto donde su luz aún cae, y donde no cae, llevo la mía. Quien es caballero de la Doncella de la Luna no espera al amanecer. En un sitio así puede que el amanecer no llegue. Así que te vuelves la luz o te vuelves la oscuridad. Yo elegí el día de mis votos.</content>
+  <content contentuid="hb0e4d1edgeb25g4594g8716g4d0af396df73" version="1">Cayeron sobre nosotros en la oscuridad, creyendo que la oscuridad era su aliada. Pero a mí me crió la luz de la luna y en ella peleo mejor: de cada sombra en la que se escondieron ya conocía la forma. Plata en una mano, la gracia de la Doncella de la Luna en la otra. Dos de ellos aprendieron que la oscuridad no siempre es amiga de quienes sirven a su amo.</content>
+  <content contentuid="he94611e9g2e7cg487fgbd05g3202e22a714b" version="1">La paz de la Doncella de la Luna sea contigo, tanta como permite este lugar sin cielo. Curo a los heridos y bendigo a los caídos, y hoy hice mucho más de lo segundo de lo que jamás elegiría. Selûne enseña que hasta la noche más oscura no es más que la luna vuelta de espaldas. Yo me aferro a eso. Hay noches en que me aferro con las dos manos.</content>
+  <content contentuid="h1e9302a3g9230g43abg94adgf56506bd8128" version="1">¿Sirves a Selûne?</content>
+  <content contentuid="hb8acda6egdde6g4587gae20g5f52af91a493" version="1">¿De verdad la luna vigila este lugar?</content>
+  <content contentuid="h4ba7167ege601g4115g9427gbb2c04a87588" version="1">Su sacerdotisa, sí, aquí fuera, donde su luz hace más falta y menos llega. La maldición es una herida en el mundo, y una herida se cura, no se conquista. Así que remiendo lo que puedo, alumbro lo que puedo y canto a los caídos hacia una luna que ya no pueden ver. Trabajo pequeño contra una oscuridad enorme. El trabajo pequeño sigue siendo trabajo.</content>
+  <content contentuid="haee23166g6ee8g437cg9689gefbe9dc08180" version="1">Vigila. Si puede llegar hasta aquí es la pregunta difícil, y no le mentiré a quien está de luto fingiendo que lo sé. Lo que sé es que su luz no se ha apagado en mí, y mientras arda aunque sea en una sola de nosotras, esta tierra no está perdida del todo. Pienso ser muy difícil de apagar.</content>
+  <content contentuid="h1622f637gbc85g472fga7f1ge2b03b70df82" version="1">Que Kelemvor te guarde, y que te guarde del modo CORRECTO, bajo tierra y en reposo, no arrastrándote de pie como insiste esta tierra maldita. Esa es mi disputa aquí, forastero. No la conquista. A los muertos se les niega su puerta, y yo soy portero por oficio sagrado.</content>
+  <content contentuid="h4d7901e3g2e82g4039g8cb3gcd39ed4e4b0c" version="1">¿Eres sacerdote de los muertos?</content>
+  <content contentuid="h39b89c42g7139g413ag861dgead8b3872a0b" version="1">¿Puedes deshacer la maldición?</content>
+  <content contentuid="hf916f012gea2cg4b03g9efdgd6028393797e" version="1">Del Señor de los Muertos, sí, y no esa cosa morbosa que la gente imagina. La misericordia de Kelemvor es el punto final al final de una vida. Descanso. Un final que se queda acabado. Esta tierra roba ese final, endereza a los muertos y los hace marchar. Cada cadáver que anda por aquí es un robo al salón de mi dios. Vine a cerrar puertas que alguien forzó.</content>
+  <content contentuid="h4c01d8c1g2740g4298g93e5ge56978457ac9" version="1">¿Deshacerla? No. Pero puedo darle a un alma cada vez su descanso debido y negarme a que aquellos a quienes quise se conviertan justo en lo que combatimos. Cuando caigan, cuando yo caiga, alguien tiene que estar ahí para que el final se sostenga. En eso consiste todo mi ministerio aquí fuera. Basta para morir por ello. Puede que aún lo demuestre.</content>
+  <content contentuid="h3a8e7521g2af3g433fga8afg99052f52145a" version="1">Un guardián custodia una frontera. La mía es la que hay entre los muertos que descansan y los que no. Suena a trabajo de sacerdote, y lo es, pero los sacerdotes necesitan a alguien con una maza que sostenga la línea mientras rezan. Ese soy yo. Hoy he tumbado a más de los que quiero contar, y susurré la venia de Kelemvor sobre cada uno que cayó. Antes fueron personas. Se merecen las palabras.</content>
+  <content contentuid="h1c3c14b6g1e6eg483aga2ffg02d69848704f" version="1">Huimos de un sitio en llamas directos a uno oscuro: esa es la suerte del refugiado. De la sartén a la sombra. No soy soldado. Soy un mago de pueblo que aprendió tres trucos de combate en el camino porque el camino lo exigía. Nos mantuvieron vivos hasta la siguiente milla. Por los pelos.</content>
+  <content contentuid="h7e6b77e4gaee8g461bga506g6316ff460c33" version="1">¿Adónde huís?</content>
+  <content contentuid="h9c3d2d30g53d7g4b43g98c7g6becbfa27232" version="1">¿Los rechazaste tú solo?</content>
+  <content contentuid="h5e877797g6849g4f18ga486g026143f5ff9e" version="1">Hacia la luz al final del camino, como todo el mundo. Más adelante, dicen. A algún sitio seguro. La mitad de nosotros dejó de creer que «seguro» señale a algo real, y aun así caminamos hacia allí. Un rumor de seguridad sigue siendo más que la certeza que dejamos atrás. Los tieflings tenemos práctica viviendo de rumores de seguridad.</content>
+  <content contentuid="h09bb9a82g3ec6g4296gbcbag2cfd9863eea5" version="1">Yo, tres trucos y una cantidad de suerte que preferiría no volver a gastar. Me prendí las manos, recordé cada crueldad que alguien haya dicho de los míos y le entregué el fuego a los que nos cerraban el paso. No es heroísmo, forastero. Es solo una tiefling negándose, una vez más, a morir en silencio porque algo decidió que debíamos.</content>
+  <content contentuid="hf6041239g9247g44bbg967cg665198dbb2f2" version="1">Llevé a una criatura y un carcaj en el mismo hombro durante seis millas y al final no sabría decirte cuál pesaba más. Tumbé a dos de ellos sin soltar ninguna de las dos cargas. Tu fuerza no la eliges tú: la elige el camino, y luego te quita todo lo que tienes. La criatura está ya bajo la luz. El carcaj está vacío. Trato justo.</content>
+  <content contentuid="h94493d37g4a2ag4e54g929bg11e58c73a710" version="1">Estás mirando a un muerto que se olvidó de tumbarse. Me tuvieron en una celda bajo Levaluna, y de esas no se vuelve, lo sabe todo el mundo. Yo volví. No recomiendo el método y no sé explicar del todo la suerte. Pero estoy fuera, estoy armado y no pienso volver a bajar esas escaleras vivo.</content>
+  <content contentuid="h0d48fbc0gb90ag45f5gb3a2g0ed834c17e83" version="1">¿Escapaste de Levaluna?</content>
+  <content contentuid="haf89cfc8gc3b5g471fg9e4ege2f7bf83f89a" version="1">¿Qué te hicieron ahí abajo?</content>
+  <content contentuid="h67edb2a4g8710g49d3gbfd8gd645372414f5" version="1">La prisión de debajo. Te bajan para el don, que es como llaman a la cosa que te meten en el cráneo. Salí antes de que me tocara. Dejé en esas escaleras a amigos que no fueron lo bastante rápidos. Algunas noches los oigo, a los que recibieron el don. Eso es lo peor: siguen ahí abajo y han dejado de gritar. Así sabes que para ellos ya es tarde.</content>
+  <content contentuid="h49ae0c46g7f4cg461bg99b8gc5cdc4b5da75" version="1">¿A mí? No lo bastante. A los otros, más de lo que una boca debería decir en voz alta. He decidido no contarlo: contarlo lo convierte en recuerdo en vez de en pesadilla, y todavía no estoy listo para tomármelo con calma. Quizá cuando esto acabe. Bajo un cielo de verdad podría contarlo todo. Si es que hay un después.</content>
+  <content contentuid="h70c3fd40g0a10g4093g840eg4a5d3188629a" version="1">En esa celda contaba los días por los gritos: venían por turnos, puntuales como una campana. Cuando mi turno se acercó, dejé de contar y me puse a cavar. Salí con estas dos manos y una cucharada de suerte. Desde entonces cada sombra me parece un guardia que viene a arrastrarme de vuelta, así que ahora golpeo primero, sea guardia o no. Ya pediré perdón a los inocentes en la otra vida, suponiendo que esta maldición deje a alguien tener otra.</content>
+  <content contentuid="ha499fc8fg2acbg4891gb1cbg935500ab98fc" version="1">Puño Llameante. O lo era, cuando aquí fuera había un Puño del que formar parte. Ahora soy un uniforme sin cadena de mando, recorriendo un camino con una espada y la costumbre de no ceder terreno. Las viejas costumbres son lo único que queda. Servirán.</content>
+  <content contentuid="hc4efe854g21fcg415ag950eg8deda790bc26" version="1">¿El Puño se retiró?</content>
+  <content contentuid="h604d9562g6758g43a6g9846gb0d20a24bbc2" version="1">¿Adónde te diriges?</content>
+  <content contentuid="h2fb52ee5g3ed5g4a6dgacfcgca37000c9744" version="1">El Puño se rompió, que no es lo mismo, y moriré insistiendo en ello. No huimos: nos dispersaron, nos cortaron, nos tragó la oscuridad de uno en uno y de dos en dos hasta que no quedó ningún «nosotros» al que darle la orden de retirada. Yo soy lo que quedó a la deriva. Un soldado sin ejército no es más que un hombre terco con una espada. Pero un hombre terco con una espada aún vale por un camino sostenido una hora más.</content>
+  <content contentuid="h99e8374eg19afg4437g9f85gd87761112bec" version="1">A la luz. Como todos los que se arrastran por este camino, aunque yo quiero sacar de ello algo más que una habitación caliente. Dale a un soldado un puesto y un muro que siga en pie y lo sostendré hasta que caiga. Un soldado necesita algo que sostener o no es más que un hombre oxidándose dentro de un peto abollado. Encontraré un muro nuevo, y hasta entonces el camino será mi muro.</content>
+  <content contentuid="h80809e9cgda4eg4654g9f58g9ecb0663cd54" version="1">Tengo puede que seis flechas y ni idea de dónde saldrán las seis siguientes. El intendente está muerto, la línea de suministro es un recuerdo y la oscuridad no acepta formularios de requisición. Así que hago de cada disparo una decisión en vez de una costumbre. Seis flechas, seis elecciones. Es una forma rara de ser soldado. Es la única que queda aquí fuera.</content>
+  <content contentuid="h87a60174g5fd0g4cffgb2c3g4264d6f208a4" version="1">[DBG] A3-H01 · Vanguardia de Rivington (True Soul Drow + 8 Soldado)</content>
+  <content contentuid="hb9031407g7611g4217g9b93g95ad7c98c8b7" version="1">[DBG] A3-H07 · El cónclave de Bhaal (6 bhaalistas, 1 por rango)</content>
+  <content contentuid="hea68887cg83b6g4dd2gba08g527512a0e3e1" version="1">[DBG] ESC-A3-H01 · Escaramuza de Rivington (Milicia+Arpista vs Absoluta)</content>
+  <content contentuid="h3f6bb44bgfb95g4acbg821cga0d292dd4aeb" version="1">[DBG] A3-H02 · Patrulla de calle (Portador + Nigromante + 6 Soldado)</content>
+  <content contentuid="hed929bddg5b26g42e8gaf32gb6eba16d35bc" version="1">[DBG] A3-H03 · Emboscada en las alcantarillas (True Soul + Nigromante + 2 Devourer)</content>
+  <content contentuid="hfc2ff4b7g2b92g4c15ga27dg00a28b150e98" version="1">[DBG] A3-H04 · Patrulla del puerto (Portador de élite + 7 Soldado + 2 Winged)</content>
+  <content contentuid="hc35a995dgdeafg4adega4c2ge3b79bcf722c" version="1">[DBG] A3-H05 · Célula bhaalista (True Soul + 6 Bhaalista del pool)</content>
+  <content contentuid="hdb68a196g4009g4e7cgbfa5g56e668bdd25d" version="1">[DBG] A3-H06 · Necrópolis del cementerio (Pastor + 2 Mummy + 5 Elite) [Guarnicao]</content>
+  <content contentuid="h9b4d4ef8g59a9g4ef6g89a7ge67b030d32a5" version="1">[DBG] ESC-A3-H02 · Escaramuza (3 City Watch vs Absoluta)</content>
+  <content contentuid="h2abe0835gaa2eg443dg9ae8g684eb9bdacbe" version="1">[DBG] ESC-A3-H03 · Escaramuza (2 Investigador + 1 Fist vs Absoluta)</content>
+  <content contentuid="h0149aca9g97e1g4b08gbcdcg4fee87750a2b" version="1">[DBG] ESC-A3-H04 · Escaramuza (3 City Watch vs Absoluta)</content>
+  <content contentuid="h16861358g274fg4d15g902bgcbfdef9f4cfc" version="1">[DBG] ESC-A3-H05 · Escaramuza (2 Fist + 1 Investigador vs Absoluta)</content>
+  <content contentuid="h719bf464gc66dg48cfg91beg38c8c37f70a9" version="1">[DBG] ESC-A3-H06 · Escaramuza (3 Sepulturero + 1 Kelemvorita vs Absoluta)</content>
+  <content contentuid="h01995b8eg9939g4c0cg98b9g24893221b8d9" version="1">[DBG] ESC-A3-H07 · Escaramuza (2 Fist + 1 Disidente de Bhaal vs Absoluta)</content>
+  <content contentuid="hc744d571g11cfg478egb5bfg8d605f034735" version="1">[DBG] A3-X01 · Fuerza de asalto psíquica [T] (Teniente + MF + 4 Devourer)</content>
+  <content contentuid="h2911fad2gede9g4f82g8e23g4158cbd43079" version="1">[DBG] A3-X02 · La última marcha (Teniente + Necro + Winged + Necromites)</content>
+  <content contentuid="hd99f204ag962eg4a07g87b2g80a08e83be0b" version="1">[DBG] A3-X03 · La hoja y la marca (Teniente + Unholy Assassin + 8 Bhaalista)</content>
+  <content contentuid="h498af82cgd69eg40b9g920ag2d592c5439c8" version="1">[DBG] ESC-A3-X01 · Escaramuza (4 Fist + 1 Paladín vs Absoluta)</content>
+  <content contentuid="h0010a2c5g4bdbg49d6g8c56g3b3b0c98b80c" version="1">[DBG] ESC-A3-X02 · Escaramuza (3 Fist + 2 Arpista vs Absoluta)</content>
+  <content contentuid="h9ff4550fgf2a6g415dga563g1cd604077851" version="1">[DBG] ESC-A3-X03 · Escaramuza (2 Fist + 1 Disidente vs Absoluta)</content>
+  <content contentuid="h7f45626cg8274g4f6bg89f8g8c621326baba" version="1">Ulitharid</content>
+  <content contentuid="ha9375adfgbc06g45edgafa5gf4d83adca46d" version="1">[DBG] A3-E01 · La guardia de hierro del Teniente (Teniente + Caballero de la Marca) [Guarnicao]</content>
+  <content contentuid="hded1ba28g50c7g4e42ga280g5bf6324a3d88" version="1">[DBG] A3-E02 · El rebaño del Pastor (Pastor + Golem + Necromites + Mummies)</content>
+  <content contentuid="hc5f49d81ga166g411eg88d7g84206fc54495" version="1">[DBG] A3-E03 · Pelotón psíquico [T->ULITHARID] (Mano del Cerebro + 2 MF + 6 Devourer)</content>
+  <content contentuid="h60428f75ga370g4576g9847g8f8255adc48f" version="1">[DBG] A3-E04 · La hueste infernal (Verdugo + Cambions + Merregons + Imps)</content>
+  <content contentuid="h14c8a7c8g304ag445bg8fb2gcf915417c6e0" version="1">[DBG] A3-E05 · La corte de las hojas (Teniente + 8 Bhaalista) [Guarnicao]</content>
+  <content contentuid="hbe833fbfg19bcg4acbg87feg69b929080789" version="1">[DBG] A3-E06 · El cortejo del caballero caído (3 Death Knight + Mummy Lord)</content>
+  <content contentuid="ha7591882g02b1g4404g9c5bgd7e445e047a5" version="1">[DBG] A3-E07 · La legión del Cerebro (Mano + Teniente + 4 MF + 8 Devourer)</content>
+  <content contentuid="he1006116gc9a1g4822gad5agf067999c8262" version="1">[DBG] A3-E08 · La marcha final de los condenados (CLIMAX, 17 unidades)</content>
+  <content contentuid="h0e3560ccg5fa4g4573g9fbeg73270cd48ce8" version="1">[DBG] A3-E09 · El tribunal de carne y hueso (Mano + Pastor + MFs + DKs + Mummy Lord)</content>
+  <content contentuid="h30e193edg0297g4872ga6bfg8644bd953ba8" version="1">[DBG] ESC-A3-E01 · Escaramuza Endgame</content>
+  <content contentuid="h9622c856g0f05g4143g8313g27d313f3af30" version="1">[DBG] ESC-A3-E02 · Escaramuza Endgame</content>
+  <content contentuid="hb7ebcf52g0ca5g40f7g9d91g0daa6fd63bec" version="1">[DBG] ESC-A3-E03 · Escaramuza Endgame</content>
+  <content contentuid="h051a98b9gec53g415fg99e3ge704e5af73ea" version="1">[DBG] ESC-A3-E04 · Escaramuza Endgame</content>
+  <content contentuid="h7945ff09gadb8g458bgbf95g4fbd5f468af2" version="1">[DBG] ESC-A3-E05 · Escaramuza Endgame</content>
+  <content contentuid="ha6ebc839gb91cg494fgb7c2ge6afe846e8c6" version="1">[DBG] ESC-A3-E06 · Escaramuza Endgame</content>
+  <content contentuid="hd4657359g5d67g45efgb204g6e10b6095a5f" version="1">[DBG] ESC-A3-E07 · Escaramuza Endgame</content>
+  <content contentuid="h8d585f98g4b4cg4a90g9941g624028dfff97" version="1">[DBG] ESC-A3-E08 · Escaramuza Endgame</content>
+  <content contentuid="h9c4a9e43g0592g4d96gbd04g1b2193c553d8" version="1">[DBG] ESC-A3-E09 · Escaramuza Endgame</content>
+  <content contentuid="h0df4d023g8198g4897gad56g5c47f59d6e7f" version="1">Vigilante</content>
+  <content contentuid="h4bb19d08g59a9g4012gaf08g281bc7e521e1" version="1">Actúa pronto en combate. (+3 a Iniciativa)</content>
+  <content contentuid="h5e0fe594g97b3g423bgb6fbgf215259ddbc9" version="1">Alerta</content>
+  <content contentuid="h7abebba3g704dg4300g816dg40fe67566273" version="1">Siempre listo: no puede ser sorprendido y tiene iniciativa superior.</content>
+  <content contentuid="hc4170d14g4138g4aaagb35dg5d1a315cd52d" version="1">Pies ligeros</content>
+  <content contentuid="hcbb1904fgf6ddg4707ga505g364c1e7bc807" version="1">Más rápido; ignora el terreno difícil al correr; sus víctimas no pueden replicar.</content>
+  <content contentuid="h1cf2e427g89b2g4a9ag9849gd8b3c65d10c6" version="1">Centinela</content>
+  <content contentuid="hd6f326bbga694g4ee9gbf07g66d3355e27ec" version="1">Sus ataques de oportunidad dejan clavado al objetivo; castiga los ataques contra sus aliados.</content>
+  <content contentuid="h20bbabe3g2361g46f1g9648g4d3b6bc4fe59" version="1">Curtido</content>
+  <content contentuid="h48956facg4e56g424fg8d9eg600f2b1d4d62" version="1">Mucho más duro de lo que aparenta. (+2 puntos de golpe por nivel)</content>
+  <content contentuid="hb17b4431ga7ecg497dg8640gc2e875527f16" version="1">Concentración de batalla</content>
+  <content contentuid="h1e07541bgb6c4g4449g8966gf2ac04ae3026" version="1">Ventaja para mantener la concentración: rompe al lanzador, no al hechizo.</content>
+  <content contentuid="hd7c4fb1fg71b4g4860gac6agaedd20765629" version="1">Maestro de armas de asta</content>
+  <content contentuid="h40b6bf10g2d59g406fg875bg36f74d548d98" version="1">Golpea a quien se le acerca y remata con el asta.</content>
+  <content contentuid="hfa8cdc8ag4c04g42c7g9005gfd45b5365592" version="1">Ojo certero</content>
+  <content contentuid="h70540d97g5f19g44aagadc3gb1f22a2f7ef1" version="1">Las alturas no dan cobijo; el tiro a quemarropa, tampoco refugio.</content>
+  <content contentuid="h69a51656g60adg427bgb926g78fef635433f" version="1">Verdugo</content>
+  <content contentuid="h667a6f7dg6243g4f8cgbba3g4355ab5e3cc9" version="1">Cuando un enemigo cae o un golpe entra limpio, vuelve a atacar.</content>
+  <content contentuid="hcc7e29d7g3db8g4259gabd8g46edffa20282" version="1">Coloso acorazado</content>
+  <content contentuid="h6fb950c2gb95cg4d68g8e29g069207916a20" version="1">Los golpes de armas no mágicas resbalan sobre su armadura.</content>
+  <content contentuid="h47276724gae9bg4f93ga608g285e4c25846b" version="1">Adepto del fuego</content>
+  <content contentuid="h5e7191a7g6f53g4d3fg9880ga0f6b0ddd3d1" version="1">Sus llamas atraviesan la resistencia.</content>
+  <content contentuid="h0dd1e253g4f6ag4633g9836ga7bb9318b132" version="1">Matamagos</content>
+  <content contentuid="h622dc144g502eg49cbg8fc8g21db8a6b3fbb" version="1">Castiga a los lanzadores cercanos y les rompe la concentración.</content>
+  <content contentuid="hb2f6cad7g8213g4ad7g9904gfef700830220" version="1">En desbandada</content>
+  <content contentuid="hf73b2955gf533g4c88g9b92g432a5231fbb5" version="1">Roto y corriendo hacia el borde del campo. Abátelo antes de que escape, o volverás a encontrártelo, y se acordará de ti.</content>
+  <content contentuid="h1eb44a6ag4a75g4191gb6a1gb88d388765ad" version="1">Vengativo</content>
+  <content contentuid="h42124482g8c5fg48e9gb1e7g49985cf0ef79" version="1">Se te escapó una vez. Entrenó, se curó y volvió con tu nombre en la cabeza.</content>
+  <content contentuid="hd89f9cceg1067g4f65gaaf0gc9e5965e2832" version="1">Desbandada por pánico</content>
+  <content contentuid="hd25e8f09gf72fg4c83g9cc1gd52f29f091a9" version="1">Roto y corriendo. Ninguna tirada lo va a serenar. Su Movimiento aumenta y tiene Desventaja en las tiradas de ataque y en las pruebas de característica.</content>
+  <content contentuid="h9a416483g9966g47d4g879cge8532d83e4e8" version="1">Nada que perder</content>
+  <content contentuid="h761d8843g63acg4a5dg998cg6c8dab94d253" version="1">Acorralado más allá del punto de huida. Planta los pies y encuentra un último arranque de furia.</content>
+  <content contentuid="h266d75d0g9c28g4666g95cag1df6176cd065" version="1">Nada que perder</content>
+  <content contentuid="hf5204e5fg1beeg48f1g8a78g051ad26c0e33" version="1">Si al 30 por ciento de sus fuerzas no puede huir, se enfurece en su lugar. Tú se lo enseñaste.</content>
+  <content contentuid="h619879ecg6e86g4598gae07g636fb58d2c83" version="1">Cicatriz de hoja</content>
+  <content contentuid="h3a382fa5gaaffg44b9ga1eag8ef345404170" version="1">Recuerda lo que le hiciste. Resistente al daño cortante.</content>
+  <content contentuid="h8799c020gf937g4d6cga3d3g7b4fe1ce6c29" version="1">Cicatriz de púa</content>
+  <content contentuid="h634014c0gad93g477cg8101g1464ee350304" version="1">Recuerda lo que le hiciste. Resistente al daño perforante.</content>
+  <content contentuid="h36e9754dg7aebg46ecgbee9g8c2246253bad" version="1">Cicatriz de maza</content>
+  <content contentuid="hdec388afg4a69g4ea7g8818g32f598a7b641" version="1">Recuerda lo que le hiciste. Resistente al daño contundente.</content>
+  <content contentuid="h836981a3g70e7g4ba8gb360gb988b8f5c4d8" version="1">Cicatriz de llama</content>
+  <content contentuid="h9ba92be3g767eg44a5g89b6ge8e2b792d050" version="1">Recuerda lo que le hiciste. Resistente al daño de fuego.</content>
+  <content contentuid="ha000aab5gdcc8g4923g8e8aga435be2686ca" version="1">Cicatriz de escarcha</content>
+  <content contentuid="h900ea437gd246g42aaga584gb715ec8b2176" version="1">Recuerda lo que le hiciste. Resistente al daño de frío.</content>
+  <content contentuid="hc2601efagda93g4e0fgaf2ag92595d09bf18" version="1">Cicatriz de tormenta</content>
+  <content contentuid="hb30e5712gdaaag48c2g9ef7g4beb5616e756" version="1">Recuerda lo que le hiciste. Resistente al daño de relámpago.</content>
+  <content contentuid="hae5074bdg8753g4e99g8947g00e96c5dfc2c" version="1">Cicatriz de ácido</content>
+  <content contentuid="h206fc683g2ae7g47d9ga9ccgd49a74f30cf7" version="1">Recuerda lo que le hiciste. Resistente al daño de ácido.</content>
+  <content contentuid="h7849d492g8cf1g412fg887cg3a67971b7ab7" version="1">Cicatriz de veneno</content>
+  <content contentuid="h3f0dfe0dge601g4208g9f4eg50c41e28fd91" version="1">Recuerda lo que le hiciste. Resistente al daño de veneno.</content>
+  <content contentuid="h2b571f4cgad37g4ed6g9841gffa265cf1689" version="1">Cicatriz de tumba</content>
+  <content contentuid="h856024c1g5481g4ed4ga4e7gbadd4108c01f" version="1">Recuerda lo que le hiciste. Resistente al daño necrótico.</content>
+  <content contentuid="h42b19605g4e52g4347gb931g010f09d71c97" version="1">Cicatriz de luz</content>
+  <content contentuid="h96933d21gc21dg48b1g966bg81a2e49e22ae" version="1">Recuerda lo que le hiciste. Resistente al daño radiante.</content>
+  <content contentuid="hb81faaacgbe97g4c8aga51dge7314df347bc" version="1">Cicatriz de mente</content>
+  <content contentuid="ha483e183gbb5cg4c80g9e8dg07bdd78ee86c" version="1">Recuerda lo que le hiciste. Resistente al daño psíquico.</content>
+  <content contentuid="h72f97d2dgffffg4813ga48ag2e3437c120ed" version="1">Cicatriz de trueno</content>
+  <content contentuid="hc30e8fb1g24fdg4864g913cg1c5d5737275e" version="1">Recuerda lo que le hiciste. Resistente al daño de trueno.</content>
+  <content contentuid="h1d495dd6gb205g4e66ga1bag434a742afb94" version="1">Cicatriz de fuerza</content>
+  <content contentuid="hf5f9acd3g0973g40a0gbf50g56706fc05d87" version="1">Recuerda lo que le hiciste. Resistente al daño de fuerza.</content>
+  <content contentuid="hbc94cacdgbf7dg44eagb110ge83d05498f65" version="1">Doctrina del Silenciador</content>
+  <content contentuid="hbd6d0370gec3cg49eagba92g604a5acc4ada" version="1">Adiestrado por el Cerebro para estrangular la magia enemiga: guarda un contrahechizo en reserva.</content>
+  <content contentuid="ha1947183g99beg4598gb77bgb128d656afc0" version="1">[DBG] Atención +1</content>
+  <content contentuid="h0825d1e1gd923g44cbga328gfe3200ec10a1" version="1">[DBG] Atención = 0</content>
+  <content contentuid="h1da23681g5fd6g4e22gb841g2637050771cf" version="1">Reflejo estudiado</content>
+  <content contentuid="h157fe325g4b07g4c3egb4a5gfa4bdab2a017" version="1">La Absoluta vio a un solo héroe encargarse de matar. Esta cosa lleva el equipo de ese héroe y pronuncia sus hechizos. Mátala y la lección se pierde.</content>
+  <content contentuid="hfa628d41gffb9g41fagb913g7251cd110365" version="1">[DBG] Invocar Doppelganger</content>
+  <content contentuid="h5e2d90b1g7c34g4f8ag9a61g0d4b83c1e7f2" version="1">[DBG] Invocar Inquisidor</content>
+  <content contentuid="hebb5bdfag1260g4319g87efg97094edf26db" version="1">Rastreado</content>
+  <content contentuid="h41ff76bbg1679g499cga153gc83cf4b0824f" version="1">El enemigo ha descubierto tu campamento. Tu próximo descanso largo está comprometido.</content>
+  <content contentuid="heb516102g5fa7g4d18ga950gcaccb84654ef" version="1">[DBG] Invocar Noche</content>
+  <content contentuid="h45ea16c1g4abdg4e95gb974gfa40ea65e1e8" version="1">Requiem for the Absolute</content>
+  <content contentuid="h06adc722g970ag4e4cga052g0c0308d67d3c" version="1">LK_REQ_CFG_MASTER</content>
+  <content contentuid="hf7e6fa83gceb0g4949g88f6g054452389287" version="1">Requiem for the Absolute: los encuentros dinámicos están ACTIVADOS.</content>
+  <content contentuid="h3f5940f9gdfdcg4ac7g9c0dg75efde5c5786" version="1">LK_REQ_CFG_SKIRMISH</content>
+  <content contentuid="hc488a976g5d7cg4371gb98ag6ef0125edc76" version="1">Requiem for the Absolute: las escaramuzas entre la Absoluta y la Resistencia están ACTIVADAS.</content>
+  <content contentuid="h7263711dg097fg4cebg99begbc0b72e2c309" version="1">LK_REQ_CFG_VENGEANCE</content>
+  <content contentuid="h0c41d91fg3defg4765g94ecg42e69a8576a0" version="1">Requiem for the Absolute: los comandantes heridos huyen y vuelven más fuertes.</content>
+  <content contentuid="h2be9d4c6gcfe9g4080gaddfg4cf371c74f5c" version="1">LK_REQ_CFG_INT1</content>
+  <content contentuid="hfb0fc0f0gad84g428fg9aeag3e36bc48af8a" version="1">Requiem for the Absolute: intensidad de caza en Tranquila.</content>
+  <content contentuid="h877258aeg516cg4a5cg82d5g7abf1fa22b7d" version="1">LK_REQ_CFG_INT2</content>
+  <content contentuid="he1d726b7gecfag4432gb184gc0427e7377d1" version="1">Requiem for the Absolute: intensidad de caza en Estándar.</content>
+  <content contentuid="hab294afbg2037g4fbbg9cecgaefbf0f30b77" version="1">LK_REQ_CFG_INT3</content>
+  <content contentuid="h6c8cd976g936eg4a5dga5degd61ebc1e887f" version="1">Requiem for the Absolute: intensidad de caza en Implacable.</content>
+  <content contentuid="h7d8ce3d2gebadg43aeg8c57gac7912e2b61e" version="1">LK_REQ_CFG_INT4</content>
+  <content contentuid="h499e679cg3281g4af5gaee4g98fd930f3211" version="1">Requiem for the Absolute: intensidad de caza en Acosado.</content>
+  <content contentuid="h93502330g15abg44fcgb8b8g4988bd128854" version="1">Encuentros dinámicos</content>
+  <content contentuid="hdb0616f2g7df5g4d81gae6cgd62393237418" version="1">Escaramuzas</content>
+  <content contentuid="h7d7b77e1gbf39g4685g8ad5g22be2575e524" version="1">Huida y venganza</content>
+  <content contentuid="hef24b4b0gcf55g4387gbb77ge5a1f4ada6a4" version="1">Intensidad de la caza</content>
+  <content contentuid="h9198add7g9140g49c8ga1dfgf793dc24d872" version="1">Tranquila</content>
+  <content contentuid="hcfd2b6a4g582bg4c9bg8d95g6792924401d1" version="1">Estándar</content>
+  <content contentuid="h8b7e2498g6356g4559ga6e8g833ac4df100f" version="1">Implacable</content>
+  <content contentuid="hd37e718cg7ddbg4ad9g94ccge7d14aa56617" version="1">Acosado</content>
+  <content contentuid="hfd1c879bg3712g4242gb483ge7667851353d" version="1">Sistemas</content>
+  <content contentuid="he51c2558g0428g4f27g9a7agf81f656d3d55" version="1">Cadencia</content>
+  <content contentuid="h06c60e7cg38d6g4f36g95caga13086e81ad5" version="1">La Absoluta te caza durante toda la campaña. Cada opción de aquí se lee en vivo: al cambiarla surte efecto en el siguiente descanso largo, y la elección queda guardada en tu partida. Pasa el cursor por una opción para leer exactamente qué cambia.</content>
+  <content contentuid="h9f632808g94e0g405fgab48g005a50b1789a" version="1">El interruptor maestro de todo el motor de encuentros. Activado, cada descanso largo tira por un suceso: 20 por ciento con Atención baja, hasta 40 por ciento en cuanto hayas matado a siete comandantes, más 20 por cada noche seguida sin nada. Desactivado, esa tirada se sigue haciendo, pero nunca se despacha a nadie. Las bandas de guerra que ya están en el mundo siguen comportándose igual, los cadáveres se siguen limpiando y un comandante que ya huyó sigue volviendo.</content>
+  <content contentuid="h1ea044ceg63fdg4f54g8e61gd70e039a42c5" version="1">Batallas entre la Absoluta y la Resistencia en las que empiezas neutral y puedes mirar, unirte a cualquiera de los dos bandos o marcharte. Son 37 de cada 100 sucesos. Desactivadas, esa parte pasa a ser patrullas en vez de noches vacías, así que el número total de encuentros no baja.</content>
+  <content contentuid="hdfdf439cgdb9bg4a48ga9cegece1f538e885" version="1">Un comandante que baje al 30 por ciento de vida huye del campo en vez de morir. Vuelve en un encuentro posterior con nombre propio, la vida al completo, equipo mágico, un título y resistencia a los tipos de daño que usaste contra él. Desactivado, los comandantes luchan hasta la muerte y nunca se pone a nadie en cola para la venganza.</content>
+  <content contentuid="h38f11709gcc68g42f7ga53bg4a8d759272b3" version="1">Con qué frecuencia te encuentra el ejército después de un descanso largo. Esto desplaza a la vez la probabilidad base de cada franja de Atención, así que la curva de escalada conserva su forma. Un ajuste más tranquilo significa además silencios más largos, porque la presión que se acumula en las noches vacías parte de un suelo más bajo.</content>
+  <content contentuid="h51c3e4c8ge250g4642gbaccg3675a34237d2" version="1">Diez puntos por debajo de la curva de serie. Los encuentros empiezan en torno a una noche de cada diez y puedes pasar cuatro noches sin ver a nadie.</content>
+  <content contentuid="hf751aac6g80aag4322gb730g658a7d40d1bb" version="1">El equilibrio de serie, ajustado por el autor. Una noche de cada cinco al principio, una de cada dos y media cuando el ejército haya aprendido a temerte.</content>
+  <content contentuid="h4be7b255g5e0fg4962g90a3gad3c3c7e2419" version="1">Diez puntos por encima de la curva de serie. El silencio es raro y el ejército te encuentra casi todas las noches en cuanto la Atención empieza a subir.</content>
+  <content contentuid="hde7b5777g0dd4g4340g8391gcc54366cbfe9" version="1">Veinticinco puntos por encima de la curva de serie. Con Atención alta casi todo descanso queda interrumpido. Descansar pasa a ser una decisión en vez de una costumbre.</content>
+  <content contentuid="hcb035fcegd293g4716g9177g5f2a063d0cf3" version="1">LK_REQ_CFG_ADAPTIVE</content>
+  <content contentuid="h735d4873g4500g42e6g9d0cg74ebf66ee530" version="1">Requiem for the Absolute: el ejército te estudia.</content>
+  <content contentuid="ha2118746g91a8g4283ga54dg25c08040bc11" version="1">LK_REQ_CFG_AMBUSH</content>
+  <content contentuid="h5777fd6ag0d1fg45c7gabcag9adb235567ff" version="1">Requiem for the Absolute: saben dónde duermes.</content>
+  <content contentuid="h2d19c372g378cg4815g82b2g50537fc0afaa" version="1">LK_REQ_CFG_TADPOLE</content>
+  <content contentuid="hb4ccba16g5769g436dgb092g47e888a97e0d" version="1">Requiem for the Absolute: los frascos viajan con los fieles.</content>
+  <content contentuid="hc6841061g4507g4c11ga530gf823ee8be120" version="1">LK_REQ_CFG_ATT1</content>
+  <content contentuid="h5e1b336ag3653g45d2g8958gffd24c46b3bc" version="1">Requiem for the Absolute: el ejército aprende despacio.</content>
+  <content contentuid="h16ecc5fag4c11g434cgb1d1gf04b583119fc" version="1">LK_REQ_CFG_ATT2</content>
+  <content contentuid="h3410183fgb28dg402egae5bg769976a0123a" version="1">Requiem for the Absolute: el ejército aprende al ritmo de serie.</content>
+  <content contentuid="h9cf24f90gd504g4cc3gaeb4gaa66b225cc69" version="1">LK_REQ_CFG_ATT3</content>
+  <content contentuid="hea0a9947g0bc0g436cga44bg850ed4f9df63" version="1">Requiem for the Absolute: el ejército aprende rápido.</content>
+  <content contentuid="hd00865a4g9accg455fg9c42gdaa337edb01a" version="1">LK_REQ_CFG_CMD1</content>
+  <content contentuid="h18e3b608gb098g4485g866fg6162a9b45b42" version="1">Requiem for the Absolute: los comandantes no llevan nada de más.</content>
+  <content contentuid="h1b9966a3gc3a8g46f2g83b2g46a941009ba7" version="1">LK_REQ_CFG_CMD2</content>
+  <content contentuid="hac1b16e0gd095g4d62ga116g041f5912a582" version="1">Requiem for the Absolute: los comandantes llevan poco.</content>
+  <content contentuid="h9fb2c98cg9086g4fb7gbd9fg26233b2a7ccd" version="1">LK_REQ_CFG_CMD3</content>
+  <content contentuid="h7c59bf38g6cc8g4ef8g8560g4f294025c9ff" version="1">Requiem for the Absolute: los comandantes llevan un premio.</content>
+  <content contentuid="h48edcdc4ge051g4db0g9920g5ccbe07a6436" version="1">Mundo</content>
+  <content contentuid="h75004750g9fd5g4ce7g9ffcg79d62ba0cc2b" version="1">Recompensas</content>
+  <content contentuid="h22ee1daag4b51g42efg989cg83c07503937a" version="1">Emboscadas</content>
+  <content contentuid="h8f964b94g0e4cg4a9bg89e8g78e6119a7b62" version="1">Bandas de guerra que aparecen cerca y te roban la primera ronda. Uno de cada cinco sucesos es una emboscada. Desactivadas, esa parte pasa a ser una patrulla normal que ves venir, y ningún encuentro concede ya ronda de sorpresa. Ten presente el límite: en los actos 2 y 3 las tablas de encuentros no separan patrulla de emboscada, así que unas cuantas bandas pueden seguir empezando más cerca de lo que empezaría una patrulla; lo que ya no pueden es pillarte desprevenido.</content>
+  <content contentuid="h78422c0eg5c5fg42f9ga235g134e4b55d01c" version="1">Ejemplares de renacuajo adicionales</content>
+  <content contentuid="hedd6a858g414dg4596g96acgf18417cb76e9" version="1">Las Almas Verdaderas y los comandantes de la Absoluta llevan un frasco con un renacuajo vivo que sueltan al morir. Hay 54 portadores así repartidos por la campaña. Desactivado, no se coloca ningún frasco y los únicos renacuajos que encuentras son los del juego base. Los portadores ya muertos o ya presentes en el mapa conservan lo que se les dio.</content>
+  <content contentuid="h140eb737g9d0ag44f8gb88ag90b8b32becc9" version="1">Crecimiento de la Atención</content>
+  <content contentuid="h3a6a964ag1d30g48d2gbc14g65897bfe33bd" version="1">La Atención es el medidor de un solo sentido que mide cuán en serio te toma la Absoluta. Sube cuando matas a un comandante y lo gobierna todo: con qué frecuencia te encuentran, qué dotes reciben las tropas, cuándo aparecen las élites y la doctrina. Esto cambia lo rápido que sube el medidor, nunca dónde están los escalones, así que toda la escalada mantiene su forma.</content>
+  <content contentuid="hcf94cb62g5e98g42b3g8294g52acb2ad33ae" version="1">Lento</content>
+  <content contentuid="h945d59b2gaf86g4f4eg9a2egfd59f6977b73" version="1">Dos comandantes muertos por escalón en vez de uno. El ejército tarda alrededor del doble en llegar a su peor versión, y el avance que llevas hacia el siguiente escalón queda guardado en tu partida.</content>
+  <content contentuid="h10f8dad2g4920g4e76g9ea0g5c1409bd0dce" version="1">Estándar</content>
+  <content contentuid="hd1bdade2gc775g4152g8887gec3995d80240" version="1">Un comandante muerto, un escalón. La curva que el autor ajustó y publicó.</content>
+  <content contentuid="h39325f23gecfag4e96gb36eg6c1436e51d1d" version="1">Rápido</content>
+  <content contentuid="h5a707985g1174g4a2fg8ef5g4f306f61288c" version="1">Dos escalones por comandante muerto. Llegas a las élites, a la doctrina y a las bandas más duras con la mitad de muertes. Solo recomendable si ya conoces la escalada.</content>
+  <content contentuid="he68a5a8cg3032g4e55ga9aeg8df216f59531" version="1">Recompensas de comandante</content>
+  <content contentuid="hab23f718g1cc2g4643gbc51gb6f91f9ae438" version="1">Lo que deja tras de sí un comandante muerto, en 117 comandantes repartidos por la campaña. A la tropa no le afecta: conserva su botín ligero en cualquier caso. Una cosa que conviene saber antes de elegir: el tesoro se tira cuando el comandante APARECE, no cuando muere, así que un comandante que ya está en tu mundo conserva lo que se le dio y el cambio solo alcanza a los que aparezcan a partir de ahora.</content>
+  <content contentuid="he2ecb677g9f16g4c45gae87gf82959c91392" version="1">Ninguna</content>
+  <content contentuid="h4985928ag73b9g4771gb0f9gaba88c677c97" version="1">Nada de tesoro extra. Los comandantes sueltan solo el equipo que llevan puesto. Para una partida en la que la recompensa es la pelea.</content>
+  <content contentuid="h87fcc505g7eefg41a7g8368g36fce4b084db" version="1">Reducida</content>
+  <content contentuid="h0c72cf90ga00bg4eebgb9fdg261eccf9a531" version="1">La tabla de combate ligera del juego base. Oro y algún consumible suelto, sin los pergaminos ni las gemas escalados por nivel.</content>
+  <content contentuid="he4b3f8d8gea98g4df7g8b78gf93cca1e5adb" version="1">Estándar</content>
+  <content contentuid="h7a5750b4g990ag47d5g8b3dgf2f1099b9750" version="1">El equilibrio de serie: la tabla de combate rica del juego base, escalada al nivel. Oro, alquimia, flechas especiales, un pergamino y gemas.</content>
+  <content contentuid="hfdb88595g4f3bg43fag9ccagbf15acef1b8d" version="1">LK_REQ_CFG_SILENCER</content>
+  <content contentuid="h7cb29c17gdeacg46d1g9867g3e895de281db" version="1">Requiem for the Absolute: responden a tu magia.</content>
+  <content contentuid="h1745a77ag5adbg46a0ga021gc80a5cea885a" version="1">LK_REQ_CFG_MARKWARD</content>
+  <content contentuid="h641c81eeg9f63g4848g99f4gb1f2142946ae" version="1">Requiem for the Absolute: escudan al comandante.</content>
+  <content contentuid="ha0a416eeg8ef5g4232g8469g78fe38c3e8e6" version="1">LK_REQ_CFG_DOPPEL</content>
+  <content contentuid="hdd029a35g0cc2g4572g9e7bg0d908ff3ed9e" version="1">Requiem for the Absolute: construyen tu espejo.</content>
+  <content contentuid="h24a1ed32g45ddg4f93gb07ag3da25865b495" version="1">LK_REQ_CFG_WARD</content>
+  <content contentuid="h2c9da46bg094fg41b0gbbdagdaf74450ae41" version="1">Requiem for the Absolute: se endurecen contra tus golpes.</content>
+  <content contentuid="h554349c3g5004g4b42g9098g82ddf48c188a" version="1">LK_REQ_CFG_FEATS</content>
+  <content contentuid="h11eceba7g5d0cg4811gbccag612b3e41951f" version="1">Requiem for the Absolute: el ejército entrena.</content>
+  <content contentuid="hca3205c5ga700g49d3g91e2ga4d4e19bc9c1" version="1">Doctrina</content>
+  <content contentuid="h5d10111fgd3afg4439g8cc6g3729d527b299" version="1">Silenciador</content>
+  <content contentuid="h6c797ff6gf66bg4c6bgb25dg7cebc09839f6" version="1">Un lanzador enviado específicamente para callar al tuyo. Llega cuando hayas lanzado 15 hechizos en combate y deja de enviarse si esa cuenta baja de 8. Lleva Silencio y Contrahechizo, y abre silenciando el suelo que pisas. Desactivado, el papel no se asigna nunca; todo lo demás que hace la banda de guerra queda igual.</content>
+  <content contentuid="h47210e3cgb0b6g4589g8eaag35dde76b685d" version="1">Guardián de la Marca</content>
+  <content contentuid="haa051023ge548g4cfeg8018g41f842ac7448" version="1">Un guardaespaldas atado al comandante por Vínculo protector: el comandante recibe la mitad del daño y el guardián sangra la otra mitad. Llega cuando hayas matado a 3 comandantes con sus tropas marcadas todavía vivas, y deja de aparecer por debajo de 2. Desactivado, los comandantes van solos.</content>
+  <content contentuid="h9871ed21g5536g4a79g8241g00408c85f519" version="1">Doppelganger</content>
+  <content contentuid="h3747cb42ga6e5g4ab2gb689g2efb2f5636d4" version="1">Si uno de tus personajes se encarga de la mayoría de las muertes, el ejército construye una copia de ese personaje y te la envía, con la misma clase, el mismo equipo y el mismo nivel. Llega tras 3 encuentros así y deja de aparecer por debajo de 1. Desactivado, no se construye ningún espejo.</content>
+  <content contentuid="hb903e601g91f7g45fag961fgae41bd33723b" version="1">Resistencia dinámica</content>
+  <content contentuid="h88486de7g51e5g4d0egae4dgb582fb16a0f5" version="1">Golpea al ejército 15 veces con el mismo tipo de daño y las siguientes bandas de guerra llegan resistentes a él. Sostiene 2 tipos como mucho a la vez, y cada uno se va apagando por su cuenta en los encuentros en que dejas de usarlo. Desactivada, a ninguna banda se le concede resistencia, y las que ya la llevan la conservan hasta morir.</content>
+  <content contentuid="he84a8f88g72beg4bd1g960ag736ebca091b3" version="1">Escalera de dotes</content>
+  <content contentuid="h904da5e1gc773g4ca6g9d40g2ab845100b23" version="1">El único crecimiento que no responde a tu estilo: sube solo con la Atención. Vigilante con Atención 2, Alerta con 3, equipos de élite con 4 y 5. Es lo que pone Vigilante en una banda de guerra con la que te cruzas por la calle. Desactivada, cada unidad pelea con las estadísticas de su propia plantilla y no se le añade nada. Las unidades que ya llevan una dote la conservan.</content>
+  <content contentuid="h068c68e3g12f5g4ca2g83bdg36027d28af2e" version="1">Asaltos al campamento</content>
+  <content contentuid="h4e2659a2g9cc3g4854ga530g15591d356533" version="1">El ejército encuentra el campamento en persona. En cuanto la Atención llega a 2, uno de cada siete descansos largos se ve interrumpido por una banda de guerra que entra entre los petates, sacada de las mismas tablas que cualquier otro encuentro y escalada a tu nivel. El descanso se completa igual: la noche siempre termina, por tres vías independientes, aunque la banda no llegue nunca. Viene DESACTIVADO de serie, porque una versión anterior de esto podía dejar un descanso atascado, y se activa a voluntad hasta que se gane su sitio en tu campaña.</content>
+  <content contentuid="hc6040e50gd825g40faga68bg6a3c61894204" version="1">LK_REQ_CFG_CAMPRAID</content>
+  <content contentuid="hd0e397f5gea3cg48a3g9409g4e234ef9738d" version="1">Requiem for the Absolute: saben dónde duermes.</content>
+  <content contentuid="h9321b35dg31e9g41b3g9f64g20b029e9a55f" version="1">¡Han encontrado el campamento! ¡A las armas!</content>
+  <content contentuid="ha3f61c05g7b28g4e9dg8c14g5f0d92b7e341" version="1">LK_REQ_CFG_ICONATT</content>
+  <content contentuid="hb8d2470eg91cfg4a63gb57dg2e6084c3f19a" version="1">Requiem for the Absolute: la marca de Atención se muestra en el retrato del grupo.</content>
+  <content contentuid="hc40e7b92g5d18g4f27g9a86g3b71e5c0d248" version="1">LK_REQ_CFG_ICONRAID</content>
+  <content contentuid="hd15a83f6g2c74g4b09g8e35g6a92f4d18b7c" version="1">Requiem for the Absolute: el aviso de asalto al campamento se muestra en el retrato del grupo.</content>
+  <content contentuid="hf3a80d51g47c2g4e96gb18ag5d206ce7419b" version="1">Puramente visual. La marca que muestra la Atención de la Absoluta en el retrato del grupo. Ocultarla no cambia nada en la partida: el ejército te caza exactamente igual.</content>
+  <content contentuid="h6b1e5c04g2f79g4a38g9d5cg83e17f0a92d5" version="1">Puramente visual. El ojo que te avisa de que hay un asalto al campamento armado. Ocultarlo elimina el aviso, así que el asalto llega sin anunciarse.</content>
+  <content contentuid="h9c41d7e0g6b83g4f15ga927g0d5e28c14b63" version="1">Interfaz</content>
+  <content contentuid="h5b90e14cg8a37g4d62gb0f5g19e73c8a2064" version="1">Marca de Atención en el retrato</content>
+  <content contentuid="h2e47c9a1gd50bg4837g96a2g7f1b08d5e3c6" version="1">Aviso de asalto al campamento en el retrato</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000001" version="1">He visto suficiente. La Absoluta conocerá vuestras caras antes de que acabe la noche.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000002" version="1">Atrapadlo antes de que llegue a la linde del bosque.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000003" version="1">Dejadlo ir.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000004" version="1">Esperad. ¡Esperad! Yo solo miraba. No os levanté la mano en ningún momento.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000006" version="1">[DBG] Patrulla con Observador</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000007" version="1">Que conserve la vida. Muerto no le sirve a nadie.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000008" version="1">Que corra. Diga lo que les diga, que vengan.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000009" version="1">Acabad con él.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000010" version="1">Retrocede a gatas, luego se da la vuelta y corre sin mirar atrás.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000011" version="1">Está de pie antes de que termines la frase, y desaparece.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000012" version="1">No consigue decir una palabra más.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000013" version="1">Corre. Más rápido de lo que debería correr algo que lleva encima tanto hierro.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000014" version="1">Ya se está moviendo. Viera lo que viera, la Absoluta lo oirá.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000015" version="1">Marcharse.</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000016" version="1">[DBG] Plantilla: entregar 6 informes</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000017" version="1">[DBG] Plantilla: resolver beat</content>
+  <content contentuid="hc1a11111g0000g4000g8000g000000000018" version="1">[DBG] Misión cumplida en el líder de banda</content>
+  <content contentuid="hb84e9d02g1c57g4a63g8f20g5d71c0e4a396" version="1">Vacante</content>
+  <content contentuid="h4b7d02e1g9c35g4a68gb1f4g0e29d5a73c6b" version="1">Misión cumplida</content>
+  <content contentuid="h8e13f7a2gd460g4b91g85c3g26f0a9d18e47" version="1">Tiene lo que la Absoluta quería de ti. Se retira del campo, y recordará tu cara.</content>
+  <content contentuid="h439e2b40gfa74g4ac1g8e4ag46da2797e25e" version="1">Doctrina: Contrahechizo</content>
+  <content contentuid="h07d8e01dgb24bg4b11ga798g519709bd9427" version="1">El rango ha adiestrado a este oficial contra lanzadores de conjuros. Lleva Contrahechizo y el espacio de conjuro para pagarlo.</content>
+  <content contentuid="h4940cbb3g1f46g4917g97a4g6b1fe32147ed" version="1">Doctrina: Escudo</content>
+  <content contentuid="hbad68a19gf123g480dga5a2gaa134143c511" version="1">El rango le ha enseñado a este oficial a desviar el primer golpe. Reacciona con Escudo.</content>
+  <content contentuid="h2081c2d9g65f1g450bg97c7g8bee00dfd045" version="1">Doctrina: Paso brumoso</content>
+  <content contentuid="h5cd23c1dg5bb3g47e6ga6eag741a647cd37b" version="1">El rango le ha enseñado a este oficial que el terreno es una elección. Lleva Paso brumoso.</content>
+  <content contentuid="h8969d146gedf0g43deg9e83g9a60f66232f3" version="1">Doctrina: Medicina de campaña</content>
+  <content contentuid="heff2c846g38e8g4c5ega939gacecfdb1348c" version="1">El rango ha hecho que merezca la pena mantener vivo a este oficial. Lleva Curar heridas y gasta la acción.</content>
+  <content contentuid="heaecacd7g810ag407cgb3b7g29c9a1494fb1" version="1">Renacuajo: Túnel de fuerza</content>
+  <content contentuid="hea48adf7gef61g46d6g9ce0g4858a4535382" version="1">El renacuajo obedece al rango. Este oficial carga a través de la línea con Túnel de fuerza.</content>
+  <content contentuid="hc1719556g4236g4230g985ag1505e76642b0" version="1">Renacuajo: Miedo escénico</content>
+  <content contentuid="h5cd13d6dg51c4g4e17g8a24g6d8db5e84c74" version="1">El renacuajo obedece al rango. Este oficial ciega una mente con Miedo escénico.</content>
+  <content contentuid="h57bc05f3gc790g42bbg87b6gbc6e651a4279" version="1">Renacuajo: Agujero negro</content>
+  <content contentuid="h0a2a99f8gf0f4g44daga616g9ded5e04476d" version="1">El renacuajo obedece al rango. Este oficial junta a la fuerza tu formación con Agujero negro.</content>
+  <content contentuid="h5cd0048bg632dg43d7g9519g1f98bcd2f36c" version="1">Renacuajo: Absorber intelecto</content>
+  <content contentuid="hf3fb4d71gdb1fg4345gb459g07d5c050dc28" version="1">El renacuajo obedece al rango. Este oficial se alimenta de una mente con Absorber intelecto.</content>
+  <content contentuid="h287f80cbg3a72g41afg90dag2ddf17966675" version="1">Renacuajo: Fracturar psique</content>
+  <content contentuid="h19487ba2gb942g4a72ga086ge15d31ac9048" version="1">El renacuajo obedece al rango. Este oficial abre una mente en canal con Fracturar psique.</content>
+  <content contentuid="h406a9b5cgfbc5g4008gb83fg2a7b27f0ec26" version="1">Renacuajo: Escudo de esclavos</content>
+  <content contentuid="h91414e9dg0324g4921g81f6g9b802b15ece4" version="1">El renacuajo obedece al rango. Este oficial protege a sus propias tropas con Escudo de esclavos.</content>
+  <content contentuid="he2a97ec4gf983g459egbe03g1e654876609b" version="1">entregó un informe</content>
+  <content contentuid="h0b674502g54cag4660ga00bgda9bc8788ae0" version="1">ascendió de rango</content>
+  <content contentuid="h15ab48eeg66d9g4a84ga7fcg0af5454ba0d6" version="1">ganó el duelo</content>
+  <content contentuid="h54d8a08cgc9d2g4eebgabc8g80b667f23e0e" version="1">murió en la purga</content>
+  <content contentuid="h0b2cf000g06a0g4844g93d5g6f6d3be2b8a6" version="1">salió de caza</content>
+  <content contentuid="h0fdcf3ddgfe75g45a8g8b23g347adfdd72b6" version="1">huyó del campo</content>
+  <content contentuid="h2629ef9fgf81cg4e03gabadg0f4cd286afea" version="1">cumplió la misión</content>
+  <content contentuid="h328b16cdg023eg47a0ga6bbg2824a6981ff3" version="1">cayó en el campo</content>
+  <content contentuid="h10e5e73egfc28g4a04g8928g9fe236a363c5" version="1">Noticias de la tropa</content>
+  <content contentuid="h1676deabgc16cg45f2gbbc2g8235620d8b2e" version="1">Nada todavía. El ejército no se ha movido.</content>
+  <content contentuid="h5306c1e8gff2dg47c3ga969g0bc3b396c8de" version="1">Noticias de la tropa</content>
+  <content contentuid="hba5116beged32g48d2ga864g6835b7520a8e" version="1">Las últimas cinco cosas que el ejército se hizo a sí mismo mientras mirabas hacia otro lado: informes, ascensos, duelos, purgas y cacerías. Lo más reciente va arriba y solo se guardan cinco. Nada de esto necesita que estés presente. Ocurre lo mires o no.</content>
+  <content contentuid="h6e32cc51g296eg4f95ga091g6752f4969981" version="1">Requiem for the Absolute</content>
+  <content contentuid="h2319ee95g5ec1g4466gac05g715c665d5f59" version="1">Jerarquía</content>
+  <content contentuid="h3c3a4a8cg04f6g41f5gacfcgf2a86aa59341" version="1">Ajustes</content>
+  <content contentuid="h98dae82aga626g4c05g94cfgedc63bef0ea5" version="1">El Libro de Cuentas</content>
+  <content contentuid="hfd9c1895gc6b0g4772gb7dag158d88cc88c1" version="1">Informes entregados:</content>
+  <content contentuid="h1c698275ga96dg43f3g9d11gaf2c2dce2180" version="1">Puestos cubiertos:</content>
+  <content contentuid="hdd7d65e4g8ad5g4cccgafe4g3ce867bbc20a" version="1">Toda patrulla puede llevar un observador silencioso. Cuando su informe llega al ejército, asciende alguien a quien nunca has visto. Abátelo mientras huye y el ascenso no llega a ocurrir.</content>
+  <content contentuid="hf0d48025ga35bg4e65ga0afge8b71aa9d947" version="1">Un comandante que se te escapa vivo, o que abandona el campo tras tumbar a uno de los tuyos, queda recordado por su nombre. Volverá.</content>
+  <content contentuid="he28611eegdddbg403fg8c4cgbdc056e33ad8" version="1">Los Némesis</content>
+  <content contentuid="hff96b16egcfeeg4aadgb5c9g8af9fd5ed7c6" version="1">Oficiales de la Absoluta</content>
+  <content contentuid="hc4fdff51ga45eg4751g9eaeg5c5fe92b89c3" version="1">Juramentados a la venganza</content>
+  <content contentuid="h1f3c6c55g39f4g40bag9c73g796c7e9853e6" version="1">La tropa: incontable, sin nombre</content>
+  <content contentuid="h6258616fg007eg4516ga1ceg8e636640df32" version="1">Solo se gana este rango el comandante que haya dejado a uno de los tuyos en el suelo. Abandona el campo en el instante en que ocurre y vuelve a por ti por tu nombre. Tres como mucho.</content>
+  <content contentuid="h5f78110fgc487g48b9g9d2eg567793b0d3f9" version="1">Comandantes que se te escaparon vivos, o que abandonaron el campo tras tumbar a uno de los tuyos. Cada uno vuelve con un título y mejor equipo, y solo muere delante de ti. Como mucho hay tres andando por el mundo.</content>
+  <content contentuid="h5e9503eag16edg4f84gb27cg57ab010c5ced" version="1">Siete puestos, uno por cada rama del ejército. Un informe entregado cubre el que esté vacío, o asciende al oficial que ya lo ocupa. El numeral es su rango. Son nombres mudos hasta que uno sobrevive a un encuentro contigo y se gana su sitio ahí arriba.</content>
+  <content contentuid="h10ec3badgbb36g4911g98d0ge65d3a7bfaaa" version="1">La tropa</content>
+  <content contentuid="h0dab7436g35f7g48f9ga148g04600a1e3efb" version="1">Incontables y sin nombre. Cualquiera de ellos puede subir: sobrevivir a un solo encuentro contigo es la única puerta.</content>
+  <content contentuid="hc41e2a78g5e0cg4f40g8056gda2facef8060" version="1">Informes entregados</content>
+  <content contentuid="hd123e989g53fag4074g9fabgc2f8a27495ef" version="1">Observadores que se te escaparon y dieron parte. Cada informe alimenta un ascenso. Abatir al observador mientras huye lo impide.</content>
+  <content contentuid="h442b3e2eg847eg4fddgb90bg54fdb63c54dc" version="1">Puestos cubiertos</content>
+  <content contentuid="h6456766ag5247g4bcdg9fb8ga5c07a20e3f8" version="1">Cuántos de los siete puestos tienen ahora mismo un oficial. Uno vacío lo cubre el siguiente informe de esa rama, o el reclutamiento cuando al ejército le faltan manos.</content>
+  <content contentuid="hae240ff8gdd3dg4485g95afge5cd603f243c" version="1">La Marcha del Heraldo</content>
+  <content contentuid="h699f32d2g891cg4d9fgb62bg66519ee6b9bb" version="1">Los Jefes de Guerra Goblin</content>
+  <content contentuid="h3a6978d2g5658g4472gadd7g8e6b58766b32" version="1">Las Almas Verdaderas</content>
+  <content contentuid="h0b1f0088gcf76g46d1g82bcg22d8a4b25909" version="1">Los Cazadores</content>
+  <content contentuid="h52f6b87fgb26cg4d87g8ec5gece14dc8da0b" version="1">El Culto de Myrkul</content>
+  <content contentuid="h0501a8edg9b94g42c2g9427gbee3b01c06af" version="1">Los Bhaalistas</content>
+  <content contentuid="h799642e6g2266g4683ga1afgb30c5da3da5f" version="1">Los Azotamentes</content>
+  <content contentuid="h165c6023g87d7g481bg939eg8cdb96943674" version="1">Aquí no hay ninguna némesis</content>
+  <content contentuid="hcd45bc5fg7b80g4ec5g94a7g6e4a168c9932" version="1">Rango</content>
+  <content contentuid="hc2af0c63ga032g4797gb091gceadb0c3ff68" version="1">Familiaridad</content>
+  <content contentuid="h92f646fage6e7g4972g9b3bg6b721587235d" version="1">Comandantes hobgoblin que recorren las columnas y reagrupan a la tropa en plena pelea. La rama más antigua del ejército.</content>
+  <content contentuid="h38e56d1bg905cg44b8g8eb9g28982fbed155" version="1">Jefes goblin que mantienen unidas a sus bandas solo con miedo. El puesto más tosco, y el que más veces cambia de manos.</content>
+  <content contentuid="h734795c7g4e34g44cegad35ga428ae79446c" version="1">Fanáticos, adeptos, acólitos e inquisidores. Veintiocho cuerpos pueden llevar este rango, así que su oficial es aquel a quien favorezca la Absoluta.</content>
+  <content contentuid="h5e525ac6g8003g4d7bgb054g0bfc6fdfd92c" version="1">Manadas de gnolls que dan caza a lo que se les escapa a las columnas. Su oficial pelea con más fuerza cuanto más cerca está de morir.</content>
+  <content contentuid="h75fba5e8g7ddcg4e60g972bg5a569ea6637e" version="1">Hueso, y los muertos que vuelven a levantarse. Este oficial manda sobre lo que tus propias muertes dejan en el campo.</content>
+  <content contentuid="hb1640214gc405g4149g8019gda1dbc7d49a4" version="1">El asesinato convertido en doctrina. Este oficial abre la pelea con una hoja que nunca viste salir de su vaina.</content>
+  <content contentuid="hd966bc4bg7f19g4616g96deg988f79e2b3f5" version="1">Comandantes ilícidos. La rama más rara del ejército, y aquella a la que responde todo el resto.</content>
+  <content contentuid="h77b76d8cga670g4f8egbd77g70cd07b5cb9b" version="1">Ningún comandante ha dejado a uno de los tuyos en el suelo y se ha marchado. El puesto está vacío.</content>
+  <content contentuid="hd10cc8cag7089g424dgbe69g1391042734da" version="1">Dejó a uno de los tuyos en el suelo y abandonó el campo en el mismo aliento. Ahora te caza por tu nombre, y no es él quien huye.</content>
+  <content contentuid="h1aad865ag59f2g496dga4a9g25f5217f4b19" version="1">Aquí no hay ningún enemigo juramentado</content>
+  <content contentuid="h57e7f0dcg9e7cg4f4bgaaf9gf58dd845b885" version="1">Ningún comandante se te ha escapado y ha vuelto a por más. El puesto está vacío.</content>
+  <content contentuid="ha58551bbgf57cg498bg8a9dg818b47bf7641" version="1">Este se te escapó, o se marchó del campo tras tumbar a uno de los tuyos. Vuelve con un título, mejor equipo y las cicatrices que tú le dejaste, y no huye dos veces.</content>
+  <content contentuid="h5578636fg5ebeg4b4bg8d73g30574351a406" version="1">Un puesto vacío</content>
+  <content contentuid="hf6a0bc21g12e7g4dfbgbd4bg46098a9d69ca" version="1">Ningún oficial ocupa este puesto. El siguiente informe lo cubre.</content>
+  <content contentuid="hccb33617ga5e9g4b19ga82fg76ebe3d200be" version="1">La Absoluta está mirando</content>
+  <content contentuid="h559b95f5gc8dbg44daga2bcg0693d80b7a7f" version="1">Este es el ejército tal y como está ahora mismo. Cada nombre de aquí lo puso algo que hiciste, o que dejaste de hacer.</content>
+  <content contentuid="h7607e630gad3bg4af4gb0d4g7e7340eb39e8" version="1">Informes entregados</content>
+  <content contentuid="h797904c8g32e6g4ae2ga6b8ga1347d9ecb7a" version="1">Incontables y sin nombre</content>
+  <content contentuid="h7c3e91a4gb52dg4f08g9e17g2a6df04b83c1" version="1">Némesis</content>
+  <content contentuid="h5d02b7f6g318cg4a91gbe64gd97c150ae2f3" version="1">Derribó a uno de los tuyos y abandonó el campo en el mismo aliento. Ahora te caza por tu nombre.</content>
+</contentList>

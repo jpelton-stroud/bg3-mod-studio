@@ -1,0 +1,28 @@
+// ==============================================================================
+// UnlockLevelCurveExtended - Spell_Projectile
+// Projectile spells for Wizard Spell Mastery (At-Will, No Spell Slot)
+// ==============================================================================
+
+new entry "Projectile_MagicMissile_Mastery"
+type "SpellData"
+data "SpellType" "Projectile"
+using "Projectile_MagicMissile"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Projectile_ChromaticOrb_Mastery"
+type "SpellData"
+data "SpellType" "Projectile"
+using "Projectile_ChromaticOrb"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Projectile_RayOfSickness_Mastery"
+type "SpellData"
+data "SpellType" "Projectile"
+using "Projectile_RayOfSickness"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Projectile_ScorchingRay_Mastery"
+type "SpellData"
+data "SpellType" "Projectile"
+using "Projectile_ScorchingRay"
+data "UseCosts" "ActionPoint:1"

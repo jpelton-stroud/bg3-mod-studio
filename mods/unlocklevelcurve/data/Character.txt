@@ -1,0 +1,260 @@
+new entry "Badger_Giant_Wildshape_14"
+type "Character"
+using "Badger_Giant_Wildshape_12"
+data "Vitality" "61"
+
+new entry "Badger_Giant_Wildshape_16"
+type "Character"
+using "Badger_Giant_Wildshape_14"
+data "Vitality" "76"
+
+new entry "Badger_Giant_Wildshape_18"
+type "Character"
+using "Badger_Giant_Wildshape_16"
+data "Vitality" "93"
+
+new entry "Badger_Giant_Wildshape_20"
+type "Character"
+using "Badger_Giant_Wildshape_18"
+data "Vitality" "112"
+
+new entry "Bear_Polar_Wildshape_14"
+type "Character"
+using "Bear_Polar_Wildshape_12"
+data "Vitality" "141"
+
+new entry "Bear_Polar_Wildshape_16"
+type "Character"
+using "Bear_Polar_Wildshape_14"
+data "Vitality" "176"
+
+new entry "Bear_Polar_Wildshape_18"
+type "Character"
+using "Bear_Polar_Wildshape_16"
+data "Vitality" "216"
+
+new entry "Bear_Polar_Wildshape_20"
+type "Character"
+using "Bear_Polar_Wildshape_18"
+data "Vitality" "261"
+
+new entry "Deep_Rothe_WildShape_14"
+type "Character"
+using "Deep_Rothe_WildShape_12"
+data "Vitality" "59"
+
+new entry "Deep_Rothe_WildShape_16"
+type "Character"
+using "Deep_Rothe_WildShape_14"
+data "Vitality" "72"
+
+new entry "Deep_Rothe_WildShape_18"
+type "Character"
+using "Deep_Rothe_WildShape_16"
+data "Vitality" "87"
+
+new entry "Deep_Rothe_WildShape_20"
+type "Character"
+using "Deep_Rothe_WildShape_18"
+data "Vitality" "104"
+
+new entry "Spider_Giant_Wildshape_14"
+type "Character"
+using "Spider_Giant_Wildshape_12"
+data "Vitality" "90"
+
+new entry "Spider_Giant_Wildshape_16"
+type "Character"
+using "Spider_Giant_Wildshape_14"
+data "Vitality" "108"
+
+new entry "Spider_Giant_Wildshape_18"
+type "Character"
+using "Spider_Giant_Wildshape_16"
+data "Vitality" "128"
+
+new entry "Spider_Giant_Wildshape_20"
+type "Character"
+using "Spider_Giant_Wildshape_18"
+data "Vitality" "150"
+
+new entry "Wolf_Dire_Wildshape_14"
+type "Character"
+using "Wolf_Dire_Wildshape_12"
+data "Vitality" "127"
+
+new entry "Wolf_Dire_Wildshape_16"
+type "Character"
+using "Wolf_Dire_Wildshape_14"
+data "Vitality" "162"
+
+new entry "Wolf_Dire_Wildshape_18"
+type "Character"
+using "Wolf_Dire_Wildshape_16"
+data "Vitality" "202"
+
+new entry "Wolf_Dire_Wildshape_20"
+type "Character"
+using "Wolf_Dire_Wildshape_18"
+data "Vitality" "247"
+
+new entry "Wildshape_SaberTooth_Tiger_14"
+type "Character"
+using "Wildshape_SaberTooth_Tiger_12"
+data "Vitality" "104"
+
+new entry "Wildshape_SaberTooth_Tiger_16"
+type "Character"
+using "Wildshape_SaberTooth_Tiger_14"
+data "Vitality" "119"
+
+new entry "Wildshape_SaberTooth_Tiger_18"
+type "Character"
+using "Wildshape_SaberTooth_Tiger_16"
+data "Vitality" "134"
+
+new entry "Wildshape_SaberTooth_Tiger_20"
+type "Character"
+using "Wildshape_SaberTooth_Tiger_18"
+data "Vitality" "149"
+
+new entry "Wildshape_Panther_14"
+type "Character"
+using "Wildshape_Panther_12"
+data "Vitality" "76"
+
+new entry "Wildshape_Panther_16"
+type "Character"
+using "Wildshape_Panther_14"
+data "Vitality" "84"
+
+new entry "Wildshape_Panther_18"
+type "Character"
+using "Wildshape_Panther_16"
+data "Vitality" "92"
+
+new entry "Wildshape_Panther_20"
+type "Character"
+using "Wildshape_Panther_18"
+data "Vitality" "100"
+
+new entry "Wildshape_Owlbear_14"
+type "Character"
+using "Wildshape_Owlbear_12"
+data "Vitality" "130"
+
+new entry "Wildshape_Owlbear_16"
+type "Character"
+using "Wildshape_Owlbear_14"
+data "Vitality" "148"
+
+new entry "Wildshape_Owlbear_18"
+type "Character"
+using "Wildshape_Owlbear_16"
+data "Vitality" "166"
+
+new entry "Wildshape_Owlbear_20"
+type "Character"
+using "Wildshape_Owlbear_18"
+data "Vitality" "184"
+
+new entry "Dilophosaurus_Wildshape_14"
+type "Character"
+using "Dilophosaurus_Wildshape_12"
+data "Vitality" "118"
+
+new entry "Dilophosaurus_Wildshape_16"
+type "Character"
+using "Dilophosaurus_Wildshape_14"
+data "Vitality" "140"
+
+new entry "Dilophosaurus_Wildshape_18"
+type "Character"
+using "Dilophosaurus_Wildshape_16"
+data "Vitality" "162"
+
+new entry "Dilophosaurus_Wildshape_20"
+type "Character"
+using "Dilophosaurus_Wildshape_18"
+data "Vitality" "184"
+
+new entry "Air_Myrmidon_Wildshape_14"
+type "Character"
+using "Air_Myrmidon_Wildshape_12"
+data "Vitality" "126"
+
+new entry "Air_Myrmidon_Wildshape_16"
+type "Character"
+using "Air_Myrmidon_Wildshape_14"
+data "Vitality" "144"
+
+new entry "Air_Myrmidon_Wildshape_18"
+type "Character"
+using "Air_Myrmidon_Wildshape_16"
+data "Vitality" "162"
+
+new entry "Air_Myrmidon_Wildshape_20"
+type "Character"
+using "Air_Myrmidon_Wildshape_18"
+data "Vitality" "180"
+
+new entry "Earth_Myrmidon_WIldshape_14"
+type "Character"
+using "Earth_Myrmidon_WIldshape_12"
+data "Vitality" "145"
+
+new entry "Earth_Myrmidon_WIldshape_16"
+type "Character"
+using "Earth_Myrmidon_WIldshape_14"
+data "Vitality" "166"
+
+new entry "Earth_Myrmidon_WIldshape_18"
+type "Character"
+using "Earth_Myrmidon_WIldshape_16"
+data "Vitality" "187"
+
+new entry "Earth_Myrmidon_WIldshape_20"
+type "Character"
+using "Earth_Myrmidon_WIldshape_18"
+data "Vitality" "208"
+
+new entry "Fire_Myrmidon_Wildshape_14"
+type "Character"
+using "Fire_Myrmidon_Wildshape_12"
+data "Vitality" "126"
+
+new entry "Fire_Myrmidon_Wildshape_16"
+type "Character"
+using "Fire_Myrmidon_Wildshape_14"
+data "Vitality" "144"
+
+new entry "Fire_Myrmidon_Wildshape_18"
+type "Character"
+using "Fire_Myrmidon_Wildshape_16"
+data "Vitality" "162"
+
+new entry "Fire_Myrmidon_Wildshape_20"
+type "Character"
+using "Fire_Myrmidon_Wildshape_18"
+data "Vitality" "180"
+
+new entry "Water_Myrmidon_Wildshape_14"
+type "Character"
+using "Water_Myrmidon_Wildshape_12"
+data "Vitality" "126"
+
+new entry "Water_Myrmidon_Wildshape_16"
+type "Character"
+using "Water_Myrmidon_Wildshape_14"
+data "Vitality" "144"
+
+new entry "Water_Myrmidon_Wildshape_18"
+type "Character"
+using "Water_Myrmidon_Wildshape_16"
+data "Vitality" "162"
+
+new entry "Water_Myrmidon_Wildshape_20"
+type "Character"
+using "Water_Myrmidon_Wildshape_18"
+data "Vitality" "180"
+

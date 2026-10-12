@@ -1,0 +1,11 @@
+new entry "Vlaakith_portal_Boss"
+type "Object"
+using "SHA_Shadowquake_Item"
+data "Vitality" "50"
+
+new entry "Shadow_portal_Boss"
+type "Object"
+using "SHA_Shadowquake_Item"
+data "Vitality" "100"
+data "Sight" "600"
+

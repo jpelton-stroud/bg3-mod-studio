@@ -1,0 +1,464 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <content contentuid="h3b21f2a3g5e47gd63bgdbecga6b764e932bf" version="1">Проверка сил иллитидов</content>
+  <content contentuid="h4c2bfb9dgd52cg55dfge2eeg0482f463c83f" version="1">Проверяет, использовали ли вы силу иллитида.</content>
+  <content contentuid="h7fcd8a99g4d11g157bg058eg7c34c7137598" version="2">Dynamic Extra Encounters: триггер сил иллитидов</content>
+  <content contentuid="h4b8134ffg1314g6c27g5c17g91d85eabe46a" version="1">Dynamic Extra Encounters: блокировщик</content>
+  <content contentuid="hf9c9a061g0f2bge6beg20f0g0049a0dfeecf" version="1">Dynamic Extra Encounters: масштабирование уровня</content>
+  <content contentuid="h5a6e4e72g114cg5434g4bc7g4bb6d7cb5e58" version="1">Dynamic Extra Encounters: триггер нежити</content>
+  <content contentuid="h0227bc31g403agb5c1g8ebagd1bd227a13c6" version="3">Метка усопших</content>
+  <content contentuid="h0b008d58ge290g10a3g513bgfbaf62415361" version="1">Dynamic Extra Encounters: появление привидений</content>
+  <content contentuid="h976ae69dg2429g914bg9f2ega7aaf94b9ec7" version="7">Налётчик</content>
+  <content contentuid="h7eb81909g3d5eg471fg7558g9e45867985d5" version="6">Налётчик</content>
+  <content contentuid="h08d3e6ddgc1f9g4d94gde0ag87ad24f4acde" version="5">Воин-гитьянки</content>
+  <content contentuid="h88e993d8g26d8g225fg6164g0c7216724522" version="5">Воин-гитьянки</content>
+  <content contentuid="h7a32e7deg8f29ge81cg6c4cge920a3ff6183" version="1">Триггер повышения уровня.</content>
+  <content contentuid="haf41b1f8gcb80g4284g5166g565150bf566f" version="1">Dynamic Extra Encounters: бонус масштабирования уровня</content>
+  <content contentuid="h038f5f29g65feg2d3fgf88agafa26a2fb682" version="1">Характеристики повышения уровня</content>
+  <content contentuid="ha37056aag56aage938gaf3agf8511d4be8d3" version="1">Бонус масштабирования уровня</content>
+  <content contentuid="hb578e62ag7047g2f41g6b1cg422702c49da3" version="3">Гишра</content>
+  <content contentuid="h3c7187d5g017fg1ebag03afg70e34d9e205d" version="5">Гишра</content>
+  <content contentuid="hcb4f791ag0f7bg31aag647ag80ea5813eeca" version="1">Dynamic Extra Encounters: характеристики привидения</content>
+  <content contentuid="h95d9054ag3469gb476g082cg54c3d73b6b86" version="1">Dynamic Extra Encounters: появление нежити</content>
+  <content contentuid="h62bff688gdba9geccagd266g09cb1ad0dba5" version="8">Элементаль воздуха</content>
+  <content contentuid="haeac339bg85e6g4d38g7590g5dca359aea11" version="8">Элементаль огня</content>
+  <content contentuid="ha3f06eecg03d3gd987g797dg9fbe36e20450" version="8">Элементаль воды</content>
+  <content contentuid="h237c6864g273agdc8fg764cged2ed3214940" version="9">Элементаль земли</content>
+  <content contentuid="h836f4de1gb778gb526g249fg181f57c72112" version="1">Эффекты элементалей земли</content>
+  <content contentuid="h94d4c9f9g4b8bg8f5agdbc1gf1e71f8fc819" version="2">Завеса тонка, и невинные ничего не забывают. Мстительная сущность привязана к вашей душе, ожидая подходящего момента, чтобы потребовать своё. Вы не одни.</content>
+  <content contentuid="heea57484g22e7ga0b9gbcbbgafe559d0f416" version="4">Вы несете краденый артефакт Аверно. Демоническая энергия, бурлящая в вас, дарует постоянный бонус +[1] к &lt;LSTag Tooltip="Strength"&gt;Силе&lt;/LSTag&gt;, но создаваемый им маяк привлекает гнев камбионов и дьяволов.</content>
+  <content contentuid="hcf4a911bgd252ged2cgb5cfgc5528d771784" version="4">Ваши рефлексы обострены окружающей тьмой, что дарует постоянный бонус +[1] к &lt;LSTag Tooltip="Dexterity"&gt;Ловкости&lt;/LSTag&gt;. К сожалению, эта концентрированная тьма притягивает внимание Госпожи Утрат, привлекая свирепые тени и призрачных темных юстициаров.</content>
+  <content contentuid="hab6a4db3g39c7g9a75gadc8g75549ba18fc8" version="4">Сырая, нефильтрованная жизненная сила, пульсирующая в этом органе, укрепляет вашу кровь, даруя постоянный бонус +[1] к &lt;LSTag Tooltip="Constitution"&gt;Выносливости&lt;/LSTag&gt;. Однако запах этой украденной магии привлекает кровожадных красношапок и гниющих вайд.</content>
+  <content contentuid="hf55c4da5gfa52gb77cgae01ge20f91410899" version="9">Взгляд Маглубиета</content>
+  <content contentuid="hef948498g1d2eg5ae7gc4c2gcd0cc39af904" version="9">Огромный налитый кровью глаз, плавающий в мутной зловонной жидкости. Местные племена почитают его как святой артефакт своего свирепого бога войны, хотя его истинное биологическое происхождение остается жуткой тайной.</content>
+  <content contentuid="h814b2261g82a3g5ac9gbea3g9ca6f26aca2b" version="8">Призма ложного «я»</content>
+  <content contentuid="hc6c94d86g1c93gfd97ge841gf1d59d216946" version="8">Зазубренный светящийся осколок кристалла, преломляющий свет невозможным, головокружительным образом. Вглядываясь в него, вы видите слегка идеализированное, бесконечно улыбающееся отражение самого себя, которое двигается с задержкой в долю секунды.</content>
+  <content contentuid="h6945cbf1g22d1gad31gb8a4gfc20889bd9f2" version="9">Адский гримуар</content>
+  <content contentuid="h7139cb1fg3093g012dg5633gdd36b6ceb261" version="9">Тяжелый том в переплете из темного металла, обложка которого напоминает кованые ворота, сдерживающие вихрь адского пламени. Страницы неприятно горячие на ощупь и постоянно пахнут серой и жженой медью.</content>
+  <content contentuid="h28b447f3g458eg69a6gc494g4d850aaa6b82" version="8">Мозг в сосуде</content>
+  <content contentuid="hf11bfb79g2ae1g6cc6g3d35gdc9d1f6e5af4" version="8">Удивительно сохранившийся мозг, плавающий в изысканном шипастом стеклянном сосуде, наполненном светящейся зеленой консервирующей жидкостью. Он слабо пульсирует чистой психической энергией, время от времени вызывая тупую боль в висках у каждого, кто держит его в руках.</content>
+  <content contentuid="habbb5b69g60efg0f4fga2cdg8419933b1153" version="10">Жемчужина затмения</content>
+  <content contentuid="he012562cg2ea6g47f9g1feagfed71d7adfa9" version="10" />
+  <content contentuid="he6b11ad7g6787g7c93g4bfcg728a6c48dc09" version="2">Проклятие: Адская метка</content>
+  <content contentuid="h5952bc81g937dg187bg2b1egdb351da6789c" version="2">Проклятие: Завеса пустоты</content>
+  <content contentuid="ha9780f16gc586g51fcg71acgb9d157a163d4" version="2">Проклятие: Месть болот</content>
+  <content contentuid="h7158061ag133fg6f41g50aagc3105d8b7ff6" version="2">Проклятие: Псионический маяк</content>
+  <content contentuid="h6e79c943g6ffcg5fadg6d28gfa701dcdd18e" version="3">Психический резонанс этого сосуда расширяет ваш разум, даруя постоянный бонус +[1] к &lt;LSTag Tooltip="Intelligence"&gt;Интеллекту&lt;/LSTag&gt;. Ужасная цена заключается в том, что он транслирует ваше местоположение по псионической сети, оповещая пожирателей интеллекта и свежевателей разума.</content>
+  <content contentuid="h5c6304b5g61f0gfb50gf479g8fb26f3aa2ec" version="2">Проклятие: Гнев военачальника</content>
+  <content contentuid="h7f47b7f0g3c21g2888g50f2g0b590eb19ea7" version="3">Проницательность этого жуткого трофея дарует постоянный бонус +[1] к &lt;LSTag Tooltip="Wisdom"&gt;Мудрости&lt;/LSTag&gt;. Однако владение им делает вас главной целью для разъяренных гоблинов и их варгов.</content>
+  <content contentuid="hbd6dc304gb106g92a0g38b2g504fbc16df6c" version="2">Проклятие: Расколотое отражение</content>
+  <content contentuid="hbc866e95g81dcg9a0ag4b47g66ca830dc175" version="3">Потусторонняя уверенность, исходящая от кристалла, дарует постоянный бонус +[1] к &lt;LSTag Tooltip="Charisma"&gt;Харизме&lt;/LSTag&gt;. Остерегайтесь кристалла, так как его магия время от времени раскалывает реальность, создавая для вас и ваших союзников враждебных теневых двойников, стремящихся заменить оригиналы.</content>
+  <content contentuid="ha52ecfc6gce47g0889gd8a4g2679da0b544e" version="8">Мумифицированное сердце карги</content>
+  <content contentuid="h05f14f8fg02cfga716g1024g0d8b20869822" version="8">Затвердевшая масса размером с кулак, которая все еще слабо бьется в вашей ладони. Она сильно пахнет болотной водой и гнилью, излучая скверную, но невероятно мощную жизненную силу.</content>
+  <content contentuid="h60cc6345g950cgcfcega40bgd7e6c7edaef7" version="9">Тяжелая холодная сфера из темного камня с тонкими светящимися голубыми прожилками. Кажется, она поглощает свет вокруг себя, создавая в вашей сумке постоянный неестественный мрак.</content>
+  <content contentuid="h71b914c7gab0eged74g5023g9996cd679f4b" version="1">Адская метка</content>
+  <content contentuid="hb7827257g3c0ag8ab8g89c4g25fb59b4cd82" version="2">Дарует постоянный бонус +[1] к &lt;LSTag Tooltip="Strength"&gt;Силе&lt;/LSTag&gt;.</content>
+  <content contentuid="h83b15b94gd02bg4ddcg10ffgd78646aa85e1" version="1">Завеса пустоты</content>
+  <content contentuid="h5e18f391ga507gd853g98a1g944282b7ce7d" version="2">Дарует постоянный бонус +[1] к &lt;LSTag Tooltip="Dexterity"&gt;Ловкости&lt;/LSTag&gt;.</content>
+  <content contentuid="ha8d5dab0ge897g3adage6efg163343a4b11d" version="1">Месть болот</content>
+  <content contentuid="hefdce986gb624g9e93gaec9geb0c04d5dcd4" version="2">Дарует постоянный бонус +[1] к &lt;LSTag Tooltip="Constitution"&gt;Выносливости&lt;/LSTag&gt;.</content>
+  <content contentuid="h630b3e0ag066ag7ca6g25e1g114cc282675b" version="1">Псионический маяк</content>
+  <content contentuid="h04200047g0fd9gf2cagd34ag2bf3b102ddea" version="2">Дарует постоянный бонус +[1] к &lt;LSTag Tooltip="Intelligence"&gt;Интеллекту&lt;/LSTag&gt;.</content>
+  <content contentuid="he9a0a1eeg6ef4g2c9dg91c6g14637972e26f" version="1">Гнев военачальника</content>
+  <content contentuid="ha635b121g7950g9196g1020g45bd6d8ce842" version="2">Дарует постоянный бонус +[1] к &lt;LSTag Tooltip="Wisdom"&gt;Мудрости&lt;/LSTag&gt;.</content>
+  <content contentuid="h8d3d3c68gfdb9g2c1fg784cg2d8e8669d849" version="1">Расколотое отражение</content>
+  <content contentuid="hb112b8d3ga546g6afeg0555g33fcb8801998" version="2">Дарует постоянный бонус +[1] к &lt;LSTag Tooltip="Charisma"&gt;Харизме&lt;/LSTag&gt;.</content>
+  <content contentuid="hefb69008g6740gb4fcgdd2cgb8a38256f001" version="1">Триггер проклятого предмета</content>
+  <content contentuid="h2cd39fd2gbc7dgf7b6g629eg18532fdb526d" version="1">Триггер проклятого предмета</content>
+  <content contentuid="ha5079d0dge6b3g5dbbg124cg991ab9e213f5" version="1">Триггер проклятого предмета</content>
+  <content contentuid="ha03bc6e3g63f9g3a1bg6876ged2cb6f53d4b" version="1">Триггер проклятого предмета</content>
+  <content contentuid="h1d68b768g0769g227bg3f94gbcebd748c952" version="1">Триггер проклятого предмета</content>
+  <content contentuid="h434598b5g5f3eg42a6ge8d2g6c90dce70d53" version="1">Триггер проклятого предмета</content>
+  <content contentuid="h094d8750gf4d8gfb13g1ebfg358f580fd594" version="6">Мстительный камбион</content>
+  <content contentuid="h24d20e55g48cdg72fag0c81gf0bd5713ccca" version="6">Мстительный бес</content>
+  <content contentuid="h24d930f9gf93ag6bf6gd78cg7eafbdb046cf" version="9">Зеркальный двойник</content>
+  <content contentuid="h20fb8ba7gdba1gf868g002egc4f9e17eabbb" version="6">Мстительный камбион</content>
+  <content contentuid="he52303e6g5e7dg1deeg8c01gec9ec08ebd65" version="1">Гоблин-буяг</content>
+  <content contentuid="hd65bcba7gd3d7gb8fcg7848gcda3e921b4fc" version="1">Гоблин-драчун</content>
+  <content contentuid="h46a2dd08gf7f8g8be4g4e92g869e767a6c94" version="4">Гоблин-ищейка</content>
+  <content contentuid="h241d066ag70adge012gb1d6g3329259bcdbb" version="1">Гоблин-остроглаз</content>
+  <content contentuid="h1a37e91cg083ag59d3geee4gd04031367cce" version="4">Юстициар-ночной ткач</content>
+  <content contentuid="h0a20c311ga4efg4b9bg2eccg9dcef48e0311" version="4">Юстициар-мститель</content>
+  <content contentuid="h63d0fe3egc116gb033gee36gb4ef34e9a99a" version="4">Юстициар-ловец душ</content>
+  <content contentuid="h2d1f2d80g20aaga7ddg8a10g26068b2fe68b" version="4">Тень</content>
+  <content contentuid="hb724cbd3gd7f1ge1f4g5241gf0cb64ba5a92" version="4">Призрак</content>
+  <content contentuid="hb4e267f1g5d21g6319gda7bgc0febbd5582d" version="4">Красношапка</content>
+  <content contentuid="h2f2e43c6g87a5g6d6agbb5cg15aa1b4c549c" version="4">Кровавый мудрец красношапок</content>
+  <content contentuid="h5272e333g448ag1666gb951gfab42b22cd72" version="6">Красношапка</content>
+  <content contentuid="h1cadd1efg9619ge773g746fg1df2944a5276" version="4">Минлок</content>
+  <content contentuid="h94b99395g942dg319dga645g413a41ab1312" version="4">Вайда</content>
+  <content contentuid="h3c1be0c6g8843g9f80gaf67ge05b2e426a94" version="3">Пожиратель интеллекта</content>
+  <content contentuid="hc1936342g080cg4f08g47afg4546903bc9b9" version="5">Прожорливый пожиратель интеллекта</content>
+  <content contentuid="h4af3d31fgdc9fg8cb8g9078g10e408a66ee1" version="9">Церебральный архонт</content>
+  <content contentuid="h982317ebg88b5g2f5eg6a10g14e95bb73663" version="9">Хранитель утерянного воспоминания</content>
+  <content contentuid="hf4c4d5edg8548gc923g949fg008000d19de8" version="8">Церебральный страж</content>
+  <content contentuid="h62ad91a3g0e7dg46deg3e24g228ef2820e09" version="8">Длань востребования</content>
+  <content contentuid="hf2f3008eg4173g4b32g2c41g8785e9e7d4e9" version="8">Церебральный кантор</content>
+  <content contentuid="h453bf2ecgbf46g1d62ge7e3gad2692f4f404" version="8">Глас преследования</content>
+  <content contentuid="hc3804c58gb01fg8949gbf02gce5786de3692" version="1">Гоблин-ищейка</content>
+  <content contentuid="he924441cg2012g88f8gad83g707b839915a3" version="5">Гоблин-остроглаз</content>
+  <content contentuid="h49a64820g6e98ge6b4g002dg7baf0521e1aa" version="5">Гоблин-храбрец</content>
+  <content contentuid="hf37875e6g374eg51b8gb7e5gd6f8630ef5e4" version="5">Гоблин-буяг</content>
+  <content contentuid="h58a41954gbae9g6259g1a60geb9274273c26" version="4">Варг</content>
+  <content contentuid="h5b5fbe48g52b7g6012g3f82g7d035becc4cd" version="4">Адский кабан</content>
+  <content contentuid="h2b5d6f89g7b43ge279g7960g4f5df1abd0c0" version="6">Мстительный кабан</content>
+  <content contentuid="hceded001g8fe1gcc61g20c5g023e26d289fa" version="5">Гоблин-драчун</content>
+  <content contentuid="h89d6f83agb70dg7092g129fg8b8e2feea3c2" version="5">Зеркальный двойник</content>
+  <content contentuid="hd012bf7egeb09gcc21gedfbg5ba75a9ed47f" version="6">Зеркальный двойник</content>
+  <content contentuid="h6e68007fga638g3d9cg47edgc58c4db0ec5e" version="1">Dynamic Extra Encounters: эффекты проклятого клона</content>
+  <content contentuid="hc7e80843g2993g2c96g1b11g25b6fd403a8d" version="3">Камбион</content>
+  <content contentuid="h7d0007ddgd654g2040gf968g3b64307f6039" version="1">Архетип: варвар</content>
+  <content contentuid="h81f66e85g9c0ag7ec0gebb7g3d2a83e63cf2" version="1">Архетип: бард</content>
+  <content contentuid="hafbdf72fgb34bg971cgcf0dg341cf8b9f9f2" version="1">Архетип: жрец</content>
+  <content contentuid="he751a855gc2b9g8553g220agbaeed87ef2fc" version="1">Архетип: друид</content>
+  <content contentuid="ha3dd89d6g0b06g8887g5d38g8570d0e02565" version="1">Архетип: воин</content>
+  <content contentuid="h33a81932gd4eag8639g2044gbeca9f2d63fd" version="1">Архетип: монах</content>
+  <content contentuid="ha4b49e74g492agd6e3g7581g26ab9a7f659e" version="1">Архетип: паладин</content>
+  <content contentuid="h00a6d69fgcb8fg69dcg133bg2efd4f3fb3f8" version="1">Архетип: следопыт</content>
+  <content contentuid="h01a5a2a3g9412g7c7bgf346g04b8b0b147e9" version="1">Архетип: плут</content>
+  <content contentuid="ha270b254g40a1g70efg39a3g1d93a6913707" version="1">Архетип: чародей</content>
+  <content contentuid="ha23648fag1ac9gccc9g91dfgd130d7db3e4c" version="1">Архетип: колдун</content>
+  <content contentuid="hf4ac18cagde30g0684gfb54g88cca10c678b" version="1">Архетип: волшебник</content>
+  <content contentuid="he76e255dg31a0gf87agced1g077003cb5fee" version="5">Хобгоблин</content>
+  <content contentuid="h7674e871g6870gbd46g5c3cgeee155569b97" version="3">Белый варг</content>
+  <content contentuid="he887c83bg77f1g4ae6g647dg3867d9ea932c" version="1">Проклятый предмет</content>
+  <content contentuid="h4e53b20fg728egcbbcgf2f5g2374f76e502d" version="5">&lt;LSTag Type="Image" Info="TutorialRedWarning"/&gt; Этот предмет проклят! Будьте осторожны, подбирая его!</content>
+  <content contentuid="hee27ff5fga0e6g0576g7b84gd710b34192cd" version="1">Взрыв раствора изменений</content>
+  <content contentuid="h22867e7cgd380g8313g8ae4g6251f27eec96" version="1">Обливает находящихся поблизости существ раствором изменений, который наносит урон и покрывает поверхности.</content>
+  <content contentuid="hbe159a64g18d5gfc00gfe25g2c420d4c05c6" version="1">Вздутое чрево</content>
+  <content contentuid="h31969ac7ga588g0fbcg60cfg0ecab9e22549" version="1">Когда ненасытный пожиратель интеллекта погибает, он взрывается &lt;LSTag Type="Spell" Tooltip="Projectile_DEE_DeathBurst_IntellectDetonator"&gt;взрывом раствора изменений&lt;/LSTag&gt;.</content>
+  <content contentuid="hd527b7b6ge686gcff3ga93bgc641f53645a0" version="1">Юстициар-разбойник</content>
+  <content contentuid="h9217223agb1d4gbd6ag3961g85264425e5f7" version="1">Последователь Маглубиета</content>
+  <content contentuid="hf624a41cgcf33g03c4g54abg47eaab476dfa" version="1">Последователь Маглубиета</content>
+  <content contentuid="h8871bd4egdeccg0a6cge9bbgb72c431cfe72" version="1">Последователь Маглубиета</content>
+  <content contentuid="h1aeb0634gb338g9373g8a34gf87e8fb23fe7" version="1">Последователь Маглубиета</content>
+  <content contentuid="h41a80284g429ag3f24g18bdgc2f791ad5067" version="1">Последователь Маглубиета</content>
+  <content contentuid="h0dfb6e32g1a3cg921dge932gb9a628a588d2" version="1">Последователь Маглубиета</content>
+  <content contentuid="ha80adb82g8109ge863ge024g2b6c50562050" version="4">Последователь Маглубиета</content>
+  <content contentuid="h7df7ccdegf6f3g76c8gab27g4d80153e22fd" version="6">Мародёр</content>
+  <content contentuid="hc8233a22g666bgc7b2g716fgb6edb22113ef" version="5">Мародёр</content>
+  <content contentuid="haeb86ab5gefb9gc831ge3bfge474059b4306" version="6">Мародёр</content>
+  <content contentuid="h62b9a531g2089g95a5g2ec6g570975ffb2a0" version="2">Мародёрство</content>
+  <content contentuid="h00e35903g2424gae97g3a99gf118691c0aef" version="1">Поиск добычи.</content>
+  <content contentuid="ha7148df9ga664gb5efgc63fg8f644ca378b4" version="2">Блокировка мародёров включена</content>
+  <content contentuid="haca97ff0g43d2g225bgc647ge8a60e0e0e3b" version="1">Предотвращает появление мародёров.</content>
+  <content contentuid="he2f76790geddeg21eeg5972g6b4a011a71c4" version="1">Полевые мародёры</content>
+  <content contentuid="hf756be23ga43cg895dg97afg24d15f155078" version="1">Включает или выключает появление мародёров (Dynamic Extra Encounters).</content>
+  <content contentuid="h9be54691g589agf8e4g1399ge4b32157e507" version="2">Функции Dynamic Extra Encounters</content>
+  <content contentuid="h67b04144g816bg3a79g1abeg2566edf3daea" version="1">Включить функции Dynamic Extra Encounters</content>
+  <content contentuid="h4502abf5ga682g1281g17c8gf26538813cf4" version="1">Отключить функции Dynamic Extra Encounters</content>
+  <content contentuid="h395c26ddg521bg9752g10f9gffd72e49a297" version="2">Позволяет включать и отключать функции Dynamic Extra Encounters.</content>
+  <content contentuid="h01d7e712g516bg9e01g33c2gaace360abda6" version="4">Функции полевых мародёров</content>
+  <content contentuid="h3b9d1566gf22fg2a6fg4f13g2520e1d30b1a" version="1">Скрывает функции Dynamic Extra Encounters</content>
+  <content contentuid="hca4adfbagd392g58a8g9ab7g4a39a81e0a81" version="1">Менеджер Dynamic Extra Encounters</content>
+  <content contentuid="h7b10e334ga1f1g93b2g9b78gf5b11e50e9b1" version="1">Позволяет включать и отключать функции Dynamic Extra Encounters.</content>
+  <content contentuid="hda916fe8g3901g26afg34d2g29a409d445be" version="2">Блокировка элементалей включена</content>
+  <content contentuid="h618eeac4g0ed9g4889g13f4g0c8c5a874367" version="1">Предотвращает появление элементалей.</content>
+  <content contentuid="had369665gce87gb3eagd714gd54a0d7aab3c" version="2">Блокировка нежити включена</content>
+  <content contentuid="ha80e79fdg0f62g8607g3334g9e273c35222c" version="2">Предотвращает появление погребённой нежити при откапывании зарытых сундуков.</content>
+  <content contentuid="hd732a942gc726g909eg8e61g22bf1ae5b3f4" version="2">Блокировка привидений включена</content>
+  <content contentuid="h5a0fa1begd2e6g9b39gdf41gad1f37075373" version="1">Предотвращает появление мстительного духа.</content>
+  <content contentuid="heb1acaecg9c34g49c2gefecg7449ee3003f1" version="2">Блокировка охотников-гитьянки включена</content>
+  <content contentuid="hcc75450eg67a5g1d56gd152gb17ef66cfb1d" version="2">Предотвращает появление охотников-гитьянки после использования сил иллитидов.</content>
+  <content contentuid="h96e64a1fg9874g8be9g19ffg5480c6228dcf" version="1">Погребённые ужасы</content>
+  <content contentuid="hfac1a2efgbdf5gea2cgd3c9g34109e8e8d69" version="1">Включает или выключает появление нежити при откапывании зарытых сундуков (Dynamic Extra Encounters).</content>
+  <content contentuid="hab1686a6g4c7dg6747gbcc2g57220ea2f11e" version="1">Схождение стихий</content>
+  <content contentuid="h3c77c84dg3a9bg1d5bg2b8cgad647316f916" version="1">Включает или выключает появление элементалей при нанесении специфического элементального урона (Dynamic Extra Encounters).</content>
+  <content contentuid="h40bd2db6g498bg5dbcgfb4dg8bb05550dd35" version="1">Охота гитьянки</content>
+  <content contentuid="h231a27a7ga5c7g8e77gb27ageb1f6fd4f7a9" version="1">Включает или выключает появление охотников-гитьянки при использовании сил иллитидов (Dynamic Extra Encounters).</content>
+  <content contentuid="h0d05afa4g414ege13eg9e71gb14f6028a0c9" version="1">Метка усопших</content>
+  <content contentuid="hc35fd235gb6adg5569gdc15gbbd3fda90d4c" version="1">Включает или выключает появление мстительных духов при убийстве мирных жителей (Dynamic Extra Encounters).</content>
+  <content contentuid="hdf44e6fdg1dadg0920g509eg7fb440166878" version="1">Отключить полевых мародёров</content>
+  <content contentuid="h918e3f66g8980g9410g52c1gca468bf9d7ed" version="2">Функции схождения стихий</content>
+  <content contentuid="h75165e29g3fe5g801fg255fg157a677f20d4" version="1">Отключить схождение стихий</content>
+  <content contentuid="h917cd336gb892g5dbeg3c17g4160e3869e22" version="2">Функции «Метки усопших»</content>
+  <content contentuid="h268cd5bcgb8b8g3bcbgf6e5ga057498108e6" version="3">Функции погребённых ужасов</content>
+  <content contentuid="h75d265a5g3429gf115g3135g16c340bfe072" version="1">Отключить погребённые ужасы</content>
+  <content contentuid="h44e9e888gd0e3gc2cag2542g0e16e26ef3f5" version="1">Отключить «Метку усопших»</content>
+  <content contentuid="hdee75b8dg9f2dg0619ge3e6g2d59f40817a7" version="2">Функции охоты гитьянки</content>
+  <content contentuid="h387f5c95ga973g54fegf46eg7fe59375df64" version="1">Отключить охоту гитьянки</content>
+  <content contentuid="h5f71addeg78e9ga977g8083gbe39dc1e2bad" version="1">Включить или отключить полевых мародёров</content>
+  <content contentuid="h39ef2a57g4b51gdb8dg30feg010af2526129" version="1">Включить или отключить схождение стихий</content>
+  <content contentuid="ha76cf575g8c8fga794gb26bgaba7e63cae71" version="1">Включить или отключить «Метку усопших»</content>
+  <content contentuid="h1898a1b4g00bbg4748g80f5g199797db925b" version="1">Включить или отключить погребённые ужасы</content>
+  <content contentuid="h88b386b8g1cb4gdbf1g294dg9ad42bbdda51" version="1">Включить или отключить охоту гитьянки</content>
+  <content contentuid="ha6292208g2240g5446gc414gdc84e44f9405" version="1">Добавляет контейнер заклинаний</content>
+  <content contentuid="heb384c60ga87cg5fbfg06d7ga0c58a3cc1cb" version="1">Контейнер заклинаний для включения и отключения функций.</content>
+  <content contentuid="h23bbe22egac78g08dag4213gd36c0bca5d22" version="2">Корни Теней</content>
+  <content contentuid="hf78be6afgc536g2c71ge115g0f17320a57c4" version="3">Убив лазутчиков в Изумрудной роще, вы привлекли внимание множества друидов Теней, всё ещё действующих в диких землях. Они будут неустанно идти по вашему следу, пока вы не достигнете Оскверненных тенью земель — места, слишком темного даже для тех, кто шагает во тьме.</content>
+  <content contentuid="h1451e95ege3e7g6627g0fc6g3190bdc3b5e1" version="1">Dynamic Extra Encounters: триггер друидов Теней</content>
+  <content contentuid="h2aff056bgbe0bg517bg9488g28c7947d5eaa" version="1">Dynamic Extra Encounters: эффекты друидов Теней</content>
+  <content contentuid="h7174f13dg7217g2de1g3eafg1f3ea1778565" version="1">Дриада</content>
+  <content contentuid="h74f4ee17g39ceg69f1g11d7g9d01967076bc" version="2">Друид</content>
+  <content contentuid="h51193c32g27beg202fgdd6agd5a627ab2b57" version="2">Затронутый тенью</content>
+  <content contentuid="he2fef81ag8a6dg7722g0801g89bcaf23f476" version="2">Друид</content>
+  <content contentuid="hbe93bf05ge8a1g80f0g8bacg0a9f86d9832c" version="2">Затронутый тенью</content>
+  <content contentuid="h284374bag90ceg0ca2gfb67g43cb8f4c6e5d" version="3">Друид</content>
+  <content contentuid="hb11e4c7ag6f51g643dg2c07g1827579039ca" version="3">Затронутый тенью</content>
+  <content contentuid="h98907d6bgde53g61f1g040dgdeea48f59261" version="3">Друид</content>
+  <content contentuid="ha37cac9fgf38cgdbd0g53e1gac7487e2cc5d" version="3">Затронутый тенью</content>
+  <content contentuid="h50a2aed4gf8d5gf167ga82fgfdbea1a1d3af" version="3">Друид</content>
+  <content contentuid="h29c5378egc54dgf4c8gcf39gfcdb4d4573a4" version="3">Несущий шипы</content>
+  <content contentuid="hd69cebcag6155gee38g5c9cg4eaa54830bdc" version="2">Блокировка друидов Теней включена</content>
+  <content contentuid="h1d34c2ccg19e7ge071gf3a3gb5b7a47d7d3b" version="1">Предотвращает появление друидов Теней.</content>
+  <content contentuid="h37bc7c56g2a77g249dg41a7g48582ed76f2f" version="2">Функции «Теневых следов»</content>
+  <content contentuid="hbc58f905g638bg0b09g8803gf44f5bc61518" version="1">Включить или отключить засады друидов Теней</content>
+  <content contentuid="ha907844dgd013gf27ag56e9g8d7430e52a7f" version="4">Монета проклятых</content>
+  <content contentuid="h4f6f876eg2e4fg08d1g7a65g23ea5209f371" version="4">Торговцы смотрят на эту монету с глубоким подозрением, инстинктивно завышая цены. Однако её истинная суть делает её знаком высокого престижа, со временем снискивающим великое расположение.</content>
+  <content contentuid="h550f2e61g0642gea0egf63fg815dcfbc8660" version="3">Проклятое восприятие: Проклятие</content>
+  <content contentuid="h18abf22cg285egd8d6g503cgf53f4f9b1026" version="3">Монета-пустышка</content>
+  <content contentuid="h4d649cabga6d4g386cg1c83g22cff7ae48f6" version="2">Проклятое восприятие</content>
+  <content contentuid="h4458d1dcgd7d5g3600gab92gb244b394b704" version="1">Ничего не делает.</content>
+  <content contentuid="hcb80ab25ge12ag73e5g6085g241a41171cb5" version="1">Стойкая и тревожная аура искажает восприятие окружающих. Торговцы шарахаются от вас и требуют значительно более высокую плату за свои товары. Искажение сменяется на противоположное, как только проклятие снимается: торговцы начинают видеть в вас желанного покровителя и вместо этого предлагают небольшую скидку.</content>
+  <content contentuid="ha991434ag5ba1g346egb677g51b603386b2f" version="1">Положительное отношение торговцев</content>
+  <content contentuid="h651e081cg6037gdf67g195dg9deac2806e9a" version="1">Блокировка лагерных огров включена</content>
+  <content contentuid="hd82908fcg0254gc901g7adbgc62b87d492ec" version="2">Предотвращает появление огров в лагере после долгого отдыха.</content>
+  <content contentuid="hfbe9608ag84cbgd672gcf23ga17d15a13f06" version="1">Запах обжоры</content>
+  <content contentuid="h0dd67b15g3a14gd884g5c68g9f768a616541" version="1">Включить или отключить огров в лагере</content>
+  <content contentuid="hf22b0f1bgb298gd585g70b5gdce9ec2d7464" version="2">Ожившие доспехи</content>
+  <content contentuid="h94accc33g47c4g1105g73ffg744a02977356" version="2">Ожившие доспехи</content>
+  <content contentuid="h7b3c867ag3407gff99ga04ag1e23f6761676" version="2">Ожившие доспехи</content>
+  <content contentuid="h7bc27244gdaa1gdccbg13abga46ea8134d5c" version="1">Блокировка оживших доспехов включена</content>
+  <content contentuid="h6f0f27d9gdfcdge2e6g294eg932ee3dc4fa6" version="2">Предотвращает появление оживших доспехов при обыске нагрудников.</content>
+  <content contentuid="h59ea0e06ga549gc70eg7bf4gfad06817bd8e" version="1">Разумная сталь</content>
+  <content contentuid="h92764be4g8164g00feg147dg2d15e47dc26a" version="1">Включить или отключить ожившие доспехи</content>
+  <content contentuid="h2bc182b7g4db5gc61ag5e42g11a650174ae0" version="2">Дым и кинжалы</content>
+  <content contentuid="he4c50448gc51ega84cgf743g56c996bdcd9e" version="1">Включить или отключить воров-взломщиков</content>
+  <content contentuid="h45f96d3fgf3bcgd4d1g8dfdga2f7c1ad5bf3" version="1">Блокировка воров-взломщиков включена</content>
+  <content contentuid="h95027b33g3503g8518gefedg35d72b526bca" version="1">Предотвращает появление воров при взломе замков.</content>
+  <content contentuid="h10b427edg4c7fg6a7ag0a0dg0243ca1e0f16" version="2">Злоба выжившего</content>
+  <content contentuid="he6d33038g6f4bgd2b8gdf1dg7ff39a637cf1" version="2">Закалённый поражением</content>
+  <content contentuid="hd672aca1gf8ccg54a4g5207g2e109027fab6" version="2">Аватар мести</content>
+  <content contentuid="h559dccd2g0c7bg323dgb134g87c24ad788ed" version="2">Эхо поражения: Вендетта</content>
+  <content contentuid="h67402540g5e0eg9212g96feg29b3285bb129" version="2">Блокировка «Эха поражения» включена</content>
+  <content contentuid="h72196accg4372g4c54ge484g6aa620e23d26" version="1">Предотвращает объявление вендетты врагами против игрока.</content>
+  <content contentuid="h4637800bg5d75g5653g4206gdd4c8ddbef08" version="2">Эхо поражения</content>
+  <content contentuid="h262d09c7g6e60g922dgf11dg76cad63b87eb" version="1">Включить или отключить врагов с вендеттой</content>
+  <content contentuid="h27bab316g0af5g70e2geb21g9fe6f0837f47" version="3">Питаемая горькими воспоминаниями о едва не случившейся гибели, ваша ненависть толкает вас за пределы обычных возможностей.&lt;br&gt;&lt;br&gt;Угроза вендетты: Обычная</content>
+  <content contentuid="h454dd925gf376gad72gf47bgc229a1a37b30" version="2">То, что вас не убило, лишь сделало ваш клинок острее. Вы тщательно изучили свою добычу и вернулись со смертоносной точностью и адаптивными контрмерами.&lt;br&gt;&lt;br&gt;Угроза вендетты: Элитная</content>
+  <content contentuid="h5af92dc6g5240g45cfgedc9g37d2c0dbc430" version="2">Исключительно благодаря силе воли вы превзошли смертную слабость и стали неудержимым воплощением мести. Вы не успокоитесь, пока ваша цель не будет полностью уничтожена.&lt;br&gt;&lt;br&gt;Угроза вендетты: Мини-босс</content>
+  <content contentuid="h2f13015bg64c8g6ab7g9ea4g5c6be3cb461e" version="1">Злобные удары</content>
+  <content contentuid="haa81a6edg8c1cg83f3gbd78geed94105a2d8" version="1">Все атаки наносят дополнительно [1] урона.</content>
+  <content contentuid="h8d55216egc85ag63d6g5273g01eb10cc9a8a" version="1">Закалённая решимость</content>
+  <content contentuid="h1abb80d9gb367g6584g1ec6ge66d10ba0bad" version="2">Дарует бонус +[1] к &lt;LSTag Tooltip="ArmourClass"&gt;классу брони&lt;/LSTag&gt; и &lt;LSTag Tooltip="SavingThrow"&gt;испытаниям&lt;/LSTag&gt;, пока запас &lt;LSTag Tooltip="HitPoints"&gt;очков здоровья&lt;/LSTag&gt; превышает [2]%.</content>
+  <content contentuid="hbbe600a6g01cbg868eg8ae7g1605692b80f3" version="1">Мстительный шаг</content>
+  <content contentuid="h0d676457g6c25gcb92g81a0g2550082371b7" version="2">Дарует +[1] к &lt;LSTag Tooltip="MovementSpeed"&gt;скорости перемещения&lt;/LSTag&gt; и невосприимчивость к &lt;LSTag Tooltip="OpportunityAttack"&gt;внеочередным атакам&lt;/LSTag&gt;.</content>
+  <content contentuid="h41937a66gdbd6g4efcg5a92gcb70b740780c" version="1">Прилив адреналина</content>
+  <content contentuid="h24696dd4g2583gd4afg219dg436f60172cfa" version="2">Восстанавливает [1] в начале каждого хода.</content>
+  <content contentuid="hba6421fdg547dg322dg3a52g9181c14fe219" version="1">Толстая шкура</content>
+  <content contentuid="hc01c1fa8g64e8g2540gd970g9620a6b69cb5" version="2">Урон от всех атак ближнего боя против вас уменьшается на [1].</content>
+  <content contentuid="ha3d2686ag11cfg52fagf504g3d0cf85d3e8a" version="1">Смертоносная точность</content>
+  <content contentuid="hd37b8f69gbe17g6352g4d95g18b5902a280c" version="1">Уменьшает значение, необходимое для нанесения критического удара, на [1].</content>
+  <content contentuid="hc1d3a323g1402g04a3g12a7gdefc06ca2d0b" version="1">Адаптивный панцирь</content>
+  <content contentuid="hea309fbege947g669egd48bgc1f4fca2f691" version="2">Дарует &lt;LSTag Tooltip="Resistance"&gt;устойчивость&lt;/LSTag&gt; к рубящему, колючему и дробящему урону. Эта устойчивость временно снимается на [1] ход при получении урона огнём, холодом или кислотой.</content>
+  <content contentuid="h5013ca63g6334g3c44g6532g4df97287aeea" version="1">Осквернённые миазмы</content>
+  <content contentuid="hac8d9926gd6c0g911fgcfd1g32293d7d9b68" version="2">Раз за ход имеет шанс [1]% наложить &lt;LSTag Type="Status" Tooltip="DEE_VENDETTA_ELITE_03_MIASMA"&gt;Сводящие с ума миазмы&lt;/LSTag&gt; на [2] хода.</content>
+  <content contentuid="h2aa1dfb5g820fg8870g8bf4g1a0ff2f8a599" version="1">Разрушение заклинаний</content>
+  <content contentuid="h8fefe3d9g1f49g1a27g411cgd1a170d6d9df" version="2">Дарует &lt;LSTag Tooltip="Advantage"&gt;преимущество&lt;/LSTag&gt; при &lt;LSTag Tooltip="SavingThrow"&gt;испытаниях&lt;/LSTag&gt; против заклинаний, а урон от любых заклинаний снижается на [1].</content>
+  <content contentuid="h71660ebdgc735g99f4gdb2eg27b8d5d4c6ac" version="1">Ответная кровь</content>
+  <content contentuid="h52b2cff8gfdaagc78fg3aedgc0985e090d9a" version="2">При получении удара в ближнем бою ваша кровь обжигает нападающего, нанося [1].</content>
+  <content contentuid="hf35aa904g7fc0gef99ga17fgc1ce1acc1921" version="1">Неудержимая сила</content>
+  <content contentuid="hc6238c74g6bfbgece6g990fgfab3402196db" version="2">Дарует невосприимчивость к состояниям: &lt;LSTag Type="Status" Tooltip="PRONE"&gt;сбитие с ног&lt;/LSTag&gt;, &lt;LSTag Type="Status" Tooltip="PARALYZED"&gt;паралич&lt;/LSTag&gt;, &lt;LSTag Type="Status" Tooltip="FRIGHTENED"&gt;испуг&lt;/LSTag&gt;, &lt;LSTag Type="Status" Tooltip="CHARMED"&gt;обворожение&lt;/LSTag&gt;, &lt;LSTag Type="Status" Tooltip="DOMINATE_PERSON"&gt;подчинение&lt;/LSTag&gt; и &lt;LSTag Type="Status" Tooltip="STUNNED"&gt;оглушение&lt;/LSTag&gt;.</content>
+  <content contentuid="h1aeec157gfbe7g7a77g21d0g77821ae9b3a3" version="1">Кровавая цена</content>
+  <content contentuid="h55ac79acg02dagdafeg9944g0963c4cb8f69" version="2">Вы наносите дополнительно [1] урона и восстанавливаете здоровье в размере [2]% от нанесенного урона. (Раз за атаку).</content>
+  <content contentuid="h06cb7a5bg75beg1d41gf29cg5d0b5999c873" version="1">Зеркало мучений</content>
+  <content contentuid="h36dba3e2g8143g0620gc5f0g560128ee5a7d" version="2">Покров мстительной магии защищает вас. Каждый раз, когда вы получаете урон, нападающий получает [1] в размере [2]% от нанесенного урона.</content>
+  <content contentuid="he0ae62acg1147g61f1gb199g4882b9f8f2ab" version="1">Рубцовая ткань</content>
+  <content contentuid="h9f304028g2337ga5e5g0b89g61297d715205" version="1">Вы получаете &lt;LSTag Tooltip="TemporaryHitPoints"&gt;временные очки здоровья&lt;/LSTag&gt; в размере половины от вашего максимального запаса &lt;LSTag Tooltip="HitPoints"&gt;очков здоровья&lt;/LSTag&gt;.</content>
+  <content contentuid="h40c2ac49g552ag5118g423bged763ae88924" version="1">Безумное возмездие</content>
+  <content contentuid="hd5cbf54bg3162g4875g050ag191cb14daff3" version="1">Вы получаете дополнительное &lt;LSTag Type="ActionResource" Tooltip="ActionPoint"&gt;очко действия&lt;/LSTag&gt;, а ваши &lt;LSTag Tooltip="OpportunityAttack"&gt;внеочередные атаки&lt;/LSTag&gt; совершаются с &lt;LSTag Tooltip="Advantage"&gt;преимуществом&lt;/LSTag&gt;.</content>
+  <content contentuid="h22a577ddg0495g6430g0248gd1ae4777dcc6" version="2">Адаптивный панцирь снят</content>
+  <content contentuid="h0c4d9596gec3fg964egd2d5g9d3b2636ace7" version="2">Недавно получен урон огнём, холодом или кислотой. Пока действует это состояние, преимущества &lt;LSTag Type="Status" Tooltip="DEE_VENDETTA_ELITE_02"&gt;Адаптивного панциря&lt;/LSTag&gt; утеряны.</content>
+  <content contentuid="h1a52d212gd2b8g969ega291gb4e9a2b69ead" version="1">Кровавая цена</content>
+  <content contentuid="h0fa0f33cg1093ga618g250dgec38a6022d6c" version="1">Механика исцеления на половину нанесенного урона.</content>
+  <content contentuid="hba3c05dfgccc8g81ceg65fcg1d9671c01a81" version="1">Ответная кровь</content>
+  <content contentuid="hf6472076g7e49ge383g96fagb31629a7161f" version="1">Возвращает урон атакующим в ближнем бою.</content>
+  <content contentuid="hffde5030gfc05gffb9g8e33g9ba02b8ae57a" version="1">Осквернённые миазмы</content>
+  <content contentuid="hf70925deg9a14g3812g5eeag9b23d792ed1b" version="1">Безумие + периодический урон.</content>
+  <content contentuid="h7dd45bbfg6b9bg1bcegaab6gff318e72be0d" version="1">Сводящие с ума миазмы</content>
+  <content contentuid="hbf5f372ag22c9g5c71g2025g50d7ad2cd3fb" version="1">Враждебность ко всем и получение [1] урона в конце своего хода.</content>
+  <content contentuid="hdd1b60bdgd1ddg126egbaf9gd308529abc04" version="1">Адаптивный панцирь</content>
+  <content contentuid="hde8e15b5g92e9gcdc9gd172gc1a0933648e2" version="1">Закалённая решимость</content>
+  <content contentuid="hcc61511agd80dgab9bg4f14g702f157ca3ae" version="1">Разрыв жилы</content>
+  <content contentuid="h627f5944g91cdg1449g8349g8a473f0865f8" version="1">Взрывает труп, пронзая находящихся рядом существ.</content>
+  <content contentuid="h2eda160cg91f1gdf84g3099g557d3f2c9d8b" version="1">Похоронный звон</content>
+  <content contentuid="hfb6d9363gcbabg5ee0gd84dg7d6027b35724" version="1">Звонит в колокол надвигающейся гибели. Если у цели максимальный запас здоровья, вы наносите [1] вместо обычного урона.</content>
+  <content contentuid="haf5033cfgd039g2a7cg3e6eg1cb19785ba91" version="1">Костяной хлад</content>
+  <content contentuid="h3e4d7f3age83ag55c7g6579g8353b55fe8ec" version="1">Не может восстанавливать &lt;LSTag Tooltip="HitPoints"&gt;очки здоровья&lt;/LSTag&gt;. Не может помогать персонажам &lt;LSTag Tooltip="Downed"&gt;при смерти&lt;/LSTag&gt;.&lt;br&gt;&lt;br&gt;Нежить совершает &lt;LSTag Tooltip="AttackRoll"&gt;броски атаки&lt;/LSTag&gt; с &lt;LSTag Tooltip="Disadvantage"&gt;помехой&lt;/LSTag&gt;.</content>
+  <content contentuid="h5388b16egf4adg2856g0061gcbcf09e5e043" version="1">Вой мертвецов</content>
+  <content contentuid="h12fd4d31gfa71g494egcda5g85c0ae9b5139" version="1">Издает леденящий душу вой, который накладывает состояние &lt;LSTag Type="Status" Tooltip="MOO_MAG_KETHERIC_STUPEFIED"&gt;«Оцепенение»&lt;/LSTag&gt; на всех находящихся поблизости существ.</content>
+  <content contentuid="h3d56e1cagb90agdf26g0c06g49ea4ba0c642" version="4">Летучая мышь</content>
+  <content contentuid="hfd4bad4cg8aa4g21e2ga3b3gbabdf60b80fa" version="5">Шарит-неофит</content>
+  <content contentuid="h2ea1903eg553cg30abgb50dg623cd5aa2463" version="5">Шаритская охранница</content>
+  <content contentuid="h78e65534g164dg4b97g6e66gb3159d986ba4" version="5">Шарит-неофит</content>
+  <content contentuid="hba49663bg936dgbbb0gb9e6g4fcd416f9d40" version="5">Шаритская охранница</content>
+  <content contentuid="hcc3ab16bg07dbg4f3eg01d0gf34c5f918056" version="5">Гремишка</content>
+  <content contentuid="ha954ca66ge7c1g8329g86ceg0be0d99dfc46" version="4">Элементаль лавы</content>
+  <content contentuid="h7b5086d6g5555g494eg0325g3717ecb117b8" version="4">Грязевой мефит</content>
+  <content contentuid="h6e78de64g7127g5222g7766ge79153a9b0fa" version="6">Кулак Бейна</content>
+  <content contentuid="haf1488ebg565cg46ddg5751g072752e20623" version="6">Кулак Бейна</content>
+  <content contentuid="h3622d67dg1529gce4bg485dgb40e25804204" version="6">Железный консул Бейна</content>
+  <content contentuid="hdebfaaf2g51cfg4c71ga6e8ge285e01783f0" version="6">Железный консул Бейна</content>
+  <content contentuid="h53466c0bge417gd838gbd12g6a90a048f077" version="1">Голос командира</content>
+  <content contentuid="h2abcfd3fg64edg8a64g96b7gc0ff76ae3447" version="1">Приказать союзнику от имени Темного Владыки, давая возможность направлять &lt;LSTag Type="Spell" Tooltip="Target_DEE_NPC_BanesWrath"&gt;Гнев Бейна&lt;/LSTag&gt;.</content>
+  <content contentuid="hffa691e2g4af4g9e9dgcd78g3bae5f7596e4" version="1">Гнев Бейна</content>
+  <content contentuid="hc14c993ag695fg81a0g5a03g1586c120d51b" version="1">Наполнить удар яростью Черной Руки, нанося больше урона и &lt;LSTag Type="Status" Tooltip="FRIGHTENED"&gt;пугая&lt;/LSTag&gt; цель.</content>
+  <content contentuid="hbd5cb6b8g61f7g2be2ge793g63e57214b681" version="1">Приказ Бейна</content>
+  <content contentuid="h8cc7214cgab4fgdbacgbe34gd4337c14a8c6" version="1">Это существо может направлять &lt;LSTag Type="Spell" Tooltip="Target_BanesWrath"&gt;Гнев Бейна&lt;/LSTag&gt; – такова воля Черной Руки.</content>
+  <content contentuid="h27c6ef04g9db3g5747g19f7g7acb7ca367b6" version="1">Вампирское восстановление</content>
+  <content contentuid="hba8d5b62g69abg1522gc2b9gb1065f1b615f" version="1">Вампир восстанавливает [1] в начале своего хода, если не находится на солнечном свету, не получал лучистого урона или урона от святой воды. В противном случае эта черта не действует до начала следующего хода.</content>
+  <content contentuid="h93ab7c7eg1679gb52bge57fg37bb5785a4f5" version="2">Кровные узы</content>
+  <content contentuid="hb13f6724gb167g5508gd7afgfe4e0a68cf60" version="2">Гнев Тёмной Владычицы</content>
+  <content contentuid="h0ed19373ga863ge104g790eg9630a11cf885" version="2">Нестабильный резонанс</content>
+  <content contentuid="h14ad8824g033fgd36fgcb60gb69b1c58955a" version="2">Тлеющее сердце</content>
+  <content contentuid="h400f9105g4796gae7cg090fg909a764cfbdb" version="2">Наследник герцога</content>
+  <content contentuid="h8c8e6c9cg35f0g2752g5281gaa5a2a98c672" version="2">Искоренение слабости</content>
+  <content contentuid="h5d64b189g4502gf1f7g80cegdf43121eba3b" version="1">Связанные судьбы: Триггер Астариона</content>
+  <content contentuid="h964b1493g4de6ge6f0gc932gc1c8572edb59" version="1">Связанные судьбы: Триггер Шэдоухарт</content>
+  <content contentuid="h7226ab40g9711gf9a4gdf26gdb18b6455632" version="1">Связанные судьбы: Триггер Гейла</content>
+  <content contentuid="haa66bed3g6317g45afg1038gea83eebb0227" version="1">Связанные судьбы: Триггер Карлах</content>
+  <content contentuid="h3d7bb33cg9b6dg0f91g3faag94b68450e3cd" version="1">Связанные судьбы: Триггер Уилла</content>
+  <content contentuid="h7da31b7aga222g4675gda0dgfe6befa516c1" version="1">Связанные судьбы: Триггер Лаэзель</content>
+  <content contentuid="h78507f66g6377g359bg2246gc50cb000104c" version="1">Связанные судьбы</content>
+  <content contentuid="h717e31c6g9ba4g7707g63d9gd9853e563d20" version="1">Предотвращает появление врагов, связанных с личной историей ваших спутников.</content>
+  <content contentuid="h8a6dcc9ag7133gc6c1g0229gf03941838631" version="1">Связанные судьбы</content>
+  <content contentuid="had18765dg65e1g78eeg5c3cg5cbf26ada6d5" version="1">Включить или отключить врагов, связанных с личной историей спутников</content>
+  <content contentuid="h96834084g6472g5a86g5b12geee82726a008" version="1">Включить Астариона</content>
+  <content contentuid="hc8c46f16g2c15g5a09g963bgd24cef49c492" version="1">Включить Шэдоухарт</content>
+  <content contentuid="h96f2d348g1d93gf4cagb0e2g2e6f11d216d4" version="1">Включить Гейла</content>
+  <content contentuid="hd3fdae09g26e9g144cgf648gc6cff9d5bee9" version="1">Отключить Гейла</content>
+  <content contentuid="h99b59c1bgf890g7987gf196g431c9f31e288" version="1">Включить Карлах</content>
+  <content contentuid="h2134708dg8287g85c0g7683g1e1ef6df95b7" version="1">Отключить Карлах</content>
+  <content contentuid="h10733fa5g44fag97d6g1336g2983a224147b" version="1">Включить Уилла</content>
+  <content contentuid="h186a5058gaaa5ge2e5ga8c4g07adc836d772" version="1">Включить Лаэзель</content>
+  <content contentuid="h4a5202dfga9fdg1f51ge8d9g9918618e0768" version="1">Ваш хозяин о вас не забыл. Другие порождения взяли ваш след и идут, чтобы утащить вас обратно во тьму.</content>
+  <content contentuid="he51141c8g7ccdg679eg50ecge62bbf3ed4ab" version="1">Отвернувшись от тьмы, вы навлекли на себя смертельную опасность. Преданные последователи Госпожи Утрат неустанно выслеживают вас, чтобы покарать за предательство.</content>
+  <content contentuid="h3d1d84a6g1fe6g9376gebf0gef160ded4189" version="1">Нестабильная магия, вырывающаяся из вашей груди, служит маяком. Голодающие по магии существа тянутся прямо к сфере, жаждая поглотить её силу.</content>
+  <content contentuid="h77e33ab0ge810ga863g6b28gaa01813ff814" version="1">Сильный, неконтролируемый жар, исходящий от вашего адского движителя, привлекает к вам существ пламени.</content>
+  <content contentuid="hb1b6abfdg88aeg6551gb639g15de3c165683" version="1">Ваше истинное происхождение раскрыто, что делает вас ценной мишенью для безжалостных сектантов, стремящихся манипулировать политическим будущим города.</content>
+  <content contentuid="h2f68cc1eg203fg85f2g3659g98e1a4b21450" version="1">Путешествие с истиками осквернило вашу честь. Чрезмерно рьяные воины вашего народа стремятся проявить себя, жестоко искоренив вас из своих рядов.</content>
+  <content contentuid="hfc1aa05cgbedagd967gc75dga4dbb95770ab" version="1">Проверка мода Illithid Power Overhaul</content>
+  <content contentuid="h5986c521g6d97g2de9gaf45ge3290363ae88" version="1">Проверяет, использовали ли вы силу иллитидов из мода Illithid Powers Overhaul.</content>
+  <content contentuid="h6ca0ede6g0da6g4aa4gd08agf735c4d3a6b3" version="1">Источник проклятого клона</content>
+  <content contentuid="h9336897eg3904g8a92g8acbg275432f13ab4" version="1">Клон будет копировать заклинания, сотворяемые этим персонажем.</content>
+  <content contentuid="h9af9bfacg2efbgd27ageaeag0870c05bf360" version="1">Бесплатное сотворение заклинаний клона</content>
+  <content contentuid="h28cc35degf448geea0gdf26gf99401b24be8" version="1">Позволяет сотворять заклинания без расхода ячеек.</content>
+  <content contentuid="h0acfabf9g5129g0c7cge90dgd418b6552482" version="1">Заклинание, использованное клоном</content>
+  <content contentuid="hb3245967g3987g5a52gb4aag99c293e1d498" version="1">Отслеживает, использовал ли клон заклинание.</content>
+  <content contentuid="ha4631b0ag4e01g19d2g2848g6a757dc4398d" version="2">Безупречная мимикрия</content>
+  <content contentuid="h3afe91c4g115bg3286gc46eg7f2ca529ae2b" version="2">Когда копируемое им существо сотворяет заклинание, этот клон мерцает и мгновенно изучает это заклинание.</content>
+  <content contentuid="hcfffb89bg2cd6ga165g84b3gbf6e723c53da" version="2">Проклятые враги созданы (Скрыто)</content>
+  <content contentuid="h0db7a8d0gf155g8bdag9673g6e55d2859c39" version="1">Применяется как блокировка, предотвращающая появление проклятых врагов на [1] мин.</content>
+  <content contentuid="h41d20b6fg138ag09c8ge49cg6773175dc2a1" version="2">Тестовое отпирание сундука</content>
+  <content contentuid="h9c086796gb133gd443g73a2g45b82161bb10" version="2">Хотя этот сундук прост и потрёпан непогодой, он выглядит достаточно прочным.</content>
+  <content contentuid="he3f5c031g7b51geb69g1eedg541e0086fb33" version="1">Этот противник сбежал с поля боя, чтобы отомстить вам, устроив засаду.&lt;br&gt;&lt;br&gt;При переходе в следующий акт этот противник потеряет ваш след и больше не попытается устроить засаду.</content>
+  <content contentuid="hb2fbedb6g9d17g48edg3767g4408f853536a" version="1">Корни Теней</content>
+  <content contentuid="h12b17c7dg472bgb0f5gc14ag7e9795cf5326" version="1">Друиды Теней выслеживают вас. Когда этот статус спадёт, друиды Теней устроят на вас засаду!</content>
+  <content contentuid="ha5c38f58g2679ga366g932bg4c0acdd7d4df" version="1">Перезарядка «Теневых корней»</content>
+  <content contentuid="h3c84e1c5g938dg0ce6g5ff4g742028a05a65" version="1">Применяется для предотвращения повторной активации «Теневых корней»; сбрасывается при коротком отдыхе.</content>
+  <content contentuid="h4aa41518g710fg4cebg55degd748b543c86e" version="1">Запуск таймера «Теневых корней»</content>
+  <content contentuid="hbe9ea902gb033ge95cg21b5g46972012b9e0" version="1">При наложении этого эффекта Osiris перехватывает его, что запускает таймер.</content>
+  <content contentuid="hf6f1f363g6c04g88a7g3dc3g564c238751b1" version="1">Таймер «Метки ада»</content>
+  <content contentuid="hce9d845dgba8bg5cccg1a07gd4d14b39c9d1" version="1">Таймер «Покрова пустоты»</content>
+  <content contentuid="hd7536201gb4d2g14e7g525eg5774b28ae498" version="1">Таймер «Мести болот»</content>
+  <content contentuid="ha1bec12ag5d67g5a4fg3b03g199c19fe7028" version="1">Таймер «Псионического маяка»</content>
+  <content contentuid="hdb055f20ge294gfa47gb29ag6b07d79346f9" version="1">Таймер «Гнева военачальника»</content>
+  <content contentuid="hfc7602e9g6d10ge0fegcc94g3d461317f74e" version="1">Таймер «Расколотого отражения»</content>
+  <content contentuid="hb112adb2g8693g681dg52d8g1d89bd5f5cb3" version="1">Открыть меню</content>
+  <content contentuid="h33f28206g4540g49a5gab98g2e90745eeacd" version="1">Открывает меню</content>
+  <content contentuid="h8737fb0fg834cgd04cg017bg471ddefdc656" version="1">Переключатель мародёров</content>
+  <content contentuid="h0221ac83g0e36g2ae7ge8e8g7b12c4899530" version="1">Включает или выключает функцию полевых мародёров</content>
+  <content contentuid="h19ab6936g85dagb8d2g3941g5b43e470ac40" version="1">Переключатель погребённых ужасов</content>
+  <content contentuid="hbb3b6618gaaacg7e6cgb3cdgfff2ef72c829" version="1">Включает или выключает функцию погребённых ужасов</content>
+  <content contentuid="hf6493baag83d8gc946ge19bgb9d255158ebb" version="1">Переключатель элементалей</content>
+  <content contentuid="h2247d9d8g4d38g7d5fg86d6g1608eb7517b9" version="1">Включает или выключает функцию «Схождение стихий»</content>
+  <content contentuid="hcf32d4f6ga79ag70b7g8d7bg6041a8984734" version="1">Переключатель мстительных привидений</content>
+  <content contentuid="haf842d4agce67g828fga7cbg092ba458588b" version="1">Включает или выключает функцию «Метка усопших»</content>
+  <content contentuid="h5cd7a58bg5cafg314age104g229129bd3e55" version="1">Переключатель охоты гитьянки</content>
+  <content contentuid="hfcfd4202gbfe7g7f2dg8d3dgfd1a37049cd2" version="1">Включает или выключает функцию охоты гитьянки</content>
+  <content contentuid="h7a23a00cg630dg9d98gf773g2bf6626e96b9" version="1">Переключатель друидов Теней</content>
+  <content contentuid="h247da530g5826g2a97g78f9gad91158ed816" version="1">Включает или выключает функцию «Корни теней»</content>
+  <content contentuid="h21144915gdb1eg3b58gd724gba32f97ab40d" version="1">Переключатель огров в лагере</content>
+  <content contentuid="h4b664b7fg791ag011dg5aaag5f880f1e5149" version="1">Включает или выключает функцию «Запах обжоры»</content>
+  <content contentuid="h1c05ed33g11c9gdf97ga01fg95158d42e19e" version="1">Переключатель оживших доспехов</content>
+  <content contentuid="hf972b5f9g1466gab31g1158g786c9363f9a8" version="1">Включает или выключает функцию «Разумная сталь»</content>
+  <content contentuid="h5c420f47g9191g75e4g1bc1g0ce3e2483616" version="1">Переключатель воров</content>
+  <content contentuid="hf07b265ag9038g5968g97e4gc203a96245a6" version="1">Включает или выключает функцию «Дым и кинжалы»</content>
+  <content contentuid="hc545f306g8356g5b4bg7b89g0dd71fd6ea88" version="1">Переключатель вендетты</content>
+  <content contentuid="ha8f7575bg60b1g3b01g3f28gad8311dd7e8e" version="1">Включает или выключает функцию «Эхо поражения»</content>
+  <content contentuid="hf4e136b7geac5gf1a4gd2a3g50c38dbadc5b" version="1">Переключатель судеб спутников</content>
+  <content contentuid="h31851fc2g4433g540fg0f4dg6b1d26cbc0bb" version="1">Включает или выключает функцию «Связанные судьбы»</content>
+  <content contentuid="hc068dacfg7d01g2c57gfa0fg12905b8cb417" version="1">Меню Dynamic Encounters</content>
+  <content contentuid="hae71b12cg8766g58f2g6f1fg893d36063a57" version="1">Открывает панель настройки мода Dynamic Encounters Expanded.</content>
+  <content contentuid="h69abf59cg74b6g0711g55dage77e1972ea2d" version="1">Открывает меню DEE</content>
+  <content contentuid="hd79e0d7dg7036gd557ge986g5e1a2754ce66" version="1">Полевые мародёры</content>
+  <content contentuid="h2ab64b44g8badg8f90g12e8ge5ac8c6ce73d" version="1">Погребённые ужасы</content>
+  <content contentuid="h4b770e15g9c62gabd1g3373ga05e1735129d" version="1">Схождение стихий</content>
+  <content contentuid="h992d9d2dg94c3gfc6dged25g58b74085ca97" version="1">Метка усопших</content>
+  <content contentuid="h3182861dgc41fgd12dg0a32g4e18fd249bbd" version="1">Охота гитьянки</content>
+  <content contentuid="hade6ed59g1ea6ge309gd46dg3b5c90c0455a" version="1">Корни Теней</content>
+  <content contentuid="hf0624931g34e4g9733g29afg74c9e9a64cb4" version="1">Запах обжоры</content>
+  <content contentuid="hc8cdb83agb9c6gceefgbe7eg071fed5c53b0" version="1">Разумная сталь</content>
+  <content contentuid="hc1e085aegb376gef6fg92c6gafa9edbd7b56" version="1">Дым и кинжалы</content>
+  <content contentuid="hd840398cg37e9g5496gf1b0g71dc6f70277a" version="1">Эхо поражения</content>
+  <content contentuid="h8e370a38g4053g2e69g0eb5gc96e83af4a55" version="1">Связанные судьбы</content>
+  <content contentuid="hdaacc5f5g6693gb1d4gc813gc21cb96b9bf3" version="1">Динамические случайные встречи</content>
+  <content contentuid="h22591b45gc836gce7bgb43agb6c63a7687b3" version="1">Включить/выключить динамические события.</content>
+  <content contentuid="he2043e49g599fg011cga434g8f4b1ad4fb7c" version="1">С определенной вероятностью через 10 минут после каждого сражения прибывают кобольды-мародеры, чтобы забрать оставшиеся на поле боя трофеи.</content>
+  <content contentuid="h4ff663fdg3658g9f7ag0d98g0429e27da1b9" version="1">При откапывании зарытых сундуков есть шанс потревожить покой мёртвых.</content>
+  <content contentuid="h772cc416gfc07g29e7gc373g4f03a8788f0f" version="1">Высвобождение магии привлекает внимание стихийных планов. Если нанести достаточно урона определённым видом стихии за один ход, появится шанс призвать элементаля соответствующей стихии.</content>
+  <content contentuid="h890cd7afgd174g9813g0f4dgc7d63b1855df" version="1">У любого убийства есть последствия. Убийство мирных жителей может обратить их в мстительных духов. Они выждут удобный момент и вскоре нападут на вас из засады.</content>
+  <content contentuid="h5891ffceg4955gb796g1281g71faadac1fc2" version="1">Каждый раз, когда вы используете иллитидские силы, есть шанс, что охотничий отряд гитьянки почувствует псионический всплеск и телепортируется к вам, чтобы уничтожить ваш отряд.</content>
+  <content contentuid="he3752d78g2041gb09fgbd95g73065e23450a" version="1">Убийство трёх лазутчиков из числа друидов Теней в Изумрудной роще привлечёт внимание остальных друидов Теней, все еще действующих в диких землях.</content>
+  <content contentuid="h0aceb754g906cgdcb4gd1e7gfe64b4f14dd4" version="1">После завершения долгого отдыха есть шанс, что запах вашего пиршества привлечёт в лагерь голодного огра.</content>
+  <content contentuid="h499ee627g5b18gae29g468dgd5f0cb88f75c" version="1">Некоторые брошенные реликвии отказываются служить недостойным. Надевание непроверенного металлического нагрудного доспеха теперь с определённой вероятностью может пробудить дремлющую в нём магию.</content>
+  <content contentuid="hce4ff973g646dg47f9g6e3fg1fa3517670e9" version="1">Некоторые замки вешают не только ради защиты — это приманка. Успешно взломав замок, вы с определённой вероятностью можете активировать скрытую ловушку, которая приманит хитрого вора.</content>
+  <content contentuid="h17e52ec4gca0fge447g4723gdb058c719dee" version="1">Каждый раз, когда здоровье врага опускается ниже 20%, с определённой вероятностью он может сбежать с поля боя, чтобы выносить план мести. Сбежавшие противники начнут выслеживать ваш отряд, и вероятность того, что они устроят на вас засаду в последующих боях, будет постоянно расти.</content>
+  <content contentuid="h05a306b1g5d46g48c8g17fegf7b55b8fc85e" version="1">Путешествовать со спутниками — значит делить с ними их бремя. В зависимости от того, кто именно находится в вашем отряде и как разворачивались события во время странствий, уникальные угрозы, напрямую связанные с их текущими обстоятельствами, время от времени будут выслеживать вашу группу.</content>
+  <content contentuid="h7e588084g2e0dgd1a4g6a8agb39f8076f7e1" version="1">Закрыть</content>
+  <content contentuid="h5e3f1bbagcfe9g07e3ga0e4g183d8e923c7f" version="1">Закрывает окно</content>
+  <content contentuid="hffdb23ecgbaafg5999ge24ega187f7dd0f52" version="2">Затерянный куо-тоа</content>
+  <content contentuid="he551ad27g3994ga5b4g580agc87c4606b35f" version="5">Скальный паук</content>
+  <content contentuid="h0ae7b24dg0d45gbe9eg0e2eg78713c8c7888" version="1">Невидимый помощник крошечного паучка</content>
+  <content contentuid="h10b4b5b5gf853g072dg597bg838b2e3d8427" version="4">Гнолл-опустошитель</content>
+  <content contentuid="he35c886dgc8edgacebg2177g0b1c323d74cb" version="10">Сэр Обнимашка</content>
+  <content contentuid="h3b3df5b9gefbfg89dfg7b8ag37c4050eeea6" version="10" />
+  <content contentuid="h3baa0869gba19g4804gf79bg4999e1fde3f9" version="4">Скальный паук</content>
+  <content contentuid="h0227962fg4a49gd32eg5522g99f87cf6dfb5" version="4">Скальный паук</content>
+  <content contentuid="h2ae464e2g273aga4a4g2304gbf38604268fb" version="2">Кровожадность</content>
+  <content contentuid="hfcb03391g3c26g8bd0g5f48g30cb426ff2f8" version="1">Жестянки должны умереть.</content>
+  <content contentuid="hf00d017dg08edg4948gf29eg804a4811fa64" version="4">Гнолл-опустошитель</content>
+  <content contentuid="hb0999867gc77ag8dd1g6487gf632f5538b98" version="1">Гнолл-опустошитель</content>
+  <content contentuid="h6d8c124fgf4f0g6bd8g1531g73f0ae07c558" version="3">Гиена</content>
+  <content contentuid="h01dbfa9eg12cdgcfbcgda99g82899b5a1df8" version="1">Кегли</content>
+  <content contentuid="ha95df5a5gf93bg628egb3bagbe7df90a0165" version="4">Сэр Обнимашка</content>
+  <content contentuid="h600c0366ga5e7g0cf4g7e9dgcc952d96959f" version="7">Лорд Расфуфырник</content>
+  <content contentuid="h9f789c3dgcac4gf458gb4b4gc3efa9643e7a" version="5">Сэр Обнимашка</content>
+  <content contentuid="h89276ea7g5094g4f29g8954gd40aa144e7c9" version="1">Жуткий вой</content>
+  <content contentuid="hb693a123g3662g90e4ga29egd7a5d59c4e59" version="1">Издает вой, который с определенной вероятностью может &lt;LSTag Type="Status" Tooltip="FRIGHTENED"&gt;испугать&lt;/LSTag&gt; врагов в радиусе [1].</content>
+  <content contentuid="h0ef7c1b0geed0g2c1cg86d3g8c60ab916dca" version="1">Матёрый наскок</content>
+  <content contentuid="h9daa3addg65ecgc338gc255g023ddb8047c3" version="1">Прыгает на одну цель, нанося [1] урона и с некоторой вероятностью сбивая её с ног при провале испытания на Силу.</content>
+  <content contentuid="h631b39adgbdd3g2711g8912g4796a6d5a8fd" version="1">Преданная связь</content>
+  <content contentuid="h3f1e2795gbb7agbf00gb604gf2d9ea88892b" version="2">Пока Лорд Расфуфырник жив, вы получаете &lt;LSTag Tooltip="Advantage"&gt;преимущество&lt;/LSTag&gt; при &lt;LSTag Tooltip="SavingThrow"&gt;испытаниях&lt;/LSTag&gt; Мудрости и Харизмы.</content>
+  <content contentuid="h39fe6825g4d91g9c46gf0d0g664bec073fec" version="1">Закаленная шкура</content>
+  <content contentuid="he8bf740eg0d7bg4dbcg4f1bg6f048e60efe7" version="1">Уменьшает дробящий, колющий и рубящий урон на [1].</content>
+  <content contentuid="he0ebeed1g8108g0766gc8f5ge16c6119166b" version="1">Мой самый хороший мальчик!</content>
+  <content contentuid="hc5f8f700g21ccgb417g5a77gd258a36b6992" version="2">Когда Лорд Расфуфырник погибает, Сэр Обнимашка получает эффект &lt;LSTag Type="Status" Tooltip="DEE_BUGBEAR_BLOODLUST"&gt;кровожадность&lt;/LSTag&gt;.</content>
+  <content contentuid="hcb1a2c64ga0e9g4633g2ab7g3c335aaed91b" version="1">Осиротевшая скорбь</content>
+  <content contentuid="he69c291fg4c4eg500cg0d1cg4689f366aef0" version="2">Когда Сэр Обнимашка погибает, Лорд Расфуфырник получает эффект &lt;LSTag Type="Status" Tooltip="DEE_BUGBEAR_WORG_GRIEF"&gt;«Скорбная ярость»&lt;/LSTag&gt;.</content>
+  <content contentuid="h74894337g63b6g5a35g2755g695c3d149adc" version="3">Лорд Расфуфырник погиб, и вы впадаете в состояние «Кровожадность», которое даёт вам дополнительное &lt;LSTag Type="ActionResource" Tooltip="ActionPoint"&gt;очко действий&lt;/LSTag&gt;, но ваш &lt;LSTag Tooltip="ArmourClass"&gt;класс брони&lt;/LSTag&gt; снижается на [1].</content>
+  <content contentuid="h6ce6927eg13dbge4feg76d0g9581e645ab87" version="1">Скорбная ярость</content>
+  <content contentuid="h272a2dbcg823dg93a9g7ccbg6e53e621492b" version="2">Сэр Обнимашка погиб, и вы впадаете в ярость: все &lt;LSTag Tooltip="AttackRoll"&gt;броски атаки&lt;/LSTag&gt; совершаются с &lt;LSTag Tooltip="Advantage"&gt;преимуществом&lt;/LSTag&gt;, а вы наносите [1] дополнительного урона.</content>
+  <content contentuid="h8bcf4f7eg3d7bg13d7g951ag80b730500f91" version="1">Преданная связь</content>
+  <content contentuid="hfd0c3407gcfa5g4874g0881g045b5b1c8ee4" version="1">Пока Лорд Расфуфырник жив, вы получаете &lt;LSTag Tooltip="Advantage"&gt;преимущество&lt;/LSTag&gt; при &lt;LSTag Tooltip="SavingThrow"&gt;испытаниях&lt;/LSTag&gt; Мудрости и Харизмы.</content>
+  <content contentuid="hbe9c29b5g0341g8bdagff27g27b9ae96dc3c" version="1">Взять его, мальчик!</content>
+  <content contentuid="hb43d3906g5ec7gb4d2g0bebg3b9d0ef7de7e" version="1">Даёт Лорду Расфуфырнику бонус +[1] ко всем &lt;LSTag Tooltip="AttackRoll"&gt;броскам атаки&lt;/LSTag&gt; и +[2] к &lt;LSTag Tooltip="MovementSpeed"&gt;скорости перемещения&lt;/LSTag&gt;.</content>
+  <content contentuid="hc4cc7bb1g9957g1d61g7838g1ba86bc554db" version="1">Взять его, мальчик!</content>
+  <content contentuid="hbe374c7dg6991g8591gfecdg8d5d9fdc6306" version="1">Сэр Обнимашка дал вам команду! Вы получаете бонус +[1] ко всем &lt;LSTag Tooltip="AttackRoll"&gt;броскам атаки&lt;/LSTag&gt; и +[2] к &lt;LSTag Tooltip="MovementSpeed"&gt;скорости перемещения&lt;/LSTag&gt;.</content>
+  <content contentuid="hff83a2d2g2d70g18c3g5787g71d60fc5159f" version="7">Хранительница выводка Ксуллрэ</content>
+  <content contentuid="h0d23f21fg204cgfe30ga382g8dcc5957ec79" version="1">Улучшенное хождение по паутине</content>
+  <content contentuid="hac5438e3g43b7g3c41g4a69g0435eebddef5" version="2">Даёт невосприимчивость к &lt;LSTag Type="Status" Tooltip="WEB"&gt;опутанию паутиной&lt;/LSTag&gt;. Паутина не снижает вашу &lt;LSTag Tooltip="MovementSpeed"&gt;скорость перемещения&lt;/LSTag&gt;, а находясь на паутине, вы получаете &lt;LSTag Tooltip="Advantage"&gt;преимущество&lt;/LSTag&gt; при &lt;LSTag Tooltip="AttackRoll"&gt;бросках атаки&lt;/LSTag&gt;.</content>
+  <content contentuid="ha069ebf6g3e3ag1558g14f4g80610e2c2bf7" version="1">Улучшенное хождение по паутине</content>
+  <content contentuid="h62aa47fag6a50g83a5g7a00gcbd884b8abcc" version="1">Оккупированные земли</content>
+  <content contentuid="hec6a436cg2dc9g0299g22feg6fb8e4756ab8" version="1">Наполняет карту новыми фиксированными столкновениями, патрулями и мини-боссами.</content>
+</contentList>

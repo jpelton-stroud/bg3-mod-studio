@@ -1,0 +1,6 @@
+new entry "Target_BindPactWeapon"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_BindPactWeapon"
+data "Description" "h7df69e7ege7b4gdc2cgbb67g9ba8ee4d1e3d;Bind the weapons in both your main hand and off-hand. You become proficient with them, and they use your Spellcasting Ability Modifier for attack and damage rolls, gain a +2 enchantment bonus, and deal scaling Force damage."
+data "SpellProperties" "ApplyStatus(MainHand, PACT_BLADE, 100, -1);ApplyStatus(OffHand, PACT_BLADE, 100, -1)"

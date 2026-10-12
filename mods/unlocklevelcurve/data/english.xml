@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <content contentuid="hb9928fb9gb3e4gc975g3666g7ae2f900d7c8" version="1">9ddfc6410b2d4d2bb19311306f26cd10</content>
+  <content contentuid="h7ab137b4g4268gc5c6g98cbgb09a9e407b07" version="1">4281493f24904909b75b1885ef148bf9</content>
+  <content contentuid="h4b6a97b5g0f22g6ff4g7bd7g6b728f0e0229" version="2">Retaliation</content>
+  <content contentuid="hdb43b994g5484gfbdfgcb86g0d300dbaf4a8" version="2">When a creature hits you with a melee attack, you can use your reaction to make a melee weapon attack against that creature.</content>
+  <content contentuid="h619d243bgd936g205fgc411g40f2a1db526d" version="1">Test</content>
+  <content contentuid="h3480a732gd7ebg110cg1227g2f0d17f00215" version="1">Test</content>
+  <content contentuid="h79acd646gd4eeg9b62gbf97g0f0af87dfb3a" version="1">Test</content>
+  <content contentuid="h9032876dg7adega2f5gc4efgf5e27294cb5e" version="1">Test</content>
+  <content contentuid="9ddfc6410b2d4d2bb19311306f26cd10" version="2">Signature Spells</content>
+  <content contentuid="4281493f24904909b75b1885ef148bf9" version="2">Choose two 3rd-level wizard spells in your spellbook as your signature spells. You always have these spells prepared, they don't count against the number of spells you have prepared, and you can cast each of them once at 3rd level without expending a spell slot. When you do so, you can't do so again until you finish a short or long rest.</content>
+  <content contentuid="Arcane Recovery: Level 6;1" version="2">Arcane Recovery: Level 6</content>
+  <content contentuid="h11d966b0gc41cg049dg25c1g47d1c54c97ec" version="1">Recover a Level [1] &lt;LSTag Tooltip="SpellSlot"&gt;spell slot&lt;/LSTag&gt;.</content>
+  <content contentuid="Arcane Recovery: Level 7;1" version="2">Arcane Recovery: Level 7</content>
+  <content contentuid="h05fde9a7g067cg3fd3gced1g399b961081ac" version="1">Recover a Level [1] &lt;LSTag Tooltip="SpellSlot"&gt;spell slot&lt;/LSTag&gt;.</content>
+  <content contentuid="Arcane Recovery: Level 8;1" version="2">Arcane Recovery: Level 8</content>
+  <content contentuid="he451f5e9g4ee8g30e1ge8bdg0f94b8d2e064" version="1">Recover a Level [1] &lt;LSTag Tooltip="SpellSlot"&gt;spell slot&lt;/LSTag&gt;.</content>
+  <content contentuid="Arcane Recovery: Level 9;1" version="2">Arcane Recovery: Level 9</content>
+  <content contentuid="h034ba804gae9aga129g9a68g91b08b6e0786" version="1">Recover a Level [1] &lt;LSTag Tooltip="SpellSlot"&gt;spell slot&lt;/LSTag&gt;.</content>
+  <content contentuid="h59a6b918g832dg4a3bg9bc3g96d03ddf0fa7;3" version="2">Natural Recovery: Level 9</content>
+  <content contentuid="hb873f730gdea8g16b1gb243g19c571c145e5" version="1">Recover a Level [1] &lt;LSTag Tooltip="SpellSlot"&gt;spell slot&lt;/LSTag&gt;.</content>
+  <content contentuid="h4711c3ddg6133gdd22g2b91gff4dbd4ae5c2" version="1">Recover a Level [1] &lt;LSTag Tooltip="SpellSlot"&gt;spell slot&lt;/LSTag&gt;.</content>
+  <content contentuid="h3280eb29g1397gd70dg8f84g52e0242899bf" version="1">Recover a Level [1] &lt;LSTag Tooltip="SpellSlot"&gt;spell slot&lt;/LSTag&gt;.</content>
+  <content contentuid="h7c508361gf0c8gf141g8d27g3afbcf92c408" version="1">Recover a Level [1] &lt;LSTag Tooltip="SpellSlot"&gt;spell slot&lt;/LSTag&gt;.</content>
+  <content contentuid="hcf772685g3930g428fg9e15g440dcf348ac4;1" version="2">Lunar Mend: Level 9</content>
+  <content contentuid="hcbc3105dgeaf4g432bgadb5g5ce8961bf317;2" version="2">Expend a Level 9 &lt;LSTag Tooltip="SpellSlot"&gt;spell slot&lt;/LSTag&gt; to heal yourself.</content>
+  <content contentuid="h38a31ba8g9b43g4da2gba82ga3edc87e7fcf;1" version="2">Create Sorcery Points: 9</content>
+  <content contentuid="e38b2d08b8024ecf96079ef36ff78e3f" version="2">Corona of Light</content>
+  <content contentuid="ce362b63587d4bcf9e312e5a1a01d22a" version="2">You can use your action to activate an aura of sunlight that lasts for 1 minute or until you dismiss it using another action. You emit bright light in a [15]60 foot radius.</content>
+  <content contentuid="22d55f406f304500a679097d41f4f3ac" version="2">Dismiss Corona of Light</content>
+  <content contentuid="be4197b074a54587bcc1bbaa969c509e" version="2">Remove your aura of sunlight.</content>
+  <content contentuid="e9654b090993480485e94722f3d9a266" version="2">Eldritch Master</content>
+  <content contentuid="8aec314f95bf4f178670b449f1fc4829" version="2">While not in combat, you can draw on your inner reserve of mystical power while entreating your patron to regain all your expended spell slots. Once you regain spell slots with this feature, you must finish a long rest before you can do so again.</content>
+  <content contentuid="ae6d133612814ed5a93a2c0ca64e3c20" version="2">Aura of Courage (10m)</content>
+  <content contentuid="3406fc6ed9ee42b28b2d3cbc63c13b26" version="2">Aura of Devotion (10m)</content>
+  <content contentuid="0d43ed676ef04b5a8f89084ba9efc3ce" version="2">Aura of Hate (10m)</content>
+  <content contentuid="e02065004fdf4bbdb2e82c03fa02e95c" version="2">Aura of Protection (10m)</content>
+  <content contentuid="f055d98ed78d4baba96fa35d25e4f7fb" version="2">Aura of Warding (10m)</content>
+  <content contentuid="h7ad5dc7cge33bg2b1eg44d1g230e9bb39022" version="1">Create 5 ghouls that specialise in melee combat.</content>
+  <content contentuid="h2d908974ga713g9effgcb5cg08fad233440c" version="1">Create 7 ghouls that specialise in melee combat.</content>
+  <content contentuid="h5f2e6334g0199gbee4g3791g618c3cbda726" version="1">Create 9 ghouls that specialise in melee combat.</content>
+  <content contentuid="ha33ed367g0ea7g4125gf71cg506a2e43334b" version="1">Create 5 flying ghouls that specialise in ranged combat.</content>
+  <content contentuid="h2696887bg0894g80cbg04c1gf6dde18f2e38" version="1">Create 7 flying ghouls that specialise in ranged combat.</content>
+  <content contentuid="hb7a936b9g9de4gb235g714bgaac3e124fc0b" version="1">Create 9 flying ghouls that specialise in ranged combat.</content>
+  <content contentuid="hbe63c3fdg1a95gdc16g606ag4a335a2077b7" version="1">Create 5 zombies that specialise in melee combat.</content>
+  <content contentuid="habb229dbg05bdg2c12g7529gddd413072d2e" version="1">Create 7 zombies that specialise in melee combat.</content>
+  <content contentuid="h3d921aebgd71cg728eg8604g7ab21bc81abf" version="1">Create 9 zombies that specialise in melee combat.</content>
+  <content contentuid="h57ea0921g30f3g7ed9gd9e3gcbf0d1a3ea42" version="1">Create 11 zombies that specialise in melee combat.</content>
+  <content contentuid="h0a7e78aagdddfg5181g5b57g0993dbf6e2a7" version="1">Create 13 zombies that specialise in melee combat.</content>
+  <content contentuid="h8416d4aegba34g7983g5251gb9a786dacc19" version="1">Create 5 skeletons that specialise in ranged combat.</content>
+  <content contentuid="hede4ed01g7a72g1dd0gecb4g289a43234848" version="1">Create 7 skeletons that specialise in ranged combat.</content>
+  <content contentuid="ha3ec3320g9451g8fc1g1e09gedd0add7f8bd" version="1">Create 9 skeletons that specialise in ranged combat.</content>
+  <content contentuid="h9b26487eg1a85gdb38gd029g278b29c5079a" version="1">Create 11 skeletons that specialise in ranged combat.</content>
+  <content contentuid="h1314eb68g47d1g43f9gd77agfede391c36fe" version="1">Create 13 skeletons that specialise in ranged combat.</content>
+  <content contentuid="d1ba43c7d7e542f6ba4395d90a8b0a71" version="2">Peerless Skill</content>
+  <content contentuid="6b48ee09829c4d568d0dd21995400419" version="2">When you make an ability check, you can expend one use of Bardic Inspiration and add the number rolled to your ability check.</content>
+  <content contentuid="a6d238b221e7446fb71fe110900b6e7d" version="2">Primal Champion</content>
+  <content contentuid="f15dd1489bbb40ee843c4b1406d73f81" version="2">Your Strength and Constitution scores increase by 4. Your maximum for those scores is now 24.</content>
+  <content contentuid="0c807efe9e244dd882a616f607ebfc71" version="2">Slippery Mind</content>
+  <content contentuid="cf5586d9d8b94f7fbb37ce988934ce0b" version="2">You gain Proficiency in Wisdom Saving Throws.</content>
+  <content contentuid="6b8a96ba40ba4ec68a4da65d9609eac7" version="2">Retaliation</content>
+  <content contentuid="3bbf849c9eca45959f430e7cef354aff" version="2">When a creature hits you with a melee attack, you can use your reaction to make a melee weapon attack against that creature.</content>
+  <content contentuid="34ab3d558e7e496ca96f457138255a2b" version="2">Brutal Critical (2)</content>
+  <content contentuid="e9964c62bb6c4a178478bb1000f62078" version="2">You can roll two additional weapon damage die when determining the extra damage for a critical hit with a melee attack.</content>
+  <content contentuid="823e5c282a8c42c2968183b950fc839e" version="2">Brutal Critical (3)</content>
+  <content contentuid="7c80ee07009e451ca9c374540cdb8ffb" version="2">You can roll three additional weapon damage die when determining the extra damage for a critical hit with a melee attack.</content>
+  <content contentuid="8de1e3f1fb9747bd92608660d62c9e65" version="2">Persistent Rage</content>
+  <content contentuid="6b773af75dc04f068c3befde5f770183" version="2">Your rage is so fierce that it ends early only if you fall unconscious or if you choose to end it.</content>
+  <content contentuid="3612257a74f14480b51dd479e7133b2c" version="2">Extra Attack (3)</content>
+  <content contentuid="4fa99875b34d49e3a20eb54bbe9e8779" version="2">The number of additional attacks increased to three.</content>
+  <content contentuid="e948d8759e5a4f22a7c1fc5ef9140980" version="2">Battle Magic</content>
+  <content contentuid="9ddccb9af7de47ddababd7dec44e5969" version="2">When you use your action to cast a bard spell, you can make one weapon attack as a bonus action.</content>
+  <content contentuid="2f7e7feca1384101a5d3d9f5ff870f33" version="2">Improved War Magic</content>
+  <content contentuid="add086de71af463399062aa5c7c9e7d3" version="2">When you use your action to cast a spell, you can make one weapon attack as a bonus action.</content>
+  <content contentuid="h4f0be183g0e15g446eg9f6cg27a8c586ba42;4" version="2">fourth level Spell Slots, or spell slots are full.</content>
+  <content contentuid="h4f0be183g0e15g446eg9f6cg27a8c586ba42;5" version="2">fifth level Spell Slots, or spell slots are full.</content>
+  <content contentuid="e650375353a64888812cbf9c0aca4414" version="2">Thousand Forms</content>
+  <content contentuid="43289841774d49d2b13801e928ed122d" version="2">By 14th level, you have learned to use magic to alter your physical form in more subtle ways. You can cast the Alter Self spell at will.</content>
+  <content contentuid="313c53c5deeb48b0b9ce6099fb477026" version="2">Stormborn</content>
+  <content contentuid="38c61953140b4aa395ca95c1b7b61069" version="2">You have a flying speed equal to your current walking speed.</content>
+  <content contentuid="8eae387391c04c34bc4dcaf5ec2a4292" version="2">Avatar of Battle</content>
+  <content contentuid="887304f12c4b4eb08abd29f34b2f0632" version="2">You gain resistance to bludgeoning, piercing, and slashing damage from nonmagical attacks.</content>
+  <content contentuid="649ab2dea9304b1ca6f1f79dfe71c601" version="2">Indomitable (2)</content>
+  <content contentuid="26ae0688782c4f16ac3d8040d5259fa5" version="2">Indomitable (3)</content>
+  <content contentuid="892fe858b25e416eb0d6c4d414c29f21" version="2">Relentless</content>
+  <content contentuid="3932c83f097b4edc87936d6a72cb565e" version="2">When you roll initiative and have no superiority dice remaining, you regain 1 superiority die.</content>
+  <content contentuid="893631ada03c4888aee5c3c8a13c0453" version="2">Tongue of the Sun and Moon</content>
+  <content contentuid="52e471b36368474a9037a886546051a1" version="2">You learn to touch the ki of other minds so that you understand all spoken languages.</content>
+  <content contentuid="15643419b75b498aa4b8e4caf8b298cf" version="2">Perfect Self</content>
+  <content contentuid="feb1ac2bcc34472ab897c47cf5cbda82" version="2">When you roll for initiative and have no ki points remaining, you regain 4 ki points.</content>
+  <content contentuid="64d752202b2f45228128c1e6629f8b2f" version="2">Superior Critical</content>
+  <content contentuid="d084d90944904f4095b029a57e8a79f2" version="2">Your weapon attacks score a critical hit on a roll of 18-20.</content>
+  <content contentuid="61edf69f55d04fbd81943069fb8ea17a" version="2">Survivor</content>
+  <content contentuid="7715fa53659c45d29724a16ca4754c51" version="2">At the start of each of your turns, you regain hit points equal to 5 + your Constitution modifier if you have no more than half of your hit points left. You don't gain this benefit if you have 0 hit points.</content>
+  <content contentuid="f43e3e44edcc4915ba8ab93589f1198b" version="2">Sorcerous Restoration</content>
+  <content contentuid="65aa51398fb649e39e3302438f8f0e2a" version="2">You regain 4 expended sorcery points whenever you finish a short rest.</content>
+  <content contentuid="91a2d36b7e8a4f658b00176cd3a8a658" version="2">Wind Soul</content>
+  <content contentuid="887983247b3a4347a58fa893fe55bd31" version="2">You gain immunity to lightning and thunder damage. You also gain a magical flying speed of 60 feet.</content>
+  <content contentuid="8cc8bff7f1a14100abd3cb165eb19aea" version="2">Spell Resistance</content>
+  <content contentuid="531837d85061467aa2a508cacb4b4813" version="2">You have advantage on saving throws against spells. Furthermore, you have resistance against the damage of spells.</content>
+  <content contentuid="c98287a86fc24910b6ae913841887cf2" version="2">Superior Inspiration</content>
+  <content contentuid="020cc208f09d41d9a304c6b2c701d8fd" version="2">When you enter combat and have no uses of Bardic Inspiration left, you regain one use.</content>
+  <content contentuid="e4b7bec15804456db530fcd17d5c1514" version="2">Fungal Body</content>
+  <content contentuid="456055affedb4b78b0b01d7b5e96356e" version="2">The fungal spores in your body alter you: you can't be blinded, deafened, frightened, or poisoned, and any critical hit against you counts as a normal hit instead, unless you're incapacitated.</content>
+  <content contentuid="796304e3ef07499983c269176fa984bd" version="2">Blindsense</content>
+  <content contentuid="5443040359d24f23a880bf981628fee7" version="2">You are aware of the location of any hidden or invisible creature nearby.</content>
+  <content contentuid="6ea2920575f7436d9dc944db30a01e51" version="2">Elusive</content>
+  <content contentuid="2cad5e973c974662acb04296ebd24bcf" version="2">You are so evasive that attackers rarely gain the upper hand against you. No attack roll has advantage against you while you aren't incapacitated. (currently non-functional)</content>
+  <content contentuid="h5922cb82ge5feg4ea9g1306gfd02884c30da" version="1">Can &lt;LSTag Type="Spell" Tooltip="Target_CallLightning_LightningBolt_7"&gt;Call Lightning&lt;/LSTag&gt; without expending a &lt;LSTag Tooltip="SpellSlot"&gt;spell slot&lt;/LSTag&gt;.</content>
+  <content contentuid="h2c2458a0g4be0g91f2gb680g3069837da046" version="1">Can &lt;LSTag Type="Spell" Tooltip="Target_CallLightning_LightningBolt_8"&gt;Call Lightning&lt;/LSTag&gt; without expending a &lt;LSTag Tooltip="SpellSlot"&gt;spell slot&lt;/LSTag&gt;.</content>
+  <content contentuid="heb288c68g2939g64e6ge9bfg18551494ea37" version="1">Can &lt;LSTag Type="Spell" Tooltip="Target_CallLightning_LightningBolt_9"&gt;Call Lightning&lt;/LSTag&gt; without expending a &lt;LSTag Tooltip="SpellSlot"&gt;spell slot&lt;/LSTag&gt;.</content>
+</contentList>

@@ -1,0 +1,28 @@
+// Nature's Wrath: Bonus Action, increased tactical range (18m)
+new entry "Target_NatureWrath"
+type "SpellData"
+using "Target_NatureWrath"
+data "UseCosts" "BonusActionPoint:1;ChannelOath:1"
+data "TargetRadius" "18"
+
+// Lay on Hands Container
+new entry "Target_LayOnHands"
+type "SpellData"
+using "Target_LayOnHands"
+data "UseCosts" "BonusActionPoint:1"
+
+// Lay on Hands Sub-spells
+new entry "Target_LayOnHands_LesserHealing"
+type "SpellData"
+using "Target_LayOnHands_LesserHealing"
+data "UseCosts" "BonusActionPoint:1;LayOnHandsCharge:1"
+
+new entry "Target_LayOnHands_GreaterHealing"
+type "SpellData"
+using "Target_LayOnHands_GreaterHealing"
+data "UseCosts" "BonusActionPoint:1;LayOnHandsCharge:2"
+
+new entry "Target_LayOnHands_Cure"
+type "SpellData"
+using "Target_LayOnHands_Cure"
+data "UseCosts" "BonusActionPoint:1;LayOnHandsCharge:2"

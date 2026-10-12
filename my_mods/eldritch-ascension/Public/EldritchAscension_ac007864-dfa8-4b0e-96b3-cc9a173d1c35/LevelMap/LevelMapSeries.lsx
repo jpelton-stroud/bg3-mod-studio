@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="7" revision="1" build="3"/>
+    <region id="LevelMapSeries">
+        <node id="root">
+            <children>
+                <node id="LevelMapSeries">
+                    <attribute id="Level1" type="LSString" value="1d6"/>
+                    <attribute id="Level9" type="LSString" value="1d8"/>
+                    <attribute id="Level15" type="LSString" value="1d10"/>
+                    <attribute id="Level20" type="LSString" value="1d12"/>
+                    <attribute id="Name" type="FixedString" value="PactBladeForceDice"/>
+                    <attribute id="UUID" type="guid" value="7b8228c2-3fc5-4658-ba38-31b0d93d0eb4"/>
+                </node>
+                <node id="LevelMapSeries">
+                    <attribute id="Level1" type="LSString" value="1d6"/>
+                    <attribute id="Level5" type="LSString" value="2d6"/>
+                    <attribute id="Level11" type="LSString" value="3d6"/>
+                    <attribute id="Level17" type="LSString" value="4d6"/>
+                    <attribute id="Name" type="FixedString" value="HexScalingDice"/>
+                    <attribute id="UUID" type="guid" value="5ed02c9b-67d4-4e5b-9cd3-873f8422a527"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>

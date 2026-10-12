@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="8" revision="0" build="500"/>
+    <region id="ProgressionDescriptions">
+        <node id="root">
+            <children>
+                <node id="ProgressionDescription">
+                    <attribute id="Description" type="TranslatedString" handle="h7430cf11g670bg487fgbc0cg4b602cad6fd5" version="1"/>
+                    <attribute id="DisplayName" type="TranslatedString" handle="h259014ccgada0g4157gab58g5f52b029f712" version="1"/>
+                    <attribute id="ProgressionTableId" type="guid" value="d18eda7e-4b7d-490d-9952-cd33a3c60479"/>
+                    <attribute id="SelectorId" type="FixedString" value="SpellMastery1"/>
+                    <attribute id="UUID" type="guid" value="5b8085f9-6f32-43cb-a2a9-d8bc7eacd910"/>
+                </node>
+                <node id="ProgressionDescription">
+                    <attribute id="Description" type="TranslatedString" handle="hba50bcf8gde78g48f7ga5dcg2fcc38597c92" version="1"/>
+                    <attribute id="DisplayName" type="TranslatedString" handle="h4a29aa68g355ag4933g8c94g285d922c7c6b" version="1"/>
+                    <attribute id="ProgressionTableId" type="guid" value="d18eda7e-4b7d-490d-9952-cd33a3c60479"/>
+                    <attribute id="SelectorId" type="FixedString" value="SpellMastery2"/>
+                    <attribute id="UUID" type="guid" value="3b4e18d6-4e4e-4fb1-a2c5-d8e606d1a38a"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>

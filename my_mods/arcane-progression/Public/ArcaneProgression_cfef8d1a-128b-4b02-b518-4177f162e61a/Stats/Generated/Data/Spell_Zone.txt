@@ -1,0 +1,16 @@
+// ==============================================================================
+// UnlockLevelCurveExtended - Spell_Zone
+// Zone spells for Wizard Spell Mastery (At-Will, No Spell Slot)
+// ==============================================================================
+
+new entry "Zone_Thunderwave_Mastery"
+type "SpellData"
+data "SpellType" "Zone"
+using "Zone_Thunderwave"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Zone_BurningHands_Mastery"
+type "SpellData"
+data "SpellType" "Zone"
+using "Zone_BurningHands"
+data "UseCosts" "ActionPoint:1"

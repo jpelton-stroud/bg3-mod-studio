@@ -1,0 +1,24 @@
+new entry "DDS_Huntmasters_Boar"
+type "Character"
+using "Companion_Boar_7"
+data "Level" "1"
+data "Passives" "AttackOfOpportunity;DarknessRules;ShortResting;CompanionsBond_Creature;ExceptionalTraining;BestialFury;ExtraAttack"
+
+new entry "DDS_Huntmasters_Spider"
+type "Character"
+using "Companion_GiantSpider_7"
+data "Level" "1"
+data "Passives" "AttackOfOpportunity;SpiderWalk;DarknessRules;Darkvision;CompanionsBond_Creature;EightLeggedWaltz_Spider;BestialFury;ExtraAttack"
+
+new entry "DDS_Huntmasters_Wolf"
+type "Character"
+using "Companion_Wolf_7"
+data "Level" "1"
+data "Passives" "AttackOfOpportunity;DarknessRules;PackTactics;ShortResting;CompanionsBond_Creature;ExceptionalTraining;BestialFury;ExtraAttack"
+
+new entry "DDS_Huntmasters_Bear"
+type "Character"
+using "Companion_Bear_7"
+data "Level" "1"
+data "Passives" "AttackOfOpportunity;DarknessRules;ShortResting;CompanionsBond_Creature;ExceptionalTraining;BestialFury;ExtraAttack"
+

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="8" revision="0" build="500"/>
+    <region id="Progressions">
+        <node id="root">
+            <children>
+                <!-- Level 1: Add Crit Refund Passive to Base Paladin -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="1"/>
+                    <attribute id="Name" type="LSString" value="Paladin"/>
+                    <attribute id="PassivesAdded" type="LSString" value="PaladinsCall_DivineAbundance_CritRefund"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="ba2afe85-acba-4ea1-a238-2b4543f47821"/>
+                    <attribute id="UUID" type="guid" value="b60618d1-c262-42b5-9fdd-2c0f7aa5e5af"/>
+                </node>
+                <node id="Progression">
+                    <attribute id="IsMulticlass" type="bool" value="true"/>
+                    <attribute id="Level" type="uint8" value="1"/>
+                    <attribute id="Name" type="LSString" value="Paladin"/>
+                    <attribute id="PassivesAdded" type="LSString" value="PaladinsCall_DivineAbundance_CritRefund"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="ba2afe85-acba-4ea1-a238-2b4543f47821"/>
+                    <attribute id="UUID" type="guid" value="1f5396ad-65e3-4ed5-a339-d76b11af96ea"/>
+                </node>
+
+                <!-- Level 4: +1 Level 1 Spell Slot (Total: 4 L1) -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="4"/>
+                    <attribute id="Name" type="LSString" value="Paladin"/>
+                    <attribute id="Boosts" type="LSString" value="ActionResource(SpellSlot,1,1)"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="ba2afe85-acba-4ea1-a238-2b4543f47821"/>
+                    <attribute id="UUID" type="guid" value="64dd6de3-4119-4b0f-bf71-72916b0f0898"/>
+                </node>
+
+                <!-- Level 5: Add Righteous Strikes Tier 1 (+1d6 Radiant) -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="5"/>
+                    <attribute id="Name" type="LSString" value="Paladin"/>
+                    <attribute id="PassivesAdded" type="LSString" value="PaladinsCall_RighteousStrikes_1"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="ba2afe85-acba-4ea1-a238-2b4543f47821"/>
+                    <attribute id="UUID" type="guid" value="099a4fb1-01db-46e3-9e48-9366df0e6118"/>
+                </node>
+
+                <!-- Level 7: +1 Level 2 Spell Slot (Total: 4 L1, 4 L2) -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="7"/>
+                    <attribute id="Name" type="LSString" value="Paladin"/>
+                    <attribute id="Boosts" type="LSString" value="ActionResource(SpellSlot,1,2)"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="ba2afe85-acba-4ea1-a238-2b4543f47821"/>
+                    <attribute id="UUID" type="guid" value="4b6c4bc2-641e-456a-a7a3-9b343fb5d52a"/>
+                </node>
+
+                <!-- Level 8: Upgrade to Righteous Strikes Tier 2 (+1d8 Radiant) -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="8"/>
+                    <attribute id="Name" type="LSString" value="Paladin"/>
+                    <attribute id="PassivesAdded" type="LSString" value="PaladinsCall_RighteousStrikes_2"/>
+                    <attribute id="PassivesRemoved" type="LSString" value="PaladinsCall_RighteousStrikes_1"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="ba2afe85-acba-4ea1-a238-2b4543f47821"/>
+                    <attribute id="UUID" type="guid" value="bf8623ad-e204-46c5-9c59-d8eeb318f72d"/>
+                </node>
+
+                <!-- Level 10: +1 Level 3 Spell Slot (Total: 4 L1, 4 L2, 3 L3) -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="10"/>
+                    <attribute id="Name" type="LSString" value="Paladin"/>
+                    <attribute id="Boosts" type="LSString" value="ActionResource(SpellSlot,1,3)"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="ba2afe85-acba-4ea1-a238-2b4543f47821"/>
+                    <attribute id="UUID" type="guid" value="ff40a1db-1466-4fdf-ab49-79a01747a405"/>
+                </node>
+
+                <!-- Level 11: Upgrade to Righteous Strikes Tier 3 (+1d10 Radiant) & +1 Level 4 Slot -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="11"/>
+                    <attribute id="Name" type="LSString" value="Paladin"/>
+                    <attribute id="Boosts" type="LSString" value="ActionResource(SpellSlot,1,4)"/>
+                    <attribute id="PassivesAdded" type="LSString" value="PaladinsCall_RighteousStrikes_3;UnlockedSpellSlotLevel4"/>
+                    <attribute id="PassivesRemoved" type="LSString" value="PaladinsCall_RighteousStrikes_2;ImprovedDivineSmite"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="ba2afe85-acba-4ea1-a238-2b4543f47821"/>
+                    <attribute id="UUID" type="guid" value="cc90f34d-28ba-4254-b7dc-473af8c3d633"/>
+                </node>
+
+                <!-- Level 12: +1 Level 4 Spell Slot (Total: 4 L1, 4 L2, 3 L3, 2 L4) -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="12"/>
+                    <attribute id="Name" type="LSString" value="Paladin"/>
+                    <attribute id="Boosts" type="LSString" value="ActionResource(SpellSlot,1,4)"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="ba2afe85-acba-4ea1-a238-2b4543f47821"/>
+                    <attribute id="UUID" type="guid" value="98aa74ae-b8c8-47c3-bbcb-b2aa0d664c3c"/>
+                </node>
+
+                <!-- Level 15: Upgrade to Righteous Strikes Tier 4 (+1d10 + CHA Radiant) [ULC Integration] -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="15"/>
+                    <attribute id="Name" type="LSString" value="Paladin"/>
+                    <attribute id="PassivesAdded" type="LSString" value="PaladinsCall_RighteousStrikes_4"/>
+                    <attribute id="PassivesRemoved" type="LSString" value="PaladinsCall_RighteousStrikes_3"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="ba2afe85-acba-4ea1-a238-2b4543f47821"/>
+                    <attribute id="UUID" type="guid" value="65c6b594-c4f9-4fc6-9882-47fffc39a0bb"/>
+                </node>
+
+                <!-- Level 20: Upgrade to Righteous Strikes Tier 5 (+1d12 + CHA Radiant) [ULC Integration] -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="20"/>
+                    <attribute id="Name" type="LSString" value="Paladin"/>
+                    <attribute id="PassivesAdded" type="LSString" value="PaladinsCall_RighteousStrikes_5"/>
+                    <attribute id="PassivesRemoved" type="LSString" value="PaladinsCall_RighteousStrikes_4"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="ba2afe85-acba-4ea1-a238-2b4543f47821"/>
+                    <attribute id="UUID" type="guid" value="bcba6cc1-3b0a-4562-ac80-0259108ecb36"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>

@@ -1,0 +1,574 @@
+<?xml version="1.0"?>
+<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <content contentuid="h5b8a29d3gdb5fg32cag21deg1dc2dfa1b954" version="2">Party Scaled HP 1</content>
+  <content contentuid="h6434252bgd5f1g52ffgf685g34b2cea44d10" version="3">Level Scaled 1-3</content>
+  <content contentuid="h9a8bbb22ga9f0gfc78g8c23gbeb096b27251" version="2">Bolstered</content>
+  <content contentuid="ha07cc19fg6a33g0f62gce38gfa33af43c183" version="2">Unerring</content>
+  <content contentuid="h92cb7c87g40f7g5f5ag18e0gaf5c1109f952" version="2">Fleet-Footed</content>
+  <content contentuid="h03354d09g49e1g65d5g64eag0127e37afda5" version="2">Hardened</content>
+  <content contentuid="h36b2e9f6g04b7g051dgef15gcf9e99921ba6" version="2">Arcane Mirror</content>
+  <content contentuid="h8e3e1d33g2475g2491g3b2ege71602154a7d" version="2">Barbed Carapace</content>
+  <content contentuid="h28a9939bgf480g4812gcbc0ga2f49312bdf9" version="2">Deflecting Winds</content>
+  <content contentuid="he83cf69eg7283gefa0gbc52g50cbb54e4b41" version="2">Enduring</content>
+  <content contentuid="hbed0554egdb47g54b1g1c60g11540e0918d6" version="2">Troll-Blooded</content>
+  <content contentuid="hea8d830ag0172g63d9g490bgc93704bd30f7" version="2">Lethal</content>
+  <content contentuid="h924af03bgcd8cgba53g55dag2fc7eb1aed55" version="2">Unfettered</content>
+  <content contentuid="h06c207abgaf73g22b5g9f13gc08e4f7f273e" version="2">Eagle-Eyed</content>
+  <content contentuid="hb599366bg8dcbgc000g9046g06b725131637" version="1">Champion: Warrior</content>
+  <content contentuid="h5a9d8f3ag994ag635bgab54g6c0743d4ecfa" version="1">Champion: Necromancer</content>
+  <content contentuid="hcf4944c0gb912geae6gbb01gcc8892d2493a" version="1">Champion: Primalist</content>
+  <content contentuid="h12f4d37bg0bd7g1faagae3dgaf7a95a534fa" version="1">Champion: Berserker</content>
+  <content contentuid="he1b02cbag48b0gb649g425dgab3b7b7037e5" version="1">Champion: Assassin</content>
+  <content contentuid="h4af5e367g4752ge4d6g19ffg4997a9636b36" version="1">Champion: Shapeshifter</content>
+  <content contentuid="h5ac2f73dgebb8ga752g92c2gf3e13652c6b7" version="1">Champion: Templar</content>
+  <content contentuid="hca77ecf2gd366g95c5gac84g81999655c2cb" version="1">Champion: Reaper</content>
+  <content contentuid="h4d0e59d1g3176g6c36g9717g9faa8214e672" version="1">Champion: Beastmaster</content>
+  <content contentuid="haf9bfb5egfcbbg2419gd423g9332b0b453ff" version="1">Champion: Blood Knight</content>
+  <content contentuid="h2c157fffg7ab7g52b6g7e47g5c109a7b1f56" version="1">Champion: Plaguebringer</content>
+  <content contentuid="h82c4451dg0328ge758g98feg901623d6cf47" version="1">Champion: Preserver</content>
+  <content contentuid="hd83cf962g9860g7b4dg2706g4677124a477a" version="1">Champion: Enchanter</content>
+  <content contentuid="hdf9abb99ga4dagbf35g2001ge69deb2b15c8" version="1">Party Scaled HP 2</content>
+  <content contentuid="h76aefaa2g1357g4087g13fegb9889b322d13" version="1">Party Scaled HP 3</content>
+  <content contentuid="h640c1f1eg68d6g1244gd3c3g5c7cf3c87fbb" version="1">Party Scaled HP 4</content>
+  <content contentuid="he9cce9fbge840g3ccag9253gdbaf29ce4a42" version="2">Level Scaled 4-6</content>
+  <content contentuid="h9741e498g1baegba05g58d3g6d97919bb90e" version="3">Legendary Fortitude</content>
+  <content contentuid="h44bc41d4g4009ga147gaeeeg10251b30ebcb" version="4">NULL</content>
+  <content contentuid="h701eda49gbc49g0898g7405g2abca09314e3" version="1">Indomitable Resolve</content>
+  <content contentuid="h0ec91bf2ge342g7b09gf03dg60b35c5ee3b7" version="2">The first time you are inflicted with one of the following statuses (&lt;LSTag Type="Status" Tooltip="STUNNED"&gt;Stunned&lt;/LSTag&gt;, &lt;LSTag Type="Status" Tooltip="PARALYZED"&gt;Paralyze&lt;/LSTag&gt;, &lt;LSTag Type="Status" Tooltip="FRIGHTENED"&gt;Frightened&lt;/LSTag&gt;, &lt;LSTag Type="Status" Tooltip="SLEEP"&gt;Sleep&lt;/LSTag&gt;), its instantly removed and you gain &lt;LSTag Tooltip="Advantage"&gt;Advantage&lt;/LSTag&gt; on your next &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt;.</content>
+  <content contentuid="hf16d8494g6074gb4e9g1353gf750d30c23e8" version="1">Fey Step Evasion</content>
+  <content contentuid="h6ec467dfg9d2cg4011gc931ga89f8ce39812" version="2">When a melee attack misses you, you can cast &lt;LSTag Type="Spell" Tooltip="Target_DDS_Elf_MistyStep"&gt;Misty Step&lt;/LSTag&gt; up to [1] away until the end of your turn.</content>
+  <content contentuid="hf2b5638egb8e0gc325g2103gee2bb77db88d" version="1">Venomous Spite</content>
+  <content contentuid="h25e0c175g14b5g328cg467egf49062536599" version="2">Your attacks deal additional[1]. Furthermore, when you land a &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hit&lt;/LSTag&gt;, the target is &lt;LSTag Type="Status" Tooltip="BLINDED"&gt;Blinded&lt;/LSTag&gt; for [2] turn.</content>
+  <content contentuid="he93e4d09gc5a9g7f97g86a6gec97648216b1" version="1">Dual Heritage</content>
+  <content contentuid="hd0e5fdc9gc816g2c17g954ag69489ee00eb7" version="3">At the start of combat, you gain &lt;LSTag Tooltip="Resistance"&gt;Resistance&lt;/LSTag&gt; to Physical Damage or Elemental Damage for [1] turns.</content>
+  <content contentuid="hd29a608fg9e9cgafa7g856cga974062da08e" version="1">Blood Frenzy</content>
+  <content contentuid="hc578b19fgf41cgde26g6a23gdba2e11a2112" version="2">When your &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt; drop below [1]%, your &lt;LSTag Tooltip="MovementSpeed"&gt;movement speed&lt;/LSTag&gt; increases by [2], and your melee attacks apply &lt;LSTag Type="Status" Tooltip="BLEEDING"&gt;Bleeding&lt;/LSTag&gt;.</content>
+  <content contentuid="h0eb8399fgb67bg2eddg32a6g50bcd1f45934" version="1">Slippery Target</content>
+  <content contentuid="he4764bb6g667agd6d9gcc80g704a15de39dc" version="2">You cannot be targeted by &lt;LSTag Tooltip="OpportunityAttack"&gt;Opportunity Attacks&lt;/LSTag&gt;.</content>
+  <content contentuid="hc8a36cd3ge80bga130g7a7dg0c4229e817e0" version="1">Stone Skin</content>
+  <content contentuid="hde08a0f4gb53ag0f7ega79cg5a93d6e2d91a" version="2">All physical damage is reduced by [1].</content>
+  <content contentuid="h6dbf3ea3g247cgb5degea46gda01dec75aca" version="1">Arcane Feedback</content>
+  <content contentuid="he9df1f1cg8928ge693gb8d4g0599dd35e8dd" version="2">When you successfully roll a &lt;LSTag Tooltip="SavingThrow"&gt;Saving Throw&lt;/LSTag&gt; against a spell, the caster of that spell takes [1].</content>
+  <content contentuid="h3392866bg039dg82c4gea7ag7857011d959e" version="1">Infernal Retribution</content>
+  <content contentuid="h7a09af8eg9e58ge735gd514g6534b100df23" version="3">When you are hit by a melee attack, the attacker takes [1].</content>
+  <content contentuid="h1a627925gbd4cg338cg1302g66ed8820e1c0" version="1">Draconic Plating</content>
+  <content contentuid="hea530ff6g8f0egccc1g3c6eg1c70d6f0cd15" version="2">You are &lt;LSTag Tooltip="Immune"&gt;Immune&lt;/LSTag&gt; to &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hits&lt;/LSTag&gt;.</content>
+  <content contentuid="h93cd6d4aga012g5556g6c49g03174532271f" version="1">Astral Severance</content>
+  <content contentuid="ha724618egb047gef6ag25a6g25062750d9fb" version="2">Your attacks deal an additional [1]. Additionally, your attacks apply &lt;LSTag Type="Status" Tooltip="DDS_GITHYANKI_TRAIT_DEBUFF"&gt;Astral Severance&lt;/LSTag&gt; until the end of their turn.</content>
+  <content contentuid="h76a6234fga986g6fe3g9475gebff8d21ad40" version="1">Vicious Opportunists</content>
+  <content contentuid="hc5ec28d6g503eg1e49gd6f0g4964bb44e863" version="3">You deal an extra [1] damage to targets that are &lt;LSTag Type="Status" Tooltip="PRONE"&gt;Prone&lt;/LSTag&gt;, or &lt;LSTag Type="Status" Tooltip="RESTRAINED"&gt;Restrained&lt;/LSTag&gt;.</content>
+  <content contentuid="h1c5c9269g6045gfe17g288cg90955a4e2aaa" version="1">Grave Rot</content>
+  <content contentuid="hd39603a7g8806g9433g3f8bg73f31af8e7ea" version="3">When you hit a creature with a melee attack, there is a [1]% chance to afflict the target with &lt;LSTag Type="Status" Tooltip="DDS_UNDEAD_TRAIT_DEBUFF"&gt;Grave Rot&lt;/LSTag&gt; until the start of its next turn.</content>
+  <content contentuid="ha5423278gcbfdgecb2g5e4fg71b25e5d9e99" version="1">Mind Muddle</content>
+  <content contentuid="h9f11d1bdg5836ga2bagd4eag71ddcb9b3cca" version="4">Whenever you take damage, the attacker may suffer &lt;LSTag Tooltip="Disadvantage"&gt;Disadvantage&lt;/LSTag&gt; on all &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt; until the start of their next turn.</content>
+  <content contentuid="h5badef7bgaa68g7c92gcd2fgd24184d45b6f" version="1">Ravenous Vigor</content>
+  <content contentuid="h83817ec1g947cg4996gbfafgac6b285c9b80" version="2">Dealing melee damage restores [1].</content>
+  <content contentuid="hba413dd4gfdccgf324g899eg8a1a53b9be5d" version="1">Brutal Ambush</content>
+  <content contentuid="h01b0bb30g4a39g4a3fg3eb1g8c810ac153f0" version="2">The first attack you make in combat automatically knocks the target &lt;LSTag Type="Status" Tooltip="PRONE"&gt;Prone&lt;/LSTag&gt; if it hits, bypassing standard &lt;LSTag Tooltip="SavingThrow"&gt;Saving Throws&lt;/LSTag&gt;.</content>
+  <content contentuid="h421a2ab8g1a6eg4853g1a2eg11cb8233369b" version="1">Tactical Superiority</content>
+  <content contentuid="hc799e51ag008dg41e4gf1e0g51bb904d2118" version="2">The first time you miss an attack in combat, you regain an &lt;LSTag Type="ActionResource" Tooltip="ActionPoint"&gt;Action Point&lt;/LSTag&gt; and your next attack has &lt;LSTag Tooltip="Advantage"&gt;Advantage&lt;/LSTag&gt;.</content>
+  <content contentuid="h7405020fg5f85gec9ag8677gdcb29f3b072d" version="1">Shadow Choke</content>
+  <content contentuid="h055c892eg1d43g7996gd495gfadf1d863c5d" version="2">Attacks made against creatures with full &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt; automatically become &lt;LSTag Type="Status" Tooltip="SILENCED"&gt;Silenced&lt;/LSTag&gt; for [1] turn.</content>
+  <content contentuid="h6d134b9cge124g1bb5g950ag180496dff8fc" version="1">Blood in the Water</content>
+  <content contentuid="h1b1d5a9ege5a8g9787g1490g8b655c26d2aa" version="2">Attacks against targets who are missing any &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt; deal an additional [1].</content>
+  <content contentuid="h38dbe079g153cg07f4gcf53gfe16e8f1394e" version="1">Cornered Ferocity</content>
+  <content contentuid="hdf425fd3gecb2g7d12gd032g07789be5dff6" version="2">When you drop below [1]% &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt;, your attacks deal an additional [2] damage, but your &lt;LSTag Tooltip="ArmourClass"&gt;Armour Class&lt;/LSTag&gt; drops by [3].</content>
+  <content contentuid="h35ee6389g9121g36a1g7125gd6ed45451453" version="2">Divine Mandate</content>
+  <content contentuid="hb0066ac9g02d7gf7bdg0e80g46b27d348515" version="3">When you attack a creature, that creature becomes illuminated with holy light. They cannot &lt;LSTag Type="Status" Tooltip="SNEAKING"&gt;Hide&lt;/LSTag&gt; or become &lt;LSTag Type="Status" Tooltip="INVISIBILITY"&gt;Invisible&lt;/LSTag&gt; for [1] turns.</content>
+  <content contentuid="h31304d63g006bgf28cg0022gd3fdde4abbb5" version="2">Self-Repair Protocol</content>
+  <content contentuid="h7d0c33bdg5986gb573gac1ag0d9007b752dd" version="4">At the start of your turn, your start repairing yourself. If you take no damage until the start of your next turn, you regain [1]% of your maximum &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt;.</content>
+  <content contentuid="hd7401399g44ecg3f05g5e9dgf69bc1739256" version="3">Energy Dispersion</content>
+  <content contentuid="h114b13f8g9104g8bf5gd473gd7a5c7aacc60" version="4">When you take damage, you have a [1]% chance to deal [2] to anyone nearby.</content>
+  <content contentuid="h36ad4d6dga182g4383g4d80g3d29b9148a5f" version="2">Illusory Decoy</content>
+  <content contentuid="h8e6f1934gdab8gedcbg3b5dgad1ea27d51e3" version="3">The first time you are attacked in combat, you immediately turn &lt;LSTag Type="Status" Tooltip="INVISIBILITY"&gt;Invisible&lt;/LSTag&gt;.</content>
+  <content contentuid="hb254838egaf1cga480ge53agfe1f7cabcfab" version="2">Demonic Bargain</content>
+  <content contentuid="h79b36324gad8eg3a04gebc5ge80e033bbebe" version="3">When you miss an attack, you sacrifice [1]% of your max &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt; to make your next attack a &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hit&lt;/LSTag&gt;.</content>
+  <content contentuid="ha93a3766g8660g18e0g5418g317cfaaf3997" version="2">Predatory Instincts</content>
+  <content contentuid="hfcfe8761g67b6g3821gc4a7g6ea195be4a4a" version="3">You have &lt;LSTag Tooltip="Advantage"&gt;Advantage&lt;/LSTag&gt; on &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt; against targets whose haven't taken a turn yet.</content>
+  <content contentuid="h92730e52gde85g85f5g6e82gd3c13a28df55" version="2">Rooted Defenses</content>
+  <content contentuid="h7f0a4660geaf0ga58eg2e13g1362ac6a8b6d" version="4">When you are hit by a melee attack, the attacker is &lt;LSTag Type="Status" Tooltip="ENSNARED"&gt;Entangled&lt;/LSTag&gt; by grasping vines for [1] turns.</content>
+  <content contentuid="h493bac19g756cg22a8g09bagd62febdcdac1" version="1">Acidic Engulf</content>
+  <content contentuid="hc4b79099gde4eg583eg5ec5g253a64ee0f54" version="2">When damaged by a &lt;LSTag Tooltip="MeleeWeaponAttack"&gt;melee weapon attack&lt;/LSTag&gt;, the attackers weapon starts to corrode. The attacker suffers a -[1] penalty to their &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt; for [2] turns.</content>
+  <content contentuid="h09a04ca6g78aeg1a80g0550g4478fcc1478b" version="1">Indomitable Resolve</content>
+  <content contentuid="hdd49ea64g80a3ga513g9796gca8ed81344f8" version="2">You have &lt;LSTag Tooltip="Advantage"&gt;Advantage&lt;/LSTag&gt; on your next attack.</content>
+  <content contentuid="hfaf1d544g555dg3820gcd50gad59413cf2eb" version="1">Fey Step Evasion</content>
+  <content contentuid="hba166ca1gf2b9g1515gcb4ag47e2416ad57a" version="1">Able to cast &lt;LSTag Type="Spell" Tooltip="Target_DDS_Elf_MistyStep"&gt;Misty Step&lt;/LSTag&gt; until the end of your turn.</content>
+  <content contentuid="h490f834ega978g440cg8c37g5620b031e405" version="1">Indomitable Resolve</content>
+  <content contentuid="h2f0e1f09g32f9g7687gae41g534386c1c2e9" version="1">Fey Step Evasion</content>
+  <content contentuid="hd906ddfcgf25ag0d63g008fgdb070e04035a" version="1">Misty Step</content>
+  <content contentuid="h319a74bdgda2fg3a02g30dcg1bd391185803" version="1">Surrounded by silver mist, you teleport to an unoccupied space you can see.</content>
+  <content contentuid="h5e4881b0gce6dg6d1dg746dgfad3fff7bbad" version="1">Venomous Spite</content>
+  <content contentuid="h1beabd6egb23eg60d4g44c6g6391a4e64d9b" version="1">Venomous Spite Crit</content>
+  <content contentuid="hc432cf1fgae56gb749gc3c3g20858d8dc778" version="1">Dual Heritage: Physical Resistance</content>
+  <content contentuid="hf62bfb90g1592g75b1g67e7g722c8e91e48c" version="2">You've gained &lt;LSTag Tooltip="Resistance"&gt;Resistance&lt;/LSTag&gt; to Physical damage</content>
+  <content contentuid="h47969b1cg6f70g636ag1c91g0df1a9bc9b86" version="1">Dual Heritage: Elemental Resistance</content>
+  <content contentuid="hd1c363edg4910gb8d6g3719g745d878d1796" version="2">You've gained &lt;LSTag Tooltip="Resistance"&gt;Resistance&lt;/LSTag&gt; to Elemental damage.</content>
+  <content contentuid="he5a22683gf368g3bceg2ce7g532b7fe02581" version="1">Dual Heritage</content>
+  <content contentuid="hf58cac01g0ccegb924g919ag359a8bcbfee1" version="1">Blood Frenzy</content>
+  <content contentuid="hf4964cddgf130gcc30gb5ccg4ca68cc1996b" version="2">Your &lt;LSTag Tooltip="MovementSpeed"&gt;movement speed&lt;/LSTag&gt; is increased by [1], and your melee attacks apply &lt;LSTag Type="Status" Tooltip="BLEEDING"&gt;Bleeding&lt;/LSTag&gt;.</content>
+  <content contentuid="h966cda59gb455g7a98g1c88g87f99882af50" version="1">Blood Frenzy</content>
+  <content contentuid="hb2bab8a1ga765gf794g5646ga2fe356b7990" version="1">Blood Frenzy</content>
+  <content contentuid="h4b8811beg1407g1eb0gdb55gc6d403ff289d" version="1">Arcane Feedback</content>
+  <content contentuid="ha6d37b60ge6a0g739fg54f4g0f079b71fadb" version="1">Infernal Retribution</content>
+  <content contentuid="hc0fb6dc0g9a1dg399ag70bag1d791f3b65f8" version="1">Astral Severance</content>
+  <content contentuid="hd2fc993bg33dcg9b7ag5ae0g2bee4db0e7a8" version="1">You have &lt;LSTag Tooltip="Disadvantage"&gt;Disadvantage&lt;/LSTag&gt; on &lt;LSTag Tooltip="SavingThrow"&gt;Saving Throws&lt;/LSTag&gt; for maintaining &lt;LSTag Tooltip="Concentration"&gt;Concentration&lt;/LSTag&gt;.</content>
+  <content contentuid="hc99ae91fg8339gb855g5804gec0a82f04e5c" version="1">Astral Severance</content>
+  <content contentuid="h96e71f07g8e74gf08dg4a15gfa7dff5de406" version="1">Ravenous Vigor</content>
+  <content contentuid="h2db1de76g642fg6d0bgfa38gc80069517467" version="1">Vicious Opportunists</content>
+  <content contentuid="h5d35fac1gc65ag2935g0aebga8e241010cad" version="1">Tactical Superiority</content>
+  <content contentuid="h561e8c1bg80dag141eg9ea2gcd45d25f8317" version="1">Astral Severance</content>
+  <content contentuid="he5b3dbc5gb78bg70a5ga65fgec2c633856db" version="1">Grave Rot</content>
+  <content contentuid="hc67e722ege986g2836g571dg6aada71da917" version="1">Cannot regain &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt;.</content>
+  <content contentuid="hcc7b2e08g34dfg7b6ag03ceg3ee2bc417e58" version="1">Mind Muddle</content>
+  <content contentuid="h9cc9c7edg392egb176g6ee4gc4c29c21c19b" version="2">You have &lt;LSTag Tooltip="Disadvantage"&gt;Disadvantage&lt;/LSTag&gt; on all &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt;.</content>
+  <content contentuid="h8861f7eeg7d10g319bgef81ga15a9b6558c5" version="1">Brutal Ambush</content>
+  <content contentuid="h5178a3e9g0cadg1187g65edgce1c9b0bee5b" version="1">Shadow Choke</content>
+  <content contentuid="h6607458bg2f37g95e3gbbb6gaf29f47a7869" version="1">Blood in the Water</content>
+  <content contentuid="h83273ed0ge757g9d57g22a7g6bd3b29fb585" version="1">Grave Rot</content>
+  <content contentuid="h6f4d261fg15f3g949agfd0eg49962ddcccca" version="1">Mind Muddle</content>
+  <content contentuid="h6a5b54f3gc333ge008g51feg615006bb4db0" version="1">Cornered Ferocity</content>
+  <content contentuid="h304e89b5g4578ga0afgf48bgbb543b3d65a7" version="2">Divine Mandate</content>
+  <content contentuid="hb362ef4fgb532g63ebgc8f1ga9c7e79077be" version="1">Cornered Ferocity</content>
+  <content contentuid="h40f524e8gdd71g7abdgf247gff1ced84eeac" version="2">You deal an additional [1] damage, but your &lt;LSTag Tooltip="ArmourClass"&gt;Armour Class&lt;/LSTag&gt; is reduced by -[2].</content>
+  <content contentuid="h348fe2e1gbedcga839ged85g13a7f85fe9da" version="1">Divine Mandate</content>
+  <content contentuid="had5cea6fg03eag1e10g21ddgadb4eab0be89" version="2">You cannot &lt;LSTag Type="Status" Tooltip="SNEAKING"&gt;Hide&lt;/LSTag&gt; or be &lt;LSTag Type="Status" Tooltip="INVISIBILITY"&gt;Invisible&lt;/LSTag&gt;.</content>
+  <content contentuid="hcfc9b984geb53gaa6bgb492g49936f364fac" version="1">Self-Repair Protocol</content>
+  <content contentuid="h7cc86aa9g8eeag4130g5205g19ae9c0bbb8f" version="2">Energy Dispersion</content>
+  <content contentuid="hc1b17844g0ef4g77f8gc88bgdeacb6c55bcf" version="1">Illusory Decoy</content>
+  <content contentuid="hf854a32eg006bge5abg7a77g2a6cc4dde16d" version="1">Demonic Bargain</content>
+  <content contentuid="he4dd3907g27a0gb1d3g3b00g3a2c853cebe9" version="1">Predatory Instincts</content>
+  <content contentuid="hfdd5d2cdg9705g4788g470cgaf12dbb80582" version="1">Rooted Defenses</content>
+  <content contentuid="hc0100df5g7649g9e48gcd0fgdda40a9475c5" version="1">Acidic Engulf</content>
+  <content contentuid="h6319bfc9g0ad5g6f43gff70g06225fd09573" version="1">Self-Repair Protocol</content>
+  <content contentuid="h16932188g3793gaa89g3566g4f4d966f8ecc" version="2">Regain [1]% of your maximum &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt; if you take no damage while this status is active.</content>
+  <content contentuid="he205530bg7085g1736g6d1fg828210f630c4" version="1">Energy Dispersion</content>
+  <content contentuid="h1b62cc03g9770gccf1g3df8g83dea85360a7" version="1">Dispersed energy, dealing [1] to nearby targets.</content>
+  <content contentuid="h8b83c92cgf49dg8c67gf148g908291fe22d7" version="1">Demonic Bargain</content>
+  <content contentuid="he0d6380cg204cge4f0g8917ge9268f524da6" version="2">Your next attack is a &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hit&lt;/LSTag&gt;.</content>
+  <content contentuid="h087b1d05gbae1g34acg7233gbaecd02e098d" version="1">Acidic Engulf</content>
+  <content contentuid="h050db8f6gbc67g9174ga6eag68d45e4ffc67" version="2">Suffering a -[1] penalty to &lt;LSTag Tooltip="MeleeWeaponAttack"&gt;melee weapon attack&lt;/LSTag&gt; &lt;LSTag Tooltip="AttackRoll"&gt;Rolls&lt;/LSTag&gt;.</content>
+  <content contentuid="hf28cc8a5g085dg3ffcgba8fg8df8c8afe150" version="1">Bone Chill</content>
+  <content contentuid="he156b6e5g13b6g1e90g61a0g4661a69a3081" version="1">Prevent the target from healing until your next turn. The target cannot help &lt;LSTag Tooltip="Downed"&gt;Downed&lt;/LSTag&gt; characters. An undead target receives &lt;LSTag Tooltip="Disadvantage"&gt;Disadvantage&lt;/LSTag&gt; on &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt;.</content>
+  <content contentuid="h1324c43dgccd0g9ff9g6177g530d6c9ed540" version="1">Toll the Dead</content>
+  <content contentuid="habb83a86ga219ge211g9c07g3a4bd7d8f7e2" version="1">Ring the bell of impending doom. If the target is at full health, you deal [1] instead.</content>
+  <content contentuid="heff53a9ag37f6g0466g39c3g77041452477f" version="1">Ray of Enfeeblement</content>
+  <content contentuid="h66b2b49fg94c6gb0bfg9a2dg8961f2e4e8cb" version="1">Weaken a foe: they deal half damage with weapon attacks using &lt;LSTag Tooltip="Strength"&gt;Strength&lt;/LSTag&gt;.</content>
+  <content contentuid="hb2c05e26g4b2ag506ega425g34e830581b9a" version="2">Elemental Adaptation: Acid</content>
+  <content contentuid="h62e7c25ege741gde03gc32bg78dd104d5bfa" version="2">Elemental Adaptation: Cold</content>
+  <content contentuid="h97c1da4dg64d7g34ebg2b2bgd5272172749f" version="2">Elemental Adaptation: Fire</content>
+  <content contentuid="h272c0c62g3a7dg6cf9gbc1fg60ec04fc9162" version="2">Elemental Adaptation: Lightning</content>
+  <content contentuid="h11f310efgb313gee7fgce7cge3405dc9d017" version="2">Elemental Adaptation: Thunder</content>
+  <content contentuid="h4895f254gf611g8979ga32cg713e3ad9dd64" version="2">Elemental Adaptation</content>
+  <content contentuid="h13bad796gdf75g4729ga15dg752f28d2a7c4" version="1">Animal Friendship</content>
+  <content contentuid="h71780cbeg0613gaedag247eg766e21f0cc03" version="1">Convince a beast not to attack you.</content>
+  <content contentuid="h4a2b4712g25f7g7b8cgf414ga8d35abf4f0c" version="1">Thorn Whip</content>
+  <content contentuid="h707ef56fg6d46gcc7bgac45g43df1e75eebd" version="1">Pulls the creature [1] closer to you.</content>
+  <content contentuid="hbc4f0c47g20deg720dg0bb6gc39b68ab4373" version="1">Shocking Grasp</content>
+  <content contentuid="h552f40f0g9aacg4129g4848gadf3121af925" version="1">The target cannot use reactions. This spell has &lt;LSTag Tooltip="Advantage"&gt;Advantage&lt;/LSTag&gt; on creatures with metal armour.</content>
+  <content contentuid="h4fca9a0ege5bfg3599g0f3fg554b0e612c3b" version="1">Ensnaring Strike</content>
+  <content contentuid="heb26fe44g6c3fgb3f6g51b5g1785b441f47e" version="1">Your attack summons thorny vines that possibly &lt;LSTag Type="Status" Tooltip="ENSNARING_STRIKE"&gt;Ensnare&lt;/LSTag&gt; your target.</content>
+  <content contentuid="hd472f446gd420g1824g16d3gb99a6f4fcff4" version="2">Boiling Blood</content>
+  <content contentuid="he4c93210g8e82gad76g4f5cgfb4103a7107c" version="2">Boiling Blood</content>
+  <content contentuid="h1d99aff3g7775g4ca1g8d64gca8efc5ac9c6" version="2">Boiling Blood</content>
+  <content contentuid="h381954acg989fgf147g9df2g95fb2b8abca4" version="2">Boiling Blood</content>
+  <content contentuid="h3954bb7cg00e0ge667g1d46g5d3493a981a7" version="1">Barkskin</content>
+  <content contentuid="h9a298351g628dg6a35gd910g62a087f61658" version="1">Protect a creature from attacks: increase its &lt;LSTag Tooltip="ArmourClass"&gt;Armour Class&lt;/LSTag&gt; up to 16.</content>
+  <content contentuid="h5175a041g50a4g34a4g6adfg86210507fdf9" version="1">Shadow Step</content>
+  <content contentuid="hcc56013cge131gc173g726ag6f7fddc77043" version="1">Teleport from shadow to shadow. Afterwards, you have &lt;LSTag Tooltip="Advantage"&gt;Advantage&lt;/LSTag&gt; on your next melee &lt;LSTag Tooltip="AttackRoll"&gt;Attack Roll&lt;/LSTag&gt;.</content>
+  <content contentuid="hfaf6a8d4g27ecg73b5ga3c3gcb0e0e53c5c5" version="1">Embrace Death</content>
+  <content contentuid="h4064e310ge20cga52dg0956gb93dc4febe22" version="1">&lt;LSTag Type="Status" Tooltip="HOLD_PERSON"&gt;Hold&lt;/LSTag&gt; a humanoid enemy still. They can't move, act or react. Attacks from within [1] are always &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hits&lt;/LSTag&gt;.</content>
+  <content contentuid="ha24c27f1g20a8g1a8bg4e5dg9ed31a928e4d" version="1">Cloak of Shadows</content>
+  <content contentuid="h75e4a27eg82bfg0890gc9f4g6084e033d847" version="1">Wrap yourself in shadows to become &lt;LSTag Type="Status" Tooltip="CLOAK_OF_SHADOWS_MONK"&gt;Invisible&lt;/LSTag&gt; if you are obscured.</content>
+  <content contentuid="h62d538bag61beg21d5ge830ge897601495bc" version="1">Wild Shape: Panther</content>
+  <content contentuid="hba1714b8g1ccag4cf5gd39eg0487220000e0" version="1">Take the shape of a panther that can &lt;LSTag Type="Spell" Tooltip="Shout_Prowl_Panther"&gt;Prowl&lt;/LSTag&gt; around invisibly.</content>
+  <content contentuid="hfa6b7b1ag44b6g2ee4g6904gc917e1d031a3" version="1">Wild Shape: Owlbear</content>
+  <content contentuid="hce509bcag8463gd9acgc4a5g4079d083aa67" version="1">Take the shape of an owlbear that can &lt;LSTag Type="Spell" Tooltip="Shout_Owlbear_Wildshape_Smash"&gt;Rupture&lt;/LSTag&gt; the ground and become &lt;LSTag Type="Spell" Tooltip="Shout_Owlbear_Wildshape_Enrage"&gt;Enraged&lt;/LSTag&gt;.</content>
+  <content contentuid="h5f725a3ag9d7bgb0b6gb455g7e059919d83e" version="1">Wild Shape: Spider</content>
+  <content contentuid="h3f6e3bbcg0f94gacb6g15afgaeadee7b823d" version="1">Assume the shape of a giant spider that can &lt;LSTag Type="Spell" Tooltip="Target_Web_Spider"&gt;Enweb&lt;/LSTag&gt; enemies. The giant spider has a starting health of [1] that increases every two druid levels.</content>
+  <content contentuid="hb8533d73gb0e8gd65cgcc19g8b91cce43d3f" version="1">Wild Shape: Bear</content>
+  <content contentuid="hcfacbfbfg3b36ge21cgdac0g5c3a49cc77df" version="1">Your bear shape has [1].</content>
+  <content contentuid="h4821911fgf5d2gcabegb590g8078efeb98ba" version="1">Wild Shape: Wolf</content>
+  <content contentuid="hab4e3becg8245gb3begb360g1b1a311e3b3d" version="1">Your wolf shape has [1].</content>
+  <content contentuid="h075e98b2g4cf3g6dbcg13e1g925d781f79bf" version="1">Polymorph</content>
+  <content contentuid="h096787deg5593g0c69g08fdg200e7f48c5ef" version="1">Transform a creature into a harmless sheep.</content>
+  <content contentuid="h318caa50gf7f8g0242ga160gd7981de6915b" version="1">If the sheep's hit points drop to 0, the target reverts to its original form with its original hit points.</content>
+  <content contentuid="h43d5cd15ge8c8g884cg5984g3581d5816da9" version="1">Silence</content>
+  <content contentuid="h5380a9d1gd96agb33bg7563g9efa0e90be0f" version="1">Create a sound-proof sphere. All within are &lt;LSTag Type="Status" Tooltip="SILENCED"&gt;Silenced&lt;/LSTag&gt; and &lt;LSTag Tooltip="Immune"&gt;Immune&lt;/LSTag&gt; to Thunder damage.</content>
+  <content contentuid="h7c5dd97cgbb2dgd400g7944g28794b86eec2" version="1">Vow of Enmity</content>
+  <content contentuid="h54cfba52g35c0gc028g17c5g28a3a6ba5d09" version="1">Gain &lt;LSTag Tooltip="Advantage"&gt;Advantage&lt;/LSTag&gt; on &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt; against an enemy.</content>
+  <content contentuid="h0ac2a7c7g7071g0b16gac78gced552a435b8" version="2">Death's Mark</content>
+  <content contentuid="he646cb85gf112gba6bgee0ag392d2c44d8e1" version="1">Wounding Ray</content>
+  <content contentuid="hc0941c96g7a10g09d5g5a77gdf3f134d61a4" version="1">Deals [1].</content>
+  <content contentuid="hfb2c68ffg77d0gecf5g1b8fgaa924e60e33d" version="2">Touch of the Grave</content>
+  <content contentuid="he4d8f0cfg0a51gd3cag5059g58dcb7cab2e1" version="1">Dark Celebration</content>
+  <content contentuid="h04c226edgdde6gde54gbb7eg7ff4767b0534" version="1">Undead thralls gain &lt;LSTag Type="Status" Tooltip="SHA_SKELETON_CRUELTY"&gt;Undying Cruelty&lt;/LSTag&gt;, and all creatures other than undead thralls take [1].</content>
+  <content contentuid="ha24695f6g97a8g0c5bg4a1eg5e5d5a505d94" version="2">Reaper's Toll</content>
+  <content contentuid="hfc782bd1g3282gc8cdg7093g43778cfbf97c" version="1">Frenzy</content>
+  <content contentuid="h2f7191cbg2cc7g3ad3gfc67gbe3da2ac5dc5" version="1"> The huntmaster has commanded you to enter a frenzy. You have a +[1] bonus to attack rolls and damage, and gain Resistance to physical damage.</content>
+  <content contentuid="h9e6d6d92gdf0cgb87agabdeg497ac254769c" version="1">Coordinated Pack</content>
+  <content contentuid="hf811285bgd8ccgcac8ge8cdg51a728445e94" version="2">While you have a beast companion within [1], your attacks become more precise. The number needed to roll a &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hit&lt;/LSTag&gt; is reduced by [2].</content>
+  <content contentuid="h900a7971g2709gd11bge70fgf41a2a06815b" version="1">Command: Frenzy</content>
+  <content contentuid="h6c850165g793cga63dgb915ga9dd8afb86c8" version="1">Command a beast companion to enter a frenzy. Their attack rolls and damage are increased by [1], and they gain Resistance to physical damage.</content>
+  <content contentuid="h6e12d8d1g1a18gc2dbge5d6g6f2ad519107b" version="1">Ensnaring Strike (Ranged)</content>
+  <content contentuid="hf4e42e3agfaf6ge37eg141fga9b28aec1284" version="1">Your attack summons thorny vines that possibly &lt;LSTag Type="Status" Tooltip="ENSNARING_STRIKE"&gt;Ensnare&lt;/LSTag&gt; your target.</content>
+  <content contentuid="h2800f873g4448g2945g9ceeg32f1455a67ea" version="1">Hail of Thorns</content>
+  <content contentuid="h5909e7b5g35d7ga538g5f3cgf38c30cd2a8c" version="1">The thorns deal [1] to the target and then explode. The explosion deals an additional [2] to the target and surrounding creatures.</content>
+  <content contentuid="he0290097ga769gf307g9a7fgd899a3e6ab23" version="1">Pinning Shot</content>
+  <content contentuid="hdbd091d1g3f2cg6771g568bg570695eeb7be" version="1">Deal regular damage and reduce a target's &lt;LSTag Tooltip="MovementSpeed"&gt;movement speed&lt;/LSTag&gt; by [1].</content>
+  <content contentuid="h6647ad6ag95aag4d44gdb27g2528ecaa3909" version="1">Alpha's Call</content>
+  <content contentuid="h0f206d2cgb4e6g57e6gaf34g23da79e97db9" version="1">&lt;LSTag Tooltip="MovementSpeed"&gt;This character's movement speed&lt;/LSTag&gt; is increased by [1], and it gains [2].</content>
+  <content contentuid="h4e1550afg530bg16eeg5ec6g33bece5d2599" version="1">False Life</content>
+  <content contentuid="h5640771fgc127g78d6g5b66gd503a18003bb" version="1">Gain [1].</content>
+  <content contentuid="hc06f17bdgee81g6dbdg1824gb1d8b528f75f" version="1">Alpha’s Howl</content>
+  <content contentuid="h94b6e343ga825gd5a8g77fcgf58f760b3ef7" version="1">Gather your pack. Each ally within earshot can move an additional [1] during their next turn, and gains [2].</content>
+  <content contentuid="h867c6bfag7088g6d5fg199dg57101e80b7bc" version="4">Huntmaster's Wolf</content>
+  <content contentuid="h586f214dgdbaegd2c7g9890gdcfc80bc03ac" version="4">Huntmaster's Bear</content>
+  <content contentuid="hb818f0e7gf905g296bg09f8g06b466dfd0ae" version="4">Huntmaster's Spider</content>
+  <content contentuid="hb5478907g70e4ge968g8daagabfd263b40eb" version="4">Huntmaster's Boar</content>
+  <content contentuid="hee84ee29g2f34g32b3g4263g9632899f4428" version="1">Huntmaster's Boar</content>
+  <content contentuid="hf79a80f6ge22agaf96g8f2bgf27f73a934d2" version="1">Summon the Huntmaster's Boar.</content>
+  <content contentuid="hcc0c3264g37aeg3f31g67e2gc4e3bfee9399" version="1">Huntsman's Spider</content>
+  <content contentuid="hd3712ca8gac0bg61ddg34f7ged00a08041ce" version="1">Summon the Huntmaster's Spider.</content>
+  <content contentuid="hf2bcd18agece3gf69egedcfg3c12431a9f2a" version="1">Huntsman's Wolf</content>
+  <content contentuid="ha4e67ea4g55b7g7e9bge128gb3069fe72fac" version="1">Summon the Huntmaster's Wolf.</content>
+  <content contentuid="hd8fbaa4bgebd2gbf38g1022ga202e5d1b171" version="1">Huntsman's Bear</content>
+  <content contentuid="hc52b872egfa97gbf3cga365g76d1154269ff" version="1">Summon the Huntmaster's Bear.</content>
+  <content contentuid="ha8f2bf9egcd1dgb574g9654gcc8cf89caafd" version="2">Sanguine Thirst</content>
+  <content contentuid="heecb07f9g2f62gd5fcg09d4g30e7b0305f6c" version="4">You sustain yourself on the slaughter. You heal for [1]% of all damage dealt. This healing increases to [2]% if the target is &lt;LSTag Type="Status" Tooltip="BLEEDING"&gt;Bleeding&lt;/LSTag&gt;.</content>
+  <content contentuid="he5eca06cg1f05gfff8gea8dgbe0cd37e50ed" version="1">Blood-Sapped</content>
+  <content contentuid="he30d163cgdc25gc75egc57bg2c327a30fb62" version="1">Hit point maximum reduced. Creature will die if its hit point maximum is reduced to 0.</content>
+  <content contentuid="h5ba0803fgd100g60a9g063eg9876133a4c60" version="2">Siphon Vitality</content>
+  <content contentuid="hafaf2c0fgf0b2g191eg3f18g46a5e069c830" version="2">Cruel Lacerations</content>
+  <content contentuid="h695a616cg309bg88a1ge063g20c55bd2c1bc" version="1">Cauterized</content>
+  <content contentuid="hb75b6c8dg5403ga72cg73d6gc6184cb62477" version="1">Unable to Heal</content>
+  <content contentuid="hf811aa99g147cg8751gfc5cgbdcd668f4579" version="1">Exsanguinated</content>
+  <content contentuid="had992be0g56f9g0d5ege7a5g801df03bcf57" version="1">Movement speed reduced by half, and have disadvantage on Strength and Dex saving throws.</content>
+  <content contentuid="h594d9915g7d87ge2c0gaae6g28ab5a39c44a" version="2">Flammable Ichor</content>
+  <content contentuid="h59929e53gc294g28e9g7be1g29c7eee39a7d" version="2">Fatal Hemorrhage</content>
+  <content contentuid="hce73896cgd863g7572g06b4ga60c3898ee99" version="1">Blood Cleave</content>
+  <content contentuid="hfef41c9ag355bga357g6e0ag6a29985c602c" version="1">Lash out to attack up to [1] enemies at once and make them &lt;LSTag Type="Status" Tooltip="BLEEDING"&gt;Bleed&lt;/LSTag&gt;.</content>
+  <content contentuid="h6bbd04b5g6f83gaaedg62fcg59041569c5c0" version="2">Sanguine Rupture</content>
+  <content contentuid="h7673f191ga55bg6f95gab9dg8a52230f7e77" version="1">With a cruel gesture, magically tear open the target's flesh from afar. Deals piercing damage and inflicts &lt;LSTag Type="Status" Tooltip="BLEEDING"&gt;Bleeding&lt;/LSTag&gt;.</content>
+  <content contentuid="h1ddfcb19gf497g7569ga696gcfff0358d3f3" version="1">Plaguebringer's Poison Aura</content>
+  <content contentuid="h85ff0ff8gc6c5g0205gd06dge92b702ba0bc" version="1">Festering Contagion</content>
+  <content contentuid="hc2c764e0gc0b8gf1e7g6f30g1b78e25c411b" version="1">A foul sickness courses through the target's veins, causing their skin to blacken and peel. The target takes [1] at the start of their turn.</content>
+  <content contentuid="h8c0ec571g0d02g5e8ag5803g2f91c0ea7ee3" version="2">Virulent Strikes</content>
+  <content contentuid="h262801f9gf5d9geab7gaa68gf1e7a47ef196" version="2">Your attacks have a [1]% chance to apply &lt;LSTag Type="Status" Tooltip="DDS_CHAMP_PLAGUEBRINGER_CONTAGION"&gt;Festering Contagion&lt;/LSTag&gt; for [2] turns.</content>
+  <content contentuid="h0047c666gedc3g0726ge7c7gdd89232be8ad" version="1">Noxious Wail</content>
+  <content contentuid="h3f39614agf221g90b4g0079g291f6aa9b6f2" version="1">Let out a sickening wail that forces toxic air from your lungs. All nearby enemies within [1] take [2].</content>
+  <content contentuid="h3412228dg06c5gd0a7g55ffg528341c38b63" version="1">Poison Mist</content>
+  <content contentuid="h792c6566g334dge559gde2cga3e8cd98d811" version="1">On a hit, surround the target in a noxious cloud that possibly &lt;LSTag Type="Status" Tooltip="POISONED"&gt;Poisons&lt;/LSTag&gt; those within it.</content>
+  <content contentuid="hb2213f65g7474g0aecg5529g96a0633a74a5" version="1">Virulent Venom</content>
+  <content contentuid="h9c9e76aag88e8g2276g7fa2g41aa1a33eadf" version="1">Point your ringed finger at a target to make it &lt;LSTag Tooltip="Vulnerable"&gt;Vulnerable&lt;/LSTag&gt; to[1], unless it is &lt;LSTag Tooltip="Immune"&gt;Immune&lt;/LSTag&gt; to Poison damage. </content>
+  <content contentuid="h9eafc6a9gf6a7gfa32g22abgfe2c196d2f06" version="1">Poisonous Strike</content>
+  <content contentuid="h30940398ged87gbb9cg77b2g44661d2c2fd4" version="1">Deal [1] in addition to your weapon's [2] when you make a melee attack.</content>
+  <content contentuid="h589ccec2g4f5dg723eg78eegfed15f47a882" version="1">Poison Spray</content>
+  <content contentuid="haaa08a07g2a3eg1553g6b0cg3cf026d8e4e9" version="1">Project a puff of noxious gas.</content>
+  <content contentuid="h426ce730g7c64g00abg415cg949919813ee9" version="1">Temporary Hit Points</content>
+  <content contentuid="h8cfe0723g58e4g7fb1g3685gf5a0570e7885" version="1">Kept from death's door by a brief magical boost. Gained [1] &lt;LSTag Tooltip="TemporaryHitPoints"&gt;temporary hit points&lt;/LSTag&gt; .</content>
+  <content contentuid="h5060bf05g318dga9d8g3662gfb218509a18f" version="2">Spark of Life</content>
+  <content contentuid="hb9de3c3fg3564g2c0agebdag549f4f3bf4d1" version="2">Fortifying Grace</content>
+  <content contentuid="hffb0fa9fgac35gf28fg65f8g40347fbddea4" version="1">Transfusion</content>
+  <content contentuid="h014f76ecg14d3gb175gae50gd2a6c9890c9b" version="1">Sacrifice a quarter of your remaining &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt; to heal a target for the same amount.</content>
+  <content contentuid="h931b068dgf75dg9184g2845gb638be532df5" version="1">Stasis Ward</content>
+  <content contentuid="h8b613f5cgafb6ga77dg551bge582e75f7952" version="2">The next attack against this creature will shatter the ward and possibly Stun the attacker.</content>
+  <content contentuid="hed9f2794gf524gf511g91f1g117d3ada9cfa" version="1">Aegis of Stasis</content>
+  <content contentuid="h16563f22g2de6g90d1gc2d8g1fd3f48c725f" version="1">Stasis Ward Blast</content>
+  <content contentuid="hc04d2ac8g3cacg873dgf461ge3cf852de2e1" version="1">Encase an ally in a volatile ward. The next time they are attacked, the ward shatters, possibly Stunning the attacker for 1 turn.</content>
+  <content contentuid="hd5ca4d7bg92cbg2b8dgbfb2g6fb6ab84312a" version="1">Vitality Pulse</content>
+  <content contentuid="h0c8e2770g93e1gef08ge477geef445729c6a" version="1">Expel a surge of restorative energy. Yourself and all allies within [1] will regain [2].</content>
+  <content contentuid="h516b9c99g36deg182bg0f96g549c15d250f0" version="1">Vitality Pulse</content>
+  <content contentuid="he9949a02ga979ge8a0ge2a7g6c6698ad7b2c" version="1">Heal yourself and all nearby allies for [1]. Regain another [1] next turn.</content>
+  <content contentuid="ha72832fdg545cg6ee4g4e12g97db9ac382cd" version="1">Vitality Pulse</content>
+  <content contentuid="h414ae4dagfb60g7986g0f3bg1ddf0073a892" version="1">Heal yourself and all nearby allies for [1]. Regain another [1] next turn.</content>
+  <content contentuid="h1f55de50g5e7dg3cf1g121ag8d1c7123418b" version="1">Healing Word</content>
+  <content contentuid="hed8bf060g4faeg2889ga307g8dd68adff07a" version="1">Heal a creature you can see.</content>
+  <content contentuid="hed786055g987ege761g2fe5g10834e57aa2c" version="1">Sanctuary</content>
+  <content contentuid="hf4f2c496g0bffg0f41g35ecg4917f150d2b8" version="1">Allies cannot be targeted until they attack or harm a creature. They can still take damage from area spells.</content>
+  <content contentuid="h62d81137g9d85g070dgc43dge3d976c30835" version="1">Aid</content>
+  <content contentuid="h1d48d6efg2f8fg8d2eg86f9g616a30307277" version="1">Heal your allies and increase their hit point maximum by [1].</content>
+  <content contentuid="h6007b5e8g2480g3b4ag7315gc58c38be9799" version="1">Hold Person</content>
+  <content contentuid="h81100b86g480dg9b8cg75c3ga86dc53f5875" version="1">&lt;LSTag Type="Status" Tooltip="HOLD_PERSON"&gt;Hold&lt;/LSTag&gt; a humanoid enemy still. They can't move, act or react. Attacks from within [1] are always &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hits&lt;/LSTag&gt;.</content>
+  <content contentuid="h9637b574g0d98gfd46g1c20g8c01d01c4885" version="1">Magic Weapon</content>
+  <content contentuid="hda3df265g0d6ege3a2g60e6gff5d0e02725b" version="1">Infuse a weapon with arcane energy. The weapon becomes magical, receiving a +[1] bonus to &lt;LSTag Tooltip="AttackRoll"&gt;Attack&lt;/LSTag&gt; and Damage Rolls.</content>
+  <content contentuid="hc7b3eba6g9841g4a13g52e5gd91512a32a4c" version="1">Shield of Faith</content>
+  <content contentuid="h5158257dg77b4g5a0bg0aa4g3583c69e7d34" version="1">Protect a creature from attacks: increase its &lt;LSTag Tooltip="ArmourClass"&gt;Armour Class&lt;/LSTag&gt; by 2.</content>
+  <content contentuid="h4bedbd90g6684g547fg6e8fg2025283619d6" version="1">Haste</content>
+  <content contentuid="h8211829dg72ddg1adaga554g32c5e420777c" version="1">Target yourself or an ally to become &lt;LSTag Type="Status" Tooltip="HASTE"&gt;Hastened&lt;/LSTag&gt;: gain an action, become faster and gain +2 to &lt;LSTag Tooltip="ArmourClass"&gt;Armour Class&lt;/LSTag&gt;.</content>
+  <content contentuid="hff9be077ge787gd6beg849dg4b34a25ad320" version="1">Bane</content>
+  <content contentuid="h3ca54416gf209g197fg3d9bg7efbb8d757d4" version="1">Up to [2] creatures receive a -[1] penalty to &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt; and &lt;LSTag Tooltip="SavingThrow"&gt;Saving Throws&lt;/LSTag&gt;.</content>
+  <content contentuid="h2a737188g5590g6d0cg9e9ag8a342dbee582" version="1">Stinking Cloud</content>
+  <content contentuid="hff71eb20g0a05gaec7gefe4gc7f2a88ac26e" version="1">Create a cloud of gas so nauseating it prevents creatures from taking actions.</content>
+  <content contentuid="hbf889e06gaaa2g6f84g6d11gda3c4637a9ac" version="1">Spiteful Enchantment</content>
+  <content contentuid="h382ee394g23a3ge98dg04f3gb6159eb0e777" version="2">Whenever the Enchanter succeeds a &lt;LSTag Tooltip="SavingThrow"&gt;Saving Throw&lt;/LSTag&gt; against a foe's spells or actions, they take [1].</content>
+  <content contentuid="h85836a6egbb17g105dgb3d2gc04fbdccc936" version="3">Magically reinforced. Gain a +[1] bonus to all &lt;LSTag Tooltip="SavingThrow"&gt;Saving Throws&lt;/LSTag&gt;.</content>
+  <content contentuid="hfbc1ed34gbf7ag85c5ge5adgd2713888f6e4" version="3">You strike with unnatural precision. Grants a +[1] bonus to &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt;.</content>
+  <content contentuid="hc8d22b45gb7a8g78f1ge821g8180972e65fb" version="3">You move with blinding speed. &lt;LSTag Tooltip="MovementSpeed"&gt;Movement speed&lt;/LSTag&gt; is increased by [1].</content>
+  <content contentuid="h29a0b06cg5a92gdb24g983eg621455f4bb47" version="3">You possesse an unnaturally tough exterior. Gain a +[1] bonus to &lt;LSTag Tooltip="ArmourClass"&gt;Armour Class&lt;/LSTag&gt;.</content>
+  <content contentuid="he08d5ae0g13e0gc887g5588gafc70ac13643" version="2">Warded by a reflective shimmer. When damaged by a spell, the attacker takes [1]% of the damage back as[2].</content>
+  <content contentuid="h09d51041g6081ga4ddga3d9g0b59e98737cb" version="3">Covered in cruel, invisible spikes. When struck by a melee attack, the attacker takes [1]% of the damage back as[2].</content>
+  <content contentuid="hf8efc561g8479g7445g4925g8e9f8a9c4520" version="3">Surrounded by a localized gale. When struck by a ranged attack, the attacker takes [1]% of the damage back as[2].</content>
+  <content contentuid="h3a4eddb4gc21cg343dgc477gec3f3e36e179" version="2">You shrug off blows with ease. All incoming damage is reduced by [1].</content>
+  <content contentuid="h5535eb68gcf62gb6fbg7b36gdb1d410bf0cf" version="2">Your wounds rapidly knit themselves together. You regain [1] at the start of you turn.</content>
+  <content contentuid="h35ff9aa4g77fbg0b90g84dfg210c17965921" version="3">You strike with deadly intent, finding vital spots more easily. &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hit&lt;/LSTag&gt; threshold is reduced by [1].</content>
+  <content contentuid="h76131f0fg4d25g7b4bgf02bg3ad925fe9fcb" version="2">You glide effortlessly across the battlefield. Ignoring all &lt;LSTag Type="Status" Tooltip="DIFFICULT_TERRAIN"&gt;Difficult Terrain&lt;/LSTag&gt;.</content>
+  <content contentuid="he58f2b67g3351gd0d7g6bbagaf7aab3affd6" version="3">You possess incredibly keen sight. The maximum range of all &lt;LSTag Tooltip="RangedWeaponAttack"&gt;ranged weapon attacks&lt;/LSTag&gt; and spells is increased by [1]%.</content>
+  <content contentuid="h5a132e82gad70g4a14g9a87g7af7450da92d" version="1">Party Scaled HP 5</content>
+  <content contentuid="h770b4b41g83e1g13b0g4bbfg19eb6de558be" version="1">Party Scaled HP 6</content>
+  <content contentuid="h593870ceg2fb1gb62cgdabbgc8c399a17691" version="1">Party Scaled HP 7</content>
+  <content contentuid="h39f090c7gfa46gbb8dg9c1ag001ca299f1e4" version="1">Party Scaled HP 8</content>
+  <content contentuid="h4e72976eg36d8g3909ga64dgc041f58d59b2" version="2">Level Scaled 7-9</content>
+  <content contentuid="he048504dgb2efg7c31g6658g6025399e3919" version="2">Level Scaled 10-12</content>
+  <content contentuid="h8b3e40b0gc643ga40cg6f55g5cd042a6cdd5" version="2">Level Scaled 13-15</content>
+  <content contentuid="hbc88b810g8923ge24bgfe71g392a031e2ce2" version="2">Level Scaled 16-18</content>
+  <content contentuid="h032aa573g1ca4gfc93g6cdbg56397c3fac18" version="2">Level Scaled 19+</content>
+  <content contentuid="h37a37114g2dbdg667egbd34ge1e7ec6ca0a2" version="1">Magic Weapon</content>
+  <content contentuid="hc0c5af40g8723g2682g2530g6d71b5d88733" version="1">Weapon has become magical, receiving a +[1] bonus to &lt;LSTag Tooltip="AttackRoll"&gt;Attack&lt;/LSTag&gt; and Damage Rolls.</content>
+  <content contentuid="h08c12066g819cg180bg89cagb915dfb14eb0" version="1">Aura of Deflection</content>
+  <content contentuid="ha0845298ga366gbba9g45c5gd8f2ad71e421" version="1">Aura of Deflection</content>
+  <content contentuid="h8835dc21gf064gd3dbg88ebg3a11857aa08c" version="1">Aura of Carnage</content>
+  <content contentuid="hae2ff852g1f5eg80abgd576g62df07397394" version="1">Aura of Carnage</content>
+  <content contentuid="h58da42c2g9ac9g34d2g79e1g8b64046717ea" version="1">Aura of Resolve</content>
+  <content contentuid="hfb96c9ddg42fdg7339g8237g2e803879f794" version="1">Aura of Resolve</content>
+  <content contentuid="h7b35c17egdceeg0f89g365dg6e99f6f61c36" version="1">Aura of Tactician</content>
+  <content contentuid="h9351aa1eg23adg4b02g38c1g0189ee856649" version="1">Aura of Tactician</content>
+  <content contentuid="hf73da25fg4fb5gbce4ge297gfe1acfb2d4fb" version="1">Aura of Interference</content>
+  <content contentuid="h9b150524ga699g22d7g84dcgaec852668c79" version="1">Aura of Interference</content>
+  <content contentuid="h180dee1fg7a5ag5e72gbeb8gd5de0c1e2bd5" version="1">Aura of Spite</content>
+  <content contentuid="h98dafc17gd93fga7d5g73f5gcff920a6e7be" version="1">Aura of Spite</content>
+  <content contentuid="h33e190fdg5f66gc87egb89bg007860c3560a" version="1">Projecting a localized kinetic ward. Allies within [1] impose &lt;LSTag Tooltip="Disadvantage"&gt;Disadvantage&lt;/LSTag&gt; on ranged attacks made from further than [2] away.</content>
+  <content contentuid="h331afb13g530fg5447g8cc0gd105ad2ba9dd" version="1">Shielded by a leader's aura. Ranged attacks more than [1] away have &lt;LSTag Tooltip="Disadvantage"&gt;Disadvantage&lt;/LSTag&gt; against you.</content>
+  <content contentuid="h6eadc2e8g4062g7ca7g5c0fg28d0fd5d2d2e" version="3">Radiating a bloodthirsty frenzy. Allies within [1] have their &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hit&lt;/LSTag&gt; threshold reduced by [2]. When they score a &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hit&lt;/LSTag&gt;, they heal for [3]% of the damage dealt.</content>
+  <content contentuid="hce781593gce83gc082gfce2gae4a56bde820" version="3">Driven to slaughter. Your &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hit&lt;/LSTag&gt; threshold is reduced by [1]. Scoring a &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hit&lt;/LSTag&gt; restores &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt; equal to half the damage dealt.</content>
+  <content contentuid="h3a54e1e1gb8cfgf73cg2145g72eaba1e3d36" version="2">Projecting an aura of discipline. The Leader and allies within [1] are &lt;LSTag Tooltip="Immune"&gt;Immune&lt;/LSTag&gt; to being &lt;LSTag Type="Status" Tooltip="DISARMED"&gt;Disarmed&lt;/LSTag&gt;, knocked &lt;LSTag Type="Status" Tooltip="PRONE"&gt;Prone&lt;/LSTag&gt;, or &lt;LSTag Type="Status" Tooltip="FRIGHTENED"&gt;Frightened&lt;/LSTag&gt;.</content>
+  <content contentuid="ha66e9adbg784cgf090geab8g4298d636d96b" version="2">Anchored by a leader's unbreakable will. &lt;LSTag Tooltip="Immune"&gt;Immune&lt;/LSTag&gt; to being &lt;LSTag Type="Status" Tooltip="DISARMED"&gt;Disarmed&lt;/LSTag&gt;, knocked &lt;LSTag Type="Status" Tooltip="PRONE"&gt;Prone&lt;/LSTag&gt;, or &lt;LSTag Type="Status" Tooltip="FRIGHTENED"&gt;Frightened&lt;/LSTag&gt;.</content>
+  <content contentuid="h6170de41ge62dg613fg40bag31f1ab25b457" version="2">Coordinates the battlefield with flawless precision. The Leader and allies within [1] gain a +[2] bonus to their &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt;.</content>
+  <content contentuid="ha4c5ecaege717gbe3eg42c5g83ff99c88aeb" version="2">Guided by an expert commander. Receives a +[1] bonus to all &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt;.</content>
+  <content contentuid="h19c1291fg8b38gd392g5e0fgb38831a331d9" version="2">Generates an oppressive magical gravity. Enemies within [1] are completely stripped of their ability to use &lt;LSTag Type="ActionResource" Tooltip="ReactionActionPoint"&gt;reactions&lt;/LSTag&gt;.</content>
+  <content contentuid="hd215a80bg357cg6446g875bgb4d22979bfd4" version="2">Crushed by an oppressive magical pressure. This creature cannot use &lt;LSTag Type="ActionResource" Tooltip="ReactionActionPoint"&gt;reactions&lt;/LSTag&gt;.</content>
+  <content contentuid="h91ca9916gcb3fgd1cdg0fa3gf278ae73977c" version="2">Fills the surrounding air with suffocating malice. Enemies that start their turn within [1] take [2] and suffer &lt;LSTag Tooltip="Disadvantage"&gt;Disadvantage&lt;/LSTag&gt; on &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt;.</content>
+  <content contentuid="h4788720cga208g1e5bgf39cg70fad510eb96" version="2">Plagued by malicious energy. Takes [1] at the start of the turn and has &lt;LSTag Tooltip="Disadvantage"&gt;Disadvantage&lt;/LSTag&gt; on all &lt;LSTag Tooltip="AttackRoll"&gt;Attack Rolls&lt;/LSTag&gt;.</content>
+  <content contentuid="h7a3c2c0bg9582g1dd7g4713gb0ca2a549b48" version="1">Aura of Carnage Heal</content>
+  <content contentuid="h93a8b452g72f9gdbd4g7633g7a6bdd564cf9" version="1">Heal on Crit</content>
+  <content contentuid="h5c7301b7g012bg71bag2bc6ge59ffbe304f2" version="1">Dominate the frontline with martial discipline, striking with lethal precision and effortlessly shrugging off the heaviest of blows.</content>
+  <content contentuid="hdef8bb1agcc03g3af9g135cg1fd642879226" version="1">Command the forces of the grave, raising fallen corpses to shield yourself while slowly draining the life force from the living.</content>
+  <content contentuid="h54e85184g1224gdcbeg181bgc6ef2c73be41" version="1">Channel the untamed fury of the wilds, wielding explosive elemental magic to crush anyone who dares step into your domain.</content>
+  <content contentuid="hb36891b5g1b1dga6cfgba78g4bc01bd5b2e3" version="1">Surrender to blinding rage, turning your own pain into raw physical power and cleaving through enemies with terrifying momentum.</content>
+  <content contentuid="h8d2f1a61gf79bg9ef6gbb12gf9f5519bbae7" version="1">Strike from the shadows with ruthless efficiency, crippling your prey's weak points and vanishing before retaliation can even find you.</content>
+  <content contentuid="h1f3b5bccg1b60gba7bg5a1ag5aaf85f1de44" version="1">Warp your physical form to adapt to any threat, tearing into your foes with unstoppable ferocity.</content>
+  <content contentuid="h4f2c61f8g8855g79e2gdf9ag20a7ffd179a2" version="1">A silencer of the arcane, shrugging off hostile spells with ease and locking down enemies before they can escape.</content>
+  <content contentuid="h1e649133gbddfg9b1egda7bgf94538c04327" version="1">Harvest the souls of the living, gliding across the battlefield to deliver swift, inevitable, and absolute death.</content>
+  <content contentuid="h72be9fe9g22ddgef8eg22c7g68c65f9db5d9" version="1">Strike your prey with precision from a distance, fighting in perfect synchronization with the ferocious beasts you summon to the frontline.</content>
+  <content contentuid="hac783f83g017eg2887g16abg75ad9e83c40e" version="1">Sustain your own unnatural vitality by opening grievous wounds, feeding on the spilled blood of your enemies to become virtually unkillable.</content>
+  <content contentuid="h28ef62e9g089egaddagca91gc03ebadea1f3" version="1">Spread sickening rot with every breath, smothering the battlefield in noxious fumes that slowly and painfully melt your foes away.</content>
+  <content contentuid="h4f22caeegc7ecg4764g3b97g3f3d43f2a472" version="1">Weave volatile protective wards, heavily shielding your allies and punishing anyone foolish enough to strike at them.</content>
+  <content contentuid="h66c3e1a1g38d5g6ef9g84aeg707580fa282d" version="1">Twist and fracture the minds of your enemies, shattering their focus and manipulating their actions while magically supercharging your allies.</content>
+  <content contentuid="ha81b5603g709bgefa8g65ebgfe3fec888c93" version="1">When you take Acid, Cold, Fire, Lightning, or Thunder damage, you gain Resistance to that specific damage type for [1] turn.</content>
+  <content contentuid="h8520f0a1gd795gb614g033dg780c8c7ae33e" version="1">Primal Infusion</content>
+  <content contentuid="h38f46b37g3ba9g54a3g07a9gc02cfc370b00" version="1">Your strikes channel the chaotic forces of the wilds. Your attacks have a chance to deal an additional [1] Elemental damage.</content>
+  <content contentuid="hcc692459ge7f8g1024g21b3g14880a0ec2db" version="1">Pain is Power</content>
+  <content contentuid="hb716f3b9gc9b6g3daag2bcagad8a36cf8841" version="1">You transform your own grievous wounds into raw, devastating strength. As your Hit Points fall, your weapon damage drastically increases.</content>
+  <content contentuid="h5c45ff3ag3b6eg2709g9000gb75bc422de57" version="1">Pain is Power</content>
+  <content contentuid="hfebadec2g84a3ga9f9gd0b8gf25d5422f54d" version="1">You transform your own grievous wounds into raw, devastating strength. As your Hit Points fall, your weapon damage drastically increases.</content>
+  <content contentuid="h862de3eagf4bdg6e1eg215bge68d0b67c357" version="1">Pain is Power</content>
+  <content contentuid="h86423483g834dg0063gbf7dg2550dec4b6be" version="1">You transform your own grievous wounds into raw, devastating strength. As your Hit Points fall, your weapon damage drastically increases.</content>
+  <content contentuid="hc41b56fcgda1cg6d55g455bgc7ba461af07b" version="1">Pain is Power</content>
+  <content contentuid="h4748d34bg5a73g3991g60a1ge98339ddf70a" version="1">You transform your own grievous wounds into raw, devastating strength. As your Hit Points fall, your weapon damage drastically increases.</content>
+  <content contentuid="hcf9ad542gee1bg3f7eg81c2ga3c821aff33a" version="2">Your dark magic decays the very essence of your foes. Dealing damage with a Necromancy spell afflicts the target with &lt;LSTag Type="Status" Tooltip="DDS_CHAMP_REAPER_REDUCE_HP"&gt;Death's Mark&lt;/LSTag&gt;.</content>
+  <content contentuid="h63de3581g8681gb84fg5f09g985aa15bfee2" version="2">No one escapes the end. You instantly execute and kill any target you damage that drops below [1]% of their maximum &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt;.</content>
+  <content contentuid="h348bac88ga450gbe4fg1e34g92cd25cc7c70" version="2">Attacking a &lt;LSTag Type="Status" Tooltip="BLEEDING"&gt;Bleeding&lt;/LSTag&gt; target afflicts them with &lt;LSTag Type="Status" Tooltip="DDS_CHAMP_BLOOD_KNIGHT_BLOOD_SAP"&gt;Blood-Sapped&lt;/LSTag&gt; for [1] turn.</content>
+  <content contentuid="hdbda3cf4g8c6cg608dgcdebgb5632cb4aa08" version="2">You smell weakness. When attacking a target that has less than [1]% of their &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt; remaining, your strikes have a chance to inflict &lt;LSTag Type="Status" Tooltip="BLEEDING"&gt;Bleeding&lt;/LSTag&gt;.</content>
+  <content contentuid="ha034af92gab85g617dg9fb2g759997accc13" version="2">Your unnatural flesh reacts violently to heat and holy magic. Taking Fire or Radiant damage inflicts &lt;LSTag Type="Status" Tooltip="DDS_CHAMP_BLOOD_KNIGHT_CAUTERIZED"&gt;Cauterized&lt;/LSTag&gt; upon you.</content>
+  <content contentuid="h2fe98e15g453age524g8f14g829d2f52e790" version="2">You violently rip the blood from your victims' veins. When attacking a &lt;LSTag Type="Status" Tooltip="BLEEDING"&gt;Bleeding&lt;/LSTag&gt; target, you have a [1]% chance to remove the &lt;LSTag Type="Status" Tooltip="BLEEDING"&gt;Bleeding&lt;/LSTag&gt; condition and inflict &lt;LSTag Type="Status" Tooltip="DDS_CHAMP_BLOOD_KNIGHT_EXSANGUINATED"&gt;Exsanguinated&lt;/LSTag&gt;.</content>
+  <content contentuid="h97c3ad7fg8359g898agba4cgb65747fec907" version="1">A constant, soothing aura of mending magic courses through you, regenerating [1] Hit Point at the start of your turn.</content>
+  <content contentuid="hfa01495fg3030ged52gcdc0g0bb75d4f3594" version="2">Your restorative magic overflows to create a protective barrier. Whenever you heal a target, they also gain &lt;LSTag Tooltip="TemporaryHitPoints"&gt;temporary hit points&lt;/LSTag&gt;.</content>
+  <content contentuid="hb1b83a30g7977g5ca1g60b5g141896f3aacf" version="1">You have resistance to[1].</content>
+  <content contentuid="h21a7da1cgcc99g7d4agc175g3426cca562cb" version="1">You have resistance to[1].</content>
+  <content contentuid="h02007a0eg5f93g5fb5g7471g4a9acd20b5f7" version="1">You have resistance to[1].</content>
+  <content contentuid="hc50a2fdeg1050g088fgc400g9c23e8759614" version="1">You have resistance to[1].</content>
+  <content contentuid="hc34bb122gbcb3g8c73gbb85g3ef855ca83a6" version="1">You have resistance to[1].</content>
+  <content contentuid="h8803e0d8g5699ged26g5c9bg68266064a172" version="1">Fuelled by agony. Deal an additional +[1] weapon damage for every [2]% of Hit Points missing (up to a maximum of +[3]).</content>
+  <content contentuid="hd616a875g0b1agada8gc8dfgb26684d384a9" version="1">Fuelled by agony. Deal an additional +[1] weapon damage for every [2]% of Hit Points missing (up to a maximum of +[3]).</content>
+  <content contentuid="h685b7e79gcd7ag862eg3aaagcad39b683ada" version="1">Fuelled by agony. Deal an additional +[1] weapon damage for every [2]% of Hit Points missing (up to a maximum of +[3]).</content>
+  <content contentuid="ha16a0b78g2294g9687g01eag8d8295d80d5b" version="1">Fuelled by agony. Deal an additional +[1] weapon damage for every [2]% of Hit Points missing (up to a maximum of +[3]).</content>
+  <content contentuid="hf185f4c1g76f6gc285g6d58g53d6e87a5b16" version="1">Vitality is actively rotting away. Maximum Hit Points are reduced by [1]%.</content>
+  <content contentuid="h7932a8b4g8109g54d1ga9f8g3c924be03530" version="1">Targeted</content>
+  <content contentuid="h40d0da6dgbaa0g9e8fg517bg5642dca31e37" version="1">You have drawn the Templars ire. &lt;br&gt; The Templar will attempt to attack this creature if possible.</content>
+  <content contentuid="h12d645fbg0ef7g7f9ag5e1bgb91fba41485a" version="2">Silence the Source</content>
+  <content contentuid="h3ed750b3g547fg4bb8g83ffg8965c5ffc7b0" version="1">The Templar always attacks the last creature that casts a spell on it.</content>
+  <content contentuid="h52705187gf6b8ge194ga059g770d801919c5" version="1">Threatened</content>
+  <content contentuid="h1ff8b2efg2339g9cd5g16e4g58d22a9aa124" version="2">The Templar is focusing on a new target.</content>
+  <content contentuid="h2f9baf52gf865g5f4egf942g8059888637d8" version="3">Dynamic Difficulty Scaling: Hard Mode</content>
+  <content contentuid="h7d547d6ag3890g2ebcg5521g83eacfa15e55" version="13">Enable or Disable Hard Mode.&lt;br&gt;&lt;LSTag Type="Image" Info="TutorialCombatLog"/&gt; Can only be Toggled outside of combat.</content>
+  <content contentuid="h1f7615b3g5074g2d38gcd18gfd1f5d2366c6" version="1">Hard Mode Enabled</content>
+  <content contentuid="he4f5a52cg3c5bg242cgdb6ag1ab955dc530f" version="4">Party Scaled: Hard Mode</content>
+  <content contentuid="hc0d14a7cg84cagde6cgc556g2c2e0aafe1b0" version="1">Party Scaled HP Hard Mode 2</content>
+  <content contentuid="hfb2997dfg75b5g4494g9590g2c51e9deb443" version="1">Party Scaled HP Hard Mode 3</content>
+  <content contentuid="h71537379g1b45gd69dgf141gd42ecd8ed40c" version="1">Party Scaled HP Hard Mode 4</content>
+  <content contentuid="h259ea740g8cc6gc011g4e61g58e55e50f195" version="1">Party Scaled HP Hard Mode 5</content>
+  <content contentuid="h6dfdeba1gc711g8989g96c1gcb08fb3d0797" version="1">Party Scaled HP Hard Mode 6</content>
+  <content contentuid="hfd1ce5ebga08cg1c24gbee9gf6f500b90e32" version="1">Party Scaled HP Hard Mode 7</content>
+  <content contentuid="h621005b8g52dbg3cd8ge4d8g1990e1329bcf" version="1">Party Scaled HP Hard Mode 8</content>
+  <content contentuid="hd8e6783fgf7f5g3ef8ged47gfbda50d2ddd2" version="1">Champion's Vigor</content>
+  <content contentuid="h0493a27fgcaa0g8907gbc62g95b870b48f21" version="1">A protective ward guards this champion. Granting &lt;LSTag Tooltip="TemporaryHitPoints"&gt;temporary hit points&lt;/LSTag&gt; equal to [1]x the champion's level. While these &lt;LSTag Tooltip="TemporaryHitPoints"&gt;temporary hit points&lt;/LSTag&gt; persist, the champion take -[2] less damage from all sources.</content>
+  <content contentuid="hc37e0f0cg2ba3gbd98g6a94gbec9a9e1af85" version="5">Party Scaled: Hard Mode</content>
+  <content contentuid="h35eded5bgb757g2cd6ga89eg389bc749b4da" version="5">Party Scaled: Hard Mode</content>
+  <content contentuid="h3544dc6aga0c1g8d6ag467cgddfe576de69b" version="5">Party Scaled: Hard Mode</content>
+  <content contentuid="hff6ceb06gbbdcg63e8g14c5g6a051cf49b82" version="1">Party Scaled: Hard Mode</content>
+  <content contentuid="hde0a440fgcd49gce25g28fcg37acb872f3cc" version="1">Party Scaled: Hard Mode</content>
+  <content contentuid="hf23c2df3g48afg7a15g9149g85c5715a2c13" version="1">Party Scaled: Hard Mode</content>
+  <content contentuid="h13aa3c7cgc345gebcbga15agaf646839f56b" version="1">Party Scaled: Hard Mode</content>
+  <content contentuid="hda1c1000g4af2ge727g0e51g1cad1802315a" version="1">Spell</content>
+  <content contentuid="h5470dbecg79fagc990gc2bfg702e84a75b28" version="1">Melee</content>
+  <content contentuid="ha771ee01g07b8g53a0gaccdg2d2b8d42089d" version="1">Ranged</content>
+  <content contentuid="hd0ee8dfcgf918gc3a2ge71dg82cde407d95e" version="1">Spell Reflect</content>
+  <content contentuid="he9bb2e68g487ag04eeg3dd3g38d0ebf628dc" version="1">Melee Reflect</content>
+  <content contentuid="ha5bdaf49g59f1ge148gc584g679187229aa9" version="1">Ranged Reflect</content>
+  <content contentuid="hd638c2bdg2e50gc919gb0eeg0ff097b5cbb4" version="1">Arcane Mirror Hit</content>
+  <content contentuid="h362799cfg5139g3adag3a68g00ab22eae78a" version="1">Barbed Carapace Hit</content>
+  <content contentuid="h288e05ecg8da4g2aefgc969g9b27a4adb560" version="1">Deflecting Winds Hit</content>
+  <content contentuid="h789c5abag7d89gbae5gf992g04bf947e7298" version="1">Dynamic Difficulty Scaling: Reduced XP</content>
+  <content contentuid="h27c6a214g9329g242dga493g76f60ea0e911" version="19">Reduces Experience gained from leveled up enemies to match their original level. &lt;br&gt;&lt;LSTag Type="Image" Info="SoftWarning"/&gt;This can result in losing XP.</content>
+  <content contentuid="h58a3b424g325agcb9fgab2eg38e74dc25081" version="1">Reduced XP</content>
+  <content contentuid="h0a864969g212fg7c35g49a7ga5e7ff2dfc75" version="1">Control Undead</content>
+  <content contentuid="hffb4a7f7g1093ge13bg85e6g50dd098b56b6" version="1">Use the power of your Oath to gain control over an undead creature. The undead will follow you around and attack your enemies.</content>
+  <content contentuid="hbc384775g47dfg3c3ag54a3g0ce51b8699f7" version="1">Templar Spell Reflect</content>
+  <content contentuid="hcd3ab6d0gb443g7958gb9ebg3f4799841542" version="1">Templar Spell Reflect Hit</content>
+  <content contentuid="h3efa8806g139bg533ag359agbd92f0ff5659" version="1">Level Scaling Prevention</content>
+  <content contentuid="had2b7f2fgb181gd541gea4bgc1d4bc918fde" version="1">Prevents enemies from scaling to this party members level.</content>
+  <content contentuid="h7dd99fc0g5f57g6653g7cc8g345fbe09e1f3" version="1">Champion: Siphoner</content>
+  <content contentuid="hf7d5d7bbg4e8ag0d46g1cfag005872bfa7ad" version="1">Champion: Mirage</content>
+  <content contentuid="h5688738dg41e1g86a1g789dg4829f1e7851d" version="1">Champion: Chronomancer</content>
+  <content contentuid="h39d0e67cg4404g0a51ga42fgc069a688a0c8" version="1">Champion: Voidwalker</content>
+  <content contentuid="hc73ee527g6432gcceag71c3g0b486dac7f2b" version="1">Champion: Catalyst</content>
+  <content contentuid="he3d6297agcac6gf64fg1da3g4443dbfe5212" version="1">Champion: Soul-Binder</content>
+  <content contentuid="h23e1b126gb1cag4d2egd4d9gbafe90d5c9d8" version="1">Champion: Weaver</content>
+  <content contentuid="h0760cb0dgc6c6gccacgca39g1d0472da0b15" version="1">Siphoned: Strength</content>
+  <content contentuid="hc1e13660g8342gcb7cgc351g14c891963c8c" version="1">Siphoned: Dexterity</content>
+  <content contentuid="h110e2eafg60a9gecc6g6de6g75b9e61995aa" version="1">Siphoned: Constitution</content>
+  <content contentuid="h65417c20g79c7ge3c6g7459gf3dc84eba0cd" version="1">Siphoned: Intelligence</content>
+  <content contentuid="h2018d93eg3275gb8b1gd0ecg2f2d256d3f49" version="1">Siphoned: Wisdom</content>
+  <content contentuid="h7a415fa2g3a3fg2fafg3bb3g334f73e32868" version="1">Siphoned: Charisma</content>
+  <content contentuid="hce11eb05gad99gb4f7g35a9g833bd404c8c0" version="1">Empowered: Strength</content>
+  <content contentuid="h7a527207gce03g136dgef41gbaaefece65ea" version="1">Empowered: Dexterity</content>
+  <content contentuid="h2e8303fdg9952g3841gb329g701c8dd1459e" version="1">Empowered: Constitution</content>
+  <content contentuid="h615af765g75c2gd820g7816gd712cdefcb7b" version="1">Empowered: Charisma</content>
+  <content contentuid="hc24874ebg80abga798g2988g244e0c7ca8ae" version="1">Empowered: Wisdom</content>
+  <content contentuid="h1083c425g7b5egf221g0ccbgc325fcd6d96f" version="1">Empowered: Intelligence</content>
+  <content contentuid="h3f53e8b2gcb65g9bd5g51c6g60a081c70cc7" version="1">Siphon Trigger</content>
+  <content contentuid="h8bf1c561g72e3g672fg9941g6f96a7c1e349" version="2">Essence Drain</content>
+  <content contentuid="hf2a018f8g92cagb518g48e3g3d305c5b10a8" version="1">Siphon Heal Trigger</content>
+  <content contentuid="h56d2eff7g5b82gb736g1705gc754bde59abb" version="2">Essence Metabolism</content>
+  <content contentuid="hb18d746cgc7bfge168ge0f2gf16357cc9ed6" version="1">Striking a foe tears away their defining attribute. You become &lt;LSTag Type="Status" Tooltip="DDS_SIPHONER_EMPOWERED"&gt;Empowered&lt;/LSTag&gt; while leaving the victim &lt;LSTag Type="Status" Tooltip="DDS_SIPHONER_SIPHONED"&gt;Siphoned&lt;/LSTag&gt;. &lt;LSTag Tooltip="CriticalHit"&gt;Critical Hits&lt;/LSTag&gt; violently tear away extra essence.</content>
+  <content contentuid="ha45fd082g4a4fg1e57g09d6gcfc437ac522f" version="1">At the start of your turn, you process stolen energy, healing yourself for an amount based on the remaining duration of your &lt;LSTag Type="Status" Tooltip="DDS_SIPHONER_EMPOWERED"&gt;Empowered&lt;/LSTag&gt; statuses.</content>
+  <content contentuid="h263f317bgc4dbg8968g87a6g1217fbcdfe47" version="1">Drain the vital essence of your foes, crippling their greatest strengths while fueling your own relentless power with their stolen vitality.</content>
+  <content contentuid="h72185ec0g3e3agd5c4gd069g21ce256e7be7" version="1">Empowered</content>
+  <content contentuid="h179a7105gdf2fge6fcg1a4aga765b41fef29" version="1">This entity has stolen vital essence, granting a +[1] bonus to the affected attribute for each stack.</content>
+  <content contentuid="h45d5d083g4ca0g371ega6b4gc5b861ba84d4" version="1">Siphoned</content>
+  <content contentuid="hbc8eca98g74c0g113dg6691gf1470e3dfad1" version="1">Vital essence is being ripped away. The affected attribute is reduced by -[1] per stack. Death is instant if it reaches 0.</content>
+  <content contentuid="h93a26b1dg0419g5d81gd97dg69913f43adb4" version="1">Legendary Fortitude</content>
+  <content contentuid="h76c00f5egd3e1gf21bgeb29gb3c54fc93276" version="3">Whenever this creature takes damage, all further damage it takes is reduced by [1]. This lasts until it takes damage from another attack.</content>
+  <content contentuid="h011fbf1eg4527g3883g1591gd6712a16c1cf" version="2">Legendary Fortitude</content>
+  <content contentuid="h26d4090cgfea7g5090g1d73gdc505eba5ffd" version="4">Reduces all incoming damage by [1]. This effect is removed when the creature takes damage from the next attack.&lt;br&gt;&lt;br&gt;&lt;LSTag Type="Image" Info="SoftWarning"/&gt;This will not be removed when taking damage from &lt;LSTag Type="Spell" Tooltip="Projectile_MagicMissile"&gt;Magic Missile&lt;/LSTag&gt;.</content>
+  <content contentuid="h4eddee46g9b3fg8f17gdabaga976e09bf839" version="4">Time Theft Aura</content>
+  <content contentuid="h0a3b696ag524fgf605g14edgaf32b00deb3e" version="2">Time Theft</content>
+  <content contentuid="h068d0c77g4307g3ba3gf502g7ec99c8e8a19" version="2">Time Theft: Bonus Action Point</content>
+  <content contentuid="hc98e7c69g848bga8d5g79b7gf35c7aea8c94" version="1">Time Theft: Action Point</content>
+  <content contentuid="h75995653geafegba8fg4627g3000c35787aa" version="5">If you start your turn inside this aura, there is a [1]% chance to reduce your &lt;LSTag Type="ActionResource" Tooltip="BonusActionPoint"&gt;Bonus Action Point&lt;/LSTag&gt; by [4], if you remain in the aura for more than [2] turn, there is a [3]% chance to have your &lt;LSTag Type="ActionResource" Tooltip="ActionPoint"&gt;Action Point&lt;/LSTag&gt; reduced by [4].</content>
+  <content contentuid="hc57ca7e0gabfdg90d8g0068gcf13c4754c33" version="1">Temporal Shift</content>
+  <content contentuid="h0130660bg8b6cg4793g5c50ge59364640337" version="4">The Chronomancer exists slightly out of sync with standard time; it cannot be &lt;LSTag Type="Status" Tooltip="SLOW"&gt;Slowed&lt;/LSTag&gt;, &lt;LSTag Type="Status" Tooltip="PARALYZED"&gt;Paralysed&lt;/LSTag&gt;, or &lt;LSTag Type="Status" Tooltip="STUNNED"&gt;Stunned&lt;/LSTag&gt;.</content>
+  <content contentuid="hf94d5e5fg5ebag6d0cgb7cbgc72810049db0" version="1">Rewind</content>
+  <content contentuid="h955b9a96g72cagd34bgfe75ga92ded4ce9b1" version="3">When the Chronomancer takes damage below [1]% of their Hit Points, they reverse time restoring their Hit Points to what it was [2] turns ago.</content>
+  <content contentuid="hadbcc38dg2d64gad38g38e2g7e8ef34ecf45" version="1">Time Theft Aura</content>
+  <content contentuid="hba7f90f5g914cg5a08gb4ecg15907034cdff" version="4">Projecting an aura in a [1] radius. Any enemies starting their turn inside the aura have a [2]% chance to have their &lt;LSTag Type="ActionResource" Tooltip="BonusActionPoint"&gt;Bonus Action Point&lt;/LSTag&gt; stolen, if the player stays in the aura for more than [3] turn, they have a [4]% chance to have their &lt;LSTag Type="ActionResource" Tooltip="ActionPoint"&gt;Action Point&lt;/LSTag&gt; stolen.</content>
+  <content contentuid="h15d57da7g3f11gba03g4dfeg26c93fd67cb3" version="1">Rewinded</content>
+  <content contentuid="hfaed0fb3gc69cgdc53g5e2bge87f74f2dfc7" version="2">Refractive Fracture</content>
+  <content contentuid="h7450f964g7889gc9bfgc0aegd288d363721a" version="2">When the Mirage takes damage other than[1], they splinter into a fragile duplicate, creating an additional target on the battlefield.</content>
+  <content contentuid="hbbc25fe5gfed7g579egf086g42ea54dd0e8d" version="2">Volatile Fragmentation</content>
+  <content contentuid="hb992290aga673g890eg5fd8g835eb700676e" version="2">The duplicates created by this creature are inherently unstable; when destroyed, it shatters, dealing[1] or[2] to any characters within [3].</content>
+  <content contentuid="h2c847946g8dd3g9275g1dc4ge77e58efcf39" version="1">Splinter Self</content>
+  <content contentuid="hc3390153gd206g193cgca29g0fe29ecb557e" version="1">Create a splinter of yourself.</content>
+  <content contentuid="h986efbbbg7619g27b3g2767g1f885445c0d6" version="1">Splinter</content>
+  <content contentuid="h55f75e51gc864gec15g46bag2ffef8330f6d" version="8">Clone</content>
+  <content contentuid="h70896147g55bfg67e3g1620ge462339720b3" version="2">Shattering Feedback: Minor</content>
+  <content contentuid="hc83c7a4bga5cdgdb6eg5e65g5dd217d4aa35" version="2">Shattering Feedback: Major</content>
+  <content contentuid="he2d2395bg65b2ge7ffgc175ge9ebba3bd7cc" version="2">Void-Infused Strikes</content>
+  <content contentuid="hbf1c441ag8c16ged28g8312gcea38c1aadf9" version="2">Your attacks deal an additional [1], and has a [2]% chance to deal an additional [3].</content>
+  <content contentuid="h0e7d5969g9d55g95a0g2080g14b4ea871713" version="1">Escape Velocity</content>
+  <content contentuid="h7e9c9f30g3aedg354cg7c96g6e8da77b419e" version="2">Standing within [1] of the Voidwalker, when you try to leave the aura, you must make a Strength &lt;LSTag Tooltip="SavingThrow"&gt;Saving Throw&lt;/LSTag&gt; or be dragged back [2] towards the Voidwalker.</content>
+  <content contentuid="h1c0380f6g7cd9gebbdgffc6g6f17f5e22939" version="2">Crushing Singularity</content>
+  <content contentuid="hfdb9043dg9f04g9bd9gaedfg5aa355ac7cbc" version="1">Crushed</content>
+  <content contentuid="ha17b6798gd253g27e4gdc65gaec37fa36fc9" version="1">Gravitational Drag</content>
+  <content contentuid="h80162bc3gc508gddf5gfb8bg19914ca52369" version="3">The Voidwalkers attacks impare the targets movement, reducing the targets movement by [1] per stack.</content>
+  <content contentuid="h397865d6ge085g104bga2e6gb52991cc3971" version="3">You are suffering from extreme gravitational pressure; you are &lt;LSTag Tooltip="Vulnerable"&gt;Vulnerable&lt;/LSTag&gt; to[1] and[2], and your &lt;LSTag Tooltip="MovementSpeed"&gt;movement speed&lt;/LSTag&gt; is halved.</content>
+  <content contentuid="hbda2066dgb2a4g37b0ga4ccg270819e9df72" version="1">Gravitational Drag</content>
+  <content contentuid="hb37e1f7cgef81g246eg7648g156eb0631875" version="3">&lt;LSTag Tooltip="MovementSpeed"&gt;Movement speed&lt;/LSTag&gt; is reduced by [1] per stack.&lt;br&gt;&lt;br&gt;&lt;LSTag Type="Image" Info="SoftWarning"/&gt;This can be removed when healed.</content>
+  <content contentuid="h2dfc3493gf61agf9f0gaf79g5f7f4600f9a6" version="1">Soul-Linked</content>
+  <content contentuid="h433c5009g9185ga6a0g04ddg8173228a285a" version="3">You are linked to the Soul-Binder. Whenever the Soul-Binder takes damage, you take [1]% of that damage. To sever this tie, you must take[3] or[4] equal to [2]% of your Maximum &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt; from an ally. The link is automatically removed if either you or the Soul-Binder dies.</content>
+  <content contentuid="hfc042eadg84a2gdd22g7a59gc6322dca5f19" version="1">Lesser Blade Ward</content>
+  <content contentuid="h414033degcc98g8428g7778g23102900601c" version="1">Bludgeoning, Piercing, and Slashing damage is reduced by [1].</content>
+  <content contentuid="h5b9fc5dbg1e61ga922gc6e8gc73a095d5898" version="1">Devil's Sight</content>
+  <content contentuid="h52a33224g8a90g4d06g5bdagb45d9824e592" version="1">You can see normally in darkness, both magical and non-magical, to a distance of [1].</content>
+  <content contentuid="h9d45d1ecg58ddg6965g4599g3ae2e44db162" version="1">Manipulate the tapestry of existence, leaving adversaries trapped in a sluggish wake of stolen moments while you weave through time to correct your own failures before they occur.</content>
+  <content contentuid="h359b4ddbg0ed6g298dgcd14g8b65de8bebdb" version="2">Your perception of time is fractured by the Chronomancer, causing you to lose your &lt;LSTag Type="ActionResource" Tooltip="BonusActionPoint"&gt;Bonus Action&lt;/LSTag&gt; for [1] turns.</content>
+  <content contentuid="h69685b65gbf79g57f0g9d14gef89e7fb2dce" version="2">Time is stripped from your grasp; you lose your &lt;LSTag Type="ActionResource" Tooltip="ActionPoint"&gt;Action Point&lt;/LSTag&gt; this turn.</content>
+  <content contentuid="hef8a1ed9g2024g6d37g6c6ag41b2f6ace210" version="1">This creature has recently experienced a temporal reversal, restoring its health to a previous state.</content>
+  <content contentuid="h1b83ad90g98e3gb328g4c71gea1ebc5d1776" version="1">A master of deception who fractures their own form upon impact, forcing foes to contend with a growing legion of volatile phantoms.</content>
+  <content contentuid="h9a0899d4g4132g9f67geeccgb3966ba81a63" version="1">A fragile duplicate of the Mirage. If destroyed by damage, it bursts with shards, dealing [1] to creatures within [3]. If allowed to persist for [4] turns, it collapses, releasing a psychic blast that deals [2] to anyone within [3].</content>
+  <content contentuid="h0128514dg72b7gadcdg19f5gd36bd8aab07e" version="1">A harbinger of crushing density, this entity warps the fabric of reality, forcing all who draw near to succumb to an insurmountable, suffocating weight.</content>
+  <content contentuid="hd6351a4dgf268gdd41g18e3g002ae712c323" version="1">An intense gravitational field emanates from you; any creature within [1] is &lt;LSTag Type="Status" Tooltip="DDS_VOIDWALKER_CRUSHED"&gt;Crushed&lt;/LSTag&gt; by the surrounding pressure.</content>
+  <content contentuid="h02eda34fg82d0g4a51g85fbgfdfecc8fe401" version="1">Soul-Link Cooldown</content>
+  <content contentuid="hd6cea3b9gebecg6d9ag0ba3g5d282824aac8" version="1">The Soul-Link has been successfully removed. When the cooldown ends, the Soul-Link is re-applied.</content>
+  <content contentuid="h64d2c756ge84ag90ffg1300g830a10ab333e" version="1">Unstable Isotope Trigger</content>
+  <content contentuid="h32d0b83dgd0fbgbfadged76ga8cf3cfaaba1" version="1">Unstable Isotope: Melee</content>
+  <content contentuid="h04ba9775g991cg4a26g12b7g67ba7a411319" version="1">Unstable Isotope: Ranged</content>
+  <content contentuid="he046054bg42a6g4881g8897g3f66cbca9ac0" version="1">Unstable Isotope: Spell</content>
+  <content contentuid="h4f79dea6gcab7g2880g70e8g23e6921689c4" version="1">Critical Mass</content>
+  <content contentuid="h014679f7g039eg09eage0b6g9620f307bd1c" version="1">Tethered</content>
+  <content contentuid="h85c922c4gea7bg1964gc26cgd40c4d32a515" version="1">Tethered</content>
+  <content contentuid="haad439a1g565fgeeb3gd466gcb8ef705b15f" version="1">Tethered Distance Check</content>
+  <content contentuid="hadbc39d8g81e8gd38bgb712ge27d794a8d3b" version="1">Bind the lifeforce of your most resilient adversaries to your own, ensuring that your suffering becomes their sudden demise.</content>
+  <content contentuid="h204b9ec8g0059g43e1g1baagf99cf97f4538" version="1">Shared Suffering</content>
+  <content contentuid="hcd38b07aga96bg44eag44a7g9a629bc910e9" version="1">Whenever the Soul-Binder takes damage, [1]% of that damage is dealt to the Soul-Linked target. Conversely, if the Soul-Linked target is healed, the Soul-Binder heals for [2]% of that amount.</content>
+  <content contentuid="h13d8d646g3adbga360g844agcd30c4ba5561" version="1">Infuse your targets with volatile energy, turning their every action into a deadly and unpredictable hazard for themselves and their allies.</content>
+  <content contentuid="hea5f0ee8g2a0fgc5a7g61e9g95d14f0fae45" version="2">Taking or dealing Melee damage triggers a localized physical reaction. You take [1] and anyone within [2] is knocked &lt;LSTag Type="Status" Tooltip="PRONE"&gt;Prone&lt;/LSTag&gt;.&lt;br&gt;&lt;br&gt;&lt;LSTag Type="Image" Info="TutorialRedWarning"/&gt;Failing to trigger this causes &lt;LSTag Type="Status" Tooltip="DDS_CATALYST_CRIT_MASS"&gt;Critical Mass&lt;/LSTag&gt;.</content>
+  <content contentuid="hfdf50907g54d3g1afdgc35eg973a901e27db" version="2">Taking or dealing Ranged damage triggers a thermal reaction. You become &lt;LSTag Type="Status" Tooltip="FROZEN"&gt;Frozen&lt;/LSTag&gt; for [1] turns.&lt;br&gt;&lt;br&gt;&lt;LSTag Type="Image" Info="TutorialRedWarning"/&gt;Failing to trigger this causes &lt;LSTag Type="Status" Tooltip="DDS_CATALYST_CRIT_MASS"&gt;Critical Mass&lt;/LSTag&gt;.</content>
+  <content contentuid="h77702de3gd078g9c78gb4e8g75678560a0bb" version="2">Taking spell damage or casting a spell destabilizes your magical energy. You take [1] and are &lt;LSTag Type="Status" Tooltip="SILENCED"&gt;Silenced&lt;/LSTag&gt; for [2] turn.&lt;br&gt;&lt;br&gt;&lt;LSTag Type="Image" Info="TutorialRedWarning"/&gt;Failing to trigger this causes &lt;LSTag Type="Status" Tooltip="DDS_CATALYST_CRIT_MASS"&gt;Critical Mass&lt;/LSTag&gt;.</content>
+  <content contentuid="hcc1a9a71g6299ge4b5g5f3eg94b4a1de980e" version="1">Critical Mass</content>
+  <content contentuid="hf980e22fg0a9fg5d07g71e3g0b8a8cd9274b" version="1">If an Unstable Isotope expires after [1] turns without being triggered, it undergoes explosive decay, dealing [2] to the afflicted target.</content>
+  <content contentuid="h5569341fg9436gef86gbf80g018f71c99f65" version="1">Isotopic Infusion</content>
+  <content contentuid="h9b08f252g5a5eg84c7gce74gb4ca4fcaba33" version="1">Attacks from this creature apply a random Unstable Isotope to the target that lasts for [1] turns.</content>
+  <content contentuid="h5510b5dbg9cc1g0b6bg594eg1340c1d5a92d" version="1">Bind the fates of your adversaries together, manipulating their proximity to weave a deadly trap of shared pain and violent collisions.</content>
+  <content contentuid="h797f0ad0ge490gd3f2g8edfga2e5009245d3" version="3">You are magically bound to another character. Any non-[1] you take is mirrored to the linked character as[1], and vice versa. If you end your turn and are more than [2] apart from the other Tethered character, it causes an &lt;LSTag Type="Status" Tooltip="DDS_WEAVER_ELASTIC_SNAP_TXT"&gt;Elastic Snap&lt;/LSTag&gt;. Alternatively, if you end your turn within [3] of the Tethered character, it triggers &lt;LSTag Type="Spell" Tooltip="Projectile_DDS_Weaver_ViolentConvergence"&gt;Violent Convergence&lt;/LSTag&gt;.</content>
+  <content contentuid="h7dd3b5d5g064fg3e4ag3d23g94f56e7c12e9" version="2">You are magically bound to another character. Any non-[1] you take is mirrored to the linked character as[1], and vice versa. If you end your turn and are more than [2] apart from the other Tethered character, it causes an &lt;LSTag Type="Passive" Tooltip="DDS_Weaver_ElasticSnap"&gt;Elastic Snap&lt;/LSTag&gt;. Alternatively, if you end your turn within [3] of the Tethered character, it triggers &lt;LSTag Type="Passive" Tooltip="DDS_Weaver_ViolentConvergence"&gt;Violent Convergence&lt;/LSTag&gt;.</content>
+  <content contentuid="h44b77039gdf27g9cc3gfa25gcae222e69a3b" version="1">Violent Convergence</content>
+  <content contentuid="h1f61b69eg2f69g25b4g5485g1c4003709f9c" version="1">If Tethered targets end their turn within [1] of each other, the tether triggers Violent Convergence.</content>
+  <content contentuid="hbe6d9babgd2fbg8596g7b77g10ef0939f5c8" version="1">Elastic Snap</content>
+  <content contentuid="hc64e04bdgd442ge964gb813g6419971bdfac" version="1">If Tethered targets end their turn more than [1] apart, the tether violently snaps. The link is removed, but both targets take damage equal to 40% of their maximum hit points and are knocked Prone.</content>
+  <content contentuid="h47cf2ec9g5cd3g4a3ag5cfeg5a9826e32ca2" version="1">Violent Convergence</content>
+  <content contentuid="h145424bage7e2g92c1gd9cegcebc29281003" version="1">Violent Convergence</content>
+  <content contentuid="ha35f4adfg793egd46agbff6gaf851b3f21dd" version="1">Melee Isotope</content>
+  <content contentuid="hb392eb50g59d4g6fbfg3258gd509779750ac" version="1">Check for melee attacks.</content>
+  <content contentuid="h7fc06934gfaebgde38g99d0g4f29878fe659" version="1">Ranged Isotope</content>
+  <content contentuid="h30bbde9fg4f19gd58fg02d4g3ec6ab549ee9" version="1">Check for ranged attacks.</content>
+  <content contentuid="haf505f28g24ffgf7d5g433ag01fd43bb028b" version="1">Spell Isotope</content>
+  <content contentuid="h6db6ce86g5439g96d8g12dag6e9d16968570" version="1">Check for spell attacks.</content>
+  <content contentuid="h54a30ad9gb091g3c89g2cbfg5daa4c35c34b" version="1">spe</content>
+  <content contentuid="h8a39afc5g3dc5g2ae8gf5dfg3a1e65621235" version="1">mel</content>
+  <content contentuid="hc64bc884g7f37gab71g1b35g19e5e05ba42f" version="1">Test</content>
+  <content contentuid="h66a76172gb2b9ged3egcfe7g6e07a99c92a4" version="2">Unstable Isotope</content>
+  <content contentuid="h0c721e7dgd641g0691g6e5bg91a6d66af756" version="1">Unstable Isotope</content>
+  <content contentuid="h1ce12e4agcc08gd433g0a9dg720c2d03161a" version="1">Melee Isotope Attacking</content>
+  <content contentuid="h4acc537dgadc3g75cfg0c82gfa2887cbc23b" version="1">Ranged Isotope Attacking</content>
+  <content contentuid="h63456606gadfbg8326ge9d8g904d7a057536" version="1">Spell Isotope Attacking</content>
+  <content contentuid="h1130a930g273cg4ee3g5620ge9cea8b47738" version="1">Unstable Isotope: Melee Trigger</content>
+  <content contentuid="h70cf9ac1g18d3g5f61g44cbg0a4077b451be" version="1">Unstable Isotope: Spell Trigger</content>
+  <content contentuid="hc0d5e942g10ebgb628g4381g9fda088055fc" version="1">Ignore Violent Convergence</content>
+  <content contentuid="hd98c1eecg75f2geea7g6f90g03942d6636d4" version="1">Status that causes Violent Convergence to ignore the shared damage between the 2 Tethered players.</content>
+  <content contentuid="ha907a5c1g895fg2210g410ag3185819b122c" version="1">If Tethered targets end their turn within [1] of each other, the tether deals [2] to all creatures within [3].</content>
+  <content contentuid="h8e272ff4gbe3ag5dafge0b9g0ed6e7176d34" version="1">You are magically bound to another character. Any non-[1] you take is mirrored to the linked character as[1], and vice versa. If you end your turn and are more than [2] apart from the other Tethered character, it causes an &lt;LSTag Type="Status" Tooltip="DDS_WEAVER_ELASTIC_SNAP_TXT"&gt;Elastic Snap&lt;/LSTag&gt;. Alternatively, if you end your turn within [3] of the Tethered character, it triggers &lt;LSTag Type="Spell" Tooltip="Projectile_DDS_Weaver_ViolentConvergence"&gt;Violent Convergence&lt;/LSTag&gt;.</content>
+  <content contentuid="hb0386e02gd3e3g220fg11fbg07fbdb6e2993" version="1">Elastic Snap</content>
+  <content contentuid="h3e8d6c27g0ce4g3869gaf66g99424eee9cf7" version="1">If Tethered targets end their turn more than [1] apart, the tether violently snaps. The link is removed, but both targets take damage equal to [2]% of their maximum &lt;LSTag Tooltip="HitPoints"&gt;hit points&lt;/LSTag&gt; and are knocked &lt;LSTag Type="Status" Tooltip="PRONE"&gt;Prone&lt;/LSTag&gt;.</content>
+  <content contentuid="h61bc5c39ge936gb742g691dgf9182b869bc6" version="1">Champion Extra Attack</content>
+  <content contentuid="hbff66b5fg8be8gc271gb7c7gcf522598a950" version="1">Champion Improved Extra Attack</content>
+</contentList>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <!-- Rogue: Elusive -->
+  <content contentuid="h490490eegffbcg4f4cga420g12c524928c99" version="1">Elusive</content>
+  <content contentuid="hbc6280f3g86b7g4b09gb6c3gd7a53ca23764" version="1">You are so evasive that attackers rarely gain the upper hand. No attack roll has advantage against you while you aren't incapacitated, and critical hits against you count as normal hits.</content>
+
+  <!-- Rogue: Stroke of Luck -->
+  <content contentuid="h5fc625aeg752cg43ebg84d1g4487a9a81927" version="1">Stroke of Luck</content>
+  <content contentuid="h42eaa799ge163g48bbg9a80g4b3ea253fed2" version="1">If your attack misses a target, you can turn the miss into a hit. Recharges on a Short Rest.</content>
+
+  <!-- Monk: Diamond Soul -->
+  <content contentuid="hfa0db6a6gcf4ag4f7fg80bfg641d0feec648" version="1">Diamond Soul</content>
+  <content contentuid="h1978b6d8gef76g4f08gaa54g246aaddaa637" version="1">Your mastery of ki grants you proficiency in all saving throws. Additionally, whenever you fail a saving throw, you can spend 1 ki point to reroll it.</content>
+
+  <!-- Monk: Empty Body -->
+  <content contentuid="h5586742bg5c01g4729g81efg68eba20b647e" version="1">Empty Body</content>
+  <content contentuid="h701c0902gd458g4709g8422g1d176596b7cd" version="1">Spend 4 ki points to become invisible for 10 turns. While invisible, you gain resistance to all damage except Force damage.</content>
+
+  <!-- Shadow Monk: Opportunist -->
+  <content contentuid="h1b750bd7g51fag4d34gbb4fg7597bc5ad93d" version="1">Opportunist</content>
+  <content contentuid="h6771d1c7g142eg408dgb309ga6ac207ede66" version="1">Whenever an enemy within melee range is struck by an ally's attack, you can use your reaction to make a melee attack against that creature.</content>
+
+  <!-- Ranger: Vanish -->
+  <content contentuid="h5e09ca47geacfg4c92g8c54gde991eed451c" version="1">Vanish</content>
+  <content contentuid="h71da3c80g27fdg40a3g9f8bg564be94cedbc" version="1">You can use the Hide action as a bonus action on your turn.</content>
+
+  <!-- Ranger: Feral Senses -->
+  <content contentuid="h1a1aba36ge628g412dg84f3g4644efcb0705" version="1">Feral Senses</content>
+  <content contentuid="h40e33a76g8e75g4320g9e6fgaff7eb85c8e1" version="1">You gain preternatural awareness. You cannot be blinded and can detect invisible creatures within 9m.</content>
+
+  <!-- Ranger: Foe Slayer -->
+  <content contentuid="hcf73c5f7g4d82g4995gb03agcf3efbfee5df" version="1">Foe Slayer</content>
+  <content contentuid="h7c739daeg8dabg4c8bg8493g0357d0693219" version="1">You add your Wisdom modifier to your attack rolls and weapon damage rolls.</content>
+
+  <!-- Gloom Stalker: Shadowy Dodge -->
+  <content contentuid="h170779d0g39ffg49aagb6f9ged5f7cb61c88" version="1">Shadowy Dodge</content>
+  <content contentuid="he936af81gf705g4481ga8fcg9e7d5e501af4" version="1">Whenever a creature makes an attack roll against you, you can use your reaction to impose disadvantage on the attack roll.</content>
+
+  <!-- Paladin: Cleansing Touch -->
+  <content contentuid="h2b56d659gd38cg4167gbf8cgae8659aeaf74" version="1">Cleansing Touch</content>
+  <content contentuid="hafb351f1g0f3cg47dag8556g3a7808dbae69" version="1">Use an action to end harmful spells and magical conditions affecting yourself or an ally.</content>
+
+  <!-- Devotion: Purity of Spirit -->
+  <content contentuid="h5716792eg17f1g4a13g892bge1771f10732a" version="1">Purity of Spirit</content>
+  <content contentuid="h095cb99dg4473g4667g8ba5ge5a209ed95ee" version="1">You are constantly shielded by holy warding. You cannot be charmed or frightened, and gain the continuous effects of Protection from Evil and Good.</content>
+
+  <!-- Ancients: Undying Sentinel -->
+  <content contentuid="hf403c4deg4346g497egb35ag1d3bae590b03" version="1">Undying Sentinel</content>
+  <content contentuid="h8a179ba7g697bg48fdg88e2g686651576840" version="1">When you are reduced to 0 hit points and are not killed outright, you drop to 1 hit point instead. Recharges on a Long Rest.</content>
+
+  <!-- Oathbreaker: Supernatural Resistance -->
+  <content contentuid="h451a6337gc13bg4c07ga025g86ced51690f" version="1">Supernatural Resistance</content>
+  <content contentuid="ha89e4479geb2bg4de0ga909g97f3a18a7737" version="1">You gain resistance to non-magical bludgeoning, piercing, and slashing damage.</content>
+
+  <!-- Vengeance: Soul of Vengeance -->
+  <content contentuid="hacb9f8bagbe6ag4beag87bcgdad23fb8ddb7" version="1">Soul of Vengeance</content>
+  <content contentuid="h3c846032g19eeg4d95g96d3gea01e54341fc" version="1">When a creature under your Vow of Enmity makes an attack, you can use your reaction to make a melee weapon attack against it.</content>
+
+  <!-- Paladin: Auras Expanded -->
+  <content contentuid="h52a304a7gf9bdg417dg83e8g33b14bfb3c5d" version="1">Aura Range Improvement</content>
+  <content contentuid="h3d7b59bbgfb70g4cbcgbe95g29016c687f0e" version="1">The radius of your protective paladin auras extends outwards to 9m (30ft).</content>
+
+  <!-- Conjuration: Focused Conjuration -->
+  <content contentuid="h1d8eaa58g8eb3g4b4dg9343gbcde520c4ce5" version="1">Focused Conjuration</content>
+  <content contentuid="h293263abgc5dag479eg8122g7cfa42b02b16" version="1">While concentrating on a Conjuration spell, damage cannot break your concentration.</content>
+
+  <!-- Draconic: Dragon Wings -->
+  <content contentuid="h15c7e820g69aag4ef8g84bcg828fb7d07e0e" version="1">Dragon Wings</content>
+  <content contentuid="hc7266f46gc998g4ca9gbf53gd7cb7ad082ea" version="1">You manifest dragon wings from your draconic heritage, granting you the ability to fly at will and increasing your movement speed.</content>
+
+  <!-- Storm Sorcery: Storm's Fury -->
+  <content contentuid="h758d0c6ag9eaag4c5bg988dg8ba7c9e67d1e" version="1">Storm's Fury</content>
+  <content contentuid="h4e0f403eg0569g4e73g8acag40747fb2c900" version="1">When you are hit by a melee attack, you can use your reaction to deal 14 Lightning damage to the attacker and push them 6m away.</content>
+
+  <!-- Warlock: Shroud of Shadows -->
+  <content contentuid="h0f5dd8edg6459g490egb60dg3d50956860d2" version="1">Shroud of Shadows</content>
+  <content contentuid="h6f2084ceg8418g41dfg8d5eg3e2c1ff6a322" version="1">You can cast Invisibility at will, without expending a spell slot.</content>
+
+  <!-- Warlock: Master of Myriad Forms -->
+  <content contentuid="h26e1f186gd87dg469fg9537g21f4087e4f6b" version="1">Master of Myriad Forms</content>
+  <content contentuid="h8feb912agacecg42f4ga0bfge1a2bf395cef" version="1">You can cast Disguise Self at will, without expending a spell slot.</content>
+
+  <!-- Wizard: Spell Mastery -->
+  <content contentuid="h259014ccgada0g4157gab58g5f52b029f712" version="1">Spell Mastery (Level 1)</content>
+  <content contentuid="h7430cf11g670bg487fgbc0cg4b602cad6fd5" version="1">Select a 1st-level wizard spell from your broad repertoire to cast at will without expending a spell slot.</content>
+  <content contentuid="h4a29aa68g355ag4933g8c94g285d922c7c6b" version="1">Spell Mastery (Level 2)</content>
+  <content contentuid="hba50bcf8gde78g48f7ga5dcg2fcc38597c92" version="1">Select a 2nd-level wizard spell from your broad repertoire to cast at will without expending a spell slot.</content>
+</contentList>
