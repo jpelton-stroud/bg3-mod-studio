@@ -172,37 +172,38 @@ The Orchestrator launches specialized subagents in parallel to author the mod's 
 
 ---
 
-## Step 5: Reactive Supervision & Cross-Validation
+## Step 5: Reactive Supervision, Validation & Metadata Generation
 
 The Orchestrator halts tool execution and waits for reactive completion messages from all subagents.
 
 Once all subagents have reported success:
-1. **XML/LSX Syntax Validation**:
+1. **Run Deterministic Mod Validator**:
+   Execute [`scripts/validate_mod.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/validate_mod.py):
    ```bash
-   python3 -c "
-   import xml.etree.ElementTree as ET
-   from pathlib import Path
-
-   mod_dir = Path('my_mods/<ModName>_<UUID>')
-   for f in mod_dir.rglob('*.xml'):
-       ET.parse(f)
-   for f in mod_dir.rglob('*.lsx'):
-       ET.parse(f)
-   print('All XML and LSX files parsed successfully.')
-   "
+   python3 scripts/validate_mod.py --mod <ModName>
    ```
-2. **Identifier Cross-Check**:
-   - Verify that all handles referenced in `Spell_*.txt` and `Passive.txt` exist in `<ModName>.xml`.
-   - Verify that spell names referenced in `SpellLists.lsx` exist in `Stats/Generated/Data/`.
+   This automatically verifies:
+   - XML and LSX well-formedness
+   - Metadata parity between `Projects/` and `Mods/` `meta.lsx`
+   - Localization handle references (`h...;1`) against `English/<ModName>.xml`
+   - Spell references in `SpellLists.lsx` against local stats
+   - Compliance of 512×512 PNG thumbnails and logos
+
+2. **Generate Toolkit & mod.io Metadata**:
+   Execute [`scripts/generate_mod_metadata.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/generate_mod_metadata.py):
+   ```bash
+   python3 scripts/generate_mod_metadata.py --mod <ModName> --write
+   ```
+   This automatically compiles publication-ready descriptions, mechanics tables, and tags into `my_mods/<ModName>/modio_description.md`.
 
 ---
 
 ## Step 6: Targeted Game Data Sync
 
-Run [`scripts/sync_to_game_data.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/sync_to_game_data.py) targeting only the active mod:
+Run [`scripts/sync_to_game_data.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/sync_to_game_data.py) targeting only the active mod (optionally with `--bump-build`):
 
 ```bash
-python3 scripts/sync_to_game_data.py --mods <ModName>_<UUID>
+python3 scripts/sync_to_game_data.py --mods <ModName>_<UUID> --bump-build
 ```
 
 The script will:

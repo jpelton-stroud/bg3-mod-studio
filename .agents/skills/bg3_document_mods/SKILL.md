@@ -96,27 +96,13 @@ After launching the subagents, the Orchestrator stops calling tools and waits fo
 
 ## Step 4: Cataloging in `mods/library.md`
 
-Once all subagents have reported back, the Orchestrator updates [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md).
+Once all subagents have reported back, the Orchestrator executes [`scripts/update_library_catalog.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/update_library_catalog.py):
 
-### Library Categories
-Organize [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md) with standardized markdown headers:
-* `## Gear` — Weapons, armor, clothing, amulets, rings, shields, camp chest gear.
-* `## Spells` — Cantrips, new spells, spell overhauls, elemental projectile variants.
-* `## Classes & Subclasses` — Custom classes, subclass reworks, class progression features.
-* `## Progression & Rules` — Level cap extensions (e.g. UnlockLevelCurve), feats, action economy rules.
-* `## Utilities & Cheats` — Spawners, stat editors (Choose Your Stats), respec tools, dice skins.
-
-### Category Table Format
-```markdown
-| Mod Name | Description | Features Documented | Spec Link |
-| :--- | :--- | :--- | :--- |
-| **[Elemental Eldritch Blast](elemental-eldritch-blast/README.md)** | Adds configurable elemental damage variants to the Warlock Eldritch Blast cantrip. | 13 implemented | [View Spec](elemental-eldritch-blast/README.md) |
-```
-
-If updating via command line, the Orchestrator can also invoke:
 ```bash
-python3 scripts/modio_extract.py --query "<MOD_QUERY>" --update-library
+python3 scripts/update_library_catalog.py --write
 ```
+
+This automatically scans all specifications under `mods/`, extracts titles, descriptions, and feature counts, categorizes them into standard tables (**Gear**, **Spells**, **Classes & Subclasses**, **Progression & Rules**, **Utilities & Cheats**), and regenerates [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md).
 
 ---
 

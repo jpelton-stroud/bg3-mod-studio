@@ -64,12 +64,16 @@ Check for the following common BG3 conflict sources:
 > 2. **No Script Extender (BG3SE)**: Any mod requiring BG3SE or native PC dlls will fail or cause crashes on console.
 > 3. Whenever a load-order or system-overlap issue is detected on console, tag it explicitly with `[Console Load Order]`.
 
-### Step 5: Deep File Inspection (When Required)
-If metadata reveals an ambiguous overlap in core systems (such as class progression or spell tables), run:
+### Step 5: Automated Conflict Inspection (`scripts/check_mod_conflicts.py`)
+To deterministically detect stat entry collisions, progression level overlaps, and console-incompatible DLLs, run:
 ```bash
-python3 scripts/modio_extract.py --query "<MOD_SLUG>" --json
+python3 scripts/check_mod_conflicts.py --candidate "<MOD_SLUG>" --against-library --json
 ```
-Inspect the unpacked data in `mods/<MOD_SLUG>/data/` (or temporary output) to confirm whether conflicting files (`Stats/Generated/Data/Spells.txt`, `Progressions.lsx`) exist. Clean up temporary files after analysis.
+Or for comparing two specific candidate mods:
+```bash
+python3 scripts/check_mod_conflicts.py --mod1 "<MOD1>" --mod2 "<MOD2>" --json
+```
+The script will output exact stat collisions, progression level collisions, and DLL detections. If conflicts are detected, synthesize them into the return message below.
 
 ### Standardized Status Return (Mode 1)
 Return exactly one of the following formatted responses to the Orchestrator:
