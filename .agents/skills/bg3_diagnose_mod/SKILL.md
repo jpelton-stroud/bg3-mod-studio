@@ -59,6 +59,12 @@ python3 scripts/sync_to_game_data.py --dry-run
 
 # 4. Community Conflict & Collision Check
 python3 scripts/check_mod_conflicts.py --candidate <mod_slug> --against-library --json
+
+# 5. Localization Handle Orphan Audit
+python3 scripts/sync_localization.py --mod <mod_slug> --check --json
+
+# 6. Save Game & Load Order Compatibility Audit (Optional/On Request)
+python3 scripts/inspect_save_game.py --audit --json
 ```
 
 ### Step 3: Synthesis & Problem Categorization

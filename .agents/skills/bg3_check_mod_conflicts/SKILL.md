@@ -117,3 +117,23 @@ When assigned to evaluate conflicts *between* the set of candidate mods returned
   ```text
   Possible conflict found: <Candidate Mod 1> vs <Candidate Mod 2> - <Brief description of issue> [Console Load Order: cannot reorder on console to resolve override order]
   ```
+
+---
+
+## Step 6: Automated Remediation & Patch Generation (`scripts/generate_compat_patch.py`)
+
+When actionable conflicts or stat collisions are detected between two mods (or when requested by the user), offer automated patch generation:
+
+```bash
+# Generate a standalone compatibility override patch
+python3 scripts/generate_compat_patch.py --mod1 <mod1> --mod2 <mod2> --strategy merge_all --patch-name "<Mod1>_<Mod2>_Patch"
+
+# Or generate a Compatibility Framework json payload
+python3 scripts/generate_compat_patch.py --mod1 <mod1> --mod2 <mod2> --format compat_framework
+```
+
+Supported resolution strategies:
+- `merge_all`: Merges distinct non-conflicting properties and keeps higher-value parameters.
+- `override_mod1`: Explicitly prioritizes values from Mod 1.
+- `override_mod2`: Explicitly prioritizes values from Mod 2.
+

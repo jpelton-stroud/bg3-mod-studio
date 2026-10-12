@@ -142,14 +142,14 @@ The Orchestrator launches specialized subagents in parallel to author the mod's 
     {
       "TypeName": "self",
       "Role": "Stats & Spells Specialist - <ModName>",
-      "Prompt": "Author the BG3 stat entries in <stats_dir>. Mod: <ModName>, UUID: <UUID>.\nTo ensure 100% engine compliance and valid localization handle allocation, use:\n  python3 scripts/scaffold_stat_entry.py --mod <ModName> --type <weapon|armor|amulet|ring|spell_target|passivedata> --name <Id> --display-name \"<Name>\" --description \"<Desc>\" --props \"<Props>\"\nFor custom item container/vendor drops, inject drops using:\n  python3 scripts/inject_treasure_table.py --mod <ModName> --item <ItemName> --container <tutorial_chest|camp_chest|vendor_...>\nRefer to the approved plan for exact mechanics.",
+      "Prompt": "Author the BG3 stat entries in <stats_dir>. Mod: <ModName>, UUID: <UUID>.\nTo ensure 100% engine compliance and valid localization handle allocation, use:\n  python3 scripts/scaffold_stat_entry.py --mod <ModName> --type <weapon|armor|amulet|ring|spell_target|passivedata> --name <Id> --display-name \"<Name>\" --description \"<Desc>\" --props \"<Props>\"\nFor weapons/armor/objects, bind 3D visual models using:\n  python3 scripts/scaffold_root_template.py --mod <ModName> --item <Id> --visual-preset <greatsword|longsword|staff|plate|robe|amulet|ring|boots|cloak>\nFor custom item container/vendor drops, inject drops using:\n  python3 scripts/inject_treasure_table.py --mod <ModName> --item <ItemName> --container <tutorial_chest|camp_chest|vendor_...>\nRefer to the approved plan for exact mechanics.",
       "Workspace": "inherit",
       "Model": "inherit"
     },
     {
       "TypeName": "self",
       "Role": "Progression & Lists Specialist - <ModName>",
-      "Prompt": "Author progression and spell list LSX files in <public_dir>. Mod: <ModName>, UUID: <UUID>.\nFiles to create/populate:\n- Lists/SpellLists.lsx (SpellList node with UUID and Spells list)\n- Progressions/Progressions.lsx (Progression nodes for target classes/levels)\n- Progressions/ProgressionDescriptions.lsx (if new progression descriptions needed)\nEnsure valid Larian v4.8 LSX schema with proper UUIDs.\nRefer to the approved plan for exact progression assignments.",
+      "Prompt": "Author progression and spell list LSX files in <public_dir>. Mod: <ModName>, UUID: <UUID>.\nTo ensure valid Larian v4.8 XML schema without crashing the level-up screen, use:\n  python3 scripts/scaffold_progression_node.py --mod <ModName> --class <Class> --level <Level> [--subclass <Subclass>] [--passives <Passives>] [--boosts <Boosts>] [--spells <Spells>] [--feat]\nEnsure valid Larian v4.8 LSX schema with proper UUIDs.\nRefer to the approved plan for exact progression assignments.",
       "Workspace": "inherit",
       "Model": "inherit"
     },
@@ -213,6 +213,11 @@ The script will:
 3. Copy `Public/<ModName>_<UUID>` into the game's `Data/Public/`.
 4. Mirror `Localization/English/<ModName>.xml` to both `Data/Localization/English/` and `Data/Mods/<ModName>_<UUID>/Localization/English/`.
 5. Sync thumbnails and publish logos.
+
+Optionally, package a standalone `.pak` for manual installation or sharing:
+```bash
+python3 scripts/pack_mod_pak.py --mod <ModName>
+```
 
 ---
 

@@ -75,6 +75,14 @@ Deploy the updated mod into the game's active `Data/` folder so the official Too
 python3 scripts/sync_to_game_data.py --mod <mod_slug> --bump-build
 ```
 
+### Step 4b: Standalone `.pak` Packaging (`scripts/pack_mod_pak.py`)
+If releasing as an independent `.pak` archive for manual distribution, Nexus Mods, or local testing outside the Toolkit, package into an LSPK v18 archive:
+
+```bash
+python3 scripts/pack_mod_pak.py --mod <mod_slug> --output-dir dist/
+```
+This produces a byte-verified, zlib-compressed `.pak` file compatible with the BG3 Mod Manager and game engine.
+
 ---
 
 ## Step 5: Presentation to User
