@@ -64,6 +64,14 @@ The script automatically:
 * Cross-references [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md) and **automatically dumps any search results already tracked**.
 * Ranks results by relevance, tags, and subscriber popularity.
 
+> [!TIP]
+> **Tool Discovery & Schema Inspection**:
+> To inspect all search flags or discover related library tools:
+> ```bash
+> python3 scripts/tools.py --info modio-search --json
+> python3 scripts/tools.py --search "mod.io" --json
+> ```
+
 ---
 
 ## Step 3: Candidate Presentation & User Selection

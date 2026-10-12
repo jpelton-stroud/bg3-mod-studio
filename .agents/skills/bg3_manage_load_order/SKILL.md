@@ -58,6 +58,16 @@ python3 scripts/manage_load_order.py --disable "<UUID>" --json
 python3 scripts/manage_load_order.py --validate
 ```
 
+> [!TIP]
+> **Tool Discovery & Schema Inspection**:
+> To inspect all load order management and save audit options:
+> ```bash
+> python3 scripts/tools.py --info load-order --json
+> python3 scripts/tools.py --info inspect-save --json
+> python3 scripts/tools.py --search "modsettings" --json
+> ```
+
+
 ---
 
 ## Output Presentation

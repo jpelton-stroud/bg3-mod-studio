@@ -34,7 +34,10 @@ Before asking the first question:
    - Identify implicit assumptions, vague requirements, and missing edge cases.
 2. **Codebase Exploration First Rule**:
    - If a question can be answered by exploring the codebase (e.g. checking existing directories, finding script signatures, reading configuration files), explore the codebase instead of asking the user.
+   - Query the studio tooling registry to discover existing automation scripts and capabilities that can fulfill or simplify the task:
+     `python3 scripts/tools.py --search "<user intent>"` or `python3 scripts/tools.py --list`
 3. **Formulate Initial Understanding**:
+
    - Formulate a 2-sentence summary of the task and identify the primary decision branches that must be resolved.
 
 ---

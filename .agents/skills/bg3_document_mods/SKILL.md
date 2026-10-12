@@ -108,6 +108,15 @@ python3 scripts/query_mod_database.py --reindex
 
 This automatically scans all specifications under `mods/`, extracts titles, descriptions, and feature counts, categorizes them into standard tables (**Gear**, **Spells**, **Classes & Subclasses**, **Progression & Rules**, **Utilities & Cheats**), regenerates [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md), and rebuilds the high-speed query cache in `.cache/mod_database.json` for [`bg3_query_gear`](file:///home/jpstroud/projects/BaldursGate3/.agents/skills/bg3_query_gear/SKILL.md).
 
+> [!TIP]
+> **Tool Discovery & Schema Inspection**:
+> To inspect catalog updater or database indexing flags dynamically:
+> ```bash
+> python3 scripts/tools.py --info update-catalog --json
+> python3 scripts/tools.py --info query-db --json
+> python3 scripts/tools.py --search "catalog" --json
+> ```
+
 ---
 
 ## Step 5: Overall Results Presentation

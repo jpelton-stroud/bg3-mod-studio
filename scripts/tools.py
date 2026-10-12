@@ -16,6 +16,7 @@ import argparse
 import json
 import os
 import py_compile
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -173,6 +174,74 @@ def verify_registry(registry: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) -> Dict[str, Any]:
+    """Audit agent skills in .agents/skills/ for registry compliance and tool discovery."""
+    if skills_dir is None:
+        workspace_dir = SCRIPTS_DIR.parent
+        skills_dir = workspace_dir / ".agents" / "skills"
+
+    if not skills_dir.is_dir():
+        return {
+            "valid": False,
+            "error": f"Skills directory not found at {skills_dir}",
+            "skills": []
+        }
+
+    registered_tools = {t["name"]: t for t in registry.get("tools", [])}
+    registered_names = set(registered_tools.keys())
+
+    results = []
+    total_refs = 0
+    skills_with_discovery = 0
+    all_unregistered = set()
+
+    for skill_path in sorted(skills_dir.glob("*/SKILL.md")):
+        skill_name = skill_path.parent.name
+        try:
+            content = skill_path.read_text(encoding="utf-8")
+        except Exception as e:
+            results.append({"skill": skill_name, "error": str(e), "status": "read_error"})
+            continue
+
+        script_refs = sorted(list(set(re.findall(r"scripts/([a-zA-Z0-9_\-]+\.py)", content))))
+        total_refs += len(script_refs)
+
+        has_tools_py = "tools.py" in content
+        has_discovery_tip = has_tools_py or ("registry" in content.lower() and "tools.py" in content)
+        if has_discovery_tip:
+            skills_with_discovery += 1
+
+        unregistered = [s for s in script_refs if s not in registered_names and s != "tools.py"]
+        all_unregistered.update(unregistered)
+
+        if unregistered:
+            status = "unregistered_references"
+        elif has_discovery_tip:
+            status = "fully_integrated"
+        else:
+            status = "missing_discovery"
+
+        results.append({
+            "skill": skill_name,
+            "script_references": script_refs,
+            "has_discovery_guidance": has_discovery_tip,
+            "unregistered_references": unregistered,
+            "status": status
+        })
+
+    is_valid = len(all_unregistered) == 0
+
+    return {
+        "valid": is_valid,
+        "total_skills": len(results),
+        "skills_with_discovery": skills_with_discovery,
+        "discovery_coverage_pct": round(skills_with_discovery / len(results) * 100, 1) if results else 0,
+        "unregistered_scripts": sorted(list(all_unregistered)),
+        "skills": results
+    }
+
+
+
 def dispatch_run(registry: Dict[str, Any], tool_query: str, extra_args: List[str]) -> int:
     """Dispatch and execute the targeted tool script."""
     tool = find_tool(registry, tool_query)
@@ -227,10 +296,11 @@ Examples:
     parser.add_argument("--search", type=str, help="Search tools by intent, keyword, or name")
     parser.add_argument("--info", type=str, help="Display detailed flags, examples, and schema for a specific tool")
     parser.add_argument("--verify", action="store_true", help="Run automated registry integrity verification test")
+    parser.add_argument("--audit-skills", action="store_true", help="Audit agent skills in .agents/skills/ for registry compliance and tool discovery")
     parser.add_argument("--json", action="store_true", help="Emit output formatted as JSON")
 
     # Dispatch subcommand
-    parser.add_argument("subcommand", nargs="?", choices=["run", "list", "search", "info", "verify"], help="Subcommand action")
+    parser.add_argument("subcommand", nargs="?", choices=["run", "list", "search", "info", "verify", "audit"], help="Subcommand action")
     parser.add_argument("tool_name", nargs="?", help="Tool name or query for subcommand")
     parser.add_argument("extra_args", nargs=argparse.REMAINDER, help="Arguments passed to tool when using 'run'")
 
@@ -251,6 +321,8 @@ Examples:
         args.info = args.tool_name
     elif args.subcommand == "verify":
         args.verify = True
+    elif args.subcommand == "audit":
+        args.audit_skills = True
 
     # 1. Categories
     if args.categories:
@@ -263,6 +335,27 @@ Examples:
             print(format_table(rows, ["Category", "Description"]))
             print()
         return
+
+    # 1b. Audit Skills
+    if args.audit_skills:
+        report = audit_skills(registry)
+        if args.json:
+            print(json.dumps(report, indent=2))
+        else:
+            status = "PASSED" if report["valid"] else "FAILED"
+            print(f"\nSkills Audit Report: [{status}]")
+            print(f"  Total Skills:             {report['total_skills']}")
+            print(f"  With Discovery Guidance:  {report['skills_with_discovery']} / {report['total_skills']} ({report['discovery_coverage_pct']}%)")
+            print(f"  Unregistered Scripts:     {len(report['unregistered_scripts'])}\n")
+
+            rows = []
+            for s in report["skills"]:
+                scripts_str = ", ".join(s["script_references"]) if s["script_references"] else "(none)"
+                discovery_icon = "[✓]" if s["has_discovery_guidance"] else "[ ]"
+                rows.append([s["skill"], discovery_icon, s["status"], scripts_str])
+            print(format_table(rows, ["Skill Name", "Discovery", "Status", "Referenced Scripts"]))
+            print()
+        sys.exit(0 if report["valid"] else 1)
 
     # 2. Verify
     if args.verify:
