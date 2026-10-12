@@ -1,0 +1,205 @@
+// ==============================================================================
+// UnlockLevelCurveExtended - Spell_Target
+// Target spells for Level 13-20 mechanics and Spell Mastery
+// ==============================================================================
+
+new entry "Target_CleansingTouch"
+type "SpellData"
+data "SpellType" "Target"
+data "DisplayName" "h2b56d659gd38cg4167gbf8cgae8659aeaf74;1"
+data "Description" "hafb351f1g0f3cg47dag8556g3a7808dbae69;1"
+data "Icon" "Spell_Abjuration_DispelMagic"
+data "TargetRadius" "2"
+data "UseCosts" "ActionPoint:1"
+data "CooldownType" "OncePerShortRest"
+data "SpellProperties" "RemoveStatus(SG_Charmed);RemoveStatus(SG_Frightened);RemoveStatus(SG_Paralyzed);RemoveStatus(SG_Poisoned);RemoveStatus(SG_Blinded);RemoveStatus(SG_Curse);RemoveStatus(SILENCED);RemoveStatus(BANE);RemoveStatus(SLOW);RemoveStatus(HOLD_PERSON);RemoveStatus(CONFUSION);RemoveStatus(CROWN_OF_MADNESS)"
+
+new entry "Target_Invisibility_Free"
+type "SpellData"
+using "Target_Invisibility"
+data "DisplayName" "h0f5dd8edg6459g490egb60dg3d50956860d2;1"
+data "Description" "h6f2084ceg8418g41dfg8d5eg3e2c1ff6a322;1"
+data "UseCosts" "ActionPoint:1"
+data "TargetConditions" "Self()"
+
+// ------------------------------------------------------------------------------
+// Wizard Spell Mastery - 1st Level Target Spells (At-Will, No Spell Slot)
+// ------------------------------------------------------------------------------
+
+new entry "Target_Shield_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_Shield"
+data "UseCosts" "ReactionActionPoint:1"
+
+new entry "Target_MageArmor_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_MageArmor"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Target_Longstrider_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_Longstrider"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Target_FogCloud_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_FogCloud"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Target_Grease_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_Grease"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Target_FeatherFall_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_FeatherFall"
+data "UseCosts" "BonusActionPoint:1"
+
+// ------------------------------------------------------------------------------
+// Wizard Spell Mastery - 2nd Level Target Spells (At-Will, No Spell Slot)
+// ------------------------------------------------------------------------------
+
+new entry "Target_MistyStep_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_MistyStep"
+data "UseCosts" "BonusActionPoint:1"
+
+new entry "Target_Web_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_Web"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Target_Darkness_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_Darkness"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Target_HoldPerson_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_HoldPerson"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Target_Invisibility_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_Invisibility"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Target_CloudOfDaggers_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_CloudOfDaggers"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Target_Shatter_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_Shatter"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Target_Blindness_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_Blindness"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Target_PhantasmalForce_Mastery"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_PhantasmalForce"
+data "UseCosts" "ActionPoint:1"
+
+// ------------------------------------------------------------------------------
+// Paladin Dread Lord Sub-Spell
+// ------------------------------------------------------------------------------
+
+new entry "Target_DreadLord_ShadowAttack"
+type "SpellData"
+data "SpellType" "Target"
+data "DisplayName" "h3de906cbg9092g49b4g834agc7955289ba70;1"
+data "Description" "h0d31e956g6898g4cb9ga5b2g3d6532bfa528;1"
+data "Icon" "Spell_Necromancy_InflictWounds"
+data "SpellAnimationIntentType" "Aggressive"
+data "TargetFloor" "-1"
+data "TargetRadius" "1.5"
+data "UseCosts" "BonusActionPoint:1"
+data "SpellRoll" "Attack(AttackType.MeleeSpellAttack)"
+data "SpellSuccess" "DealDamage(3d10, Necrotic, Magical)"
+
+// ------------------------------------------------------------------------------
+// Open Hand Monk Quivering Palm
+// ------------------------------------------------------------------------------
+
+new entry "Target_QuiveringPalm"
+type "SpellData"
+data "SpellType" "Target"
+data "DisplayName" "hba2892fdg95e0g4f3egab31g510f73bce4ac;1"
+data "Description" "hc3651711g2d2cg4786gbe4ag2099017b7bbf;1"
+data "Icon" "Action_Monk_KiResonation_Punch"
+data "SpellAnimationIntentType" "Aggressive"
+data "TargetFloor" "-1"
+data "TargetRadius" "1.5"
+data "UseCosts" "ActionPoint:1;KiPoint:3"
+data "SpellRoll" "Attack(AttackType.MeleeUnarmedAttack)"
+data "SpellSuccess" "DealDamage(MainUnarmedWeapon, Bludgeoning);ApplyStatus(TARGET, QUIVERING_PALM_VIBRATIONS, 100, 100);ApplyStatus(SELF, QUIVERING_PALM_READY, 100, 100)"
+
+new entry "Target_QuiveringPalm_Detonate"
+type "SpellData"
+data "SpellType" "Target"
+data "DisplayName" "heb30fcadg1ce3g4249gab70g11ce1decc4c1;1"
+data "Description" "ha55b5767g7669g4745gb983gf45f5d8513f9;1"
+data "Icon" "Action_Monk_KiResonation_Blast"
+data "SpellAnimationIntentType" "Aggressive"
+data "TargetFloor" "-1"
+data "TargetRadius" "18"
+data "UseCosts" "ActionPoint:1"
+data "TargetConditions" "HasStatus('QUIVERING_PALM_VIBRATIONS') and not Dead()"
+data "SpellSuccess" "IF(SavingThrow(Ability.Constitution, SourceSpellDC())):DealDamage(10d10, Necrotic, Magical);IF(not SavingThrow(Ability.Constitution, SourceSpellDC())):DealDamage(100, Necrotic, Magical);RemoveStatus(TARGET, QUIVERING_PALM_VIBRATIONS);RemoveStatus(SELF, QUIVERING_PALM_READY)"
+
+// ------------------------------------------------------------------------------
+// Fiend Warlock Hurl Through Hell
+// ------------------------------------------------------------------------------
+
+new entry "Target_HurlThroughHell"
+type "SpellData"
+data "SpellType" "Target"
+data "DisplayName" "hde641805g99bcg4cdfgb621g24fca626e200;1"
+data "Description" "h70078bf2g47d2g4238gb4acgf3bcef4ea1c0;1"
+data "Icon" "Spell_Enchantment_Banishment"
+data "SpellAnimationIntentType" "Aggressive"
+data "TargetFloor" "-1"
+data "TargetRadius" "18"
+data "UseCosts" "ActionPoint:1"
+data "CooldownType" "OncePerLongRest"
+data "SpellRoll" "Attack(AttackType.MeleeSpellAttack)"
+data "SpellSuccess" "DealDamage(MainWeapon, MainWeaponDamageType);ApplyStatus(TARGET, HURL_THROUGH_HELL_BANISHED, 100, 1)"
+
+// ------------------------------------------------------------------------------
+// Swords Bard Master's Flourishes (Melee Variants, No Inspiration Cost)
+// ------------------------------------------------------------------------------
+
+new entry "Target_BladeFlourish_Defensive_Master"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_BladeFlourish_Defensive"
+data "UseCosts" "ActionPoint:1"
+data "SpellSuccess" "DealDamage(max(1,MainMeleeWeapon + 1d6), MainMeleeWeaponDamageType);ExecuteWeaponFunctors(MainHand);ApplyStatus(SELF, BLADE_FLOURISH_DEFENSIVE, 100, 1)"
+
+new entry "Target_BladeFlourish_Mobile_Master"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_BladeFlourish_Mobile"
+data "UseCosts" "ActionPoint:1"
+data "SpellSuccess" "DealDamage(max(1,MainMeleeWeapon + 1d6), MainMeleeWeaponDamageType);ExecuteWeaponFunctors(MainHand);ApplyStatus(TARGET, BLADE_FLOURISH_MOBILE_PUSH, 100, 1)"
+

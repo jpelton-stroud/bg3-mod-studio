@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="8" revision="0" build="500"/>
+    <region id="SpellLists">
+        <node id="root">
+            <children>
+                <node id="SpellList">
+                    <attribute id="Comment" type="LSString" value="Wizard Spell Mastery Level 1 Options"/>
+                    <attribute id="Spells" type="LSString" value="Target_Shield_Mastery;Target_MageArmor_Mastery;Projectile_MagicMissile_Mastery;Target_Longstrider_Mastery;Target_FogCloud_Mastery;Target_Grease_Mastery;Target_FeatherFall_Mastery;Zone_Thunderwave_Mastery;Zone_BurningHands_Mastery;Projectile_ChromaticOrb_Mastery;Projectile_RayOfSickness_Mastery;Shout_FalseLife_Mastery"/>
+                    <attribute id="UUID" type="guid" value="79235a63-5031-42c0-989d-b1b666890ebc"/>
+                </node>
+                <node id="SpellList">
+                    <attribute id="Comment" type="LSString" value="Wizard Spell Mastery Level 2 Options"/>
+                    <attribute id="Spells" type="LSString" value="Target_MistyStep_Mastery;Shout_MirrorImage_Mastery;Shout_Blur_Mastery;Target_Web_Mastery;Target_Darkness_Mastery;Projectile_ScorchingRay_Mastery;Target_HoldPerson_Mastery;Target_Invisibility_Mastery;Target_CloudOfDaggers_Mastery;Target_Shatter_Mastery;Target_Blindness_Mastery;Target_PhantasmalForce_Mastery"/>
+                    <attribute id="UUID" type="guid" value="86615a55-6114-4841-b13d-a4d78e723d53"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>

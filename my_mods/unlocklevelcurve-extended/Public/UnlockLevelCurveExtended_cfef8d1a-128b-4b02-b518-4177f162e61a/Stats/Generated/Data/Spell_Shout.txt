@@ -1,0 +1,101 @@
+// ==============================================================================
+// UnlockLevelCurveExtended - Spell_Shout
+// Shout spells for Level 13-20 mechanics and Spell Mastery
+// ==============================================================================
+
+new entry "Shout_EmptyBody"
+type "SpellData"
+data "SpellType" "Shout"
+data "DisplayName" "h5586742bg5c01g4729g81efg68eba20b647e;1"
+data "Description" "h701c0902gd458g4709g8422g1d176596b7cd;1"
+data "Icon" "Spell_Illusion_Invisibility"
+data "SpellAnimationIntentType" "Buff"
+data "UseCosts" "ActionPoint:1;KiPoint:4"
+data "CooldownType" "None"
+data "SpellProperties" "ApplyStatus(SELF, EMPTY_BODY, 100, 10)"
+
+// ------------------------------------------------------------------------------
+// Wizard Spell Mastery - Shout Variants (At-Will, No Spell Slot)
+// ------------------------------------------------------------------------------
+
+new entry "Shout_FalseLife_Mastery"
+type "SpellData"
+data "SpellType" "Shout"
+using "Shout_FalseLife"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Shout_MirrorImage_Mastery"
+type "SpellData"
+data "SpellType" "Shout"
+using "Shout_MirrorImage"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Shout_Blur_Mastery"
+type "SpellData"
+data "SpellType" "Shout"
+using "Shout_Blur"
+data "UseCosts" "ActionPoint:1"
+
+// ------------------------------------------------------------------------------
+// Paladin Level 20 Sacred Oath Avatars
+// ------------------------------------------------------------------------------
+
+new entry "Shout_Paladin_ElderChampion"
+type "SpellData"
+data "SpellType" "Shout"
+data "DisplayName" "h5d3b644fg539eg4b49g9399ge9e899d5dc3e;1"
+data "Description" "hfe170cc5ga559g4ab8ga961gf295faad561a;1"
+data "Icon" "Spell_Druid_Barkskin"
+data "SpellAnimationIntentType" "Buff"
+data "UseCosts" "ActionPoint:1"
+data "CooldownType" "OncePerLongRest"
+data "SpellProperties" "ApplyStatus(SELF, PALADIN_ELDER_CHAMPION, 100, 10)"
+
+new entry "Shout_Paladin_HolyNimbus"
+type "SpellData"
+data "SpellType" "Shout"
+data "DisplayName" "h8413d844gce2bg49a4gae18g4ab60c051bad;1"
+data "Description" "h0d9d5e11gfd9fg443bg866ag059b86202a76;1"
+data "Icon" "Spell_Evocation_Daylight"
+data "SpellAnimationIntentType" "Buff"
+data "UseCosts" "ActionPoint:1"
+data "CooldownType" "OncePerLongRest"
+data "SpellProperties" "ApplyStatus(SELF, PALADIN_HOLY_NIMBUS, 100, 10)"
+
+new entry "Shout_Paladin_AvengingAngel"
+type "SpellData"
+data "SpellType" "Shout"
+data "DisplayName" "h439434c7gbb28g4649g83b0gc6fa5e3a6f93;1"
+data "Description" "h609f8bddg9143g43cagb0fegc6e6cee5f109;1"
+data "Icon" "Spell_Transmutation_Fly"
+data "SpellAnimationIntentType" "Buff"
+data "UseCosts" "ActionPoint:1"
+data "CooldownType" "OncePerLongRest"
+data "SpellProperties" "ApplyStatus(SELF, PALADIN_AVENGING_ANGEL, 100, 10)"
+
+new entry "Shout_Paladin_DreadLord"
+type "SpellData"
+data "SpellType" "Shout"
+data "DisplayName" "h140e650ag5035g497bg9dc7g9bf12cb2abd3;1"
+data "Description" "h6f6c4c17g12aeg412dga4b5g8ef8289dd385;1"
+data "Icon" "Spell_Necromancy_CircleOfDeath"
+data "SpellAnimationIntentType" "Buff"
+data "UseCosts" "ActionPoint:1"
+data "CooldownType" "OncePerLongRest"
+data "SpellProperties" "ApplyStatus(SELF, PALADIN_DREAD_LORD, 100, 10)"
+
+// ------------------------------------------------------------------------------
+// Evocation Wizard Overchannel
+// ------------------------------------------------------------------------------
+
+new entry "Shout_Overchannel"
+type "SpellData"
+data "SpellType" "Shout"
+data "DisplayName" "h3001fe03g3d66g47d4g88a7g2fe25494acf6;1"
+data "Description" "ha46e1625g8cf1g45a8gae6dg955e5aa1a29b;1"
+data "Icon" "Spell_Evocation_Disintegrate"
+data "SpellAnimationIntentType" "Buff"
+data "UseCosts" "BonusActionPoint:1"
+data "CooldownType" "OncePerTurn"
+data "SpellProperties" "ApplyStatus(SELF, OVERCHANNEL_MAX_DAMAGE, 100, 1);ApplyStatus(SELF, OVERCHANNEL_FATIGUE, 100, -1)"
+

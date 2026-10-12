@@ -1,0 +1,165 @@
+// ==============================================================================
+// UnlockLevelCurveExtended - Status_BOOST
+// Status definitions for Level 13-20 mechanics
+// ==============================================================================
+
+new entry "EMPTY_BODY"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h5586742bg5c01g4729g81efg68eba20b647e;1"
+data "Description" "h701c0902gd458g4709g8422g1d176596b7cd;1"
+data "Icon" "Spell_Illusion_Invisibility"
+data "Boosts" "Resistance(Acid, Resistant);Resistance(Bludgeoning, Resistant);Resistance(Cold, Resistant);Resistance(Fire, Resistant);Resistance(Lightning, Resistant);Resistance(Necrotic, Resistant);Resistance(Piercing, Resistant);Resistance(Poison, Resistant);Resistance(Psychic, Resistant);Resistance(Radiant, Resistant);Resistance(Slashing, Resistant);Resistance(Thunder, Resistant);ApplyStatus(SELF, INVISIBLE, 100, -1)"
+
+new entry "UNDYING_SENTINEL_COOLDOWN"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "hf403c4deg4346g497egb35ag1d3bae590b03;1"
+data "Description" "h8a179ba7g697bg48fdg88e2g686651576840;1"
+data "Icon" "Spell_Abjuration_DeathWard"
+data "FormatColor" "Red"
+data "RemoveConditions" "LongRest()"
+
+new entry "STROKE_OF_LUCK_COOLDOWN"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h5fc625aeg752cg43ebg84d1g4487a9a81927;1"
+data "Description" "h42eaa799ge163g48bbg9a80g4b3ea253fed2;1"
+data "Icon" "PassiveFeature_Lucky"
+data "FormatColor" "Red"
+data "RemoveConditions" "ShortRest() or LongRest()"
+
+new entry "SHADOWY_DODGE_EVASION"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h170779d0g39ffg49aagb6f9ged5f7cb61c88;1"
+data "Description" "he936af81gf705g4481ga8fcg9e7d5e501af4;1"
+data "Icon" "PassiveFeature_UncannyDodge"
+data "Boosts" "Disadvantage(AttackTarget)"
+
+// ------------------------------------------------------------------------------
+// Paladin Level 20 Avatar Statuses
+// ------------------------------------------------------------------------------
+
+new entry "PALADIN_ELDER_CHAMPION"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h5d3b644fg539eg4b49g9399ge9e899d5dc3e;1"
+data "Description" "hfe170cc5ga559g4ab8ga961gf295faad561a;1"
+data "Icon" "Spell_Druid_Barkskin"
+data "StatusEffect" "VFX_Status_SymbioticEntity"
+data "Boosts" "ActionResource(BonusActionPoint,1,0);RegainHitPoints(10);Aura('PALADIN_ELDER_CHAMPION_AURA',3,Enemy,PALADIN_ELDER_CHAMPION_ENEMY)"
+
+new entry "PALADIN_ELDER_CHAMPION_ENEMY"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h5d3b644fg539eg4b49g9399ge9e899d5dc3e;1"
+data "Description" "hfe170cc5ga559g4ab8ga961gf295faad561a;1"
+data "Icon" "Spell_Druid_Barkskin"
+data "Boosts" "Disadvantage(SavingThrow,Spell)"
+
+new entry "PALADIN_HOLY_NIMBUS"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h8413d844gce2bg49a4gae18g4ab60c051bad;1"
+data "Description" "h0d9d5e11gfd9fg443bg866ag059b86202a76;1"
+data "Icon" "Spell_Evocation_Daylight"
+data "StatusEffect" "VFX_Spells_Cast_Cleric_Daylight_01"
+data "Boosts" "Advantage(SavingThrow,Spell);Aura('PALADIN_HOLY_NIMBUS_AURA',9,Enemy,PALADIN_HOLY_NIMBUS_ENEMY)"
+
+new entry "PALADIN_HOLY_NIMBUS_ENEMY"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h8413d844gce2bg49a4gae18g4ab60c051bad;1"
+data "Description" "h0d9d5e11gfd9fg443bg866ag059b86202a76;1"
+data "Icon" "Spell_Evocation_Daylight"
+data "TickFunctors" "IF(Tagged('UNDEAD') or Tagged('FIEND')):DealDamage(10,Radiant)"
+
+new entry "PALADIN_AVENGING_ANGEL"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h439434c7gbb28g4649g83b0gc6fa5e3a6f93;1"
+data "Description" "h609f8bddg9143g43cagb0fegc6e6cee5f109;1"
+data "Icon" "Spell_Transmutation_Fly"
+data "StatusEffect" "VFX_Status_Fly"
+data "Boosts" "UnlockSpell(Projectile_Fly);ActionResource(Movement,6,0);Aura('PALADIN_AVENGING_ANGEL_AURA',9,Enemy,PALADIN_AVENGING_ANGEL_ENEMY);Advantage(AttackRoll,TargetTagged('FRIGHTENED'))"
+
+new entry "PALADIN_AVENGING_ANGEL_ENEMY"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h439434c7gbb28g4649g83b0gc6fa5e3a6f93;1"
+data "Description" "h609f8bddg9143g43cagb0fegc6e6cee5f109;1"
+data "Icon" "Spell_Necromancy_Fear"
+data "TickFunctors" "IF(not SavingThrow(Ability.Wisdom,SourceSpellDC())):ApplyStatus(TARGET,FEARED,100,1)"
+
+new entry "PALADIN_DREAD_LORD"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h140e650ag5035g497bg9dc7g9bf12cb2abd3;1"
+data "Description" "h6f6c4c17g12aeg412dga4b5g8ef8289dd385;1"
+data "Icon" "Spell_Necromancy_CircleOfDeath"
+data "StatusEffect" "VFX_Status_Shadow"
+data "Boosts" "UnlockSpell(Target_DreadLord_ShadowAttack);Aura('PALADIN_DREAD_LORD_AURA',9,Enemy,PALADIN_DREAD_LORD_ENEMY)"
+
+new entry "PALADIN_DREAD_LORD_ENEMY"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h140e650ag5035g497bg9dc7g9bf12cb2abd3;1"
+data "Description" "h6f6c4c17g12aeg412dga4b5g8ef8289dd385;1"
+data "Icon" "Spell_Necromancy_CircleOfDeath"
+data "TickFunctors" "IF(not SavingThrow(Ability.Wisdom,SourceSpellDC())):ApplyStatus(TARGET,FEARED,100,1);IF(HasStatus('FEARED') or HasStatus('FRIGHTENED')):DealDamage(4d10,Psychic)"
+
+// ------------------------------------------------------------------------------
+// Open Hand Monk Quivering Palm Statuses
+// ------------------------------------------------------------------------------
+
+new entry "QUIVERING_PALM_VIBRATIONS"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "heb30fcadg1ce3g4249gab70g11ce1decc4c1;1"
+data "Description" "ha55b5767g7669g4745gb983gf45f5d8513f9;1"
+data "Icon" "Action_Monk_KiResonation_Blast"
+data "StatusPropertyFlags" "DisableOverhead;DisablePortraitIndicator"
+
+new entry "QUIVERING_PALM_READY"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "hba2892fdg95e0g4f3egab31g510f73bce4ac;1"
+data "Description" "hc3651711g2d2cg4786gbe4ag2099017b7bbf;1"
+data "Icon" "Action_Monk_KiResonation_Punch"
+data "Boosts" "UnlockSpell(Target_QuiveringPalm_Detonate)"
+
+// ------------------------------------------------------------------------------
+// Fiend Warlock Hurl Through Hell Status
+// ------------------------------------------------------------------------------
+
+new entry "HURL_THROUGH_HELL_BANISHED"
+type "StatusData"
+data "StatusType" "BOOST"
+using "BANISHED"
+data "DisplayName" "hde641805g99bcg4cdfgb621g24fca626e200;1"
+data "Description" "h70078bf2g47d2g4238gb4acgf3bcef4ea1c0;1"
+data "Icon" "Spell_Enchantment_Banishment"
+data "OnRemoveFunctors" "DealDamage(10d10,Psychic,Magical)"
+
+// ------------------------------------------------------------------------------
+// Evocation Wizard Overchannel Statuses
+// ------------------------------------------------------------------------------
+
+new entry "OVERCHANNEL_MAX_DAMAGE"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h3001fe03g3d66g47d4g88a7g2fe25494acf6;1"
+data "Description" "ha46e1625g8cf1g45a8gae6dg955e5aa1a29b;1"
+data "Icon" "Spell_Evocation_Disintegrate"
+data "Boosts" "MinimumRollResult(Damage,20)"
+
+new entry "OVERCHANNEL_FATIGUE"
+type "StatusData"
+data "StatusType" "BOOST"
+data "DisplayName" "h3001fe03g3d66g47d4g88a7g2fe25494acf6;1"
+data "Description" "ha46e1625g8cf1g45a8gae6dg955e5aa1a29b;1"
+data "Icon" "Spell_Evocation_Disintegrate"
+data "StackType" "Stack"
+data "TickFunctors" "IF(HasStatus('OVERCHANNEL_FATIGUE')):DealDamage(2d12,Necrotic,SELF)"
+

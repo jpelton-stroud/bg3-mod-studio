@@ -1,0 +1,28 @@
+// ==============================================================================
+// UnlockLevelCurveExtended - Spell_Zone
+// Zone spells for Wizard Spell Mastery (At-Will, No Spell Slot)
+// ==============================================================================
+
+new entry "Zone_Thunderwave_Mastery"
+type "SpellData"
+data "SpellType" "Zone"
+using "Zone_Thunderwave"
+data "UseCosts" "ActionPoint:1"
+
+new entry "Zone_BurningHands_Mastery"
+type "SpellData"
+data "SpellType" "Zone"
+using "Zone_BurningHands"
+data "UseCosts" "ActionPoint:1"
+
+// ------------------------------------------------------------------------------
+// Swords Bard Master's Flourishes (Melee Slashing Variant, No Inspiration Cost)
+// ------------------------------------------------------------------------------
+
+new entry "Zone_BladeFlourish_Slashing_Master"
+type "SpellData"
+data "SpellType" "Zone"
+using "Zone_BladeFlourish_Slashing"
+data "UseCosts" "ActionPoint:1"
+data "SpellSuccess" "DealDamage(max(1,MainMeleeWeapon + 1d6), MainMeleeWeaponDamageType);ExecuteWeaponFunctors(MainHand)"
+

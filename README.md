@@ -15,16 +15,29 @@ It has since snowballed into an entire agentic mod studio that runs (almost) com
 
 ## Features
 
+### Agentic Features
+
+- **🎨 Autonomous Mod Authoring (`bg3_create_mod`, `grill-me`)**:
+  Multi-agent pipeline that interviews modders on design intent, structures technical specifications, authors stats and localization XML, and validates file structures against Larian engine standards.
+- **🔍 Intelligent Discovery & Conflict Analysis (`bg3_search_mods`, `bg3_check_mod_conflicts`)**:
+  Natural-language catalog exploration with automated conflict evaluation, load-order checks, and console compatibility verification against your local mod library.
+- **📖 Autonomous Documentation & Cataloging (`bg3_document_mods`, `bg3_update_mod_documentation`)**:
+  Concurrent subagent workflows to download, deconstruct, and document community mods into `mods/<slug>/README.md` and refresh `mods/library.md`.
+- **⚔️ Build Crafting & BiS Theorycrafting (`bg3_create_build_guide`)**:
+  Designs min-maxed Level 20 character build guides integrating modded gear, progression paths, and turn-1 combat sequencing.
+
+### Script-Based Features
+
 - **⚡ Mod Scaffolding (`create_mod_scaffold.py`)**:
-  Generates production-grade Larian v4.8 engine metadata (`meta.lsx`), calculates 64-bit version integers, allocates unique UUIDs and localization handles, and produces compliant 512x512 PNG assets.
+  Generates production-grade Larian v4.8 engine metadata (`meta.lsx`), calculates 64-bit version integers, allocates unique UUIDs and localization handles, and produces compliant 512x512 PNG assets with zero external dependencies.
 - **🔄 Live Game Data Synchronization (`sync_to_game_data.py`)**:
-  Idempotently mirrors mods authored under `my_mods/` directly into your Steam Baldur's Gate 3 `Data/` folder. Supports continuous live-reloading (`--watch`) during mod development.
-- **🌐 mod.io Search & Deconstruction (`modio_*.py`)**:
-  Search mod.io with natural language and console filters (PS5, Xbox, Console, or PC). Download and extract PAK files into clean, readable XML/TXT definitions and rich markdown specifications.
+  Idempotently mirrors mods authored under `my_mods/` directly into your Steam Baldur's Gate 3 `Data/` folder, featuring continuous watch mode (`--watch`) for instant hot-reloading during mod development.
+- **🌐 mod.io Management Suite (`modio_*.py`)**:
+  Command-line tools to search mod.io with console filters (`modio_search.py`), extract and deconstruct PAK files into clean XML/TXT specs (`modio_extract.py`), sync personal subscriptions (`modio_sync.py`), and check for upstream updates (`modio_update.py`).
+- **⚙️ Setup & Environment Wizard (`setup.sh` / `setup_environment.py`)**:
+  Interactive setup wizard to detect game installation paths, validate mod.io API credentials, and configure author environments.
 - **📚 Curated Mod Library (`mods/library.md`)**:
   Maintains detailed feature documentation and stat specifications for documented community mods across Gear, Spells, Classes, Progression, and Utilities.
-- **🤖 Autonomous AI Agent Skills (`.agents/skills/`)**:
-  Built-in agent workflows to create mods, search catalogs, verify console load orders, and check for conflicts before deployment.
 
 ---
 
