@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="8" revision="0" build="500"/>
+    <region id="SpellLists">
+        <node id="root">
+            <children>
+                <node id="SpellList">
+                    <attribute id="Name" type="FixedString" value="Bard Blade Flourish spells"/>
+                    <attribute id="Spells" type="LSString" value="Target_BladeFlourish_Slashing;Target_BladeFlourish_Defensive;Projectile_BladeFlourish_Defensive;Target_BladeFlourish_Mobile;Projectile_BladeFlourish_Mobile;Projectile_BladeFlourish_Slashing"/>
+                    <attribute id="UUID" type="guid" value="246ad664-1a53-4d42-8a5e-0ed5cda6af62"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>

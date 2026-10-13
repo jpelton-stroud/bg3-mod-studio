@@ -1,0 +1,29 @@
+// ==============================================================================
+// Font & Flourish - Target Spells
+// Targeted Multi-Attack Melee Slashing Flourish
+// AmountOfTargets 2, melee range, allows selecting same target twice
+// ==============================================================================
+
+new entry "Target_BladeFlourish_Slashing"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_BladeFlourish_Defensive"
+data "AmountOfTargets" "2"
+data "TargetRadius" "MeleeRange"
+data "TargetConditions" "Character() and not Self() and not Dead()"
+data "SpellRoll" "Attack(AttackType.MeleeWeaponAttack)"
+data "SpellProperties" "GROUND:DealDamage(MainMeleeWeapon, MainMeleeWeaponDamageType);GROUND:ExecuteWeaponFunctors(MainHand);IF(not Player(context.Source)):ApplyStatus(SELF,AI_HELPER_EXTRAATTACK,100,1);"
+data "SpellSuccess" "DealDamage(max(1,MainMeleeWeapon + LevelMapValue(BardicInspiration)), MainMeleeWeaponDamageType); ExecuteWeaponFunctors(MainHand)"
+data "Icon" "Action_SlashingFlourish_Melee"
+data "DisplayName" "h3faed17cg9892g42acgb932g9455da2f54a5;1"
+data "Description" "h6ffc6e8dg1e55g4ceag9e69g2816b3a26fb0;1"
+data "DescriptionParams" "2;DealDamage(MainMeleeWeapon, MainMeleeWeaponDamageType)"
+data "TooltipDamageList" "DealDamage(MainMeleeWeapon + LevelMapValue(BardicInspiration), MainMeleeWeaponDamageType)"
+data "TooltipStatusApply" ""
+data "TooltipAttackSave" "MeleeWeaponAttack"
+data "PrepareSound" "Action_Prepare_Bard_Flourish"
+data "PrepareLoopSound" "Action_Loop_Bard_Flourish"
+data "CastSound" "Action_Cast_Bard_SlashingFlourishMelee"
+data "HitCosts" "BardicInspiration:1"
+data "SpellAnimation" "a09de2c8-ec46-4c27-a502-bc92cf293fe5,,;711781fb-5f5a-4b9a-bd8b-e0b4ff9dec46,711781fb-5f5a-4b9a-bd8b-e0b4ff9dec46,711781fb-5f5a-4b9a-bd8b-e0b4ff9dec46;a17a7bf3-7381-4191-83f4-304d37c738e0,a17a7bf3-7381-4191-83f4-304d37c738e0,a17a7bf3-7381-4191-83f4-304d37c738e0;1172e0b6-08d1-4f28-a651-a01681b84ee6,1172e0b6-08d1-4f28-a651-a01681b84ee6,1172e0b6-08d1-4f28-a651-a01681b84ee6;244b53cb-dc0f-4932-afd0-ab19c6df1b34,,;0002afee-5ad9-4109-ae64-9b2571601226,0002afee-5ad9-4109-ae64-9b2571601226,0002afee-5ad9-4109-ae64-9b2571601226;0b07883a-08b8-43b6-ac18-84dc9e84ff50,,;,,;,,"
+data "SpellFlags" "IsHarmful"

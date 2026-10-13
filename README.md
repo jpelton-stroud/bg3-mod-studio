@@ -13,31 +13,36 @@ It has since snowballed into an entire agentic mod studio that runs (almost) com
 
 ---
 
-## Features
+## Features Overview
 
-### Agentic Features
+This project focuses on a conversational, AI First approach to Mod Discovery, Build/Theory Crafting, and Custom Mod Authorship.
 
-- **🎨 Autonomous Mod Authoring (`bg3_create_mod`, `grill-me`)**:
-  Multi-agent pipeline that interviews modders on design intent, structures technical specifications, authors stats and localization XML, and validates file structures against Larian engine standards.
-- **🔍 Intelligent Discovery & Conflict Analysis (`bg3_search_mods`, `bg3_check_mod_conflicts`)**:
-  Natural-language catalog exploration with automated conflict evaluation, load-order checks, and console compatibility verification against your local mod library.
-- **📖 Autonomous Documentation & Cataloging (`bg3_document_mods`, `bg3_update_mod_documentation`)**:
-  Concurrent subagent workflows to download, deconstruct, and document community mods into `mods/<slug>/README.md` and refresh `mods/library.md`.
-- **⚔️ Build Crafting & BiS Theorycrafting (`bg3_create_build_guide`)**:
-  Designs min-maxed Level 20 character build guides integrating modded gear, progression paths, and turn-1 combat sequencing.
+Looking for new mods to spice up your next playthrough? Run `/bg3_search_mods` and tell it roughly what you're up for. Need help optimizing your party's leveling paths and gear loadouts across dozens of installed mods? Launch `/bg3_create_build_guide` and tell it what you want out of the character. Want to create your _own_ mod to customize your character's journey? Start with `/bg3_create_mod`, describe your vision, and see where it takes you!
 
-### Script-Based Features
+For a deep-dive into feature & functionality specifics, as well as example agent prompts, see [docs/FEATURES](docs/FEATURES.md).
 
-- **⚡ Mod Scaffolding (`create_mod_scaffold.py`)**:
-  Generates production-grade Larian v4.8 engine metadata (`meta.lsx`), calculates 64-bit version integers, allocates unique UUIDs and localization handles, and produces compliant 512x512 PNG assets with zero external dependencies.
-- **🔄 Live Game Data Synchronization (`sync_to_game_data.py`)**:
-  Idempotently mirrors mods authored under `my_mods/` directly into your Steam Baldur's Gate 3 `Data/` folder, featuring continuous watch mode (`--watch`) for instant hot-reloading during mod development.
-- **🌐 mod.io Management Suite (`modio_*.py`)**:
-  Command-line tools to search mod.io with console filters (`modio_search.py`), extract and deconstruct PAK files into clean XML/TXT specs (`modio_extract.py`), sync personal subscriptions (`modio_sync.py`), and check for upstream updates (`modio_update.py`).
-- **⚙️ Setup & Environment Wizard (`setup.sh` / `setup_environment.py`)**:
-  Interactive setup wizard to detect game installation paths, validate mod.io API credentials, and configure author environments.
-- **📚 Curated Mod Library (`mods/library.md`)**:
-  Maintains detailed feature documentation and stat specifications for documented community mods across Gear, Spells, Classes, Progression, and Utilities.
+### Mod Discovery & Cataloging
+
+- **Smart mod.io Search & Filtering**: Discover community mods across PC, PS5, and Xbox Series X|S using natural language queries and compatibility filters (`/bg3_search_mods`, `scripts/modio_search.py`).
+- **Automated Unpacking & Asset Extraction**: Download and decompress PAK/ZIP archives on demand, extracting engine XMLs, localization tables, and game stats into human-readable markdown (`/bg3_document_mods`, `scripts/modio_extract.py`).
+- **Master Mod Catalog**: Track installed and candidate mods centrally in `mods/library.md`, maintaining verified feature summaries, UUIDs, and mod.io metadata.
+- **Conflict & Load Order Analysis**: Proactively audit candidate mods for stat collisions, duplicate UUIDs, and console load order dependencies before installing (`/bg3_check_mod_conflicts`).
+- **Upstream Update Tracking**: Check for upstream patches and updates across tracked mods, refreshing documentation without manual data re-entry (`/bg3_update_mod_documentation`, `scripts/modio_update.py`).
+
+### Build Crafting
+
+- **Level 1–20 Progression Design**: Plan complete 20-level multiclass builds leveraging expanded progression frameworks like _UnlockLevelCurve_ (`/bg3_create_build_guide`).
+- **Catalog-Wide BiS Gear Queries**: Query the documented mod library for Best-in-Slot weapons, armor, passives, and spell synergies tailored to specific build archetypes (`/bg3_query_gear`).
+- **Tactical Combat Sequences**: Script turn-by-turn combat openers and action economy allocations (actions, bonus actions, reactions, spell slots) to maximize tactical output.
+- **Sandboxed Build Guides**: Keep build guides organized and isolated in `build_guides/` without cluttering version control or game directories.
+
+### Custom Mod Authorship
+
+- **Autonomous Mod Scaffolding**: Generate engine-compliant Larian packages under `my_mods/<mod_slug>/` with valid UUIDv4 identifiers, bitwise Larian `Version64` calculation, and valid `meta.lsx` descriptors (`/bg3_create_mod`, `scripts/create_mod_scaffold.py`).
+- **Zero-Dependency Asset Generation**: Automatically produce clean 512x512 PNG thumbnails using Python's standard library (`zlib`/`struct`) with no PIL/Pillow dependency required.
+- **Two-Way Live Sync & Hot Reload**: Mirror source mods directly into your game's `Data/` directory with selective idempotency and watcher support for live reload while authoring (`scripts/sync_to_game_data.py`).
+- **Active Load Order Control**: Inspect, activate, deactivate, and reorder mods directly within `modsettings.lsx` without opening external managers (`/bg3_manage_load_order`).
+- **Diagnostics & Toolkit Release Preparation**: Run static validation checks for missing localization or corrupted stat references (`/bg3_diagnose_mod`), then bump versions and prepare release assets for the official Larian Toolkit (`/bg3_release_prep`).
 
 ---
 
@@ -87,7 +92,7 @@ BaldursGate3/
 │   ├── library.md             # Master mod catalog
 │   └── <mod_slug>/            # Whitelisted mod specifications & data
 ├── my_mods/                   # Custom authored mods
-│   └── <ModName>_<UUID>/      # Larian mod package (Projects, Mods, Public, Localization)
+│   └── <mod_slug>/            # Mod package (Projects, Mods, Public, Localization)
 ├── build_guides/              # Sandbox for Level 20 build crafting (ignored by Git)
 ├── scripts/                   # Pure Python automation tools
 ├── .env.example               # Environment variables template
