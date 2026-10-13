@@ -1,0 +1,14 @@
+// ==============================================================================
+// Font & Flourish - Zone Spells
+// Legacy Melee Slashing Flourish Safety Patch
+// Eliminates friendly fire by restricting target condition to Enemy()
+// Expands cone range to 3.0m and angle to 120 degrees
+// ==============================================================================
+
+new entry "Zone_BladeFlourish_Slashing"
+type "SpellData"
+data "SpellType" "Zone"
+using "Zone_BladeFlourish_Slashing"
+data "TargetConditions" "Character() and Enemy() and not Dead()"
+data "Range" "3.0"
+data "Angle" "120"
