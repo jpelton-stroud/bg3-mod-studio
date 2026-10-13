@@ -382,7 +382,8 @@ def main():
     parser.add_argument("--search", help="General search term across name, description, boosts, and passives.")
     parser.add_argument("--rarity", help="Filter by item rarity (e.g. Rare, VeryRare, Legendary).")
     parser.add_argument("--mod", help="Filter by mod slug/name in mods/.")
-    parser.add_argument("--limit", type=int, default=50, help="Maximum number of results to display (default: 50).")
+    parser.add_argument("--limit", type=int, default=10, help="Maximum number of results to display (default: 10).")
+    parser.add_argument("--compact", action="store_true", help="Output compact records omitting raw file paths and empty fields.")
     parser.add_argument("--reindex", action="store_true", help="Force a complete rebuild of the .cache/ index.")
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON.")
 
@@ -406,13 +407,37 @@ def main():
     )
 
     if args.json:
+        if args.compact:
+            clean_results = []
+            for r in results:
+                cr = {
+                    "id": r.get("id"),
+                    "display_name": r.get("display_name"),
+                    "slot": r.get("slot"),
+                    "rarity": r.get("rarity"),
+                    "mod": r.get("mod"),
+                    "boosts": r.get("boosts"),
+                    "passives": r.get("passives"),
+                }
+                if r.get("damage"):
+                    cr["damage"] = r["damage"]
+                if r.get("damage_type"):
+                    cr["damage_type"] = r["damage_type"]
+                if r.get("ac"):
+                    cr["ac"] = r["ac"]
+                clean_results.append(cr)
+            out_results = clean_results
+        else:
+            out_results = results
+
         print(json.dumps({
-            "count": len(results),
+            "count": len(out_results),
             "total_indexed": len(entries),
             "load_time_ms": round(load_time_ms, 2),
-            "results": results,
+            "results": out_results,
         }, indent=2))
         return 0
+
 
     print(f"BG3 Community Mod Database ({len(entries)} indexed entries, loaded in {load_time_ms:.1f}ms)")
     print("=" * 80)

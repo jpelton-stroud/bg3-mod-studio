@@ -68,7 +68,7 @@ For each mod in the batch, the Orchestrator launches an individual subagent usin
       "Role": "Mod Documenter - <Mod_Name>",
       "Prompt": "<Subagent Prompt Below>",
       "Workspace": "inherit",
-      "Model": "inherit"
+      "Model": "flash"
     }
   ]
 }

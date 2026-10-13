@@ -86,7 +86,7 @@ For each mod in the target batch, launch an individual subagent using `invoke_su
       "Role": "Mod Updater - <Mod_Slug>",
       "Prompt": "<Subagent Prompt Below>",
       "Workspace": "inherit",
-      "Model": "inherit"
+      "Model": "flash"
     }
   ]
 }

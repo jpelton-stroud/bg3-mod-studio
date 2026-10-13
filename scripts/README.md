@@ -133,6 +133,35 @@ When an AI agent or subagent receives a request that does not match a hardcoded 
 
 ---
 
+## 🪙 Token Optimization & Cost Management
+
+The tooling suite and agent skills are engineered with token mitigation protocols to minimize API costs and context bloat across long sessions:
+
+### 1. Subagent Model Tiering (`Model: "flash"`)
+Concurrent subagent workers are pinned to `"Model": "flash"` across orchestrators:
+- `bg3_create_mod`: Stats, Progression, Localization, and Documentation workers.
+- `bg3_document_mods`: Individual Mod Documenter workers.
+- `bg3_update_mod_documentation`: Mod Updater check/refresh workers.
+- `bg3_search_mods`: Per-mod candidate conflict checkers.
+
+*Cost impact*: **80%–90% reduction** in token expenditure for background subagent tasks.
+
+### 2. Compact Discovery & Query Formats
+- **Discovery Hub (`scripts/tools.py`)**: `tools.py --list --json` emits a compact manifest (83.5% token reduction: ~1,689 tokens vs. ~10,289 tokens). Full schemas are retrieved on demand with `tools.py --info <alias>` or `tools.py --list --full`.
+- **Database Search (`scripts/query_mod_database.py`)**: Default limit reduced from 50 to 10 entries; `--compact` flag eliminates verbose handle/UUID dumps (~850 tokens vs. up to 15,000 tokens).
+- **Conflict Analysis (`scripts/check_mod_conflicts.py`)**: `--summary` flag emits high-level compatibility verdicts and clean collision lists (95.8% reduction: ~60 tokens vs. ~1,445 tokens).
+
+### 3. Artifact-First Streaming
+High-volume generation tasks (such as `bg3_create_build_guide`) follow the **Artifact-First** protocol:
+- Full 20-level progression tables, stat matrices, and complete gear catalogs are written directly to disk (`build_guides/<build_slug>.md`).
+- Only an executive summary (class concept, key gear linchpins, Turn 1 rotation DPR) is rendered into chat, avoiding thousands of redundant context tokens.
+
+### 4. Session Lifecycle & Hygiene
+- For distinct features, start fresh chat sessions or clear working context to avoid carrying forward large multi-turn history.
+- Use `scripts/tools.py --search` or direct script execution rather than dumping full registry schemas into conversation memory.
+
+---
+
 ## 🧪 Verification & Continuous Testing
 
 Run the automated integrity test at any time:

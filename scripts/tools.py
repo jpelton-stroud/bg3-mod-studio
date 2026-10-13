@@ -297,6 +297,7 @@ Examples:
     parser.add_argument("--info", type=str, help="Display detailed flags, examples, and schema for a specific tool")
     parser.add_argument("--verify", action="store_true", help="Run automated registry integrity verification test")
     parser.add_argument("--audit-skills", action="store_true", help="Audit agent skills in .agents/skills/ for registry compliance and tool discovery")
+    parser.add_argument("--full", action="store_true", help="Include full schemas, flags, and examples when listing tools (default: compact manifest)")
     parser.add_argument("--json", action="store_true", help="Emit output formatted as JSON")
 
     # Dispatch subcommand
@@ -431,10 +432,23 @@ Examples:
         return
 
     # 5. List
-    if args.list or not any([args.search, args.info, args.verify, args.categories]):
+    if args.list or not any([args.search, args.info, args.verify, args.audit_skills, args.categories]):
         tools = list_tools(registry, args.category)
         if args.json:
-            print(json.dumps(tools, indent=2))
+            if args.full:
+                print(json.dumps(tools, indent=2))
+            else:
+                compact_manifest = [
+                    {
+                        "name": t.get("name"),
+                        "command": t.get("command"),
+                        "category": t.get("category"),
+                        "summary": t.get("summary"),
+                        "cli_usage": t.get("cli_usage"),
+                    }
+                    for t in tools
+                ]
+                print(json.dumps(compact_manifest, indent=2))
         else:
             cat_label = f" [{args.category}]" if args.category else ""
             print(f"\n🧰 BG3 Mod Studio Tools{cat_label} ({len(tools)} available):\n")

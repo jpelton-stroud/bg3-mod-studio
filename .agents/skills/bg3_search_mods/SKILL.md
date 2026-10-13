@@ -107,7 +107,7 @@ Spawn one subagent for each selected mod to check against [`mods/library.md`](fi
       "Role": "Conflict Checker - <Mod_Slug>",
       "Prompt": "Check compatibility for BG3 mod '<MOD_SLUG>' on platform '<PLATFORM>'.\n1. Follow instructions in skill bg3_check_mod_conflicts (Mode 1: Candidate vs. Existing Library).\n2. Confirm the mod is not already tracked in mods/library.md.\n3. Check for conflicts with mods tracked in mods/library.md, taking console load order constraints into account.\n4. Return status: 'No conflicts found with existing mods' OR 'Possible conflict found: <Tracked Mod Name> - <Brief Description>'.",
       "Workspace": "inherit",
-      "Model": "inherit"
+      "Model": "flash"
     }
   ]
 }
@@ -122,9 +122,10 @@ In the same `invoke_subagent` call, launch an additional subagent to analyze cro
   "Role": "Batch Conflict Checker - Cross Candidates",
   "Prompt": "Check compatibility between the following candidate mods on platform '<PLATFORM>': <LIST_OF_CANDIDATE_SLUGS>.\n1. Follow instructions in skill bg3_check_mod_conflicts (Mode 2: Cross-Candidate Batch Conflicts).\n2. Compare candidates pairwise for overlapping progression overrides, duplicate assets, and console load order dependencies.\n3. Return status: 'No conflicts found between candidate mods' OR 'Possible conflict found: <Candidate 1> vs <Candidate 2> - <Brief Description>'.",
   "Workspace": "inherit",
-  "Model": "inherit"
+  "Model": "flash"
 }
 ```
+
 
 ---
 
