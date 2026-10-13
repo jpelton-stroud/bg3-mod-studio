@@ -1,18 +1,18 @@
 # Eldritch Apotheosis
 
-[![Mod UUID](https://img.shields.io/badge/UUID-bdfd89d8--be6b--2bb0--f2e9--9588a3f5e0ab-blue.svg)](file:///home/jpstroud/projects/BaldursGate3/my_mods/eldritch-apotheosis/Mods/EldritchApotheosis_bdfd89d8-be6b-2bb0-f2e9-9588a3f5e0ab/meta.lsx)
-[![Version](https://img.shields.io/badge/Version-1.0.0.0-green.svg)](file:///home/jpstroud/projects/BaldursGate3/my_mods/eldritch-apotheosis/Projects/EldritchApotheosis_bdfd89d8-be6b-2bb0-f2e9-9588a3f5e0ab/meta.lsx)
+[![Mod UUID](https://img.shields.io/badge/UUID-e1d817c0--a907--4e05--9b24--7f83a005e0ab-blue.svg)](file:///home/jpstroud/projects/BaldursGate3/my_mods/eldritch-apotheosis/Mods/EldritchApotheosis_e1d817c0-a907-4e05-9b24-7f83a005e0ab/meta.lsx)
+[![Version](https://img.shields.io/badge/Version-1.0.0.0-green.svg)](file:///home/jpstroud/projects/BaldursGate3/my_mods/eldritch-apotheosis/Projects/EldritchApotheosis_e1d817c0-a907-4e05-9b24-7f83a005e0ab/meta.lsx)
 [![Author](https://img.shields.io/badge/Author-MTGHillGiant-purple.svg)](#)
 [![Target](https://img.shields.io/badge/Target-BG3%20Patch%207%20%2F%20Patch%208%20Toolkit-orange.svg)](#installation--toolkit-sync)
 
 **Mod Display Name**: Eldritch Apotheosis  
 **Module Name**: `EldritchApotheosis`  
 **Folder Name**: `eldritch-apotheosis`  
-**Larian Module Folder**: `EldritchApotheosis_bdfd89d8-be6b-2bb0-f2e9-9588a3f5e0ab`  
-**Module UUID**: `bdfd89d8-be6b-2bb0-f2e9-9588a3f5e0ab`  
+**Larian Module Folder**: `EldritchApotheosis_e1d817c0-a907-4e05-9b24-7f83a005e0ab`  
+**Module UUID**: `e1d817c0-a907-4e05-9b24-7f83a005e0ab`  
 **Author**: `MTGHillGiant`  
 **Version**: `1.0.0.0`  
-**Dependencies**: `GustavDev` (`28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8`)  
+**Dependencies**: `GustavX` (`cb555efe-2d9e-131f-8195-a89329d218ea`)  
 
 ---
 
@@ -177,17 +177,19 @@ python3 scripts/sync_to_game_data.py --mods eldritch-apotheosis --watch
 
 ```text
 my_mods/eldritch-apotheosis/
-├── Projects/EldritchApotheosis_bdfd89d8-be6b-2bb0-f2e9-9588a3f5e0ab/
+├── Projects/EldritchApotheosis_e1d817c0-a907-4e05-9b24-7f83a005e0ab/
 │   ├── meta.lsx                                # Toolkit project metadata
 │   └── thumbnail.png                           # Toolkit project icon (2.6 MB)
-├── Mods/EldritchApotheosis_bdfd89d8-be6b-2bb0-f2e9-9588a3f5e0ab/
+├── Mods/EldritchApotheosis_e1d817c0-a907-4e05-9b24-7f83a005e0ab/
 │   ├── meta.lsx                                # Engine module definition & UUID
 │   └── mod_publish_logo.png                    # mod.io / in-game mod manager logo (2.6 MB)
-├── Public/EldritchApotheosis_bdfd89d8-be6b-2bb0-f2e9-9588a3f5e0ab/
+├── Public/EldritchApotheosis_e1d817c0-a907-4e05-9b24-7f83a005e0ab/
 │   ├── Levelmaps/
 │   │   └── LevelMapValues.lsx                  # 2-10 Beams & d4-d12 damage dice LevelMaps
 │   └── Stats/Generated/Data/
 │       └── Spell_Projectile.txt                # Eldritch Blast projectile override & CHA scaling
+├── Editor/Mods/EldritchApotheosis_e1d817c0-a907-4e05-9b24-7f83a005e0ab/
+│   └── Assets/                                 # Editor assets scaffolding
 ├── Localization/English/
 │   └── EldritchApotheosis.xml                  # English localization strings
 ├── thumbnail.png                               # Mod directory preview thumbnail (2.6 MB)

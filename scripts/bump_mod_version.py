@@ -75,13 +75,23 @@ def find_mod_directories(mod_query: str = "") -> list[Path]:
 
 
 def get_meta_files(mod_dir: Path) -> list[Path]:
-    """Find meta.lsx files in Projects/ and Mods/ subdirectories."""
+    """Find meta.lsx files in Mods/ (and legacy Projects/ with ModuleInfo) to update Version64."""
     files = []
-    for sub in ["Projects", "Mods"]:
-        sub_dir = mod_dir / sub
-        if sub_dir.exists():
-            for p in sub_dir.glob("*/meta.lsx"):
-                files.append(p)
+    # Always include runtime module descriptors in Mods/
+    mods_dir = mod_dir / "Mods"
+    if mods_dir.exists():
+        for p in mods_dir.glob("*/meta.lsx"):
+            files.append(p)
+
+    # Only include Projects/ if it contains ModuleInfo (legacy scaffold)
+    proj_dir = mod_dir / "Projects"
+    if proj_dir.exists():
+        for p in proj_dir.glob("*/meta.lsx"):
+            try:
+                if '<node id="ModuleInfo">' in p.read_text(encoding="utf-8"):
+                    files.append(p)
+            except Exception:
+                pass
     return files
 
 
