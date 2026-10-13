@@ -21,6 +21,7 @@ import os
 import shutil
 import sys
 import time
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
@@ -86,6 +87,56 @@ def copy_file_if_different(src: Path, dst: Path, dry_run: bool = False) -> str:
     return action
 
 
+BUILTIN_MODULES = {"Gustav", "GustavDev", "GustavX", "Shared", "SharedDev", "Engine", "PhotoMode"}
+
+CUSTOM_STUDIO_MODS = [
+    "ArcaneProgression",
+    "EldritchApotheosis",
+    "EldritchAscension",
+    "FontAndFlourish",
+    "PaladinsCall",
+]
+
+
+def check_mod_dependencies(mod_path: Path, data_dir: Path) -> list:
+    """
+    Validates that all dependencies declared in meta.lsx are resolvable in the game environment.
+    Returns list of missing dependency descriptions.
+    """
+    missing = []
+    meta_files = list(mod_path.glob("Mods/*/meta.lsx"))
+    if not meta_files:
+        return missing
+
+    appdata_mods = Path(os.environ.get("BG3_USER_MODS_DIR") or "/mnt/c/Users/jpstr/AppData/Local/Larian Studios/Baldur's Gate 3/Mods")
+
+    for meta_file in meta_files:
+        try:
+            tree = ET.parse(meta_file)
+            root = tree.getroot()
+            dep_nodes = root.findall(".//node[@id='Dependencies']//node[@id='ModuleShortDesc']")
+            for dep in dep_nodes:
+                name_attr = dep.find("attribute[@id='Name']")
+                folder_attr = dep.find("attribute[@id='Folder']")
+                dep_name = name_attr.get("value") if name_attr is not None else ""
+                dep_folder = folder_attr.get("value") if folder_attr is not None else dep_name
+                if not dep_name or dep_name in BUILTIN_MODULES:
+                    continue
+
+                in_data_mods = (data_dir / "Mods" / dep_folder).is_dir()
+                in_data_pak = (data_dir / f"{dep_name}.pak").is_file() or (data_dir / f"{dep_folder}.pak").is_file()
+                in_appdata_pak = False
+                if appdata_mods.is_dir():
+                    in_appdata_pak = any(dep_name.lower() in p.name.lower() for p in appdata_mods.glob("*.pak"))
+
+                if not (in_data_mods or in_data_pak or in_appdata_pak):
+                    missing.append(f"{dep_name} (folder: {dep_folder})")
+        except Exception as e:
+            print(f"  ⚠️ Warning: Failed to parse dependencies from {meta_file}: {e}")
+
+    return missing
+
+
 def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False) -> dict:
     """
     Synchronizes a single mod folder into Data/.
@@ -94,8 +145,16 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False) -> dict:
     mod_name = mod_path.name
     print(f"\n📦 Processing mod: {mod_name} ({mod_path})")
 
-    # 1. Detect subdirectories: Projects, Mods, Public, Localization
-    subdirs = ["Projects", "Mods", "Public"]
+    # Check dependencies before syncing
+    missing_deps = check_mod_dependencies(mod_path, data_dir)
+    if missing_deps:
+        print(f"  ⚠️  WARNING: Mod '{mod_name}' has unresolved dependencies:")
+        for m in missing_deps:
+            print(f"      - {m}")
+        print("      Opening this mod in the Toolkit will cause a SILENT CRASH unless these dependencies are installed!")
+
+    # 1. Detect subdirectories: Projects, Mods, Public, Editor
+    subdirs = ["Projects", "Mods", "Public", "Editor"]
     for subdir in subdirs:
         src_sub = mod_path / subdir
         if not src_sub.exists():
@@ -123,41 +182,31 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False) -> dict:
                     stats["unchanged"] += 1
 
     # 2. Handle Localization:
-    # Source is typically my_mods/<mod>/Localization/English/<ModName>.xml
+    # Strictly mod-local: Data/Mods/<ModFolder_UUID>/Localization/<rel>
+    # Note: NEVER write loose XMLs to Data/Localization/English/ or Data/Mods/.../Localization/
+    # because Larian's TranslatedStringRepository::LoadFromXmlFile crashes during module unload
+    # with EXCEPTION_ACCESS_VIOLATION (null FileSystem pointer at offset 0x70).
+    # Only compiled binary .loca files should be copied.
     src_loc = mod_path / "Localization"
     if src_loc.exists():
-        # Destination A: Data/Localization/...
-        dst_loc_a = data_dir / "Localization"
-        for root, dirs, files in os.walk(src_loc):
-            rel_root = Path(root).relative_to(src_loc)
-            for file in files:
-                if file.endswith(".xml") or file.endswith(".loca"):
-                    src_file = Path(root) / file
-                    # A. Data/Localization/<rel>
-                    dst_file_a = dst_loc_a / rel_root / file
-                    action_a = copy_file_if_different(src_file, dst_file_a, dry_run)
-                    if action_a == "created":
-                        stats["created"] += 1
-                        print(f"  [+] Create: {dst_file_a.relative_to(data_dir)}")
-                    elif action_a == "updated":
-                        stats["updated"] += 1
-                        print(f"  [*] Update: {dst_file_a.relative_to(data_dir)}")
-                    else:
-                        stats["unchanged"] += 1
-
-                    # B. Also replicate into Data/Mods/<ModFolder_UUID>/Localization/<rel> if Mods/<UUID> exists
-                    src_mods = mod_path / "Mods"
-                    if src_mods.exists():
-                        for mod_uuid_dir in src_mods.iterdir():
-                            if mod_uuid_dir.is_dir():
-                                dst_file_b = data_dir / "Mods" / mod_uuid_dir.name / "Localization" / rel_root / file
-                                action_b = copy_file_if_different(src_file, dst_file_b, dry_run)
-                                if action_b == "created":
+        src_mods = mod_path / "Mods"
+        if src_mods.exists():
+            for mod_uuid_dir in src_mods.iterdir():
+                if mod_uuid_dir.is_dir():
+                    dst_loc_mod = data_dir / "Mods" / mod_uuid_dir.name / "Localization"
+                    for root, dirs, files in os.walk(src_loc):
+                        rel_root = Path(root).relative_to(src_loc)
+                        for file in files:
+                            if file.endswith(".loca"):
+                                src_file = Path(root) / file
+                                dst_file = dst_loc_mod / rel_root / file
+                                action = copy_file_if_different(src_file, dst_file, dry_run)
+                                if action == "created":
                                     stats["created"] += 1
-                                    print(f"  [+] Create (mod-local): {dst_file_b.relative_to(data_dir)}")
-                                elif action_b == "updated":
+                                    print(f"  [+] Create (mod-local): {dst_file.relative_to(data_dir)}")
+                                elif action == "updated":
                                     stats["updated"] += 1
-                                    print(f"  [*] Update (mod-local): {dst_file_b.relative_to(data_dir)}")
+                                    print(f"  [*] Update (mod-local): {dst_file.relative_to(data_dir)}")
                                 else:
                                     stats["unchanged"] += 1
 
@@ -205,7 +254,7 @@ def clean_legacy(data_dir: Path, dry_run: bool = False) -> int:
     removed_count = 0
     print("\n🧹 Scanning for legacy mod folders and files in Data/...")
 
-    for subdir_name in ["Projects", "Mods", "Public"]:
+    for subdir_name in ["Projects", "Mods", "Public", "Editor/Mods"]:
         parent = data_dir / subdir_name
         if not parent.exists():
             continue
@@ -238,12 +287,75 @@ def clean_legacy(data_dir: Path, dry_run: bool = False) -> int:
     return removed_count
 
 
+def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list = None) -> int:
+    """
+    Purges custom studio mods from Data/ without touching eldritch-blast baseline or base game files.
+    """
+    removed_count = 0
+    keep_set = set(keep_mods or [])
+    print("\n🧹 Scanning for custom studio mod folders/files in Data/...")
+
+    for subdir_name in ["Projects", "Mods", "Public", "Editor/Mods"]:
+        parent = data_dir / subdir_name
+        if not parent.exists():
+            continue
+        for item in parent.iterdir():
+            if "eldritch-blast" in item.name.lower():
+                continue
+            if any(item.name.startswith(p) for p in CUSTOM_STUDIO_MODS):
+                if any(item.name.startswith(k) for k in keep_set):
+                    continue
+                removed_count += 1
+                if dry_run:
+                    print(f"  [-] Custom purge (preview): {item.relative_to(data_dir)}")
+                else:
+                    if item.is_dir():
+                        shutil.rmtree(item)
+                    else:
+                        item.unlink()
+                    print(f"  [-] Custom purged: {item.relative_to(data_dir)}")
+
+    # Check and clean loose XMLs in Data/Localization/English/
+    loc_dir = data_dir / "Localization" / "English"
+    if loc_dir.exists():
+        for item in loc_dir.iterdir():
+            if "eldritch-blast" in item.name.lower():
+                continue
+            if any(item.name.startswith(p) for p in CUSTOM_STUDIO_MODS):
+                removed_count += 1
+                if dry_run:
+                    print(f"  [-] Custom localization purge (preview): {item.relative_to(data_dir)}")
+                else:
+                    item.unlink()
+                    print(f"  [-] Custom localization purged: {item.relative_to(data_dir)}")
+
+    # Check and clean any loose XMLs in Data/Mods/*/Localization
+    mods_dir = data_dir / "Mods"
+    if mods_dir.exists():
+        for m_folder in mods_dir.iterdir():
+            if m_folder.is_dir():
+                m_loc = m_folder / "Localization"
+                if m_loc.exists():
+                    for xml_file in list(m_loc.rglob("*.xml")):
+                        removed_count += 1
+                        if dry_run:
+                            print(f"  [-] Loose XML purge (preview): {xml_file.relative_to(data_dir)}")
+                        else:
+                            xml_file.unlink()
+                            print(f"  [-] Loose XML purged: {xml_file.relative_to(data_dir)}")
+
+    if removed_count == 0:
+        print("  No custom studio mod files found to clean.")
+    return removed_count
+
+
 def run_sync(
     source_dir: Path,
     data_dir: Path,
     mod_filter: list = None,
     dry_run: bool = False,
     clean: bool = False,
+    clean_custom: bool = False,
     bump_build: bool = False,
 ):
     if not source_dir.exists():
@@ -264,6 +376,9 @@ def run_sync(
 
     if clean:
         clean_legacy(data_dir, dry_run)
+
+    if clean_custom:
+        clean_custom_mods(data_dir, dry_run)
 
     # Discover mods
     mod_folders = [d for d in source_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
@@ -298,11 +413,11 @@ def run_sync(
     print("=" * 40 + "\n")
 
 
-def watch_and_sync(source_dir: Path, data_dir: Path, mod_filter: list = None, interval: float = 2.0, clean: bool = False):
+def watch_and_sync(source_dir: Path, data_dir: Path, mod_filter: list = None, interval: float = 2.0, clean: bool = False, clean_custom: bool = False):
     print(f"👀 Watching {source_dir} for changes every {interval}s... Press Ctrl+C to stop.")
     try:
         while True:
-            run_sync(source_dir, data_dir, mod_filter, dry_run=False, clean=clean)
+            run_sync(source_dir, data_dir, mod_filter, dry_run=False, clean=clean, clean_custom=clean_custom)
             time.sleep(interval)
     except KeyboardInterrupt:
         print("\nWatcher stopped.")
@@ -347,6 +462,11 @@ def main():
         help="Disable automatic cleaning of legacy mod folders/files",
     )
     parser.add_argument(
+        "--clean-custom",
+        action="store_true",
+        help="Purge all custom studio mods from Steam Data (protects base game and eldritch-blast)",
+    )
+    parser.add_argument(
         "--bump-build",
         action="store_true",
         help="Automatically increment build number (+1) in meta.lsx before syncing",
@@ -366,7 +486,7 @@ def main():
     args = parser.parse_args()
 
     if args.watch:
-        watch_and_sync(args.source_dir, args.data_dir, args.mods, args.interval, clean=args.clean_legacy)
+        watch_and_sync(args.source_dir, args.data_dir, args.mods, args.interval, clean=args.clean_legacy, clean_custom=args.clean_custom)
     else:
         run_sync(
             args.source_dir,
@@ -374,6 +494,7 @@ def main():
             args.mods,
             args.dry_run,
             clean=args.clean_legacy,
+            clean_custom=args.clean_custom,
             bump_build=args.bump_build,
         )
 

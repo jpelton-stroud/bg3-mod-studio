@@ -80,30 +80,55 @@ class ModValidator:
                     self.add_error(f"Malformed XML in '{rel}': line {e.position[0]}, col {e.position[1]}: {e}")
 
     def parse_meta(self, meta_file: Path) -> dict:
-        data = {"uuid": "", "version64": 0, "name": "", "author": "", "folder": ""}
+        data = {
+            "uuid": "",
+            "version64": 0,
+            "name": "",
+            "author": "",
+            "folder": "",
+            "module": "",
+            "type": "",
+            "is_project": False,
+        }
         if not meta_file.is_file():
             return data
         try:
             content = meta_file.read_text(encoding="utf-8")
-            mod_info = re.search(r'<node\s+id="ModuleInfo">(.*?)</node>', content, re.DOTALL)
-            target = mod_info.group(1) if mod_info else content
+            if '<region id="MetaData">' in content:
+                data["is_project"] = True
+                name = re.search(r'<attribute\s+id="Name"\s+type="LSString"\s+value="([^"]*)"', content)
+                module = re.search(r'<attribute\s+id="Module"\s+type="LSString"\s+value="([^"]*)"', content)
+                uuid_val = re.search(r'<attribute\s+id="UUID"\s+type="LSString"\s+value="([^"]*)"', content)
+                mod_type = re.search(r'<attribute\s+id="Type"\s+type="LSString"\s+value="([^"]*)"', content)
+                if name:
+                    data["name"] = name.group(1)
+                if module:
+                    data["module"] = module.group(1)
+                    data["uuid"] = module.group(1)
+                if uuid_val:
+                    data["project_uuid"] = uuid_val.group(1)
+                if mod_type:
+                    data["type"] = mod_type.group(1)
+            else:
+                mod_info = re.search(r'<node\s+id="ModuleInfo">(.*?)</node>', content, re.DOTALL)
+                target = mod_info.group(1) if mod_info else content
 
-            name = re.search(r'<attribute\s+id="Name"\s+type="LSString"\s+value="([^"]*)"', target)
-            author = re.search(r'<attribute\s+id="Author"\s+type="LSString"\s+value="([^"]*)"', target)
-            uuid_val = re.search(r'<attribute\s+id="UUID"\s+type="FixedString"\s+value="([^"]*)"', target)
-            v64 = re.search(r'<attribute\s+id="Version64"\s+type="int64"\s+value="(\d+)"', target)
-            folder = re.search(r'<attribute\s+id="Folder"\s+type="LSString"\s+value="([^"]*)"', target)
+                name = re.search(r'<attribute\s+id="Name"\s+type="LSString"\s+value="([^"]*)"', target)
+                author = re.search(r'<attribute\s+id="Author"\s+type="LSString"\s+value="([^"]*)"', target)
+                uuid_val = re.search(r'<attribute\s+id="UUID"\s+type="(?:FixedString|guid|LSString)"\s+value="([^"]*)"', target)
+                v64 = re.search(r'<attribute\s+id="Version64"\s+type="int64"\s+value="(\d+)"', target)
+                folder = re.search(r'<attribute\s+id="Folder"\s+type="LSString"\s+value="([^"]*)"', target)
 
-            if name:
-                data["name"] = name.group(1)
-            if author:
-                data["author"] = author.group(1)
-            if uuid_val:
-                data["uuid"] = uuid_val.group(1)
-            if v64:
-                data["version64"] = int(v64.group(1))
-            if folder:
-                data["folder"] = folder.group(1)
+                if name:
+                    data["name"] = name.group(1)
+                if author:
+                    data["author"] = author.group(1)
+                if uuid_val:
+                    data["uuid"] = uuid_val.group(1)
+                if v64:
+                    data["version64"] = int(v64.group(1))
+                if folder:
+                    data["folder"] = folder.group(1)
         except Exception as e:
             self.add_error(f"Failed to read metadata from {meta_file.name}: {e}")
         return data
@@ -122,24 +147,45 @@ class ModValidator:
         self.meta_projects = self.parse_meta(proj_metas[0])
         self.meta_mods = self.parse_meta(mods_metas[0])
 
-        if not self.meta_projects["uuid"]:
-            self.add_error(f"Projects meta.lsx is missing UUID attribute.")
         if not self.meta_mods["uuid"]:
-            self.add_error(f"Mods meta.lsx is missing UUID attribute.")
+            self.add_error("Mods meta.lsx is missing UUID attribute.")
 
-        if self.meta_projects["uuid"] and self.meta_mods["uuid"]:
-            if self.meta_projects["uuid"] != self.meta_mods["uuid"]:
+        if self.meta_projects["is_project"]:
+            # Official Toolkit Project schema (<region id="MetaData">)
+            if not self.meta_projects.get("module"):
+                self.add_error("Projects meta.lsx is missing Module attribute.")
+            elif self.meta_mods["uuid"] and self.meta_projects["module"] != self.meta_mods["uuid"]:
+                self.add_error(
+                    f"Module UUID mismatch between Projects ({self.meta_projects['module']}) and Mods ({self.meta_mods['uuid']})."
+                )
+            if not self.meta_projects["name"]:
+                self.add_error("Mod Name in Projects meta.lsx is empty.")
+            elif self.meta_mods["name"] and self.meta_projects["name"] != self.meta_mods["name"]:
+                self.add_error(
+                    f"Mod Name mismatch between Projects ({self.meta_projects['name']}) and Mods ({self.meta_mods['name']})."
+                )
+
+            # Check for <node id="Categories"/> required by Toolkit ls::DefaultObjectVisitor
+            proj_content = proj_metas[0].read_text(encoding="utf-8", errors="ignore")
+            if '<node id="Categories"' not in proj_content:
+                self.add_error(
+                    "Projects meta.lsx is missing '<node id=\"Categories\"/>', which causes Toolkit to fail loading the project."
+                )
+        else:
+            # Legacy Config/ModuleInfo schema
+            self.add_warning("Projects meta.lsx uses legacy Config schema instead of official Toolkit MetaData schema.")
+            if not self.meta_projects["uuid"]:
+                self.add_error("Projects meta.lsx is missing UUID attribute.")
+            elif self.meta_mods["uuid"] and self.meta_projects["uuid"] != self.meta_mods["uuid"]:
                 self.add_error(
                     f"UUID mismatch between Projects ({self.meta_projects['uuid']}) and Mods ({self.meta_mods['uuid']})."
                 )
-
-        if self.meta_projects["version64"] != self.meta_mods["version64"]:
-            self.add_error(
-                f"Version64 mismatch between Projects ({self.meta_projects['version64']}) and Mods ({self.meta_mods['version64']})."
-            )
-
-        if not self.meta_projects["name"]:
-            self.add_error("Mod Name in Projects meta.lsx is empty.")
+            if self.meta_projects["version64"] != self.meta_mods["version64"]:
+                self.add_error(
+                    f"Version64 mismatch between Projects ({self.meta_projects['version64']}) and Mods ({self.meta_mods['version64']})."
+                )
+            if not self.meta_projects["name"]:
+                self.add_error("Mod Name in Projects meta.lsx is empty.")
 
     def validate_localization_handles(self):
         # 1. Collect all defined handles from Localization/English/*.xml
@@ -224,17 +270,17 @@ class ModValidator:
                     return
                 # IHDR width, height are bytes 16..24
                 width, height = struct.unpack(">II", header[16:24])
-                if width != 512 or height != 512:
+                if width != height or width not in (512, 1024):
                     self.add_error(
-                        f"{label} ({img_path.name}) must be 512x512 pixels (found {width}x{height})."
+                        f"{label} ({img_path.name}) must be square (512x512 or 1024x1024) pixels (found {width}x{height})."
                     )
         except Exception as e:
             self.add_error(f"Failed to validate PNG {img_path.name}: {e}")
 
     def validate_assets(self):
         # Larian standard:
-        # Projects/<ModFolder>/thumbnail.png (512x512)
-        # Mods/<ModFolder>/mod_publish_logo.png (512x512)
+        # Projects/<ModFolder>/thumbnail.png (512x512 or 1024x1024)
+        # Mods/<ModFolder>/mod_publish_logo.png (512x512 or 1024x1024)
         for d in (self.mod_dir / "Projects").glob("*"):
             if d.is_dir():
                 self.validate_image_asset(d / "thumbnail.png", "Projects thumbnail")
@@ -258,8 +304,8 @@ class ModValidator:
         return {
             "mod_name": self.mod_dir.name,
             "status": status,
-            "uuid": self.meta_projects.get("uuid", ""),
-            "version64": self.meta_projects.get("version64", 0),
+            "uuid": self.meta_mods.get("uuid", "") or self.meta_projects.get("module", "") or self.meta_projects.get("uuid", ""),
+            "version64": self.meta_mods.get("version64", 0) or self.meta_projects.get("version64", 0),
             "errors": self.errors,
             "warnings": self.warnings,
         }
@@ -269,10 +315,14 @@ def check_uuid_uniqueness(mod_dirs: list[Path]) -> list[str]:
     seen: dict[str, str] = {}
     dupes = []
     for md in mod_dirs:
-        for mf in md.glob("Projects/*/meta.lsx"):
+        # Check Mods/*/meta.lsx first, fallback to Projects/*/meta.lsx
+        target_metas = list(md.glob("Mods/*/meta.lsx")) or list(md.glob("Projects/*/meta.lsx"))
+        for mf in target_metas:
             try:
                 content = mf.read_text(encoding="utf-8")
-                m = re.search(r'<attribute\s+id="UUID"\s+type="FixedString"\s+value="([^"]+)"', content)
+                mod_info = re.search(r'<node\s+id="ModuleInfo">(.*?)</node>', content, re.DOTALL)
+                target = mod_info.group(1) if mod_info else content
+                m = re.search(r'<attribute\s+id="(?:UUID|Module)"\s+type="(?:FixedString|guid|LSString)"\s+value="([^"]+)"', target)
                 if m:
                     u = m.group(1)
                     if u in seen:

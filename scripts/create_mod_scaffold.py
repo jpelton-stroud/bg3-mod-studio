@@ -25,8 +25,16 @@ import zlib
 from pathlib import Path
 
 
-# Known common dependencies for BG3
+# Known common dependencies for BG3 (Patch 8)
 KNOWN_DEPENDENCIES = {
+    "GustavX": {
+        "Folder": "GustavX",
+        "MD5": "ef3fcba3f3684b3088ad1f9874d4957c",
+        "Name": "GustavX",
+        "PublishHandle": 0,
+        "UUID": "cb555efe-2d9e-131f-8195-a89329d218ea",
+        "Version64": 145241946983300916,
+    },
     "GustavDev": {
         "Folder": "GustavDev",
         "MD5": "33c1655f7ae3559b579ff3b9d2c45413",
@@ -109,6 +117,36 @@ def generate_png_bytes(width: int = 512, height: int = 512, r: int = 45, g: int 
     iend = make_chunk(b"IEND", b"")
 
     return header + ihdr + idat + iend
+
+
+def build_project_meta_lsx_content(
+    mod_name: str,
+    mod_uuid: str,
+    project_uuid: str,
+    game_project: str = "Gustav",
+    mod_type: str = "Add-on",
+) -> str:
+    """
+    Builds the official Baldur's Gate 3 Toolkit project meta.lsx (<region id="MetaData">).
+    This descriptor is scanned by the Toolkit Project Browser to discover editable projects.
+    """
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="8" revision="0" build="500"/>
+    <region id="MetaData">
+        <node id="root">
+            <attribute id="GameProject" type="LSString" value="{game_project}"/>
+            <attribute id="Module" type="LSString" value="{mod_uuid}"/>
+            <attribute id="Name" type="LSString" value="{mod_name}"/>
+            <attribute id="Type" type="LSString" value="{mod_type}"/>
+            <attribute id="UUID" type="LSString" value="{project_uuid}"/>
+            <children>
+                <node id="Categories"/>
+            </children>
+        </node>
+    </region>
+</save>
+"""
 
 
 def build_meta_lsx_content(
@@ -281,11 +319,12 @@ def scaffold_mod(
     v_parts = [int(p) for p in (version_str.split(".") + [0, 0, 0, 0])[:4]]
     version64 = calculate_version64(*v_parts)
 
-    # Dependencies
-    resolved_deps = [KNOWN_DEPENDENCIES["GustavDev"]]
+    # Dependencies: default to GustavX (Patch 8 base game module) unless GustavDev requested
+    base_dep = "GustavDev" if (dependencies and "GustavDev" in dependencies) else "GustavX"
+    resolved_deps = [KNOWN_DEPENDENCIES[base_dep]]
     if dependencies:
         for dep in dependencies:
-            if dep == "GustavDev":
+            if dep in ("GustavX", "GustavDev"):
                 continue
             if dep in KNOWN_DEPENDENCIES:
                 resolved_deps.append(KNOWN_DEPENDENCIES[dep])
@@ -309,6 +348,7 @@ def scaffold_mod(
     projects_dir = mod_root / "Projects" / larian_folder
     mods_dir = mod_root / "Mods" / larian_folder
     public_dir = mod_root / "Public" / larian_folder
+    editor_dir = mod_root / "Editor" / "Mods" / larian_folder / "Assets"
     stats_dir = public_dir / "Stats" / "Generated" / "Data"
     progressions_dir = public_dir / "Progressions"
     lists_dir = public_dir / "Lists"
@@ -317,6 +357,8 @@ def scaffold_mod(
     created_dirs = [
         projects_dir,
         mods_dir,
+        public_dir,
+        editor_dir,
         stats_dir,
         progressions_dir,
         lists_dir,
@@ -327,6 +369,12 @@ def scaffold_mod(
     allocated_handles = [generate_handle() for _ in range(10)]
 
     # File contents
+    project_uuid = generate_uuid()
+    project_meta_xml = build_project_meta_lsx_content(
+        mod_name=clean_name,
+        mod_uuid=mod_uuid,
+        project_uuid=project_uuid,
+    )
     meta_xml = build_meta_lsx_content(
         mod_name=clean_name,
         mod_uuid=mod_uuid,
@@ -341,10 +389,11 @@ def scaffold_mod(
     png_data = generate_png_bytes(512, 512, 45, 52, 64)
 
     files_to_write = {
-        projects_dir / "meta.lsx": meta_xml.encode("utf-8"),
+        projects_dir / "meta.lsx": project_meta_xml.encode("utf-8"),
         projects_dir / "thumbnail.png": png_data,
         mods_dir / "meta.lsx": meta_xml.encode("utf-8"),
         mods_dir / "mod_publish_logo.png": png_data,
+        editor_dir / ".gitkeep": b"",
         loc_dir / f"{clean_name}.xml": loc_xml.encode("utf-8"),
         mod_root / "README.md": readme_md.encode("utf-8"),
         mod_root / "thumbnail.png": png_data,
@@ -361,6 +410,7 @@ def scaffold_mod(
     return {
         "name": clean_name,
         "uuid": mod_uuid,
+        "project_uuid": project_uuid,
         "mod_slug": mod_slug,
         "folder_name": larian_folder,
         "larian_folder": larian_folder,
