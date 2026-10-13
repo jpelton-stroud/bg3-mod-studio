@@ -233,11 +233,13 @@
         {"name": "--mod1", "type": "str", "required": false, "description": "First mod to compare"},
         {"name": "--mod2", "type": "str", "required": false, "description": "Second mod to compare"},
         {"name": "--all", "type": "bool", "required": false, "description": "Run pairwise collision matrix across all tracked mods"},
+        {"name": "--summary", "type": "bool", "required": false, "description": "Output high-level collision counts and mod pairs without dumping full raw entries"},
         {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON conflict report"}
       ],
       "examples": [
-        "python3 scripts/check_mod_conflicts.py --candidate unlocklevelcurve --against-library --json"
+        "python3 scripts/check_mod_conflicts.py --candidate unlocklevelcurve --against-library --summary --json"
       ]
+
     },
     {
       "name": "sync_localization.py",
@@ -366,14 +368,16 @@
         {"name": "--search", "type": "str", "required": false, "description": "Free text search across name, displayName, and description"},
         {"name": "--rarity", "type": "str", "required": false, "description": "Filter by rarity: Common, Uncommon, Rare, VeryRare, Legendary"},
         {"name": "--mod", "type": "str", "required": false, "description": "Filter items to a specific mod slug"},
-        {"name": "--limit", "type": "int", "required": false, "description": "Max results to return (default: 20)"},
+        {"name": "--limit", "type": "int", "required": false, "description": "Max results to return (default: 10)"},
+        {"name": "--compact", "type": "bool", "required": false, "description": "Output compact records omitting raw file paths and empty fields"},
         {"name": "--reindex", "type": "bool", "required": false, "description": "Force rebuild cache index"},
         {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
       ],
       "examples": [
-        "python3 scripts/query_mod_database.py --slot Weapon --boost \"SpellSaveDC\" --json",
+        "python3 scripts/query_mod_database.py --slot Weapon --boost \"SpellSaveDC\" --compact --json",
         "python3 scripts/query_mod_database.py --search \"Charisma\" --rarity Legendary --json"
       ]
+
     },
     {
       "name": "update_library_catalog.py",

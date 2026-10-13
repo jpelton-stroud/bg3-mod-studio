@@ -144,28 +144,28 @@ The Orchestrator launches specialized subagents in parallel to author the mod's 
       "Role": "Stats & Spells Specialist - <ModName>",
       "Prompt": "Author the BG3 stat entries in <stats_dir>. Mod: <ModName>, UUID: <UUID>.\nTo ensure 100% engine compliance and valid localization handle allocation, use:\n  python3 scripts/scaffold_stat_entry.py --mod <ModName> --type <weapon|armor|amulet|ring|spell_target|passivedata> --name <Id> --display-name \"<Name>\" --description \"<Desc>\" --props \"<Props>\"\nFor weapons/armor/objects, bind 3D visual models using:\n  python3 scripts/scaffold_root_template.py --mod <ModName> --item <Id> --visual-preset <greatsword|longsword|staff|plate|robe|amulet|ring|boots|cloak>\nFor custom item container/vendor drops, inject drops using:\n  python3 scripts/inject_treasure_table.py --mod <ModName> --item <ItemName> --container <tutorial_chest|camp_chest|vendor_...>\nRefer to the approved plan for exact mechanics.",
       "Workspace": "inherit",
-      "Model": "inherit"
+      "Model": "flash"
     },
     {
       "TypeName": "self",
       "Role": "Progression & Lists Specialist - <ModName>",
       "Prompt": "Author progression and spell list LSX files in <public_dir>. Mod: <ModName>, UUID: <UUID>.\nTo ensure valid Larian v4.8 XML schema without crashing the level-up screen, use:\n  python3 scripts/scaffold_progression_node.py --mod <ModName> --class <Class> --level <Level> [--subclass <Subclass>] [--passives <Passives>] [--boosts <Boosts>] [--spells <Spells>] [--feat]\nEnsure valid Larian v4.8 LSX schema with proper UUIDs.\nRefer to the approved plan for exact progression assignments.",
       "Workspace": "inherit",
-      "Model": "inherit"
+      "Model": "flash"
     },
     {
       "TypeName": "self",
       "Role": "Localization Specialist - <ModName>",
       "Prompt": "Author the localization XML file at <localization_file> for mod <ModName>.\nPopulate with all DisplayName and Description handles referenced by the Stats and Progressions specialists:\n<content contentuid=\"<Handle>\" version=\"1\">Text</content>\nEnsure valid XML syntax with utf-8 encoding.",
       "Workspace": "inherit",
-      "Model": "inherit"
+      "Model": "flash"
     },
     {
       "TypeName": "self",
       "Role": "Documentation Specialist - <ModName>",
       "Prompt": "Update and enrich the mod documentation at <readme_file> for mod <ModName>.\nInclude:\n- Mod overview and author info\n- Level-by-level feature tables and mechanics\n- Dependencies and recommended load order\n- Toolkit import and sync instructions\nFollow the rich spec format used across the workspace.",
       "Workspace": "inherit",
-      "Model": "inherit"
+      "Model": "flash"
     }
   ]
 }

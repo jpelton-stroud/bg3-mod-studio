@@ -217,10 +217,23 @@ Step 3: Extra Actions / Reactions (Action Surge, Fast Hands, etc.)
 
 ---
 
-## Step 6: Output Destination
+## Step 6: Artifact-First Output & Streaming Delivery
 
-- Determine the target file path:
-  - If a party or category is specified: [`build_guides/<party_name>/build_guide_<classes>.md`](file:///home/jpstroud/projects/BaldursGate3/build_guides).
-  - Otherwise: [`build_guides/build_guide_<classes>.md`](file:///home/jpstroud/projects/BaldursGate3/build_guides).
-- Format the filename using lowercase class names and level counts (e.g., `build_guide_sorcerer16_fighter2_warlock2.md` or `build_guide_barbarian12_fighter8.md`).
-- Ensure parent directories are created automatically if they do not exist.
+To minimize chat context bloat and avoid excessive token usage, build guides must follow the **Artifact-First** delivery pattern:
+
+1. **Write Complete Guide to File First**:
+   - Determine target file path:
+     - If a party or category is specified: [`build_guides/<party_name>/build_guide_<classes>.md`](file:///home/jpstroud/projects/BaldursGate3/build_guides).
+     - Otherwise: [`build_guides/build_guide_<classes>.md`](file:///home/jpstroud/projects/BaldursGate3/build_guides).
+   - Format the filename using lowercase class names and level counts (e.g., `build_guide_sorcerer16_fighter2_warlock2.md` or `build_guide_barbarian12_fighter8.md`).
+   - Ensure parent directories are created automatically if they do not exist.
+   - Use `write_to_file` to save the complete document containing all 5 core sections (Core Concept, Progression Split & Stats, Complete BiS Gear Loadout, Full 1–20 Progression Table, and Turn 1 Combat Sequence).
+
+2. **Present Executive Summary in Chat**:
+   - **DO NOT** dump the full 20-level progression table or exhaustive item descriptions into the chat response.
+   - Instead, stream a concise **Executive Summary**:
+     - **Build Link**: Provide a direct link to the saved guide file, e.g., [`build_guide_<classes>.md`](file:///home/jpstroud/projects/BaldursGate3/build_guides/...).
+     - **Class Split & Core Synergies**: Summary of the mechanical concept in 2–3 sentences.
+     - **BiS Gear Highlights**: Condensed table or bullet list of 3–4 linchpin equipment pieces.
+     - **Turn 1 Combat Rotation**: The setup and Round 1 action sequence with expected DPR / crowd control impact.
+     - Clear direction to inspect the markdown file for the full level-by-level choices.

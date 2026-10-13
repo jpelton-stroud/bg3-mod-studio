@@ -223,6 +223,7 @@ def main():
 
     parser.add_argument("--mod2", help="Second mod path/name (used with --mod1)")
     parser.add_argument("--against-library", action="store_true", help="Compare candidate against all cataloged mods in mods/")
+    parser.add_argument("--summary", action="store_true", help="Output high-level collision counts and mod pairs without dumping full raw entries")
     parser.add_argument("--json", action="store_true", help="Output results as JSON")
 
     args = parser.parse_args()
@@ -236,7 +237,17 @@ def main():
         res = compare_two_mods(m1, m2)
 
         if args.json:
-            print(json.dumps(res, indent=2))
+            if args.summary:
+                res_out = {
+                    "mod1": res["mod1"],
+                    "mod2": res["mod2"],
+                    "has_conflicts": res["has_conflicts"],
+                    "stat_collision_count": len(res.get("stat_collisions", [])),
+                    "progression_collision_count": len(res.get("progression_collisions", [])),
+                }
+                print(json.dumps(res_out, indent=2))
+            else:
+                print(json.dumps(res, indent=2))
         else:
             print(f"\n{BOLD}{CYAN}=== BG3 Mod Compatibility Analysis ==={RESET}")
             print(f"Comparing: {BOLD}{res['mod1']}{RESET} vs {BOLD}{res['mod2']}{RESET}\n")
@@ -272,13 +283,30 @@ def main():
         cand_dlls = check_native_dlls(cand_path)
 
         if args.json:
-            output = {
-                "candidate": cand_path.name,
-                "console_incompatible": cand_dlls,
-                "conflict_count": len(results),
-                "conflicts": results,
-            }
+            if args.summary:
+                summary_conflicts = [
+                    {
+                        "mod2": r["mod2"],
+                        "stat_collision_count": len(r.get("stat_collisions", [])),
+                        "progression_collision_count": len(r.get("progression_collisions", [])),
+                    }
+                    for r in results
+                ]
+                output = {
+                    "candidate": cand_path.name,
+                    "console_incompatible": cand_dlls,
+                    "conflict_count": len(results),
+                    "conflicts": summary_conflicts,
+                }
+            else:
+                output = {
+                    "candidate": cand_path.name,
+                    "console_incompatible": cand_dlls,
+                    "conflict_count": len(results),
+                    "conflicts": results,
+                }
             print(json.dumps(output, indent=2))
+
         else:
             print(f"\n{BOLD}{CYAN}=== BG3 Mod Candidate Conflict Scan ==={RESET}")
             print(f"Candidate: {BOLD}{cand_path.name}{RESET}")
