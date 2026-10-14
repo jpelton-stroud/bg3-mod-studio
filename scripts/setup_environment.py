@@ -6,7 +6,8 @@ Interactive setup wizard and environment configuration manager for the
 Baldur's Gate 3 Mod Studio & Mod.io Toolkit.
 
 Features:
-- Validates and configures .env using pure Python standard library.
+- Validates and configures .env (written with 0600 permissions) using pure Python standard library.
+- Secrets (API key, PAT) are entered via hidden input and never echoed or displayed.
 - Tests mod.io API Key against https://api.mod.io/v1/games/3716.
 - Tests mod.io Personal Access Token (PAT) against https://api.mod.io/v1/me.
 - Detects OS / WSL environment and validates Baldur's Gate 3 Data directory path.
@@ -16,6 +17,7 @@ Features:
 """
 
 import argparse
+import getpass
 import json
 import os
 import re
@@ -170,6 +172,32 @@ def prompt_input(prompt_text: str, default_val: str = "", allow_empty: bool = Tr
         print(f"{YELLOW}A non-empty value is required. Please try again.{RESET}")
 
 
+def mask_secret(value: str) -> str:
+    """Return a non-revealing placeholder for a secret value."""
+    return "****" if value else ""
+
+
+def prompt_secret(prompt_text: str, current_val: str = "") -> str:
+    """Prompt for a secret without echoing it or displaying the stored value.
+
+    Pressing Enter keeps the current value (if any).
+    """
+    suffix = " [configured - press Enter to keep]" if current_val else ""
+    try:
+        res = getpass.getpass(f"{BOLD}{prompt_text}{RESET}{suffix}: ").strip()
+    except EOFError:
+        return current_val
+    return res or current_val
+
+
+def write_env_file(path: Path, content: str) -> None:
+    """Write the .env file readable/writable by the owner only (0600)."""
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(content)
+    os.chmod(path, 0o600)  # O_CREAT mode is ignored for pre-existing files
+
+
 def check_environment_status():
     """Non-interactive check of project environment configuration."""
     print(f"\n{BOLD}=== Environment Configuration Status ==={RESET}")
@@ -258,7 +286,7 @@ def run_wizard(dry_run: bool = False):
     print("Required for searching, downloading, and cataloging BG3 mods from mod.io.")
     print("Get your API key at: https://mod.io/me/access")
     current_key = existing_env.get("MODIO_API_KEY", "")
-    api_key = prompt_input("Enter MODIO_API_KEY", current_key)
+    api_key = prompt_secret("Enter MODIO_API_KEY (input hidden)", current_key)
 
     if api_key:
         test_now = prompt_input("Test this API key live against mod.io? (Y/n)", "y").lower()
@@ -271,14 +299,14 @@ def run_wizard(dry_run: bool = False):
                 print(f"{RED}✗ Verification issue: {msg}{RESET}")
                 keep = prompt_input("Do you want to keep this key anyway? (y/n)", "y").lower()
                 if keep not in ("y", "yes"):
-                    api_key = prompt_input("Re-enter MODIO_API_KEY", "")
+                    api_key = prompt_secret("Re-enter MODIO_API_KEY (input hidden)")
 
     # 2. MODIO_PAT
     print(f"\n{BOLD}2. mod.io Personal Access Token (PAT) [Optional]{RESET}")
     print("Optional token required for account actions such as subscribing/syncing mods.")
     print("Generate a PAT at: https://mod.io/me/access")
     current_pat = existing_env.get("MODIO_PAT", existing_env.get("MODIO_OAUTH_TOKEN", ""))
-    pat = prompt_input("Enter MODIO_PAT (press Enter to skip)", current_pat)
+    pat = prompt_secret("Enter MODIO_PAT (input hidden, press Enter to skip)", current_pat)
 
     if pat:
         test_pat_choice = prompt_input("Test this PAT live against mod.io? (Y/n)", "y").lower()
@@ -335,12 +363,12 @@ def run_wizard(dry_run: bool = False):
     content = "\n".join(output_lines)
 
     if dry_run:
-        print(f"\n{CYAN}[DRY-RUN] Would write to {ENV_PATH}:{RESET}")
-        print(content)
+        print(f"\n{CYAN}[DRY-RUN] Would write to {ENV_PATH} (secrets masked):{RESET}")
+        print(content.replace(f"MODIO_API_KEY={api_key}", f"MODIO_API_KEY={mask_secret(api_key)}")
+                     .replace(f"MODIO_PAT={pat}", f"MODIO_PAT={mask_secret(pat)}"))
     else:
-        with open(ENV_PATH, "w", encoding="utf-8") as f:
-            f.write(content)
-        print(f"\n{GREEN}✓ Environment configuration saved successfully to {ENV_PATH}!{RESET}")
+        write_env_file(ENV_PATH, content)
+        print(f"\n{GREEN}✓ Environment configuration saved successfully to {ENV_PATH} (mode 600)!{RESET}")
 
     # GitHub Remote Setup
     configure_github_remote()
