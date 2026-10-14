@@ -13,7 +13,10 @@ This skill acts as the autonomous "AI Doctor" for *Baldur's Gate 3* mods. It exe
 
 Activate this skill when:
 - The user runs `/bg3_diagnose_mod` or `/diagnose`.
-- The user reports in-game issues:
+- The user runs `/bg3_diagnose_mod logs` (or includes `logs`, e.g. `/bg3_diagnose_mod logs for <mod-slug>` / `check toolkit logs`).
+- The user reports in-game or Toolkit issues:
+  - *"Why is my mod throwing errors in the Toolkit / Glasses?"*
+  - *"Check the latest Glasses message log."*
   - *"Why is my mod not showing up in-game?"*
   - *"My mod items have 'Not Found' / missing text."*
   - *"Check if my mod has any errors or conflicts."*
@@ -25,7 +28,11 @@ Activate this skill when:
 
 ```mermaid
 flowchart TD
-    Trigger["User Request / /bg3_diagnose_mod"] --> Identify["1. Identify Mod in my_mods/"]
+    Trigger["User Request / /bg3_diagnose_mod"] --> CheckLogs{"Prompt includes 'logs' or Toolkit issue?"}
+    CheckLogs -- "Yes" --> ToolkitLogMode["Run diagnose_toolkit_logs.py"]
+    ToolkitLogMode --> Correlate["Correlate Log Errors to my_mods/"]
+    Correlate --> SynthesizeLogs["Synthesize Log Findings & Propose Fixes"]
+    CheckLogs -- "No" --> Identify["1. Identify Mod in my_mods/"]
     Identify --> RunVal["2. Run validate_mod.py --json"]
     RunVal --> RunLO["3. Run manage_load_order.py --json"]
     RunLO --> RunSync["4. Run sync_to_game_data.py --dry-run"]
@@ -38,13 +45,19 @@ flowchart TD
 
 ## Execution Steps
 
-### Step 1: Target Resolution
-Determine the target mod name from the user's prompt or inspect `my_mods/`:
-- If the user specifies a mod (e.g. `arcane-progression`), use it.
-- If unspecified and only one mod exists in `my_mods/`, select it.
-- If multiple mods exist, run validation across `--all` or ask the user to clarify.
+### Step 1: Mode & Target Resolution
+1. **Mode Check**:
+   - If the user prompt includes `logs` (e.g. `/bg3_diagnose_mod logs`, `/bg3_diagnose_mod logs for <mod-slug>`, or requests to check Toolkit / Glasses message logs):
+     - Proceed directly to **Step 2B: BG3 Toolkit Log Diagnostic Battery**.
+   - Otherwise, proceed to **Step 2A: Full Mod Health Diagnostic Battery**.
 
-### Step 2: Automated Diagnostic Battery
+2. **Target Resolution**:
+   - Determine the target mod name from the prompt (`for <mod-slug>`, `<mod-slug>`), or inspect `my_mods/`:
+     - If the user specifies a mod (e.g. `arcane-progression`), use it.
+     - If unspecified and only one mod exists in `my_mods/`, select it.
+     - If multiple mods exist and no mod was specified, run across workspace or prompt for clarification.
+
+### Step 2A: Full Mod Health Diagnostic Battery (Static Linter Suite)
 Run the deterministic diagnostic suite:
 
 ```bash
@@ -65,6 +78,23 @@ python3 scripts/sync_localization.py --mod <mod_slug> --check --json
 
 # 6. Save Game & Load Order Compatibility Audit (Optional/On Request)
 python3 scripts/inspect_save_game.py --audit --json
+```
+
+### Step 2B: BG3 Toolkit Log Diagnostic Battery (Glasses Runtime Suite)
+When triggered with `logs` or when investigating Toolkit runtime errors:
+
+```bash
+# 1. Inspect Latest Toolkit Session (with workspace mod correlation)
+python3 scripts/diagnose_toolkit_logs.py --mod <mod_slug> --json
+
+# 2. Filter by Specific Subsystem (e.g. Boosts, Stats, Thoth, Osiris)
+python3 scripts/diagnose_toolkit_logs.py --subsystem Boosts --mod <mod_slug> --json
+
+# 3. Inspect Specific Log Type (engine, osiris, thoth, personal)
+python3 scripts/diagnose_toolkit_logs.py --type thoth --limit 25
+
+# 4. Stream Active Session Logs in Real-Time (during live mod testing)
+python3 scripts/diagnose_toolkit_logs.py --follow
 ```
 
 > [!TIP]
