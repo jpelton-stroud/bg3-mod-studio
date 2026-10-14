@@ -5,6 +5,7 @@
 
 new entry "Shout_EmptyBody"
 type "SpellData"
+using "Shout_DispelEvilAndGood"
 data "SpellType" "Shout"
 data "DisplayName" "h5586742bg5c01g4729g81efg68eba20b647e;1"
 data "Description" "h701c0902gd458g4709g8422g1d176596b7cd;1"
@@ -12,7 +13,7 @@ data "Icon" "Spell_Illusion_Invisibility"
 data "SpellAnimationIntentType" "Buff"
 data "UseCosts" "ActionPoint:1;KiPoint:4"
 data "CooldownType" "None"
-data "SpellProperties" "ApplyStatus(SELF, EMPTY_BODY, 100, 10)"
+data "SpellProperties" "ApplyStatus(SELF, EMPTY_BODY, 100, 10);ApplyStatus(SELF, INVISIBLE, 100, 10)"
 
 // ------------------------------------------------------------------------------
 // Wizard Spell Mastery - Shout Variants (At-Will, No Spell Slot)
@@ -23,6 +24,19 @@ type "SpellData"
 data "SpellType" "Shout"
 using "Shout_FalseLife"
 data "UseCosts" "ActionPoint:1"
+
+new entry "Shout_FeatherFall_Mastery"
+type "SpellData"
+data "SpellType" "Shout"
+using "Shout_FeatherFall"
+data "UseCosts" "BonusActionPoint:1"
+
+new entry "Shout_Shield_Mastery"
+type "SpellData"
+data "SpellType" "Shout"
+using "Shout_FalseLife"
+data "UseCosts" "BonusActionPoint:1"
+data "SpellProperties" "ApplyStatus(SELF, SHIELD, 100, 1)"
 
 new entry "Shout_MirrorImage_Mastery"
 type "SpellData"

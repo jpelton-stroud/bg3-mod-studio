@@ -77,7 +77,9 @@ data "DisplayName" "h1a1aba36ge628g412dg84f3g4644efcb0705;1"
 data "Description" "h40e33a76g8e75g4320g9e6fgaff7eb85c8e1;1"
 data "Icon" "Spell_Divination_SeeInvisibility"
 data "Properties" "Highlighted"
-data "Boosts" "StatusImmunity(SG_Blinded);ApplyStatus(SELF,SEE_INVISIBILITY,-1,100)"
+data "Boosts" "StatusImmunity(SG_Blinded)"
+data "StatsFunctorContext" "OnCreate;OnLongRest"
+data "StatsFunctors" "ApplyStatus(SELF,SEE_INVISIBILITY,100,-1)"
 
 // Foe Slayer (Level 20): Add Wisdom Modifier to attack and damage rolls
 new entry "FoeSlayer"
@@ -86,7 +88,7 @@ data "DisplayName" "hcf73c5f7g4d82g4995gb03agcf3efbfee5df;1"
 data "Description" "h7c739daeg8dabg4c8bg8493g0357d0693219;1"
 data "Icon" "Action_Ranger_HuntersMark"
 data "Properties" "Highlighted"
-data "Boosts" "DamageBonus(max(0, WisdomModifier));AttackBonus(max(0, WisdomModifier))"
+data "Boosts" "DamageBonus(max(0, WisdomModifier));RollBonus(Attack, max(0, WisdomModifier))"
 
 // Gloom Stalker: Shadowy Dodge (Level 15): Impose disadvantage on incoming attack
 new entry "ShadowyDodge"
@@ -117,7 +119,9 @@ data "DisplayName" "h5716792eg17f1g4a13g892bge1771f10732a;1"
 data "Description" "h095cb99dg4473g4667g8ba5ge5a209ed95ee;1"
 data "Icon" "Spell_Abjuration_ProtectionFromEvilAndGood"
 data "Properties" "Highlighted"
-data "Boosts" "StatusImmunity(SG_Charmed);StatusImmunity(SG_Frightened);ApplyStatus(SELF,PROTECTION_FROM_EVIL_AND_GOOD,-1,100)"
+data "Boosts" "StatusImmunity(SG_Charmed);StatusImmunity(SG_Frightened)"
+data "StatsFunctorContext" "OnCreate;OnLongRest"
+data "StatsFunctors" "ApplyStatus(SELF,PROTECTION_FROM_EVIL_AND_GOOD,100,-1)"
 
 // Ancients: Undying Sentinel (Level 15): Prevent dropping to 0 HP once per long rest
 new entry "UndyingSentinel"
@@ -126,7 +130,8 @@ data "DisplayName" "hf403c4deg4346g497egb35ag1d3bae590b03;1"
 data "Description" "h8a179ba7g697bg48fdg88e2g686651576840;1"
 data "Icon" "Spell_Abjuration_DeathWard"
 data "Properties" "Highlighted;OncePerLongRest"
-data "Boosts" "UnlockInterrupt(Interrupt_UndyingSentinel)"
+data "StatsFunctorContext" "OnCreate;OnLongRest"
+data "StatsFunctors" "ApplyStatus(SELF,UNDYING_SENTINEL,100,-1)"
 
 // Oathbreaker: Supernatural Resistance (Level 15): Non-magical damage resistance
 new entry "SupernaturalResistance"
