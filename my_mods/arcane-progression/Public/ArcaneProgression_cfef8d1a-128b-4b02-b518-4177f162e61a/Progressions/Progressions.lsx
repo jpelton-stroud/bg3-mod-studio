@@ -8,7 +8,7 @@
                 <node id="Progression">
                     <attribute id="Level" type="uint8" value="17"/>
                     <attribute id="Name" type="LSString" value="Fighter"/>
-                    <attribute id="Boosts" type="LSString" value="ActionResource(ActionSurge,1,0)"/>
+                    <attribute id="Boosts" type="LSString" value="ActionResource(ActionPoint,1,0)"/>
                     <attribute id="ProgressionType" type="uint8" value="0"/>
                     <attribute id="TableUUID" type="guid" value="ba4e707e-4bbd-4630-963b-ce2f2947f971"/>
                     <attribute id="UUID" type="guid" value="0952d2fc-2c61-4184-851e-90e0902298d8"/>
@@ -27,10 +27,10 @@
                 <!-- Monk Level 17: Way of Shadow Opportunist -->
                 <node id="Progression">
                     <attribute id="Level" type="uint8" value="17"/>
-                    <attribute id="Name" type="LSString" value="Monk"/>
-                    <attribute id="PassivesAdded" type="LSString" value="IF(HasPassive('ShadowArts_Darkness') or HasPassive('ShadowArts_Invisibility') or HasPassive('ShadowArts_PassWithoutTrace')):Opportunist"/>
-                    <attribute id="ProgressionType" type="uint8" value="0"/>
-                    <attribute id="TableUUID" type="guid" value="fe1319a2-86be-469c-aab5-e3b0bd714e0e"/>
+                    <attribute id="Name" type="LSString" value="Shadow"/>
+                    <attribute id="PassivesAdded" type="LSString" value="Opportunist"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="TableUUID" type="guid" value="6e1a1046-1202-410b-9d80-91c819a8bcca"/>
                     <attribute id="UUID" type="guid" value="a545091f-9c78-41c9-ba8e-43769ea228c6"/>
                 </node>
 
@@ -87,10 +87,10 @@
                 <!-- Paladin Level 15 (Vengeance): Soul of Vengeance -->
                 <node id="Progression">
                     <attribute id="Level" type="uint8" value="15"/>
-                    <attribute id="Name" type="LSString" value="Paladin"/>
-                    <attribute id="PassivesAdded" type="LSString" value="IF(HasPassive('Oath_Vengeance_Tenets') or HasPassive('VowOfEnmity')):SoulOfVengeance"/>
-                    <attribute id="ProgressionType" type="uint8" value="0"/>
-                    <attribute id="TableUUID" type="guid" value="ba2afe85-acba-4ea1-a238-2b4543f47821"/>
+                    <attribute id="Name" type="LSString" value="Vengeance"/>
+                    <attribute id="PassivesAdded" type="LSString" value="SoulOfVengeance"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="TableUUID" type="guid" value="f769aa02-1f74-4fb6-b94c-8850143daa20"/>
                     <attribute id="UUID" type="guid" value="d30bac40-4c47-4257-a829-578301115cb3"/>
                 </node>
 
@@ -114,14 +114,24 @@
                     <attribute id="UUID" type="guid" value="dc0fcb1a-1a72-4d11-ad41-2b8ec3307b22"/>
                 </node>
 
-                <!-- Ranger Level 15: Subclass Defenses (Gloom Stalker Shadowy Dodge, Hunter Evasion) -->
+                <!-- Ranger Level 15 (Gloom Stalker): Shadowy Dodge -->
                 <node id="Progression">
                     <attribute id="Level" type="uint8" value="15"/>
-                    <attribute id="Name" type="LSString" value="Ranger"/>
-                    <attribute id="PassivesAdded" type="LSString" value="IF(HasPassive('DreadAmbusher')):ShadowyDodge;IF(HasPassive('HuntersPrey_ColossusSlayer') or HasPassive('HuntersPrey_GiantKiller') or HasPassive('HuntersPrey_HordeBreaker')):Evasion"/>
-                    <attribute id="ProgressionType" type="uint8" value="0"/>
-                    <attribute id="TableUUID" type="guid" value="8f068974-ed32-43fc-a9d9-028be1c01a9c"/>
+                    <attribute id="Name" type="LSString" value="GloomStalker"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowyDodge"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="TableUUID" type="guid" value="caa60bb8-8ca3-4871-b034-e10a6bc8ca29"/>
                     <attribute id="UUID" type="guid" value="ecbac04d-7e2c-4e2c-9626-32c952377f8c"/>
+                </node>
+
+                <!-- Ranger Level 15 (Hunter): Evasion -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="15"/>
+                    <attribute id="Name" type="LSString" value="Hunter"/>
+                    <attribute id="PassivesAdded" type="LSString" value="Evasion"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="TableUUID" type="guid" value="b19bc1ec-d7ee-4023-9f58-5056fd99be24"/>
+                    <attribute id="UUID" type="guid" value="c2bc1f91-1f75-4f99-8aee-ce80d05931d2"/>
                 </node>
 
                 <!-- Ranger Level 18: Feral Senses -->
@@ -174,16 +184,6 @@
                     <attribute id="UUID" type="guid" value="3fe1cac3-adcb-4f28-8649-e61619de63c8"/>
                 </node>
 
-                <!-- Wizard Abjuration Level 14: Spell Resistance -->
-                <node id="Progression">
-                    <attribute id="Level" type="uint8" value="14"/>
-                    <attribute id="Name" type="LSString" value="AbjurationSchool"/>
-                    <attribute id="PassivesAdded" type="LSString" value="SpellResistance"/>
-                    <attribute id="ProgressionType" type="uint8" value="1"/>
-                    <attribute id="TableUUID" type="guid" value="9f0fd3ac-7520-45fa-9f7d-08b1ca6eacf3"/>
-                    <attribute id="UUID" type="guid" value="c8c230fb-10fc-4b62-98fb-2fb60c1d3aa7"/>
-                </node>
-
                 <!-- Wizard Conjuration Level 14: Focused Conjuration -->
                 <node id="Progression">
                     <attribute id="Level" type="uint8" value="14"/>
@@ -194,13 +194,13 @@
                     <attribute id="UUID" type="guid" value="4b23b7a9-7b28-4e0e-a0dd-f21c3d784856"/>
                 </node>
 
-                <!-- Sorcerer Level 14: Draconic Dragon Wings -->
+                <!-- Sorcerer Level 14 (Draconic Bloodline): Dragon Wings -->
                 <node id="Progression">
                     <attribute id="Level" type="uint8" value="14"/>
-                    <attribute id="Name" type="LSString" value="Sorcerer"/>
-                    <attribute id="PassivesAdded" type="LSString" value="IF(HasPassive('DraconicResilience')):DragonWings"/>
-                    <attribute id="ProgressionType" type="uint8" value="0"/>
-                    <attribute id="TableUUID" type="guid" value="e2416b02-953a-4ce8-aa8f-eb98d549d86d"/>
+                    <attribute id="Name" type="LSString" value="DraconicBloodline"/>
+                    <attribute id="PassivesAdded" type="LSString" value="DragonWings"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="TableUUID" type="guid" value="35aa255d-3eb7-4e93-8092-7545ced25b09"/>
                     <attribute id="UUID" type="guid" value="b8169afa-6320-4a0c-9be5-a3dc3d739626"/>
                 </node>
 

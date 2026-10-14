@@ -5,6 +5,7 @@
 
 new entry "Target_CleansingTouch"
 type "SpellData"
+using "Target_RemoveCurse"
 data "SpellType" "Target"
 data "DisplayName" "h2b56d659gd38cg4167gbf8cgae8659aeaf74;1"
 data "Description" "hafb351f1g0f3cg47dag8556g3a7808dbae69;1"
@@ -25,12 +26,6 @@ data "TargetConditions" "Self()"
 // ------------------------------------------------------------------------------
 // Wizard Spell Mastery - 1st Level Target Spells (At-Will, No Spell Slot)
 // ------------------------------------------------------------------------------
-
-new entry "Target_Shield_Mastery"
-type "SpellData"
-data "SpellType" "Target"
-using "Target_Shield"
-data "UseCosts" "ReactionActionPoint:1"
 
 new entry "Target_MageArmor_Mastery"
 type "SpellData"
@@ -55,12 +50,6 @@ type "SpellData"
 data "SpellType" "Target"
 using "Target_Grease"
 data "UseCosts" "ActionPoint:1"
-
-new entry "Target_FeatherFall_Mastery"
-type "SpellData"
-data "SpellType" "Target"
-using "Target_FeatherFall"
-data "UseCosts" "BonusActionPoint:1"
 
 // ------------------------------------------------------------------------------
 // Wizard Spell Mastery - 2nd Level Target Spells (At-Will, No Spell Slot)
