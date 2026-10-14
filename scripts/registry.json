@@ -489,6 +489,32 @@
       "examples": [
         "python3 scripts/simulate_build_synergy.py --classes \"Paladin=2,Sorcerer=18\" --stats \"Str=22,Dex=14,Con=16,Int=10,Wis=12,Cha=24\" --dpr-sequence melee_burst --json"
       ]
+    },
+    {
+      "name": "diagnose_toolkit_logs.py",
+      "command": "toolkit-logs",
+      "category": "diagnostics",
+      "summary": "BG3 Toolkit runtime message log diagnostic, triage, and workspace correlation tool.",
+      "description": "Auto-discovers and parses live and session logs from the BG3 Toolkit (Glasses.exe). Classifies engine asserts, design errors, and subsystem failures (Boosts, Stats, Thoth, Osiris, RootTemplates), correlating errors back to local mod files in my_mods/.",
+      "intents": ["toolkit logs", "glasses logs", "toolkit errors", "engine assert", "diagnose toolkit", "glasses crash", "thoth errors", "osiris errors", "boost errors"],
+      "cli_usage": "python3 scripts/diagnose_toolkit_logs.py [options]",
+      "flags": [
+        {"name": "--type", "type": "str", "required": false, "description": "Subsystem log type: engine, osiris, thoth, personal, network, all (default: engine)"},
+        {"name": "--severity", "type": "str", "required": false, "description": "Minimum severity: critical, error, warning, info, debug (default: warning)"},
+        {"name": "--subsystem", "type": "str", "required": false, "description": "Filter by subsystem: Boosts, Stats, Thoth, Osiris, RootTemplates, Localization, Assets"},
+        {"name": "--mod", "type": "str", "required": false, "description": "Filter and correlate errors to a specific mod slug in my_mods/"},
+        {"name": "--limit", "type": "int", "required": false, "description": "Max entries to display (default: 50)"},
+        {"name": "--follow", "type": "bool", "required": false, "description": "Live stream/tail active log file (-f)"},
+        {"name": "--list-logs", "type": "bool", "required": false, "description": "List all discovered session logs and exit"},
+        {"name": "--info", "type": "bool", "required": false, "description": "Show resolved toolkit directory status"},
+        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+      ],
+      "examples": [
+        "python3 scripts/diagnose_toolkit_logs.py --json",
+        "python3 scripts/diagnose_toolkit_logs.py --mod arcane-progression --severity error",
+        "python3 scripts/diagnose_toolkit_logs.py --type thoth --limit 20",
+        "python3 scripts/diagnose_toolkit_logs.py --follow"
+      ]
     }
   ]
 }
