@@ -5,7 +5,7 @@ description: Creates or updates a public Baldur's Gate 3 mod.io collection from 
 
 # Create a BG3 mod.io Collection
 
-Use `scripts/modio_create_collection.py` to create a public BG3 collection or update one of the authenticated user's collections using numeric IDs in the `Mod.io IDs` index of `mods/library.md`.
+Use `scripts/modio_create_collection.py` to create a public BG3 collection or update one of the authenticated user's collections using numeric Mod Id values in the six-column categorized rows of `mods/library.md`.
 
 ## Safety and credentials
 
@@ -20,7 +20,7 @@ Use `scripts/modio_create_collection.py` to create a public BG3 collection or up
 ## Workflow
 
 1. Verify that `MODIO_PAT` is already configured in the environment. Do not inspect or disclose its value.
-2. Run a dry-run and let the user choose documented mods, then create a new collection or select one of their existing BG3 collections:
+2. Run a dry-run and let the user choose documented mods with valid numeric Mod Id values, then create a new collection or select one of their existing BG3 collections:
 
    ```bash
    python3 scripts/modio_create_collection.py --dry-run
@@ -33,7 +33,7 @@ Use `scripts/modio_create_collection.py` to create a public BG3 collection or up
 
 ## Troubleshooting
 
-- If the script reports missing IDs, update the `Mod.io IDs` index in `mods/library.md` only after verifying the ID from trusted mod documentation.
+- If the script reports missing IDs, update the `Mod Id` field in the corresponding category row only after verifying the ID from trusted mod documentation.
 - If the token is missing or an API request fails, report the error without requesting or exposing the token. Do not retry a write automatically.
 - For command options:
 

@@ -15,19 +15,29 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 
-# Ensure scripts directory is in python path
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 WORKSPACE_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
 
-from modio_extract import (
-    get_api_key,
-    query_modio,
-    process_mod,
-    BG3_GAME_ID,
-    MODIO_API_HOST,
-)
+if __package__:
+    from .library_catalog import parse_library_rows
+    from .modio_extract import (
+        get_api_key,
+        query_modio,
+        process_mod,
+        BG3_GAME_ID,
+        MODIO_API_HOST,
+    )
+else:
+    from library_catalog import parse_library_rows
+    from modio_extract import (
+        get_api_key,
+        query_modio,
+        process_mod,
+        BG3_GAME_ID,
+        MODIO_API_HOST,
+    )
 
 
 def get_tracked_mods(library_path=None):
@@ -39,26 +49,24 @@ def get_tracked_mods(library_path=None):
         library_path = os.path.join(WORKSPACE_ROOT, "mods", "library.md")
 
     tracked = {}
-    current_category = "General"
 
     if os.path.exists(library_path):
         with open(library_path, "r", encoding="utf-8") as f:
-            for line in f:
-                line_str = line.strip()
-                if line_str.startswith("## "):
-                    current_category = line_str[3:].strip()
-                elif line_str.startswith("|") and "[" in line_str and "README.md" in line_str:
-                    match = re.search(r"\|\s*\*\*\[(.*?)\]\((.*?)/README\.md\)\*\*\s*\|\s*(.*?)\s*\|\s*(\d+)\s+implemented\s*\|", line)
-                    if match:
-                        name, slug, desc, feat_count = match.groups()
-                        tracked[slug.lower()] = {
-                            "name": name.strip(),
-                            "slug": slug.strip(),
-                            "category": current_category,
-                            "description": desc.strip(),
-                            "features_count": int(feat_count),
-                            "spec_path": os.path.join(WORKSPACE_ROOT, "mods", slug.strip(), "README.md"),
-                        }
+            rows = parse_library_rows(f.read())
+        for row in rows:
+            slug = row["slug"]
+            feature_match = re.match(r"(\d+)\s+implemented\b", row["features_documented"], re.IGNORECASE)
+            if feature_match is None:
+                raise ValueError(f"Invalid Features Documented value for library entry '{slug}'.")
+            tracked[slug.lower()] = {
+                "mod_id": row["mod_id"],
+                "name": row["name"],
+                "slug": slug,
+                "category": row["category"],
+                "description": row["description"],
+                "features_count": int(feature_match.group(1)),
+                "spec_path": os.path.join(WORKSPACE_ROOT, "mods", slug, "README.md"),
+            }
 
     # Also detect directories in mods/ that have README.md
     mods_dir = os.path.join(WORKSPACE_ROOT, "mods")

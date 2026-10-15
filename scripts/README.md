@@ -97,7 +97,7 @@ Tools for querying cataloged community mods and interacting with mod.io.
 | Command Alias | Script | Description |
 | :--- | :--- | :--- |
 | `query-db` | [`query_mod_database.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/query_mod_database.py) | High-speed (sub-10ms) query engine searching 2,200+ mod items, passives, spells, and boosts. |
-| `update-catalog` | [`update_library_catalog.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/update_library_catalog.py) | Compiles and validates the master community catalog in [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md). |
+| `update-catalog` | [`update_library_catalog.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/update_library_catalog.py) | Compiles and validates six-column categorized rows (Mod Id, Mod Name, Mod Slug, Description, Features Documented, Spec Link) in [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md), preserving verified IDs and leaving unknown IDs blank. |
 | `modio-search` | [`modio_search.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_search.py) | Searches mod.io with natural language and platform filters (`console`, `windows`, etc.). |
 | `modio-sync` | [`modio_sync.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_sync.py) | Downloads and syncs subscribed mods from mod.io into `mods/`. |
 | `modio-update` | [`modio_update.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_update.py) | Checks tracked mods against remote mod.io releases and updates specifications. |

@@ -19,6 +19,7 @@ import urllib.parse
 import urllib.request
 import zipfile
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 BG3_GAME_ID = 6715
 MODIO_API_HOST = "g-6715.modapi.io"
@@ -1157,8 +1158,8 @@ def generate_spec_markdown(mod_metadata, meta_lsx, features, category):
     summary = mod_metadata.get("summary", "")
     author = meta_lsx.get("Author") or mod_metadata.get("submitted_by", {}).get("username", "Unknown")
     version = mod_metadata.get("modfile", {}).get("version") or meta_lsx.get("Version64") or "1.0.0"
-    mod_id = mod_metadata.get("id")
-    slug = mod_metadata.get("name_id")
+    mod_id = mod_metadata.get("id") or ""
+    slug = mod_metadata.get("name_id") or ""
 
     overview_text = summary or "Detailed specification of implemented features and mechanics in this mod."
     if slug == "gearup":
@@ -1217,6 +1218,7 @@ def generate_spec_markdown(mod_metadata, meta_lsx, features, category):
     lines = [
         f"# Mod Specification: {name}",
         f"**Category**: {category} | **Author**: {author} | **Version**: {version} | **mod.io ID**: `{mod_id}`",
+        f"**Mod Slug**: `{slug}` | **Features Documented**: {len(features)} implemented",
         f"**URL**: `https://mod.io/g/baldursgate3/m/{slug}`",
         "",
         "---",
@@ -1248,59 +1250,14 @@ def generate_spec_markdown(mod_metadata, meta_lsx, features, category):
     return "\n".join(lines)
 
 
-def update_library_markdown(library_path, mod_name, slug, category, summary, features_count):
-    """Ensure mods/library.md contains categorized sections and update the mod's entry."""
-    categories = [
-        "Gear",
-        "Spells",
-        "Classes & Subclasses",
-        "Progression & Rules",
-        "Utilities & Cheats",
-    ]
-
-    if not os.path.exists(library_path):
-        content = "# Baldur's Gate 3 Mod Library\n\nThis library catalogs documented Baldur's Gate 3 mods, their in-game features, and specifications for build crafting.\n\n"
-        for cat in categories:
-            content += f"## {cat}\n\n| Mod Name | Description | Features Documented | Spec Link |\n| :--- | :--- | :--- | :--- |\n\n"
+def update_library_markdown(library_path):
+    """Regenerate the complete library from specs while preserving known IDs."""
+    if __package__:
+        from .update_library_catalog import write_library_catalog
     else:
-        with open(library_path, "r", encoding="utf-8") as f:
-            content = f.read()
+        from update_library_catalog import write_library_catalog
 
-    # Ensure all category headers exist
-    for cat in categories:
-        if f"## {cat}" not in content:
-            content += f"\n## {cat}\n\n| Mod Name | Description | Features Documented | Spec Link |\n| :--- | :--- | :--- | :--- |\n"
-
-    # Remove existing entry if present across any category to prevent duplicates
-    entry_pattern = rf"\| \*\*\[?{re.escape(mod_name)}(?:\]\([^)]*\))?\]?\*\*.*?\n"
-    content = re.sub(entry_pattern, "", content)
-
-    # Build new row
-    clean_summary = summary.replace("|", "\\|").replace("\n", " ").strip()
-    new_row = f"| **[{mod_name}]({slug}/README.md)** | {clean_summary} | {features_count} implemented | [View Spec]({slug}/README.md) |\n"
-
-    # Insert under target category table
-    cat_header = f"## {category}"
-    if cat_header in content:
-        header_idx = content.find(cat_header)
-        next_header_idx = content.find("\n## ", header_idx + len(cat_header))
-        if next_header_idx == -1:
-            next_header_idx = len(content)
-
-        section = content[header_idx:next_header_idx]
-        lines = section.splitlines(keepends=True)
-        insert_idx = len(lines)
-        for i, l in enumerate(lines):
-            if l.startswith("| :---"):
-                insert_idx = i + 1
-            elif l.startswith("|") and insert_idx <= i + 1:
-                insert_idx = i + 1
-
-        lines.insert(insert_idx, new_row)
-        content = content[:header_idx] + "".join(lines) + content[next_header_idx:]
-
-    with open(library_path, "w", encoding="utf-8") as f:
-        f.write(content)
+    write_library_catalog(library_file=Path(library_path), mods_dir=Path(library_path).parent)
 
 
 # ----------------------------------------------------------------------
@@ -1467,7 +1424,7 @@ def process_mod(query, output_dir=None, write_spec=False, update_library=False):
     if update_library or write_spec:
         workspace_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         lib_path = os.path.join(workspace_root, "mods", "library.md")
-        update_library_markdown(lib_path, mod_name, slug, category, mod_meta.get("summary", ""), len(features))
+        update_library_markdown(lib_path)
 
     result = {
         "mod_name": mod_name,

@@ -54,9 +54,9 @@ The script will:
 4. **Apply New Releases**: If a new release is detected:
    - Downloads and unpacks the new `.pak` archive to `mods/<slug>/data/`.
    - Parses updated Stats, Localization, Meta, and Progression data.
+   - Rewrites [`mods/<slug>/README.md`](file:///home/jpstroud/projects/BaldursGate3/mods) with semantic versioning (`modfile.version`), the verified Mod.io ID, mod slug, overview, and implemented-feature count.
+   - Regenerates the categorized six-column catalog rows in [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md), preserving verified IDs and using blank Mod Id values when an ID is not available.
    - Computes the change description: uses the mod author's mod.io changelog if available; otherwise computes an automated structural diff of features (added/modified/removed items, spells, and passives).
-   - Rewrites [`mods/<slug>/README.md`](file:///home/jpstroud/projects/BaldursGate3/mods) with semantic versioning (`modfile.version`).
-   - Updates the catalog entry in [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md).
 
 > [!TIP]
 > **Tool Discovery & Schema Inspection**:

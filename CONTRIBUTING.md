@@ -74,7 +74,8 @@ When adding or updating reference mod specifications in `mods/`:
   - In-Game Items & Stat Definitions
   - Spells, Passives & Status Effects
   - Progression Trees & Unlocks
-- Update `mods/library.md` to register newly documented mods under the relevant category (Gear, Spells, Classes, Progression, Utilities).
+- Include the verified mod.io ID, slug, and implemented-feature count in the generated spec metadata; never invent an unknown ID.
+- Run `python3 scripts/update_library_catalog.py --write` to register or refresh the mod under the relevant category in `mods/library.md`. Each row uses Mod Id, Mod Name, Mod Slug, Description, Features Documented, and Spec Link; unknown IDs stay blank until verified.
 
 ---
 

@@ -99,7 +99,8 @@ Each spawned subagent receives a concise prompt directing it to follow the dedic
 >
 > 1. Read and follow all instructions in the worker skill [`bg3_update_single_mod`](file:///home/jpstroud/projects/BaldursGate3/.agents/skills/bg3_update_single_mod/SKILL.md).
 > 2. Run `python3 scripts/modio_update.py --query "<MOD_QUERY>" --json` to inspect the mod.io REST API and apply any updates.
-> 3. Return the standardized status message:
+> 3. When an update is applied, verify that the rewritten spec records its verified mod.io ID, slug, and implemented-feature count and that the catalog row uses the six-column schema.
+> 4. Return the standardized status message:
 >    - **Up-to-Date**: `<mod-slug>: No updates found (current version: v<version>)`
 >    - **Updated**: `<mod-slug>: Documentation updated to v<mod-version> — <description of changes>`
 >    - **Not Tracked**: `⚠️ <mod-slug>: Not tracked in library (use /bg3_document_mods to add)`
