@@ -24,7 +24,7 @@
                     <attribute id="FileSize" type="uint64" value="0"/>
                     <attribute id="Folder" type="LSString" value="DynamicDifficultyScaling_51c67d03-954d-67d8-d5ea-c3f04d7be8bb"/>
                     <attribute id="LobbyLevelName" type="FixedString" value=""/>
-                    <attribute id="MD5" type="LSString" value="d7b3005fa12064038a483ad35206daa9"/>
+                    <attribute id="MD5" type="LSString" value="872663c7d822d59826254792e1d6c121"/>
                     <attribute id="MenuLevelName" type="FixedString" value=""/>
                     <attribute id="Name" type="LSString" value="Dynamic Difficulty Scaling"/>
                     <attribute id="NumPlayers" type="uint8" value="4"/>
@@ -32,7 +32,7 @@
                     <attribute id="PublishHandle" type="uint64" value="6077436"/>
                     <attribute id="StartupLevelName" type="FixedString" value=""/>
                     <attribute id="UUID" type="FixedString" value="51c67d03-954d-67d8-d5ea-c3f04d7be8bb"/>
-                    <attribute id="Version64" type="int64" value="36028797018963987"/>
+                    <attribute id="Version64" type="int64" value="36028797018963988"/>
                     <children>
                         <node id="PublishVersion">
                             <attribute id="Version64" type="int64" value="144255927718626661"/>
