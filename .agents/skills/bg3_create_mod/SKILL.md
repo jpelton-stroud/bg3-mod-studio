@@ -198,12 +198,12 @@ Once all subagents have reported success:
    - Spell references in `SpellLists.lsx` against local stats
    - Compliance of 512×512 PNG thumbnails and logos
 
-2. **Generate Toolkit & mod.io Metadata**:
+2. **Export the README for Publishing**:
    Execute [`scripts/generate_mod_metadata.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/generate_mod_metadata.py):
    ```bash
    python3 scripts/generate_mod_metadata.py --mod <ModName> --write
    ```
-   This automatically compiles publication-ready descriptions, mechanics tables, and tags into `my_mods/<ModName>/modio_description.md`.
+   This exports the complete templated `README.md` as `my_mods/<ModName>/modio_description.html`.
 
 ---
 

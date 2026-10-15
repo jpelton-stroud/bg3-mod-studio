@@ -25,6 +25,9 @@ import zlib
 from pathlib import Path
 
 
+README_TEMPLATE_PATH = Path(__file__).parent / "templates" / "custom_mod_readme.md"
+
+
 # Known common dependencies for BG3 (Patch 8)
 KNOWN_DEPENDENCIES = {
     "GustavX": {
@@ -243,51 +246,28 @@ def build_readme_content(
     author: str,
     description: str,
     dependencies: list,
+    version: str,
 ) -> str:
-    dep_list_str = "\n".join(f"- `{d.get('Name')}` ({d.get('UUID')})" for d in dependencies)
-    return f"""# {mod_name}
-**Module UUID**: `{mod_uuid}`  
-**Mod Slug**: `{mod_slug}`  
-**Larian Folder**: `{folder_name}`  
-**Author**: `{author}`  
-**Toolkit Target**: Patch 7 / Patch 8 Native Toolkit Drag-and-Drop Structure
-
----
-
-## Overview
-{description}
-
----
-
-## Dependencies
-{dep_list_str}
-
----
-
-## Installation & Toolkit Import
-
-### Method 1: Automatic Sync (Recommended)
-Sync mod files directly into your Baldur's Gate 3 `Data/` folder using:
-```bash
-python3 scripts/sync_to_game_data.py --mods {mod_slug}
-```
-
-### Method 2: Manual Toolkit Workspace Import
-1. Locate your game's **Data** directory (typically `.../Baldurs Gate 3/Data/`).
-2. Copy the folders from this mod directory directly into `Data/`:
-   - `Projects/`
-   - `Mods/`
-   - `Public/`
-   - `Localization/`
-3. Launch the **Baldur's Gate 3 Toolkit**.
-4. Click **File -> Open Project...** and select **{mod_name}**.
-5. Save and Publish!
-
----
-
-## Features & Implementation
-*(To be detailed by mod authors and subagents)*
-"""
+    template = README_TEMPLATE_PATH.read_text(encoding="utf-8")
+    dependency_lines = "\n".join(
+        f"- `{dependency.get('Name')}` (`{dependency.get('UUID')}`)"
+        for dependency in dependencies
+    ) or "- None."
+    replacements = {
+        "{{MOD_NAME}}": mod_name,
+        "{{MOD_UUID}}": mod_uuid,
+        "{{MOD_SLUG}}": mod_slug,
+        "{{LARIAN_FOLDER}}": folder_name,
+        "{{VERSION}}": version,
+        "{{AUTHOR}}": author,
+        "{{DESCRIPTION}}": description,
+        "{{DEPENDENCIES}}": dependency_lines,
+    }
+    return re.sub(
+        r"\{\{[A-Z_]+\}\}",
+        lambda match: replacements[match.group(0)],
+        template,
+    )
 
 
 def scaffold_mod(
@@ -385,7 +365,16 @@ def scaffold_mod(
         dependencies=resolved_deps,
     )
     loc_xml = build_localization_xml(clean_name, allocated_handles[:2])
-    readme_md = build_readme_content(clean_name, mod_uuid, larian_folder, mod_slug, author, description, resolved_deps)
+    readme_md = build_readme_content(
+        clean_name,
+        mod_uuid,
+        larian_folder,
+        mod_slug,
+        author,
+        description,
+        resolved_deps,
+        version_str,
+    )
     png_data = generate_png_bytes(512, 512, 45, 52, 64)
 
     files_to_write = {

@@ -24,11 +24,18 @@ python3 scripts/create_mod_scaffold.py \
 ```
 
 The script produces:
+- `my_mods/<mod-slug>/README.md` from the standardized template in `scripts/templates/custom_mod_readme.md`
 - `my_mods/<ModName>_<UUID>/Projects/<UUID>/meta.lsx`
 - `my_mods/<ModName>_<UUID>/Mods/<UUID>/meta.lsx`
 - `my_mods/<ModName>_<UUID>/Public/<UUID>/Stats/Generated/Data/`
 - `my_mods/<ModName>_<UUID>/Localization/English/<ModName>.xml`
 - Clean 512x512 placeholder PNG thumbnail
+
+To export the README as an HTML publishing copy:
+```bash
+python3 scripts/generate_mod_metadata.py --mod <mod-slug> --write
+```
+This writes `my_mods/<mod-slug>/modio_description.html` beside the README.
 
 ---
 

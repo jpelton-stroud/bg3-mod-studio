@@ -26,10 +26,10 @@ Activate this skill when:
 flowchart TD
     Trigger["User Request / /bg3_release_prep"] --> Step1["1. Bump Semantic Version & Version64"]
     Step1 --> Step2["2. Strict Validation (validate_mod.py --strict)"]
-    Step2 -->|Pass| Step3["3. Generate Metadata & BBCode (generate_mod_metadata.py)"]
+    Step2 -->|Pass| Step3["3. Export README as HTML (generate_mod_metadata.py)"]
     Step2 -->|Fail| Halt["Halt: Report Errors & Propose Fixes"]
     Step3 --> Step4["4. Sync to Game Data & Bump Build (sync_to_game_data.py)"]
-    Step4 --> Step5["5. Surface Toolkit Instructions & Copy-Paste BBCode"]
+    Step4 --> Step5["5. Surface HTML publishing copy & Toolkit instructions"]
 ```
 
 ---
@@ -60,13 +60,13 @@ python3 scripts/validate_mod.py --mod <mod_slug> --strict --json
 > If strict validation fails with errors, stop the release pipeline immediately, report the errors, and offer automated fixes before continuing.
 
 ### Step 3: Description & Metadata Generation
-Generate publication-ready Markdown and BBCode formatted descriptions, change logs, and tag suggestions:
+Export the mod's complete root README as an HTML publishing copy:
 
 ```bash
 python3 scripts/generate_mod_metadata.py --mod <mod_slug> --write --json
 ```
 
-This writes description files to `my_mods/<mod_slug>/metadata/` (or mod root).
+This writes `my_mods/<mod_slug>/modio_description.html` beside the README.
 
 ### Step 4: Game Data Synchronization & Build Increment
 Deploy the updated mod into the game's active `Data/` folder so the official Toolkit detects all recent changes and the incremented build number:
@@ -109,17 +109,8 @@ Present a release summary to the user:
 
 ---
 
-#### 🏷️ Recommended mod.io Tags:
-`Classes`, `Spells`, `Level 20`, `Balance`
-
-#### 📋 BBCode Description (Ready for BG3 Toolkit):
-```bbcode
-[h1]<Mod Name>[/h1]
-[b]Version:[/b] <Version>
-
-[h2]Features[/h2]
-...
-```
+#### 📄 HTML Publishing Copy:
+`my_mods/<mod_slug>/modio_description.html`
 
 ---
 
@@ -127,6 +118,6 @@ Present a release summary to the user:
 1. Open the **Baldur's Gate 3 Toolkit**.
 2. Open Project **`<Mod Name>`**.
 3. Go to **File -> Mod Project Manager**.
-4. Paste the generated description from above and select the recommended tags.
+4. Use the generated HTML publishing copy as the mod description.
 5. Click **Publish to mod.io**.
 ```

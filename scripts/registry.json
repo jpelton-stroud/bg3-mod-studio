@@ -324,17 +324,36 @@
       "name": "generate_mod_metadata.py",
       "command": "gen-metadata",
       "category": "management",
-      "summary": "Extracts and formats publication metadata for BG3 mods for the Toolkit & mod.io.",
-      "description": "Reads mod structure, stats, and localization to generate publication-ready Markdown and BBCode formatted descriptions, tags, and changelogs.",
-      "intents": ["mod metadata", "bbcode description", "toolkit description", "publish description", "mod.io tags", "changelog generator"],
+      "summary": "Exports a custom mod README as HTML for publication.",
+      "description": "Reads a mod's root README.md and renders the full document as modio_description.html.",
+      "intents": ["mod metadata", "README HTML export", "HTML description", "toolkit description", "publish description", "mod.io description"],
       "cli_usage": "python3 scripts/generate_mod_metadata.py --mod <mod> [options]",
       "flags": [
         {"name": "--mod", "type": "str", "required": true, "description": "Mod directory name in my_mods/ or path"},
-        {"name": "--write", "type": "bool", "required": false, "description": "Write description files to metadata/ directory"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON metadata output"}
+        {"name": "--write", "type": "bool", "required": false, "description": "Write modio_description.html beside README.md"},
+        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured output paths as JSON"}
       ],
       "examples": [
         "python3 scripts/generate_mod_metadata.py --mod arcane-progression --write --json"
+      ]
+    },
+    {
+      "name": "modio_update_metadata.py",
+      "command": "modio-update-metadata",
+      "category": "management",
+      "summary": "Previews and updates metadata and selected profile settings for a local BG3 mod on mod.io.",
+      "description": "Uses MODIO_PAT to update a uniquely matched published mod's HTML description, approved additive tags, three Community options, non-commercial credit options, and public visibility. Preview is read-only; writes require --confirm.",
+      "intents": ["update mod.io metadata", "update mod profile", "set mod.io tags", "update mod description", "mod community settings", "reuse permissions"],
+      "cli_usage": "python3 scripts/modio_update_metadata.py --mod <local_mod> [--tags <approved-tags>] [--confirm] [--json]",
+      "flags": [
+        {"name": "--mod", "type": "str", "required": true, "description": "Exact mod name or slug for a folder under my_mods/"},
+        {"name": "--tags", "type": "str", "required": false, "description": "Comma-separated user-approved tags; may be repeated"},
+        {"name": "--confirm", "type": "bool", "required": false, "description": "Perform writes after interactive user confirmation; without it, preview only"},
+        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+      ],
+      "examples": [
+        "python3 scripts/modio_update_metadata.py --mod paladins-call --json",
+        "python3 scripts/modio_update_metadata.py --mod paladins-call --tags \"Class,Paladin\" --confirm --json"
       ]
     },
     {

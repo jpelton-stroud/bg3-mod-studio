@@ -85,7 +85,8 @@ Tools for load order configuration, versioning, and publishing metadata.
 | :--- | :--- | :--- |
 | `load-order` | [`manage_load_order.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/manage_load_order.py) | Inspects, activates, disables, and validates mod load order in `modsettings.lsx`. |
 | `bump-version` | [`bump_mod_version.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/bump_mod_version.py) | Increments semantic versions and encodes 64-bit uint `Version64` across `meta.lsx`. |
-| `gen-metadata` | [`generate_mod_metadata.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/generate_mod_metadata.py) | Extracts publication metadata and generates BBCode descriptions, tags, and changelogs. |
+| `gen-metadata` | [`generate_mod_metadata.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/generate_mod_metadata.py) | Renders a mod's root `README.md` as `modio_description.html`. |
+| `modio-update-metadata` | [`modio_update_metadata.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_update_metadata.py) | Previews then updates a local BG3 mod's mod.io description, approved tags, selected profile settings, non-commercial reuse permissions, and visibility; writes require `--confirm`. |
 | `setup-env` | [`setup_environment.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/setup_environment.py) | Setup wizard checking Python, Steam BG3, AppData, and mod.io configuration. |
 
 ---
@@ -180,4 +181,3 @@ This verifies that:
 3. Every script compiles without Python syntax errors.
 4. Every script cleanly handles `--help` CLI invocation.
 5. Every agent skill in `.agents/skills/` uses valid registered scripts and provides dynamic tool discovery guidance.
-

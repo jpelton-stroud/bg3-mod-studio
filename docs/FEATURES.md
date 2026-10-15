@@ -112,7 +112,7 @@ Advises on Best-in-Slot (BiS) gear, stat boosts, spells, and passives across the
 
 #### 7. `/bg3_release_prep`
 
-Automates pre-publication verification for custom mods: executes strict XML validation, prunes orphaned localization handles, increments `Version64`, packages the `.pak`, and generates mod.io BBCode descriptions.
+Automates pre-publication verification for custom mods: executes strict XML validation, prunes orphaned localization handles, increments `Version64`, packages the `.pak`, and exports the mod's root README as HTML.
 
 - **Example Prompt**:
   ```text
@@ -309,8 +309,8 @@ All studio scripts are located in [`scripts/`](scripts/) and registered in [`scr
 #### `scripts/generate_mod_metadata.py`
 
 - **Command Alias**: `gen-metadata`
-- **Purpose**: Extracts mod properties and formats ready-to-publish BBCode descriptions, release changelogs, and metadata tags for mod.io and the official Toolkit.
-- **Usage**: `python3 scripts/generate_mod_metadata.py --mod my_mods/Shadowblade`
+- **Purpose**: Renders the mod's root `README.md` as `modio_description.html` for publishing.
+- **Usage**: `python3 scripts/generate_mod_metadata.py --mod my_mods/Shadowblade --write`
 
 #### `scripts/setup_environment.py`
 
