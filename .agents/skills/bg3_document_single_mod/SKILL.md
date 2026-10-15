@@ -85,6 +85,7 @@ Verify that the generated [`mods/<mod_slug>/README.md`](file:///home/jpstroud/pr
 # Mod Specification: [Mod Name]
 **Category**: [Gear | Spells | Classes & Subclasses | Progression & Rules | Utilities & Cheats]
 **Author**: [Author] | **Version**: [Version] | **mod.io ID**: `[ID]`
+**Mod Slug**: `[slug]` | **Features Documented**: `[count] implemented`
 **URL**: `https://mod.io/g/baldursgate3/m/[slug]`
 
 ---
@@ -100,6 +101,8 @@ Verify that the generated [`mods/<mod_slug>/README.md`](file:///home/jpstroud/pr
 | :--- | :--- | :--- | :--- | :--- |
 | **[Item / Spell Name]**<br>*[Weapon / Armor / Cantrip / Passive]* | `[Technical_ID]` | Base weapon damage, AC, crit range, or stat boosts | Detailed explanation of what the granted passives/spells actually do (damage roll, save DC, effect formula, cooldown) | Camp chest, merchant, or class progression unlock |
 ```
+
+The catalog updater reads the mod.io ID, README title and overview, implemented-feature count, and containing directory name to populate Mod Id, Mod Name, Description, Features Documented, and Mod Slug. The Spec Link is generated from that slug. Never invent an unverified ID; leave it blank in the catalog until the ID is confirmed.
 
 > [!IMPORTANT]
 > If a weapon or piece of gear grants a passive or spell (e.g. `PassivesOnEquip` or `UnlockSpell`), the table MUST NOT just list the name of the passive. It must explain **what that passive actually does** (e.g., *"Adds +1d6 Force damage to every beam"* or *"Grants Advantage on Constitution Saving Throws"*).

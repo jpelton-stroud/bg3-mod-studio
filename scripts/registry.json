@@ -402,8 +402,8 @@
       "name": "update_library_catalog.py",
       "command": "update-catalog",
       "category": "library",
-      "summary": "Updates or checks master catalog in mods/library.md from mods/*/README.md.",
-      "description": "Parses all README specs in mods/<slug>/ and compiles an organized, verified master library catalog in mods/library.md.",
+      "summary": "Updates or checks six-column categorized catalog in mods/library.md from mods/*/README.md.",
+      "description": "Parses verified mod.io IDs, titles, directory slugs, descriptions, and implemented-feature counts from README specs in mods/<slug>/ and compiles categorized six-column rows with relative spec links in mods/library.md. Unknown IDs stay blank.",
       "intents": ["update library", "library catalog", "compile library.md", "library table", "tracked mods catalog"],
       "cli_usage": "python3 scripts/update_library_catalog.py [options]",
       "flags": [

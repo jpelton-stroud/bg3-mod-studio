@@ -17,7 +17,7 @@ When triggered via `/bg3_document_mods` or when requested to document one or mor
 
 1. **Intake & Decompose**: Accepts a list of one or more mod queries (names, slugs, mod.io IDs, or full mod.io URLs) and spawns an isolated subagent for each mod.
 2. **Concurrently Supervise**: Dispatches tasks to subagents in parallel via `invoke_subagent` and waits reactively for notifications (no polling loops).
-3. **Aggregate & Catalog**: Once all subagents report back, updates [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md) with general categories, mod names, descriptions, and spec links.
+3. **Aggregate & Catalog**: Once all subagents report back, runs the catalog generator to populate the six columns in [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md): Mod Id, Mod Name, Mod Slug, Description, Features Documented, and Spec Link.
 4. **Report Final Status**: Presents the user with a consolidated summary table detailing mod name, status (Success/Failed), category, and description/failure reason.
 
 ---
@@ -106,7 +106,7 @@ python3 scripts/update_library_catalog.py --write
 python3 scripts/query_mod_database.py --reindex
 ```
 
-This automatically scans all specifications under `mods/`, extracts titles, descriptions, and feature counts, categorizes them into standard tables (**Gear**, **Spells**, **Classes & Subclasses**, **Progression & Rules**, **Utilities & Cheats**), regenerates [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md), and rebuilds the high-speed query cache in `.cache/mod_database.json` for [`bg3_query_gear`](file:///home/jpstroud/projects/BaldursGate3/.agents/skills/bg3_query_gear/SKILL.md).
+This automatically scans all specifications under `mods/`, extracts verified mod.io IDs, titles, slugs, descriptions, and implemented-feature counts, categorizes them into standard tables (**Gear**, **Spells**, **Classes & Subclasses**, **Progression & Rules**, **Utilities & Cheats**), and writes six-column rows with relative README spec links. Existing verified IDs are preserved during migration; unknown IDs remain blank until verified. It then rebuilds the high-speed query cache in `.cache/mod_database.json` for [`bg3_query_gear`](file:///home/jpstroud/projects/BaldursGate3/.agents/skills/bg3_query_gear/SKILL.md).
 
 > [!TIP]
 > **Tool Discovery & Schema Inspection**:

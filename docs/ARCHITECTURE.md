@@ -105,7 +105,7 @@ flowchart LR
     DL --> Extract["Pure-Python Unpacker\n(zlib + struct)"]
     Extract --> Parse["Larian Engine Parsers\n(XML & TXT)"]
     Parse --> Specs["mods/<slug>/README.md\n(Rich Markdown Spec)"]
-    Parse --> Index["Master Catalog\n(mods/library.md)"]
+    Parse --> Index["Master Catalog\n(mods/library.md: six columns)"]
     Index --> FastDB["query_mod_database.py\n(Sub-10ms Fuzzy Search)"]
 ```
 
@@ -189,7 +189,7 @@ The live synchronization system mirrors source files from `my_mods/<mod-slug>/` 
 
 The community mod library (`mods/`) indexes over 2,200 unique community gear items, passives, spells, and boosts:
 
-- **Aggregation Pipeline**: `scripts/update_library_catalog.py` crawls all `mods/<slug>/README.md` files, parses markdown tables and metadata headers, and compiles the unified `mods/library.md`.
+- **Aggregation Pipeline**: `scripts/update_library_catalog.py` crawls all `mods/<slug>/README.md` files, parses mod.io IDs, titles, descriptions, feature counts, and directory slugs, and compiles the categorized six-column `mods/library.md` with relative spec links.
 - **Query Optimization**: `scripts/query_mod_database.py` evaluates queries against cached catalog structures using in-memory tokenization and regex matching. Lookups complete in under 10ms, allowing agent workflows to perform real-time Best-in-Slot gear evaluation without noticeable latency.
 
 ---

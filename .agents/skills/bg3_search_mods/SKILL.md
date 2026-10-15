@@ -61,7 +61,7 @@ The script automatically:
 * Retrieves `MODIO_API_KEY` from the environment or configuration.
 * Maps natural language terms to mod.io category tags and text queries.
 * Applies platform filtering (`windows`, `xboxseriesx`, `ps5`, or `console`).
-* Cross-references [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md) and **automatically dumps any search results already tracked**.
+* Cross-references Mod Name and Mod Slug in the six-column categorized rows of [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md) and **automatically dumps any search results already tracked**.
 * Ranks results by relevance, tags, and subscriber popularity.
 
 > [!TIP]

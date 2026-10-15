@@ -13,6 +13,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, TextIO, Tuple
 
+if __package__:
+    from .library_catalog import parse_library_rows
+else:
+    from library_catalog import parse_library_rows
+
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 LIBRARY_PATH = WORKSPACE_ROOT / "mods" / "library.md"
 BG3_GAME_ID = 6715
@@ -91,48 +96,26 @@ def parse_catalog(library_path: Path) -> Tuple[List[ModEntry], List[str], int]:
     except OSError as error:
         raise ModioError(f"Could not read the mod library at {library_path}: {error}") from None
 
-    catalog: Dict[str, str] = {}
-    library_entry = re.compile(
-        r"^\|\s*\*\*\[(?P<name>.+?)\]\((?P<slug>[^/]+)/README\.md\)\*\*"
-    )
-    for line in lines:
-        match = library_entry.match(line)
-        if match:
-            slug = match.group("slug").strip()
-            if slug in catalog:
-                raise ModioError(f"The library lists the slug '{slug}' more than once.")
-            catalog[slug] = match.group("name").strip()
+    catalog: Dict[str, Dict[str, str]] = {}
+    for row in parse_library_rows("\n".join(lines)):
+        slug = row["slug"]
+        if not slug:
+            continue
+        if slug in catalog:
+            raise ModioError(f"The library lists the slug '{slug}' more than once.")
+        catalog[slug] = row
     if not catalog:
         raise ModioError(f"No documented mod entries were found in {library_path}.")
 
-    id_section = False
-    id_row = re.compile(
-        r"^\|\s*(?P<name>.*?)\s*\|\s*`(?P<slug>[^`]+)`\s*\|\s*(?P<mod_id>[^|]*?)\s*\|$"
-    )
     ids_by_slug: Dict[str, int] = {}
     warnings: List[str] = []
-    for line_number, line in enumerate(lines, start=1):
-        if line.startswith("## "):
-            id_section = line[3:].strip().casefold() == "mod.io ids"
-            continue
-        if not id_section or not line.startswith("|"):
-            continue
-        match = id_row.match(line)
-        if not match:
-            if "Mod Name" not in line and not re.match(r"^\|\s*:?-+", line):
-                warnings.append(f"Line {line_number} in the Mod.io IDs index is malformed and was ignored.")
-            continue
-
-        slug = match.group("slug").strip()
-        raw_id = match.group("mod_id").strip()
-        if slug not in catalog:
-            warnings.append(f"ID index entry '{slug}' is not in the library and was ignored.")
+    for slug, row in catalog.items():
+        raw_id = row["mod_id"].strip()
+        if not raw_id:
             continue
         if not re.fullmatch(r"[0-9]+", raw_id) or int(raw_id) < 1:
-            warnings.append(f"ID index entry '{slug}' has no valid positive numeric ID and was ignored.")
+            warnings.append(f"Library entry '{slug}' has no valid positive numeric Mod Id and was ignored.")
             continue
-        if slug in ids_by_slug:
-            raise ModioError(f"The Mod.io IDs index lists the slug '{slug}' more than once.")
         ids_by_slug[slug] = int(raw_id)
 
     seen_ids: Dict[int, str] = {}
@@ -140,23 +123,23 @@ def parse_catalog(library_path: Path) -> Tuple[List[ModEntry], List[str], int]:
         prior_slug = seen_ids.get(mod_id)
         if prior_slug is not None:
             raise ModioError(
-                f"The Mod.io IDs index assigns ID {mod_id} to both '{prior_slug}' and '{slug}'."
+                f"The library assigns Mod Id {mod_id} to both '{prior_slug}' and '{slug}'."
             )
         seen_ids[mod_id] = slug
 
     missing_count = len(catalog) - len(ids_by_slug)
     entries = [
-        ModEntry(name=name, slug=slug, mod_id=ids_by_slug[slug])
-        for slug, name in catalog.items()
+        ModEntry(name=row["name"], slug=slug, mod_id=ids_by_slug[slug])
+        for slug, row in catalog.items()
         if slug in ids_by_slug
     ]
     if missing_count:
         warnings.append(
             f"{missing_count} documented library entr{'y' if missing_count == 1 else 'ies'} "
-            "without a valid Mod.io ID were excluded."
+            "without a valid Mod Id were excluded."
         )
     if not entries:
-        raise ModioError("The library has no entries with valid numeric IDs in its Mod.io IDs index.")
+        raise ModioError("The library has no entries with valid numeric Mod Id values.")
     return entries, warnings, missing_count
 
 

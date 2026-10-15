@@ -37,9 +37,10 @@ flowchart TD
 ## Mode 1: Candidate vs. Existing Library
 
 ### Step 1: Library Tracking Verification
-1. Inspect [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md) and directory names under [`mods/`](file:///home/jpstroud/projects/BaldursGate3/mods).
-2. Determine if the mod is already cataloged (matching slug or title).
-3. If already tracked, note:
+1. Inspect the categorized six-column rows in [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md), matching the candidate against Mod Slug or Mod Name.
+2. Follow the Spec Link (or the row's Mod Slug) to inspect each tracked mod's README under [`mods/`](file:///home/jpstroud/projects/BaldursGate3/mods).
+3. Determine if the mod is already cataloged.
+4. If already tracked, note:
    `Mod '<Mod Name>' is already tracked in mods/library.md.`
 
 ### Step 2: Inspection of Candidate & Library Specs
@@ -145,5 +146,4 @@ Supported resolution strategies:
 > python3 scripts/tools.py --info compat-patch --json
 > python3 scripts/tools.py --search "conflict" --json
 > ```
-
 

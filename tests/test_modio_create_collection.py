@@ -15,6 +15,9 @@ from scripts.modio_create_collection import (
     parse_catalog,
     run_workflow,
 )
+from scripts.modio_search import get_tracked_mods as search_tracked_mods
+from scripts.modio_sync import get_tracked_mods_from_library, prune_mod_from_library
+from scripts.modio_update import get_tracked_mods as update_tracked_mods
 
 
 class StubClient:
@@ -57,19 +60,20 @@ class ModioCollectionTests(unittest.TestCase):
         library_path.write_text(content, encoding="utf-8")
         return library_path
 
+    def catalog_row(self, mod_id, name, slug, description="A", features="1 implemented"):
+        return (
+            f"| {mod_id} | {name} | `{slug}` | {description} | {features} "
+            f"| [View Spec]({slug}/README.md) |"
+        )
+
     def test_parse_catalog_includes_only_valid_documented_ids(self):
         library = self.make_library(
-            "# Mod Library\n\n"
-            "| Mod Name | Description | Features | Spec Link |\n"
-            "| :--- | :--- | :--- | :--- |\n"
-            "| **[Alpha](alpha/README.md)** | A | 1 | [Spec](alpha/README.md) |\n"
-            "| **[Beta](beta/README.md)** | B | 0 | [Spec](beta/README.md) |\n"
-            "| **[Gamma](gamma/README.md)** | C | 0 | [Spec](gamma/README.md) |\n\n"
-            "## Mod.io IDs\n\n"
-            "| Mod Name | Slug | Mod.io ID |\n"
-            "| :--- | :--- | ---: |\n"
-            "| Alpha | `alpha` | 101 |\n"
-            "| Gamma | `gamma` | not-a-number |\n"
+            "# Mod Library\n\n## Gear\n\n"
+            "| Mod Id | Mod Name | Mod Slug | Description | Features Documented | Spec Link |\n"
+            "| :--- | :--- | :--- | :--- | :--- | :--- |\n"
+            f"{self.catalog_row('101', 'Alpha', 'alpha')}\n"
+            f"{self.catalog_row('', 'Beta', 'beta', features='0 implemented')}\n"
+            f"{self.catalog_row('not-a-number', 'Gamma', 'gamma', features='0 implemented')}\n"
         )
 
         entries, warnings, missing_count = parse_catalog(library)
@@ -81,16 +85,49 @@ class ModioCollectionTests(unittest.TestCase):
 
     def test_parse_catalog_rejects_duplicate_numeric_ids(self):
         library = self.make_library(
-            "| **[Alpha](alpha/README.md)** | A | 1 | [Spec](alpha/README.md) |\n"
-            "| **[Beta](beta/README.md)** | B | 1 | [Spec](beta/README.md) |\n"
-            "## Mod.io IDs\n"
-            "| Mod Name | Slug | Mod.io ID |\n"
-            "| Alpha | `alpha` | 101 |\n"
-            "| Beta | `beta` | 101 |\n"
+            "## Gear\n"
+            "| Mod Id | Mod Name | Mod Slug | Description | Features Documented | Spec Link |\n"
+            "| :--- | :--- | :--- | :--- | :--- | :--- |\n"
+            f"{self.catalog_row('101', 'Alpha', 'alpha')}\n"
+            f"{self.catalog_row('101', 'Beta', 'beta')}\n"
         )
 
-        with self.assertRaisesRegex(ModioError, "assigns ID 101 to both"):
+        with self.assertRaisesRegex(ModioError, "assigns Mod Id 101 to both"):
             parse_catalog(library)
+
+    def test_catalog_readers_use_mod_name_slug_and_feature_columns(self):
+        row = self.catalog_row("101", "Alpha", "alpha", "A description", "3 implemented")
+        library = self.make_library(
+            "## Gear\n"
+            "| Mod Id | Mod Name | Mod Slug | Description | Features Documented | Spec Link |\n"
+            "| :--- | :--- | :--- | :--- | :--- | :--- |\n"
+            f"{row}\n"
+        )
+
+        tracked = update_tracked_mods(library)
+        synced = get_tracked_mods_from_library(library)
+        root = library.parent
+        (root / "mods").mkdir()
+        (root / "mods" / "library.md").write_text(library.read_text(encoding="utf-8"), encoding="utf-8")
+        searched_slugs, searched_names = search_tracked_mods(str(root))
+
+        self.assertEqual(tracked["alpha"]["mod_id"], "101")
+        self.assertEqual(tracked["alpha"]["features_count"], 3)
+        self.assertEqual(tracked["alpha"]["description"], "A description")
+        self.assertEqual(synced["alpha"]["name"], "Alpha")
+        self.assertIn("alpha", searched_slugs)
+        self.assertIn("alpha", searched_names)
+
+    def test_prune_removes_row_by_mod_slug(self):
+        library = self.make_library(
+            "## Gear\n"
+            "| Mod Id | Mod Name | Mod Slug | Description | Features Documented | Spec Link |\n"
+            "| :--- | :--- | :--- | :--- | :--- | :--- |\n"
+            f"{self.catalog_row('101', 'Alpha', 'alpha')}\n"
+        )
+
+        self.assertTrue(prune_mod_from_library(library, "alpha"))
+        self.assertNotIn("`alpha`", library.read_text(encoding="utf-8"))
 
     def test_build_changes_adds_missing_and_only_replaces_when_selected(self):
         selected = [ModEntry("Alpha", "alpha", 101)]
@@ -104,10 +141,10 @@ class ModioCollectionTests(unittest.TestCase):
 
     def test_dry_run_does_not_send_api_writes(self):
         library = self.make_library(
-            "| **[Alpha](alpha/README.md)** | A | 1 | [Spec](alpha/README.md) |\n"
-            "## Mod.io IDs\n"
-            "| Mod Name | Slug | Mod.io ID |\n"
-            "| Alpha | `alpha` | 101 |\n"
+            "## Gear\n"
+            "| Mod Id | Mod Name | Mod Slug | Description | Features Documented | Spec Link |\n"
+            "| :--- | :--- | :--- | :--- | :--- | :--- |\n"
+            f"{self.catalog_row('101', 'Alpha', 'alpha')}\n"
         )
         client = StubClient()
         answers = iter(["1", "c", "My Collection", "A description"])
@@ -127,10 +164,10 @@ class ModioCollectionTests(unittest.TestCase):
 
     def test_declined_confirmation_does_not_send_api_writes(self):
         library = self.make_library(
-            "| **[Alpha](alpha/README.md)** | A | 1 | [Spec](alpha/README.md) |\n"
-            "## Mod.io IDs\n"
-            "| Mod Name | Slug | Mod.io ID |\n"
-            "| Alpha | `alpha` | 101 |\n"
+            "## Gear\n"
+            "| Mod Id | Mod Name | Mod Slug | Description | Features Documented | Spec Link |\n"
+            "| :--- | :--- | :--- | :--- | :--- | :--- |\n"
+            f"{self.catalog_row('101', 'Alpha', 'alpha')}\n"
         )
         client = StubClient()
         answers = iter(["1", "c", "My Collection", "A description", "no"])
@@ -148,10 +185,10 @@ class ModioCollectionTests(unittest.TestCase):
 
     def test_create_requires_confirmation_and_adds_selected_mods(self):
         library = self.make_library(
-            "| **[Alpha](alpha/README.md)** | A | 1 | [Spec](alpha/README.md) |\n"
-            "## Mod.io IDs\n"
-            "| Mod Name | Slug | Mod.io ID |\n"
-            "| Alpha | `alpha` | 101 |\n"
+            "## Gear\n"
+            "| Mod Id | Mod Name | Mod Slug | Description | Features Documented | Spec Link |\n"
+            "| :--- | :--- | :--- | :--- | :--- | :--- |\n"
+            f"{self.catalog_row('101', 'Alpha', 'alpha')}\n"
         )
         client = CreateClient()
         answers = iter(["1", "c", "My Collection", "A description", "yes"])

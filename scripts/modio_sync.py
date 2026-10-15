@@ -28,16 +28,30 @@ WORKSPACE_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
 
-from modio_extract import (
-    get_api_key,
-    process_mod,
-    BG3_GAME_ID,
-    MODIO_API_HOST,
-)
-from modio_update import (
-    get_tracked_mods,
-    check_and_apply_update,
-)
+if __package__:
+    from .library_catalog import parse_library_rows
+    from .modio_extract import (
+        get_api_key,
+        process_mod,
+        BG3_GAME_ID,
+        MODIO_API_HOST,
+    )
+    from .modio_update import (
+        get_tracked_mods,
+        check_and_apply_update,
+    )
+else:
+    from library_catalog import parse_library_rows
+    from modio_extract import (
+        get_api_key,
+        process_mod,
+        BG3_GAME_ID,
+        MODIO_API_HOST,
+    )
+    from modio_update import (
+        get_tracked_mods,
+        check_and_apply_update,
+    )
 
 
 def get_oauth_token(cli_token=None):
@@ -123,25 +137,23 @@ def get_tracked_mods_from_library(library_path):
     Does not scan the filesystem directory to avoid detecting pruned/orphaned directories.
     """
     tracked = {}
-    current_category = "General"
     if os.path.exists(library_path):
         with open(library_path, "r", encoding="utf-8") as f:
-            for line in f:
-                line_str = line.strip()
-                if line_str.startswith("## "):
-                    current_category = line_str[3:].strip()
-                elif line_str.startswith("|") and "[" in line_str and "README.md" in line_str:
-                    match = re.search(r"\|\s*\*\*\[(.*?)\]\((.*?)/README\.md\)\*\*\s*\|\s*(.*?)\s*\|\s*(\d+)\s+implemented\s*\|", line)
-                    if match:
-                        name, slug, desc, feat_count = match.groups()
-                        tracked[slug.strip().lower()] = {
-                            "name": name.strip(),
-                            "slug": slug.strip(),
-                            "category": current_category,
-                            "description": desc.strip(),
-                            "features_count": int(feat_count),
-                            "spec_path": os.path.join(WORKSPACE_ROOT, "mods", slug.strip(), "README.md"),
-                        }
+            rows = parse_library_rows(f.read())
+        for row in rows:
+            slug = row["slug"]
+            feature_match = re.match(r"(\d+)\s+implemented\b", row["features_documented"], re.IGNORECASE)
+            if feature_match is None:
+                raise ValueError(f"Invalid Features Documented value for library entry '{slug}'.")
+            tracked[slug.lower()] = {
+                "mod_id": row["mod_id"],
+                "name": row["name"],
+                "slug": slug,
+                "category": row["category"],
+                "description": row["description"],
+                "features_count": int(feature_match.group(1)),
+                "spec_path": os.path.join(WORKSPACE_ROOT, "mods", slug, "README.md"),
+            }
     return tracked
 
 
@@ -153,8 +165,13 @@ def prune_mod_from_library(library_path, slug):
     with open(library_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    pattern = rf"\| \*\*\[.*?\]\({re.escape(slug)}/README\.md\)\*\*.*?\n"
-    new_content, count = re.subn(pattern, "", content, flags=re.IGNORECASE)
+    pattern = rf"^\|[^|\n]*\|[^|\n]*\|\s*`?{re.escape(slug)}`?\s*\|[^\n]*\n?"
+    new_content, count = re.subn(pattern, "", content, flags=re.IGNORECASE | re.MULTILINE)
+    if count == 0:
+        legacy_pattern = rf"^\|[^\n]*\({re.escape(slug)}/README\.md\)[^\n]*\n?"
+        new_content, count = re.subn(
+            legacy_pattern, "", content, flags=re.IGNORECASE | re.MULTILINE
+        )
 
     if count > 0:
         with open(library_path, "w", encoding="utf-8") as f:

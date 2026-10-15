@@ -15,6 +15,11 @@ import sys
 import urllib.parse
 import urllib.request
 
+if __package__:
+    from .library_catalog import parse_library_rows
+else:
+    from library_catalog import parse_library_rows
+
 BG3_GAME_ID = 6715
 MODIO_API_HOST = "g-6715.modapi.io"
 
@@ -118,17 +123,11 @@ def get_tracked_mods(workspace_root=None):
     # Inspect mods/library.md
     library_path = os.path.join(workspace_root, "mods", "library.md")
     if os.path.isfile(library_path):
-        try:
-            with open(library_path, "r", encoding="utf-8", errors="ignore") as f:
-                for line in f:
-                    # Look for markdown links: [Mod Name](slug/README.md)
-                    matches = re.findall(r"\[([^\]]+)\]\(([^/)]+)/README\.md\)", line)
-                    for name, slug in matches:
-                        clean_name = name.strip("*").strip()
-                        tracked_names.add(clean_name.lower())
-                        tracked_slugs.add(slug.strip().lower())
-        except Exception:
-            pass
+        with open(library_path, "r", encoding="utf-8") as f:
+            rows = parse_library_rows(f.read())
+        for row in rows:
+            tracked_names.add(row["name"].lower())
+            tracked_slugs.add(row["slug"].lower())
 
     return tracked_slugs, tracked_names
 

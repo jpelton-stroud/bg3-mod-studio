@@ -25,7 +25,7 @@ For a deep-dive into feature & functionality specifics, as well as example agent
 
 - **Smart mod.io Search & Filtering**: Discover community mods across PC, PS5, and Xbox Series X|S using natural language queries and compatibility filters (`/bg3_search_mods`, `scripts/modio_search.py`).
 - **Automated Unpacking & Asset Extraction**: Download and decompress PAK/ZIP archives on demand, extracting engine XMLs, localization tables, and game stats into human-readable markdown (`/bg3_document_mods`, `scripts/modio_extract.py`).
-- **Master Mod Catalog**: Track installed and candidate mods centrally in `mods/library.md`, maintaining verified feature summaries, UUIDs, and mod.io metadata.
+- **Master Mod Catalog**: Track mods centrally in `mods/library.md` using Mod Id, Mod Name, Mod Slug, Description, Features Documented, and Spec Link; unverified IDs remain blank.
 - **Conflict & Load Order Analysis**: Proactively audit candidate mods for stat collisions, duplicate UUIDs, and console load order dependencies before installing (`/bg3_check_mod_conflicts`).
 - **Upstream Update Tracking**: Check for upstream patches and updates across tracked mods, refreshing documentation without manual data re-entry (`/bg3_update_mod_documentation`, `scripts/modio_update.py`).
 
