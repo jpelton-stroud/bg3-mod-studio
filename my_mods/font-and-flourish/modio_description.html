@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Font &amp; Flourish</title>
+  <style>
+    body { font-family: system-ui, sans-serif; line-height: 1.6; max-width: 56rem; margin: 2rem auto; padding: 0 1rem; }
+    code, pre { background: #f3f4f6; }
+    code { padding: 0.1em 0.3em; }
+    pre { overflow-x: auto; padding: 1rem; }
+  </style>
+</head>
+<body>
+<h1>Font &amp; Flourish</h1>
+<ul>
+<li><strong>Mod slug:</strong> <code>font-and-flourish</code></li>
+<li><strong>Module UUID:</strong> <code>8fd36b9b-2e80-4175-828c-b89095ae0b4e</code></li>
+<li><strong>Larian folder:</strong> <code>FontAndFlourish_8fd36b9b-2e80-4175-828c-b89095ae0b4e</code></li>
+<li><strong>Version:</strong> <code>1.0.0.1</code></li>
+<li><strong>Author:</strong> MTGHillGiant</li>
+</ul>
+<h2>Overview</h2>
+<p>Font &amp; Flourish overhauls the Baldur&#x27;s Gate 3 College of Swords Bard and core Bardic Inspiration mechanics. It restores spell-slot conversion for Bardic Inspiration and replaces the melee Slashing Flourish cone with a precise, target-selected multi-attack.</p>
+<h2>Features</h2>
+<h3>2024 Font of Inspiration (Spell Slot Conversion)</h3>
+<ul>
+<li><strong>Granted at:</strong> Level 5 via the core <code>FontOfInspiration</code> feature.</li>
+<li><strong>Action cost:</strong> Free Action (0 Action Points and 0 Bonus Action Points); usable during or outside combat.</li>
+<li><strong>Spell type:</strong> Shout (<code>Shout_FontOfInspiration</code>).</li>
+<li><strong>Upcast scaling:</strong></li>
+</ul>
+<p>  | Spell Slot Level | Bardic Inspiration Restored |   | :--- | :--- |   | <strong>1st Level</strong> | <strong>+1</strong> Charge |   | <strong>2nd Level</strong> | <strong>+2</strong> Charges |   | <strong>3rd Level</strong> | <strong>+3</strong> Charges |   | <strong>4th Level</strong> | <strong>+4</strong> Charges |   | <strong>5th Level</strong> | <strong>+5</strong> Charges (Full Refill) |   | <strong>6th Level</strong> | <strong>+5</strong> Charges (Full Refill) |</p>
+<h3>Precision Melee Slashing Flourish</h3>
+<ul>
+<li><strong>Granted at:</strong> Level 3 upon selecting College of Swords.</li>
+<li><strong>Spell type:</strong> Target (<code>Target_BladeFlourish_Slashing</code>).</li>
+<li><strong>Target count:</strong> 2 targets within melee range (<code>MeleeRange</code>).</li>
+<li><strong>Targeting rules:</strong> Can strike two distinct melee targets or the same target twice. Explicit cursor selection prevents accidental hits on allies, neutral NPCs, or party summons.</li>
+<li><strong>Resource cost:</strong> 1 Action Point + 1 Bardic Inspiration charge (consumed only on hit).</li>
+<li><strong>Legacy zone safety:</strong> The legacy cone flourish (<code>Zone_BladeFlourish_Slashing</code>) is also patched with an <code>Enemy()</code> filter and an expanded 3.0m/120° cone to safeguard existing save files.</li>
+</ul>
+<h2>Dependencies</h2>
+<ul>
+<li><strong>Required:</strong> Baldur&#x27;s Gate 3 base game module <code>GustavX</code>.</li>
+<li><strong>Progression mods:</strong> The mod documentation states compatibility with UnlockLevelCurve and custom class mods; <code>FontOfInspiration</code> is patched through passive boosting rather than class progression node overwrites.</li>
+</ul>
+<h2>Compatibility</h2>
+<ul>
+<li><strong>Game version:</strong> Baldur&#x27;s Gate 3; authored for the Patch 7 / Patch 8 Native Toolkit.</li>
+<li><strong>Known conflicts:</strong> None documented.</li>
+<li><strong>Save compatibility:</strong> Documented as safe to install on existing saves or new games.</li>
+</ul>
+<h2>Additional Credits</h2>
+<p>None listed.</p>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Paladin&#x27;s Call</title>
+  <style>
+    body { font-family: system-ui, sans-serif; line-height: 1.6; max-width: 56rem; margin: 2rem auto; padding: 0 1rem; }
+    code, pre { background: #f3f4f6; }
+    code { padding: 0.1em 0.3em; }
+    pre { overflow-x: auto; padding: 1rem; }
+  </style>
+</head>
+<body>
+<h1>Paladin&#x27;s Call</h1>
+<ul>
+<li><strong>Mod slug:</strong> <code>paladins-call</code></li>
+<li><strong>Module UUID:</strong> <code>7f92e4b1-82d3-4a16-9cf8-61d5302e1a90</code></li>
+<li><strong>Larian folder:</strong> <code>PaladinsCall_7f92e4b1-82d3-4a16-9cf8-61d5302e1a90</code></li>
+<li><strong>Version:</strong> <code>1.0.0.0</code></li>
+<li><strong>Author:</strong> MTGHillGiant</li>
+</ul>
+<h2>Overview</h2>
+<p>Paladin&#x27;s Call modernizes the Paladin class in Baldur&#x27;s Gate 3 by addressing turn economy congestion, mobility limitations, smite resource starvation, and damage scaling. Built natively for Patch 8 and fully compatible with UnlockLevelCurve up to Level 20.</p>
+<h2>Features</h2>
+<h3>Mobility &amp; Tactical Movement</h3>
+<ul>
+<li><strong>Universal Misty Step:</strong> Adds <code>Teleportation_MistyStep</code> to the base Paladin 2nd-level spell list (<code>c1c19892-6f18-40eb-a02b-af8fb251f8b5</code>). All Paladins, including Oath of Devotion and Oathbreaker, can prepare and cast _Misty Step_ at Level 5.</li>
+</ul>
+<h3>Modern Action Economy (D&amp;D 2024 Standards)</h3>
+<ul>
+<li><strong>Sacred Weapon (Oath of Devotion):</strong> Changed from an Action to a Bonus Action (<code>BonusActionPoint:1;ChannelOath:1</code>).</li>
+<li><strong>Nature&#x27;s Wrath (Oath of the Ancients):</strong> Changed to a Bonus Action with an expanded tactical range (18m).</li>
+<li><strong>Lay on Hands (all variants):</strong> Converted to a Bonus Action (<code>Target_LayOnHands</code>, <code>LesserHealing</code>, <code>GreaterHealing</code>, and <code>Cure</code>). Heal allies, remove diseases or poisons, or revive downed companions while maintaining offensive momentum.</li>
+</ul>
+<h3>Sustained Smite Economy: Divine Abundance (Crit Refund)</h3>
+<ul>
+<li><strong>Free spell slot on critical hits:</strong> Granted at Level 1 (<code>PaladinsCall_DivineAbundance_CritRefund</code>). Whenever you score a Critical Hit with a melee weapon, instantly recover an expended 1st-level spell slot.</li>
+</ul>
+<h3>Progressive Radiant Weapon Scaling (Elevated Floor)</h3>
+<p>Melee strikes scale in Radiant damage, improving at-will damage while saving spell slots:</p>
+<ul>
+<li><strong>Level 5:</strong> +1d6 Radiant damage (_Righteous Strikes Rank 1_).</li>
+<li><strong>Level 8:</strong> +1d8 Radiant damage (_Righteous Strikes Rank 2_).</li>
+<li><strong>Level 11:</strong> +1d10 Radiant damage (_Improved Divine Smite_).</li>
+<li><strong>Level 15:</strong> +1d10 + Charisma Modifier Radiant damage (_Righteous Strikes: Exalted_).</li>
+<li><strong>Level 20:</strong> +1d12 + Charisma Modifier Radiant damage (_Righteous Strikes: Apex_).</li>
+</ul>
+<h3>Expanded Spell Slot Progression (Option A) &amp; Level 20 ULC Synergy</h3>
+<ul>
+<li><strong>Levels 1–12:</strong> Adds one slot at Levels 4, 7, and 10, and introduces 4th-level slots at Levels 11 and 12:</li>
+<li><strong>Level 4:</strong> 4 / 0 / 0 / 0</li>
+<li><strong>Level 7:</strong> 4 / 4 / 0 / 0</li>
+<li><strong>Level 10:</strong> 4 / 4 / 3 / 0</li>
+<li><strong>Level 11:</strong> 4 / 4 / 3 / 1</li>
+<li><strong>Level 12:</strong> 4 / 4 / 3 / 2</li>
+<li><strong>Levels 13–20 with UnlockLevelCurve:</strong> Automatically and additively stacks with UnlockLevelCurve&#x27;s progression nodes:</li>
+<li><strong>Level 13:</strong> 4 / 4 / 3 / 3 / 0</li>
+<li><strong>Level 15:</strong> 4 / 4 / 3 / 4 / 0 (unlocks +1d10 + CHA Radiant strikes)</li>
+<li><strong>Level 17:</strong> 4 / 4 / 3 / 5 / 1</li>
+<li><strong>Level 19:</strong> 4 / 4 / 3 / 5 / 2</li>
+<li><strong>Level 20:</strong> 4 / 4 / 3 / 5 / 2 (18 slots total; unlocks +1d12 + CHA Radiant strikes)</li>
+</ul>
+<h2>Dependencies</h2>
+<ul>
+<li><strong>Required:</strong> Baldur&#x27;s Gate 3 base game module <code>GustavX</code>.</li>
+<li><strong>Progression mod:</strong> UnlockLevelCurve is required for the Level 13–20 progression synergy; load it before Paladin&#x27;s Call.</li>
+</ul>
+<h2>Compatibility</h2>
+<ul>
+<li><strong>Game version:</strong> Baldur&#x27;s Gate 3 (Patch 8).</li>
+<li><strong>Known conflicts:</strong> None documented.</li>
+</ul>
+<h2>Additional Credits</h2>
+<p>None listed.</p>
+</body>
+</html>

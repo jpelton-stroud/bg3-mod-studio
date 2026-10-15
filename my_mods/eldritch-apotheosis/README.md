@@ -1,22 +1,12 @@
 # Eldritch Apotheosis
 
-[![Mod UUID](https://img.shields.io/badge/UUID-e1d817c0--a907--4e05--9b24--7f83a005e0ab-blue.svg)](file:///home/jpstroud/projects/BaldursGate3/my_mods/eldritch-apotheosis/Mods/EldritchApotheosis_e1d817c0-a907-4e05-9b24-7f83a005e0ab/meta.lsx)
-[![Version](https://img.shields.io/badge/Version-1.0.0.0-green.svg)](file:///home/jpstroud/projects/BaldursGate3/my_mods/eldritch-apotheosis/Projects/EldritchApotheosis_e1d817c0-a907-4e05-9b24-7f83a005e0ab/meta.lsx)
-[![Author](https://img.shields.io/badge/Author-MTGHillGiant-purple.svg)](#)
-[![Target](https://img.shields.io/badge/Target-BG3%20Patch%207%20%2F%20Patch%208%20Toolkit-orange.svg)](#installation--toolkit-sync)
+- **Mod slug:** `eldritch-apotheosis`
+- **Module UUID:** `e1d817c0-a907-4e05-9b24-7f83a005e0ab`
+- **Larian folder:** `EldritchApotheosis_e1d817c0-a907-4e05-9b24-7f83a005e0ab`
+- **Version:** `1.0.0.0`
+- **Author:** MTGHillGiant
 
-**Mod Display Name**: Eldritch Apotheosis  
-**Module Name**: `EldritchApotheosis`  
-**Folder Name**: `eldritch-apotheosis`  
-**Larian Module Folder**: `EldritchApotheosis_e1d817c0-a907-4e05-9b24-7f83a005e0ab`  
-**Module UUID**: `e1d817c0-a907-4e05-9b24-7f83a005e0ab`  
-**Author**: `MTGHillGiant`  
-**Version**: `1.0.0.0`  
-**Dependencies**: `GustavX` (`cb555efe-2d9e-131f-8195-a89329d218ea`)  
-
----
-
-## Overview & Design Philosophy
+## Overview
 
 **Eldritch Apotheosis** completely overhauls the iconic Warlock cantrip *Eldritch Blast*, reimagining its progression from character Level 1 through Level 20.
 
@@ -30,7 +20,7 @@ In the modded Baldur's Gate 3 ecosystem, **Eldritch Ascension** (`PactOfTheBlade
 
 ---
 
-## Progression Mechanics & Tables
+## Features
 
 ### 1. Beam Count Scaling (`LevelMapSeries: EldritchBlast`)
 *UUID*: `ecad9e7a-389d-4789-ba69-898cfd34da3c`  
@@ -131,20 +121,25 @@ The tables below contrast damage per beam and total volley damage across landmar
 
 ---
 
-## Compatibility & Technical Design
+## Dependencies
+
+- **Required:** Baldur's Gate 3 base game module `GustavX`.
+- **Optional progression mod:** UnlockLevelCurve unlocks this mod's Level 13–20 progression; without it, the mod functions through Level 12.
+
+## Compatibility
 
 - **Clean Additive Override**:  
   Eldritch Apotheosis overrides `Projectile_EldritchBlast` using Larian's inheritance directive (`using "Projectile_EldritchBlast"`). No core story scripts or base game asset files are touched.
 - **Safe Mid-Campaign**:  
   Can be safely installed or updated in existing savegames without causing progression lock or missing spell entries.
-- **UnlockLevelCurve Compatible**:  
-  Designed from the ground up for levels 13–20. If playing with standard Level 12 caps, the mod seamlessly functions through Tier 3 (4 beams, 1d6 rider). Installing `UnlockLevelCurve` instantly unlocks Tiers 4–6 through Level 20.
+- **UnlockLevelCurve compatible:**
+  Designed from the ground up for levels 13–20. If playing with standard Level 12 caps, the mod functions through Tier 3 (4 beams, 1d6 rider). Installing `UnlockLevelCurve` unlocks Tiers 4–6 through Level 20.
 - **Passive & Item Synergy**:  
   Preserves `Repelling Blast` pushback mechanics (`Force(4.5)`), *Spellmight Gloves*, *Callous Glow Ring*, and all other damage riders that trigger on cantrip / spell hit.
 
 ---
 
-## Installation & Toolkit Sync
+### Installation & Toolkit Sync
 
 ### Method 1: Automatic Game Data Sync (Recommended)
 Sync mod files directly into your Baldur's Gate 3 `Data/` directory using the workspace synchronization script:
@@ -173,7 +168,7 @@ python3 scripts/sync_to_game_data.py --mods eldritch-apotheosis --watch
 
 ---
 
-## File Structure
+### File Structure
 
 ```text
 my_mods/eldritch-apotheosis/
@@ -198,4 +193,6 @@ my_mods/eldritch-apotheosis/
 
 ---
 
-*Authored by `MTGHillGiant` for the Baldur's Gate 3 modding community.*
+## Additional Credits
+
+None listed.

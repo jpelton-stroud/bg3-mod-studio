@@ -1,41 +1,34 @@
 # Eldritch Ascension
-**Mod Name**: `PactOfTheBladeUnleashed`
-**Module UUID**: `ac007864-dfa8-4b0e-96b3-cc9a173d1c35`
-**Folder Name**: `EldritchAscension_ac007864-dfa8-4b0e-96b3-cc9a173d1c35`
 
----
+- **Mod slug:** `eldritch-ascension`
+- **Module UUID:** `ac007864-dfa8-4b0e-96b3-cc9a173d1c35`
+- **Larian folder:** `EldritchAscension_ac007864-dfa8-4b0e-96b3-cc9a173d1c35`
+- **Version:** `1.0.0.0`
+- **Author:** MTGHillGiant
 
-## How to Import into Baldur's Gate 3 Toolkit
+## Overview
 
-This folder contains the complete, pre-configured source structure for the official **Patch 7 Baldur's Gate 3 Toolkit**.
+Eldritch Ascension expands the Warlock's Pact of the Blade playstyle with dual-wield pact binding, level-scaled weapon damage, additional attacks, and synergies between melee combat, Eldritch Blast, and Hex.
 
-### Method 1: Direct Toolkit Workspace Import (Recommended)
-1. Locate your game's **Data** directory (typically `.../Baldurs Gate 3/Data/`).
-2. Copy the folders from this directory directly into `Data/`:
-   - `Projects/`
-   - `Public/`
-   - `Localization/`
-3. Launch the **Baldur's Gate 3 Toolkit**.
-4. Click **File -> Open Project...** and select **PactOfTheBladeUnleashed**.
-5. The Toolkit will automatically load all stats, progressions, and localization strings.
-6. Click **Save** and **Publish Mod**!
+## Features
 
----
+- **Simultaneous Dual-Wield Binding:** `Target_BindPactWeapon` binds both Main Hand and Off-Hand weapons.
+- **Pact Weapon Scaling:** +2 Enchantment and scaling Force damage (1d6 at Level 1, 1d8 at Level 9, 1d10 at Level 15, 1d12 at Level 20).
+- **Devouring Blade (3rd & 4th Attacks):** Grants 3 attacks at Level 12 and 4 attacks at Level 20.
+- **Eldritch Synergy:** Automatically adds the Charisma Modifier to weapon damage rolls (double-Charisma scaling on bound weapons).
+- **Eldritch Weaving:** Melee weapon hits unlock _Eldritch Blast_ as a Bonus Action for the remainder of your turn.
+- **Lifedrinker Overhaul:** Flat Charisma + 1d8 Necrotic damage and vampiric HP healing on hit.
+- **Slot-Scaling Hex:** Necrotic damage scales up to 4d6 (1d6 at Level 1, 2d6 at Level 5, 3d6 at Level 11, 4d6 at Level 17).
 
-### Method 2: Copying into an Existing Empty Project
-If you have already clicked "New Project" in the Toolkit:
-1. Open your project folder in `Baldurs Gate 3/Data/Public/<YourProjectFolder>/`.
-2. Copy the contents of our `Public/PactOfTheBladeUnleashed_.../` into your project's `Public` folder.
-3. Copy `Localization/English/EldritchAscension.xml` into your project's `Localization/English/` folder.
-4. Reload/Save in the Toolkit.
+## Dependencies
 
----
+- **Required:** Baldur's Gate 3 base game module `GustavX`.
 
-## Implemented Features
-- **Simultaneous Dual-Wield Binding**: `Target_BindPactWeapon` binds both Main Hand and Off-Hand weapons.
-- **Pact Weapon Scaling**: +2 Enchantment and scaling Force damage (1d6 at L1, 1d8 at L9, 1d10 at L15, 1d12 at L20).
-- **Devouring Blade (3rd & 4th Attacks)**: 3 attacks at Level 12, 4 attacks at Level 20.
-- **Eldritch Synergy**: Automatically adds Charisma Modifier to weapon damage rolls (double-Charisma scaling on bound weapons).
-- **Eldritch Weaving**: Melee weapon hits unlock *Eldritch Blast* as a Bonus Action for the remainder of your turn.
-- **Lifedrinker Overhaul**: Flat Charisma + 1d8 Necrotic damage + vampiric HP healing on hit.
-- **Slot-Scaling Hex**: Necrotic damage scales up to 4d6 (1d6 at L1, 2d6 at L5, 3d6 at L11, 4d6 at L17).
+## Compatibility
+
+- **Game version:** Baldur's Gate 3; supported game patch is not specified in the current mod documentation.
+- **Known conflicts:** None documented.
+
+## Additional Credits
+
+None listed.
