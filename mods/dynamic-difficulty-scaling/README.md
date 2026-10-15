@@ -1,5 +1,5 @@
 # Mod Specification: Dynamic Difficulty Scaling
-**Category**: Spells | **Author**: GraphicFade | **Version**: 1.0.0.19 | **mod.io ID**: `6077436`
+**Category**: Spells | **Author**: GraphicFade | **Version**: 1.0.0.20 | **mod.io ID**: `6077436`
 **URL**: `https://mod.io/g/baldursgate3/m/dynamic-difficulty-scaling`
 
 ---
