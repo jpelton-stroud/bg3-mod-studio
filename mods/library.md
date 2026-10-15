@@ -36,3 +36,20 @@ This library catalogs documented Baldur's Gate 3 mods, their in-game features, a
 
 | Mod Name | Description | Features Documented | Spec Link |
 | :--- | :--- | :--- | :--- |
+
+## Mod.io IDs
+
+The collection workflow uses this index to map documented library entries to their numeric mod.io IDs. Entries without an ID are omitted from collection selection until their ID is documented here.
+
+| Mod Name | Slug | Mod.io ID |
+| :--- | :--- | ---: |
+| Dynamic Extra Encounters | `dynamic-extra-encounters` | 5961435 |
+| Paragon Encounters | `paragon-encounters` | 6346121 |
+| Enemy Tacticians | `enemy-tacticians` | 5085121 |
+| Extra encounters and Minibosses | `extra-encounters-and-minibosses` | 4484016 |
+| Requiem for the Absolute - Dynamic Encounters | `requiem-for-the-absolute` | 6191089 |
+| Dynamic Difficulty Scaling | `dynamic-difficulty-scaling` | 6077436 |
+| UnlockLevelCurve - Level 13-20 \| Patch 8 | `unlocklevelcurve` | 4166963 |
+| Enemy Legends | `enemy-legends-patch` | 5155371 |
+| More enemies in basic fights | `more-enemies-in-basic-fights` | 4484017 |
+| Nightmare difficulty | `nightmare-difficulty` | 4636439 |
