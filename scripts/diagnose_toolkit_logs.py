@@ -125,7 +125,7 @@ def classify_entry(message: str, source: str) -> Tuple[str, str]:
         severity = "CRITICAL"
     elif "!ASSERT!DESIGN:" in upper_msg or "ERROR:" in upper_msg or "!ASSERT!" in upper_msg:
         severity = "ERROR"
-    elif "WARNING:" in upper_msg or "DEPRECATED" in upper_msg:
+    elif "WARNING:" in upper_msg or "DEPRECATED" in upper_msg or "DUPLICATE" in upper_msg or "DISCARD" in upper_msg:
         severity = "WARNING"
     elif "INFO:" in upper_msg:
         severity = "INFO"
@@ -141,6 +141,8 @@ def classify_entry(message: str, source: str) -> Tuple[str, str]:
         subsystem = "Boosts"
     elif "stats" in src_lower or "functor" in msg_lower or "status" in msg_lower:
         subsystem = "Stats/Status"
+    elif "spell" in src_lower or "spell" in msg_lower:
+        subsystem = "Spells"
     elif "thoth" in src_lower or "thoth" in msg_lower:
         subsystem = "Thoth"
     elif "osiris" in src_lower or "osiris" in msg_lower or "story" in msg_lower:
@@ -159,6 +161,21 @@ def classify_entry(message: str, source: str) -> Tuple[str, str]:
     return severity, subsystem
 
 
+def normalize_name(s: str) -> str:
+    """Normalize identifier or name for flexible matching (removes hyphens, spaces, quotes, etc.)."""
+    return re.sub(r"[^a-z0-9]", "", s.lower())
+
+
+COMMON_EXCLUDES = {
+    "save", "version", "region", "node", "children", "attribute", "root", "config",
+    "lsstring", "fixedstring", "uint8", "uint16", "uint32", "uint64", "int64", "int32",
+    "bool", "guid", "float", "true", "false", "module", "gameproject", "addon",
+    "gustav", "gustavx", "shared", "shareddev", "none", "null", "type", "name", "uuid",
+    "author", "description", "folder", "md5", "filesize", "publishhandle", "tableuuid",
+    "progressiontype", "ismulticlass", "level", "comment"
+}
+
+
 def index_mod_content(mod_name: Optional[str] = None) -> Dict[str, List[Tuple[str, int, str]]]:
     """Index names, handles, and identifiers from my_mods/ to correlate with log errors.
 
@@ -171,14 +188,21 @@ def index_mod_content(mod_name: Optional[str] = None) -> Dict[str, List[Tuple[st
         mod_path = MY_MODS_DIR / mod_name
         if mod_path.is_dir():
             target_dirs.append((mod_name, mod_path))
+        elif MY_MODS_DIR.is_dir():
+            norm_target = normalize_name(mod_name)
+            for d in MY_MODS_DIR.iterdir():
+                if d.is_dir() and normalize_name(d.name) == norm_target:
+                    target_dirs.append((d.name, d))
+                    break
     else:
         if MY_MODS_DIR.is_dir():
             for d in MY_MODS_DIR.iterdir():
                 if d.is_dir():
                     target_dirs.append((d.name, d))
 
-    # Token extraction patterns
+    guid_regex = re.compile(r"^[0-9a-fA-F-]{36}$")
     token_regex = re.compile(r"([A-Za-z0-9_-]{3,64})")
+    val_regex = re.compile(r'value="([^"]+)"')
 
     for m_name, m_path in target_dirs:
         for ext in [".txt", ".lsx", ".xml"]:
@@ -189,17 +213,27 @@ def index_mod_content(mod_name: Optional[str] = None) -> Dict[str, List[Tuple[st
                     rel_path = str(fpath.relative_to(m_path))
                     with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
                         for l_idx, line in enumerate(f, 1):
+                            line_lower = line.lower()
                             # Index stat keys, boost names, handles
-                            if "new entry" in line.lower() or "type " in line.lower():
+                            if "new entry" in line_lower or "using " in line_lower or "type " in line_lower:
                                 parts = line.split('"')
                                 if len(parts) >= 2:
                                     token = parts[1].strip()
-                                    if token:
+                                    if token and token.lower() not in COMMON_EXCLUDES:
                                         index.setdefault(token, []).append((m_name, l_idx, rel_path))
+                            # Index attribute values (split by semicolon/comma/parens)
+                            for m in val_regex.finditer(line):
+                                val = m.group(1).strip()
+                                for item in re.split(r"[;,()]", val):
+                                    item = item.strip()
+                                    if len(item) >= 4 and not guid_regex.match(item) and item.lower() not in COMMON_EXCLUDES:
+                                        index.setdefault(item, []).append((m_name, l_idx, rel_path))
+                            # Index tokens with underscores, hyphens, handles, or PascalCase
                             for m in token_regex.finditer(line):
                                 t = m.group(1)
-                                if len(t) >= 4 and ("_" in t or "-" in t or t.startswith("h")):
-                                    index.setdefault(t, []).append((m_name, l_idx, rel_path))
+                                if len(t) >= 4 and t.lower() not in COMMON_EXCLUDES:
+                                    if "_" in t or "-" in t or t.startswith("h") or any(c.isupper() for c in t[1:]):
+                                        index.setdefault(t, []).append((m_name, l_idx, rel_path))
                 except Exception:
                     pass
     return index
@@ -278,8 +312,9 @@ def parse_log_file(
 
                 # Filter by mod if requested
                 if mod_filter:
-                    mod_match = any(c["mod"].lower() == mod_filter.lower() for c in correlations)
-                    if not mod_match and mod_filter.lower() not in message.lower():
+                    filter_norm = normalize_name(mod_filter)
+                    mod_match = any(normalize_name(c["mod"]) == filter_norm for c in correlations)
+                    if not mod_match and filter_norm not in normalize_name(message):
                         continue
 
                 entries.append({
