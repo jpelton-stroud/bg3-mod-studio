@@ -21,292 +21,28 @@ import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-BG3_GAME_ID = 6715
-MODIO_API_HOST = "g-6715.modapi.io"
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
-
-def get_api_key():
-    """Retrieve MODIO_API_KEY from environment or .env file."""
-    key = os.environ.get("MODIO_API_KEY")
-    if key:
-        return key.strip()
-
-    # Check project .env
-    workspace_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    env_file = os.path.join(workspace_root, ".env")
-    if os.path.exists(env_file):
-        with open(env_file, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("MODIO_API_KEY="):
-                    return line.split("=", 1)[1].strip().strip('"').strip("'")
-
-    # Check home .config/modio/env
-    home_env = os.path.expanduser("~/.config/modio/env")
-    if os.path.exists(home_env):
-        with open(home_env, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("MODIO_API_KEY="):
-                    return line.split("=", 1)[1].strip().strip('"').strip("'")
-
-    return None
-
-
-# ----------------------------------------------------------------------
-# Pure-Python LZ4 Block Decompressor
-# ----------------------------------------------------------------------
-def lz4_block_decompress(compressed_data, uncompressed_size):
-    """Decompresses standard LZ4 raw block data without external C libraries."""
-    src = io.BytesIO(compressed_data)
-    dst = bytearray()
-
-    while len(dst) < uncompressed_size:
-        token_b = src.read(1)
-        if not token_b:
-            break
-        token = token_b[0]
-
-        # 1. Literals
-        literal_len = (token >> 4) & 0x0F
-        if literal_len == 15:
-            while True:
-                extra = src.read(1)
-                if not extra:
-                    break
-                b = extra[0]
-                literal_len += b
-                if b != 255:
-                    break
-
-        lit = src.read(literal_len)
-        dst.extend(lit)
-
-        if len(dst) >= uncompressed_size:
-            break
-
-        # 2. Match offset
-        offset_b = src.read(2)
-        if not offset_b or len(offset_b) < 2:
-            break
-        offset = struct.unpack("<H", offset_b)[0]
-        if offset == 0:
-            break
-
-        # 3. Match length
-        match_len = (token & 0x0F) + 4
-        if match_len == 19:
-            while True:
-                extra = src.read(1)
-                if not extra:
-                    break
-                b = extra[0]
-                match_len += b
-                if b != 255:
-                    break
-
-        for _ in range(match_len):
-            dst.append(dst[-offset])
-
-    return bytes(dst)
-
-
-def decompress_pak_file_data(pak_bytes, offset, disk_size, uncomp_size, flags):
-    """Decompress file data from pak archive based on compression flags."""
-    raw = pak_bytes[offset : offset + disk_size]
-    method = flags & 0x0F
-
-    if method == 0 or disk_size == uncomp_size:
-        return raw
-    elif method == 1:
-        import zlib
-        return zlib.decompress(raw)
-    elif method == 2:
-        # LZ4 compression
-        try:
-            return lz4_block_decompress(raw, uncomp_size)
-        except Exception:
-            # If prefixed by 4-byte chunk size
-            if len(raw) > 4:
-                try:
-                    return lz4_block_decompress(raw[4:], uncomp_size)
-                except Exception:
-                    pass
-            return raw
-    return raw
-
-
-# ----------------------------------------------------------------------
-# LSPK Archive Unpacker (Larian Package v18)
-# ----------------------------------------------------------------------
-class LspkArchive:
-    def __init__(self, data_bytes):
-        self.data = data_bytes
-        self.files = []
-        self._parse_header_and_filelist()
-
-    def _parse_header_and_filelist(self):
-        if len(self.data) < 40 or self.data[:4] != b"LSPK":
-            raise ValueError("Not a valid LSPK package (magic mismatch)")
-
-        version, file_list_offset, file_list_size, flags, priority = struct.unpack_from(
-            "<IQIBB", self.data, 4
-        )
-
-        file_list_raw = self.data[file_list_offset : file_list_offset + file_list_size]
-        if len(file_list_raw) < 8:
-            return
-
-        num_files, comp_size = struct.unpack_from("<II", file_list_raw, 0)
-        lz4_payload = file_list_raw[8 : 8 + comp_size]
-        expected_size = num_files * 272
-
-        try:
-            decomp = lz4_block_decompress(lz4_payload, expected_size)
-        except Exception as e:
-            decomp = file_list_raw[8:]
-
-        for i in range(num_files):
-            entry_bytes = decomp[i * 272 : (i + 1) * 272]
-            if len(entry_bytes) < 272:
-                break
-            name = entry_bytes[:256].split(b"\x00", 1)[0].decode("utf-8", errors="ignore")
-            offset_low, offset_high, part, file_flags, size_disk, size_uncomp = struct.unpack_from(
-                "<IHBBII", entry_bytes, 256
-            )
-            offset = offset_low | (offset_high << 32)
-            self.files.append(
-                {
-                    "name": name.replace("\\", "/"),
-                    "offset": offset,
-                    "disk_size": size_disk,
-                    "uncomp_size": size_uncomp,
-                    "flags": file_flags,
-                }
-            )
-
-    def extract_file(self, entry):
-        return decompress_pak_file_data(
-            self.data,
-            entry["offset"],
-            entry["disk_size"],
-            entry["uncomp_size"],
-            entry["flags"],
-        )
-
-
-# ----------------------------------------------------------------------
-# mod.io API Client
-# ----------------------------------------------------------------------
-def query_modio(query_or_slug, api_key):
-    """Search mod.io for BG3 mod by name, slug, URL, or ID."""
-    clean_query = query_or_slug.strip()
-
-    # If URL: https://mod.io/g/baldursgate3/m/<slug>
-    if "mod.io" in clean_query:
-        parts = clean_query.rstrip("/").split("/")
-        clean_query = parts[-1]
-
-    # Try exact slug or ID match first
-    if clean_query.isdigit():
-        slug_candidates = [clean_query]
-        is_id = True
-    else:
-        is_id = False
-        candidates = [
-            clean_query.lower(),
-            clean_query.lower().replace(" ", "-"),
-            clean_query.lower().replace(" ", ""),
-        ]
-        slug_candidates = []
-        for c in candidates:
-            if re.match(r"^[a-z0-9-]+$", c) and c not in slug_candidates:
-                slug_candidates.append(c)
-
-    for cand in slug_candidates:
-        params = {"api_key": api_key}
-        if is_id:
-            params["id"] = cand
-        else:
-            params["name_id"] = cand
-
-        url = f"https://{MODIO_API_HOST}/v1/games/{BG3_GAME_ID}/mods?{urllib.parse.urlencode(params)}"
-        req = urllib.request.Request(url, headers={"User-Agent": "BG3ModDocPipeline/1.0"})
-        try:
-            with urllib.request.urlopen(req) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                if data.get("data") and len(data["data"]) > 0:
-                    return data["data"][0]
-        except Exception:
-            pass
-
-    # Fallback to general search query
-    clean_q_alpha = re.sub(r"[^a-z0-9]", "", clean_query.lower())
-    search_queries = [clean_query]
-    if clean_q_alpha and clean_q_alpha != clean_query.lower():
-        search_queries.append(clean_q_alpha)
-
-    results = []
-    for q_term in search_queries:
-        params = {"api_key": api_key, "_q": q_term}
-        url = f"https://{MODIO_API_HOST}/v1/games/{BG3_GAME_ID}/mods?{urllib.parse.urlencode(params)}"
-        req = urllib.request.Request(url, headers={"User-Agent": "BG3ModDocPipeline/1.0"})
-
-        try:
-            with urllib.request.urlopen(req) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                batch = data.get("data", [])
-                if batch:
-                    results.extend(batch)
-        except Exception:
-            pass
-
-        # Select best match: exact name match, slug match, or alphanumeric match
-        for m in results:
-            m_name = m.get("name", "").lower()
-            m_slug = m.get("name_id", "").lower()
-            if (
-                m_name == clean_query.lower()
-                or m_slug == clean_query.lower()
-                or re.sub(r"[^a-z0-9]", "", m_name) == clean_q_alpha
-                or re.sub(r"[^a-z0-9]", "", m_slug) == clean_q_alpha
-            ):
-                return m
-
-    if not results:
-        raise RuntimeError(f"No mods found on mod.io matching: '{query_or_slug}'")
-
-    query_tokens = set(re.findall(r"\w+", clean_query.lower()))
-    if query_tokens:
-        def match_score(mod_entry):
-            name_tokens = set(re.findall(r"\w+", mod_entry.get("name", "").lower()))
-            slug_tokens = set(re.findall(r"\w+", mod_entry.get("name_id", "").lower()))
-            all_tokens = name_tokens | slug_tokens
-            overlap = len(query_tokens.intersection(all_tokens))
-            is_all = 1 if query_tokens.issubset(all_tokens) else 0
-            norm_match = 1 if re.sub(r"[^a-z0-9]", "", mod_entry.get("name", "").lower()) == clean_q_alpha else 0
-            return (norm_match, is_all, overlap)
-
-        results_sorted = sorted(results, key=match_score, reverse=True)
-        if results_sorted and match_score(results_sorted[0])[2] > 0:
-            return results_sorted[0]
-
-    return results[0]
-
-
-def download_mod_file(mod_metadata, api_key):
-    """Download mod archive (.zip or .pak) from mod.io."""
-    modfile = mod_metadata.get("modfile")
-    if not modfile or not modfile.get("download", {}).get("binary_url"):
-        raise RuntimeError(f"Mod '{mod_metadata.get('name')}' has no active file download available.")
-
-    download_url = modfile["download"]["binary_url"]
-    sep = "&" if "?" in download_url else "?"
-    signed_url = f"{download_url}{sep}api_key={api_key}"
-
-    req = urllib.request.Request(signed_url, headers={"User-Agent": "BG3ModDocPipeline/1.0"})
-    with urllib.request.urlopen(req) as resp:
-        return resp.read()
+from scripts.lib.env_paths import MODS_DIR, REPO_ROOT, normalize_mod_key
+from scripts.lib.larian_parsers import parse_loca_bytes
+from scripts.lib.lspk import LspkArchive, decompress_pak_file_data, lz4_block_decompress
+from scripts.update_library_catalog import write_library_catalog
+from scripts.lib.mod_overrides import (
+    BASE_GAME_LOCA_HANDLES,
+    BASE_GAME_PASSIVES,
+    BASE_GAME_SPELLS,
+    MOD_SPECIFIC_OVERRIDES,
+)
+from scripts.lib.modio_client import (
+    BG3_GAME_ID,
+    MODIO_API_HOST,
+    USER_AGENT,
+    download_mod_file,
+    get_api_key,
+    query_modio,
+)
 
 
 # ----------------------------------------------------------------------
@@ -434,186 +170,7 @@ def parse_progressions_lsx(lsx_bytes):
 # ----------------------------------------------------------------------
 # Feature Extraction and In-Game Validation
 # ----------------------------------------------------------------------
-BASE_GAME_PASSIVES = {
-    "ARM_MagicalPlate_1_Passive": "**Magical Plate** - Incoming damage is reduced by 1.",
-    "ARM_SuperiorPlate_1_Passive": "**Magical Plate** - Incoming damage is reduced by 1.",
-    "ARM_SuperiorPlate_2_Passive": "**Superior Magical Plate** - Incoming damage is reduced by 2.",
-    "ARM_MartialArtsLethality_2_Passive": "**Martial Arts Lethality** - Unarmed attacks gain a +2 bonus to attack rolls and damage.",
-    "DEN_HellridersPride_Passive": "**Pride of Hell** - When you heal a creature, it gains Resistance against Bludgeoning, Piercing, and Slashing damage dealt by weapon attacks for 2 turns.",
-    "UNI_MassHealRing_Passive": "**The Whispering Promise** - When you heal a creature, it gains a +1d4 bonus to Attack Rolls and Saving Throws for 2 turns.",
-    "MAG_Violence_ViolenceOnDash_Passive": "**Linebreaker** - When dashing or taking a similar action in combat, gain 2 turns of Wrath (+1 damage to melee weapon attacks per turn remaining).",
-    "MAG_Violence_LowHP_Violence_Passive": "**Bloodlust** - When hit points fall below 50%, gain 3 turns of Wrath (+1 damage to melee weapon attacks per turn remaining).",
-    "MAG_Violence_ViolenceOnDamaged_Passive": "**Wrath on Damaged** - When the wearer takes damage, gain 1 turn of Wrath.",
-    "MAG_Rage_TempHPOnExit_Passive": "**Rage Discharge** - When Rage ends, gain temporary hit points.",
-    "MAG_Monk_Magic_Boots_Passive": "**Kushigo Boots** - Adds Wisdom Modifier to unarmed attack damage.",
-    "MAG_Monk_Magic_Gloves_Passive": "**Kushigo Gloves** - Deals an additional 1d4 damage with Throw attacks and unarmed strikes.",
-    "MAG_Monk_Magic_Hat_Passive": "**Kushigo Hat** - Gain +1 bonus to Ki Save DC.",
-    "MAG_Thunder_Reverberation_Gloves_Passive": "**Belligerent Skies** - Dealing Thunder, Lightning, or Radiant damage inflicts 2 turns of Reverberation (-1 penalty to Str, Dex, and Con saving throws per turn; at 5 stacks deals 1d4 Thunder damage and knocks Prone).",
-    "MAG_Thunder_ReverberationOnStatusApply_Boots_Passive": "**Stormy Clamour** - Inflicting a condition upon a hostile creature applies 2 turns of Reverberation.",
-    "MAG_Thunder_InflictDazeOnReverberatedCreature_Cloak_Passive": "**Thunderskin Cloak** - When a creature with Reverberation damages the wearer, it must succeed a Constitution saving throw or become Dazed.",
-    "MAG_Infernal_Metal_Boots_AntiDisplacement_Passive": "**Helldusk Stride** - Cannot be forcibly moved by a foe's spells or actions, and ignores Difficult Terrain.",
-    "MAG_Barbarian_Armor_BoneSpike_Passive": "**Bonespike Garb** - Gain +15 Temporary Hit Points upon entering Rage; melee attackers take Piercing damage equal to your Constitution modifier.",
-    "MAG_Barbarian_Helmet_BoneSpike_Passive": "**Bonespike Helmet** - Hostile creatures within 3m must make a Wisdom save when you Rage or take Psychic damage. Gain +2 to Intimidation.",
-    "MAG_Barbarian_Gloves_BoneSpike_Passive": "**Bonespike Gloves** - Attacks ignore Slashing, Piercing, and Bludgeoning Resistance.",
-    "MAG_Barbarian_Armor_RageSupport_Passive": "**Raging Vigor** - While raging, gain additional bonuses to saving throws and temporary hit points.",
-    "MAG_Radiant_RadiatingOrb_Ring_Passive": "**Coruscation Ring** - Dealing spell damage while illuminated inflicts 2 turns of Radiating Orb (-1 penalty to Attack Rolls per turn remaining).",
-    "MAG_Radiant_RadiatingOrb_Gloves_Passive": "**Luminous Gloves** - Dealing Radiant damage inflicts 2 turns of Radiating Orb on the target.",
-    "MAG_Radiant_RadiatingOrb_Melee_OnDamage_Passive": "**Luminous Strike** - Melee attacks dealing Radiant damage inflict Radiating Orb.",
-    "MAG_Radiant_Radiating_Helmet_Passive": "**Holy Lance Helm** - When an attacker misses the wearer, they must succeed a Dexterity saving throw or take 1d4 Radiant damage.",
-    "MAG_Healer_HealSelf_Passive": "**Wapira's Crown** - When healing another creature, the wearer regains 1d6 hit points.",
-    "UND_SocietyOfBrilliance_DarkvisionRing_Passive": "**Darkvision & Mind Shielding** - Gain Darkvision up to 12m and Advantage on Saving Throws against being Charmed.",
-    "UND_SocietyOfBrilliance_PullingRing_Passive": "**Telekinetic Pull** - Pulls surrounding targets closer on spell cast or thunder damage.",
-    "UND_SocietyOfBrilliance_MagicMissileNecklace_Passive": "**Psychic Spark** - Cast Magic Missile with 1 additional dart.",
-    "UND_Tower_StaffBlessMystra_Passive": "**Bless of Mystra** - Bless grants an additional +1d4 to attack rolls and saving throws (+2d4 total), and an additional +2d4 to spell attack rolls.",
-    "UNI_DarkUrge_Stealth_Expertise_Passive": "**The Shadow Itself** - Once per turn, when you kill an enemy, become Invisible for 2 turns.",
-    "DevilsSight": "**Devil's Sight** - Can see normally in darkness, both magical and non-magical, up to a distance of 24m.",
-    "MaskOfManyFaces": "**Mask of Many Faces** - Cast Disguise Self at will without expending a spell slot.",
-    "MAG_Frost_GenerateFrostOnDamage_Gloves_Passive": "**Winter's Clutches** - Dealing Cold damage inflicts 2 turns of Encrusted with Frost (-3m movement speed; at 7 stacks, DC 12 Con save or take 2d8 Cold damage and become Frozen).",
-    "MAG_Frost_GenerateFrostOnStatusApply_Hat_Passive": "**Coldbrim Hat** - Once per turn, any condition inflicted upon a target also applies 2 turns of Encrusted with Frost.",
-    "MAG_Frost_IceSurfaceProneImmunity_Boots_Passive": "**Hoarfrost Stride** - Cannot slip on ice surfaces and immune to falling Prone on icy terrain.",
-    "MAG_Frost_GenerateSurfaceOnColdDamage_Ring_Passive": "**Snowburst Ring** - Dealing Cold damage creates a 4.5m radius circle of ice surface centered on the target.",
-    "MAG_ChargedLightning_Charge_OnSpellDamage_Passive": "**Lightning Charges (Spellsparkler)** - Dealing spell or cantrip damage grants 2 Lightning Charges (+1 bonus to Attack rolls and damage; at 5 charges, consume all to deal 1d8 bonus Lightning damage).",
-    "MAG_ChargedLightning_Electrocute_Armor_Passive": "**Protecty Sparkswall** - Gain +1 AC and +1 to all Saving Throws while having Lightning Charges.",
-    "MAG_Cold_IncreaseColdDamageOnCast_Passive": "**Heart of Ice (Mourning Frost)** - Dealing Cold damage deals an additional +1 Cold damage.",
-    "MAG_Cold_ChilledOnSpellDamage_Passive": "**Insidious Cold (Mourning Frost)** - Dealing Cold damage with a spell has a chance to inflict Chilled (vulnerability to Cold, resistance to Fire).",
-    "MAG_ArcaneEnchantment_Lesser_Passive": "**Arcane Enchantment** - Gain a +1 bonus to Spell Save DC and spell attack rolls.",
-    "MAG_Legendary_Chromatic_Spellslot_Passive": "**Arcane Battery (Markoheshkir)** - The next spell cast does not consume a spell slot (Once per Long Rest).",
-    "MAG_StrengthBonusToWeaponDamage_Passive": "**Titanstring Strength** - Deals additional damage equal to your Strength modifier.",
-    "MAG_AdvantageOnReactionAttack_Passive": "**Reaction Advantage** - Gain Advantage on Opportunity Attacks.",
-    "PolearmMaster_AttackOfOpportunity": "**Polearm Master: Opportunity Attack** - You can make an Opportunity Attack when a hostile creature enters your reach.",
-    "MAG_ZOC_ForceConduit_Halberd_Passive": "**Skinburster** - Hitting with a melee weapon attack grants 2 turns of Force Conduit (-1 Physical damage taken per turn remaining).",
-    "MAG_ZOC_ForceConduit_HeavyArmor_Passive": "**Rippling Force Mail** - Gain Force Conduit when hit by a melee weapon attack.",
-    "MAG_ZOC_ForceConduitWhileSurounded_Boots_Passive": "**Force Conduit on Surround** - Gain Force Conduit when surrounded by two or more enemies.",
-    "MAG_ZOC_AdvantageOnMeleeAttackWhileSurounded_Gloves_Passive": "**Daredevil Advantage** - Gain Advantage on melee weapon attack rolls when surrounded by enemies.",
-    "MAG_ZOC_RampartAura_Amulet_Passive": "**Rampart Aura** - Fortifies defenses and grants Force Conduit.",
-    "MAG_Critical_CriticalExecution_Passive": "**Killer's Sweetheart** - When you kill a creature, your next Attack Roll is guaranteed to be a Critical Hit (Once per Long Rest).",
-    "MAG_Critical_CriticalSwiftness_Passive": "**Critical Swiftness** - Scoring a critical hit grants additional movement speed until the end of your turn.",
-    "MAG_Frightened_Immunity_Passive": "**Bravery** - Immune to being Frightened.",
-    "MAG_JumpBoost_Passive": "**Swiresy Leap** - Jump distance is increased by 1.5m.",
-    "MAG_LC_Cyric_FearImmunity_Amulet_Passive": "**Courageous Heart** - Immune to Fear and Frightened effects.",
-    "MAG_MagicalDurability_Passive": "**Magical Durability** - The wearer gains a +2 bonus to all Saving Throws.",
-    "MAG_Sarevok_HornedHelmet_DeathbringerSight_Passive": "**Deathbringer Sight** - Can see in the dark up to 3m. Number needed to roll a Critical Hit reduced by 1. Immune to being Frightened.",
-    "MAG_HomingWeapon_Passive": "**Returning Weapon** - When thrown, automatically returns to the wielder's hand.",
-    "MAG_UndeadTurning_Weapon_Passive": "**Turning Undead** - Weapon hits on undead creatures have a chance to Turn them.",
-    "Absorb_Elements_Passive": "**Absorb Elements** - Reaction: Take half damage from an incoming elemental attack (Acid, Cold, Fire, Lightning, Thunder) and deal an extra 1d6 damage of that type on your next melee attack.",
-    "Absorb_Elements_Technical_Passive": "**Absorb Elements** - Elemental damage absorption reaction trigger.",
-    "MAG_Interrupt_MAG_Interrupt_AbsorbElements_Resource_Passive": "**Absorb Elements Resource** - Manages reaction resource for elemental absorption.",
-    "Background_Entertainer": "**Entertainer** - Grants Proficiency in Acrobatics and Performance skills.",
-    "Overwhelm": "**Overwhelm** - The number needed to roll a Critical Hit while attacking is reduced by 1."
-}
-
-BASE_GAME_LOCA_HANDLES = {
-    "h7335fb51g4da9g4257gb154g03949f63e18e": "Detect Thoughts",
-    "h0f0fd40aga4f2g444eg8d1ag9ad1351a8515": "Focus your mind to read the thoughts of certain creatures while talking to them.",
-    "h7302adc0g3508g4e39gb1fcg8486e3427ddf": "Web",
-    "hdc6ddc78g6009g4b69ga59dg31a8043ccecc": "Cover an area in thick, sticky webbing that slows creatures within and possibly Entangles them.",
-    "h50cad90fg8a5eg486cg85e3g4b0b969ceedc": "Charm Person (Subtle Domination)",
-    "hbaa77d4dg08b2g41fbg9e12gcd106093fc73": "Phantasmal Force",
-    "hebec5d12ga353g43bfg8296ge553f7f40a17": "Deal 1d6 Psychic damage each turn to a creature. The damage type changes to whatever type it took most recently.",
-}
-
-BASE_GAME_SPELLS = {
-    "Projectile_Fly": "**Fly** (Level 3 Transmutation) - Grant a creature the ability to fly until a Long Rest (18m flying movement distance).",
-    "Projectile_MAG_Barbarian_BrutalLeap": "**Brutal Leap** - Leap aggressively onto a target area, dealing Bludgeoning damage and potentially knocking creatures Prone.",
-    "Rush_MAG_Barbarian_Armor_Trample": "**Trample** - Charge forward, knocking creatures Prone and dealing Bludgeoning damage.",
-    "Shout_BootsOfSpeed": "**Click Heels** - Double movement speed and impose Disadvantage on enemy opportunity attacks for 1 turn (Bonus Action).",
-    "Shout_Enlarge_Duergar": "**Enlarge** - Grow larger, dealing an extra 1d4 damage on weapon attacks and gaining Advantage on Strength checks and saves.",
-    "Shout_MAG_ArmorOfAgathys_3": "**Armor of Agathys** (Level 3 Abjuration) - Gain 15 temporary hit points and deal 15 Cold damage to melee attackers.",
-    "Shout_MAG_Harpers_HarmonizingRapier_Perfrom": "**Harmonize (Perform)** - Harmonize with your weapon, granting a +1 bonus to Performance.",
-    "Shout_MAG_Harpers_SingingSword_Container": "**Sing / Shriek (Phalar Aluve)** - Sing buffs allies (+1d4 Attack rolls and saves); Shriek debuffs enemies (-1d4 saves, extra 1d4 Thunder damage taken).",
-    "Shout_MAG_Monk_Restore_Ki_Lesser": "**Ki Restoration** - Harness spiritual energy to restore 2 Ki points (Once per Long Rest).",
-    "Shout_MAG_PassWithoutTrace": "**Pass Without Trace** (Level 2 Abjuration) - Veil of shadows giving +10 bonus to Stealth checks for all nearby companions.",
-    "Shout_MAG_PullingShout": "**Telekinetic Pull** - Pull nearby creatures or objects within 9m towards you.",
-    "Shout_MAG_Restore_ChannelDivinity": "**Eternal Devotion** - Regain 1 expended Channel Divinity charge (Once per Short Rest).",
-    "Shout_MAG_SpellSlotRestoration": "**Spell Slot Restoration** - Regain an expended Level 1, 2, or 3 spell slot (Once per Long Rest).",
-    "Shout_UND_Invisibility_ShadowOfMenzoberranzan": "**Shrouded in Shadow** - Turn Invisible for 2 turns (Requires Concentration).",
-    "Target_HideousLaughter": "**Tasha's Hideous Laughter** (Level 1 Enchantment) - Leave a creature Prone with uncontrollable laughter for up to 10 turns (DC Wis save).",
-    "Target_MAG_Smite_Wrathful": "**Wrathful Smite** (Level 1 Evocation) - Deals weapon damage + 1d6 Psychic damage and potentially Frightens the target (Wisdom save).",
-    "Target_MinorIllusion": "**Minor Illusion** (Cantrip) - Creates an illusion that distracts nearby creatures.",
-    "Target_ViciousMockery": "**Vicious Mockery** (Cantrip) - Deals 1d4 Psychic damage and gives Disadvantage on target's next attack roll (Wisdom save).",
-    "Teleportation_MAG_Revivify": "**Revivify** (Level 3 Necromancy) - Revive a fallen companion with 1 hit point.",
-    "PP_Target_SubtleDomination": "**Subtle Domination** (Level 1 Enchantment) - Charm a humanoid creature (DC 13 Wisdom saving throw). While Charmed, the target cannot attack the caster and the caster has Advantage on Charisma checks against them (Duration: 10 turns, Recharge: Once per Long Rest).",
-    "PP_Target_Web": "**Web** (Level 2 Conjuration) - Cast a 4m radius sticky web that slows creatures within and inflicts the Enwebbed condition on a failed Dexterity save (Duration: 10 turns, Recharge: Once per Long Rest).",
-    "PP_Shout_DetectThoughts": "**Detect Thoughts** (Level 2 Divination) - Open your mind to read the thoughts of creatures during dialogue, gaining Advantage on dialogue insight checks (Duration: Until Long Rest, Recharge: Once per Long Rest).",
-    "PP_Target_PhantasmalForce": "**Phantasmal Force** (Level 2 Illusion) - Deceive a creature into perceiving an illusion that deals 1d6 Psychic damage each turn for 10 turns, adapting to the damage type it took most recently (DC Int save, Recharge: Once per Short Rest).",
-}
-
-MOD_SPECIFIC_OVERRIDES = {
-    # Custom Mod Spells
-    "Target_OHF_SOF_Infused_Survival_Instinct": "Infuse a creature with psionic force. If it reaches 0 hit points, it heals 3d10 HP instead of falling Unconscious (Recharge: Once per combat).",
-    "Target_OHF_SOF_AssassinStep": "Teleport from shadow to shadow up to 18m as a Bonus Action and gain Advantage on your next melee attack (Recharge: Once per combat).",
-    "Target_OHF_SOF_IceStorm": "Level 4 Evocation - Deals 2d8 Bludgeoning + 4d6 Cold damage in a 6m radius cylinder; leaves an icy surface (Recharge: Once per Short Rest).",
-    "Target_OHF_SOF_SleetStorm": "Level 3 Conjuration - Summons an icy storm (9m radius) that creates a slippery ice surface, douses fires, and disrupts concentration (Recharge: Once per Short Rest).",
-    "Target_OHF_SOF_T1_Target_Slash_New": "Ulrick's Lacerate - Slash a target dealing weapon damage and inflict Bleeding for 4 turns on a failed Con saving throw (Recharge: Once per turn).",
-    "Target_OHF_SOF_T2_Target_Slash_New": "Ulrick's Infused Lacerate - Slash a target dealing weapon damage and inflict Bleeding for 4 turns on a failed Con saving throw (DC Maneuver + 2).",
-    "Target_OHF_SOF_T1_CreateWater": "Create Water - Douse fires and create a water surface in a 4m area, making creatures Wet (Vulnerable to Cold and Lightning) [Cooldown: Once per Short Rest].",
-    "Target_OHF_SOF_T2_CreateWater": "Infused Create Water - Douse fires and create a water surface in a 6m area, making creatures Wet [Cooldown: Once per Combat].",
-    "Target_OHF_SOF_T1_MAG_Critical_Critical_Combo": "Ulrick's Advantage - Scoring a critical hit grants Advantage on your next melee weapon attack roll.",
-    "Zone_OHF_SOF_T1_Cleave": "Ulrick's Cleave - Swing your weapon in a cone, dealing weapon damage to up to 3 targets (Recharge: Once per turn).",
-    "Zone_OHF_SOF_T2_Cleave": "Ulrick's Infused Cleave - Enhanced wide cone cleave dealing full weapon damage to all enemies in range.",
-    "Rush_OHF_SOF_T1_SpringAttack": "Ulrick's Rush Attack - Charge forward up to 9m, hitting targets for weapon damage and knocking them Off-Balanced on failed Str save (Recharge: Once per combat).",
-    "Rush_OHF_SOF_T2_SpringAttack": "Ulrick's Infused Rush Attack - Charge forward, dealing weapon damage + max(Dex, Str) and knocking enemies Off-Balanced (DC Maneuver + 2).",
-    "Shout_OHF_SOF_T1_FoeSlayer": "Ulrick's Foeslayer - The number you need to roll a Critical Hit is reduced by 1 (stacks). Gain a +2 bonus to melee weapon attacks (Recharge: Once per Short Rest).",
-    "Shout_OHF_SOF_T2_FoeSlayer": "Infused Ulrick's Foeslayer - The number you need to roll a Critical Hit is reduced by 2 (stacks). Gain a +4 bonus to melee weapon attacks.",
-    "Shout_OHF_SOF_T2_Channel_Divinity": "Infused Eternal Devotion - Regain 1 expended Channel Divinity charge (Recharge: Once per Short Rest).",
-    "Shout_OHF_SOF_T2_Pulling_Shout": "Telekinetic Pull - Pull all nearby enemies within 9m towards your position.",
-    "Shout_OHF_SOF_T1_Immovable": "Korrin's Stone Footing - Anchor yourself into the ground, gaining immunity to forced movement and Prone for 3 turns (Recharge: Once per combat).",
-    # Pact and Power: Warlock Equipment Spells
-    "PP_Target_WeaponAction_BloodPrice": "Plunge the blade into a creature, dealing main weapon melee damage + Proficiency Bonus + 1d6 Necrotic damage, and regaining hit points equal to half the total damage dealt (Cantrip Weapon Action).",
-    "PP_Target_ChainsOfSubmission": "Ethereal chains bind a humanoid target for 3 turns (Wisdom save vs Spell DC). Target is held immobile and incapacitated (unable to move, act, or react). Attacks made from within 3m are guaranteed Critical Hits (Level 2 Enchantment, Recharge: Once per Long Rest).",
-    "PP_Target_WeaponAction_Pactbreaker_Curse": "Strike a creature, dealing main weapon melee damage + Proficiency Bonus + 1d6 Psychic damage. Target must succeed a Wisdom saving throw vs Spell DC or suffer a -1 penalty to Attack Rolls for 2 turns (Cantrip Weapon Action).",
-    "PP_Shout_EchoesOfSelf": "Create 3 defensive echoes for 10 turns, granting a +2 bonus to Armour Class and Resistance to Force damage. Whenever you evade an attack, one echo disappears (Level 2 Illusion, Recharge: Once per Long Rest).",
-    "PP_Shout_WarlockSpellRestoration": "Tap into patron power to immediately restore 1 expended Warlock Spell Slot of Level 1–5 (Cantrip, Recharge: Once per Long Rest).",
-    "PP_Shout_CloakOfFlies": "Surround yourself with a 2m aura of buzzing flies for 10 turns. Grants Advantage on Intimidation checks, but Disadvantage on all other Charisma checks. Any creature starting its turn in the aura takes Poison damage equal to your Charisma Modifier (Cantrip, Recharge: Once per Long Rest).",
-    "PP_Shout_VolcanicBlast": "For 3 turns, gain Resistance to Fire damage, and fire spells deal an additional 2d6 Fire damage. Also triggers a fiery shockwave igniting flammable surfaces and dealing 2d6 Fire damage (Cantrip, Recharge: Once per Long Rest).",
-    "PP_Shout_DemonicSurge": "Channel demonic fury for 3 turns, gaining temporary hit points equal to your Warlock Level + Charisma Modifier, and causing all weapon and spell attacks to deal an additional 1d6 Psychic damage (Cantrip, Recharge: Once per Short Rest).",
-    "PP_Target_VoidStep_FollowUp": "Teleport next to any creature within 9m. Afterwards, gain Voidwalker's Resilience for 3 turns, adding +1d4 Force damage to weapon attacks and regaining 1d6 hit points (Conjuration follow-up).",
-    # Custom Mod Passives
-    "OHF_SOF_T1_Monk_Freedom": "Thalassa's Freedom - Immune to being Enwebbed and immune to slipping on ice surfaces (Night Walkers effect).",
-    "OHF_SOF_T1_Monk_Mobility": "Thalassa's Mobility - Increases Movement Speed by 3m and Acrobatics by +2.",
-    "OHF_SOF_T2_Monk_Spiteful_Thunder": "(Set Bonus) Thalassa's Infused Spiteful Thunder - When you inflict Reverberation or Thunder damage, deal an additional 1d4 Thunder damage and knock targets back 3m.",
-    "OHF_SOF_T1_ThrowingDamage": "Jàegah's Pitcher - Deals an additional 1d4 damage on Throw attacks.",
-    "OHF_SOF_T1_Inflict_Bleeding": "Jàegah's Scissors - Attacks with this weapon have a chance to inflict Bleeding on hit.",
-    "OHF_SOF_T2_Inflict_Bleeding": "Jàegah's Infused Scissors - Attacks with this weapon have a high chance to inflict Bleeding (100% on Critical Hit).",
-    "OHF_SOF_T1_Warlock_SetBonus": "(Set Bonus) Thalindra's Beguiling Personality - Your cantrips deal additional damage equal to your Charisma Modifier.",
-    "OHF_SOF_T1_Warlock_FastMovement": "Thalindra's Repositioning - Increases Movement Speed by 3m and Jump Distance by 1.5m.",
-    "OHF_SOF_AuraOfMurder": "(Set Bonus) Aura of Murder - Hostile creatures within 2m become Vulnerable to Piercing damage, unless they are already resistant or immune to it.",
-    "OHF_SOF_T2_FirstBlood_Passive": "Lunarshade's Infused First Blood - Deals an additional 1d8 damage to targets that still have all their hit points.",
-    "OHF_SOF_T2_FastMovement_Passive": "Lunarshade's Infused Mobility - Increases Movement Speed by 6m and Acrobatics by +4.",
-    "OHF_SOF_T1_Paladin_Craterous_Wounds": "Ulrick's Craterous Wounds - Whenever you score a Critical Hit, deal an additional 1d6 Force damage.",
-    "OHF_SOF_T2_Paladin_Craterous_Wounds": "Ulrick's Infused Craterous Wounds - Whenever you score a Critical Hit, deal an additional 1d10 Force damage.",
-    "OHF_SOF_T1_Fighter_ForceConduit_Attack": "Korrin's Relentless Force - Melee weapon hits grant 2 turns of Force Conduit (-1 Physical damage taken per turn remaining).",
-    "OHF_SOF_T1_Fighter_ForceConduit_Turn": "Korrin's Conduit - Shrouds the wearer with Force Conduit at the start of their turn in combat.",
-    "OHF_SOF_Infused_UND_SocietyOfBrilliance_PullingRing_Passive": "Infused Saviour's Allure - Pulls surrounding enemies within 9m towards the caster when casting a spell.",
-    # Pact and Power: Warlock Equipment Passives
-    "PP_Lifebound_Aura_Passive": "A shimmering aura envelops your familiar, increasing its maximum hit points by an amount equal to your Warlock Level (Toggled).",
-    "PP_Packkeeper_Aura_Text_Passive": "Emanate an aura in a 3m radius. Enemies within the aura suffer a 1d4 penalty to Attack Rolls and Saving Throws, and take 1d4 Necrotic damage if they start their turn within it (Toggled).",
-    "PP_Shadowfell_Infusion_Passive": "When casting Arms of Hadar, it deals an additional 1d4 Necrotic damage.",
-    "PP_BloodPact_Enhancement_Passive": "While your Pact Weapon or Hexed Weapon is active, melee weapon attacks deal an additional 1d4 Necrotic damage (Once per turn).",
-    "PP_WhispersOfVoid_Passive": "If you have Pact of the Tome, your spells deal an additional 1d4 Necrotic damage on hit (Toggled).",
-    "PP_FortunateFumble_Passive": "Gain a +1 bonus to Ability Checks and Saving Throws.",
-    "PP_PactEmpoweredAim_Passive": "Gain a +1 bonus to Spell Attack Rolls and Spell Save DC.",
-    "PP_TormentorInsight_Passive": "Gain a +1d4 bonus to Insight Checks.",
-    "PP_AscendedPact_Text_Passive": "Grants patron enhancements based on chosen pact:<br>• **Pact of the Blade**: Weapon attacks deal +1d4 Necrotic damage (+2d4 with Deepened Pact).<br>• **Pact of the Chain**: Familiars within 18m gain bonus HP equal to Warlock Level + Charisma Modifier and +1d4 to Saving Throws (familiar deals +1d6 Necrotic with Deepened Pact).<br>• **Pact of the Tome**: Spells have a 10% chance (20% with Deepened Pact) to inflict Pact Siphon for 3 turns, dealing 1d6 Necrotic per turn (2d6 with Deepened Pact) and healing the warlock for damage dealt.",
-    "PP_BindingThreads_Passive": "Gain a +1 bonus to Attack Rolls and Spell Save DC.",
-    "PP_VoidStep_Passive": "After casting Hunger of Hadar, unlock Void Step, allowing you to teleport next to a creature within 9m and gain Voidwalker's Resilience (+1d4 Force damage, 1d6 HP regen).",
-    "PP_SoulfireRetaliation_Passive": "Reaction: When struck by a melee attack, deal 2d6 Necrotic damage to the attacker. Attacker must succeed a DC 15 Dexterity saving throw or take 1d4 Necrotic damage at the start of each turn for 3 turns (Once per Long Rest).",
-    "PP_CloakOfFlies_Passive": "Unlocks the Cloak of Flies cantrip (2m aura dealing Charisma Modifier Poison damage per turn, Advantage on Intimidation, Disadvantage on other Charisma checks).",
-    "PP_VolcanicBlase_Passive": "For 3 turns, gain Resistance to Fire damage, and fire spells deal an additional 2d6 Fire damage.",
-    "PP_Leechstone_Passive": "When taking spell damage while below 50% hit points, gain temporary hit points equal to half your Warlock Level + Charisma Modifier (Once per Long Rest).",
-    "PP_Hellish_Resistance": "Gain Resistance to Fire and Necrotic damage.",
-    "PP_SurgeOfBrimstone": "At the start of combat, the first spell cast that deals Fire or Necrotic damage deals an additional 2d4 damage of that type.",
-    "PP_SearingRebuke_Passive": "Reaction: When struck by an enemy, cast a 3rd-level Hellish Rebuke dealing 4d10 Fire damage (Once per Long Rest).",
-    "PP_EverlastingPact_Text_Passive": "Grants unique benefits based on chosen pact:<br>• **Pact of the Blade**: Weapon attacks deal an extra 2d6 Psychic damage (Once per turn) and wielder gains Resistance to Psychic damage.<br>• **Pact of the Chain**: Familiars within 18m gain +2 Armour Class, +2 Attack Rolls, and temporary hit points equal to twice your Warlock Level.<br>• **Pact of the Tome**: Gain +2 to Spell Attack Rolls and Spell Save DC, and cantrips deal an additional 1d8 Psychic damage (Once per turn).",
-    "PP_FeastOnTheWounded_Passive": "When hitting a creature below maximum hit points, deal an additional 1d8 Necrotic damage (Once per turn).",
-    "PP_Focused_Eldritch_Force_Passive": "Eldritch Blast attacks have Advantage and deal an additional 1d8 Force damage (Once per attack).",
-    "PP_Soulrender_Passive": "When killing a creature with a Necrotic, Psychic, or Radiant spell, gain an additional Action this turn (Once per Short Rest).",
-    "PP_Twilights_Edge": "When casting a cantrip, make a weapon attack as a Bonus Action (Toggled, Once per Short Rest).",
-    "PP_Desperate_Renewal_Passive": "When hit points drop below 40%, unleash a wave of necrotic energy in a 5m radius dealing 2d8 Necrotic damage to enemies (allies take half) (Once per Short Rest).",
-    "PP_Devour_Essence_Passive": "After killing 3 enemies, restore an expended Warlock Spell Slot.",
-    "PP_Insatiable_Passive": "At the start of combat, take 2d10 Necrotic damage but gain Armour Class equal to your Charisma Modifier (maximum +5) until combat ends.",
-    "PP_WhisperSilk_Passive": "When damaging a creature afflicted by Hex, the critical hit roll threshold against that creature is reduced by 1 (Stacks).",
-}
+# Reference dictionaries imported from scripts.lib.mod_overrides
 
 
 def extract_and_verify_features(all_stats, loc_dict, roottemplate_names=None, progressions=None):
@@ -1252,36 +809,46 @@ def generate_spec_markdown(mod_metadata, meta_lsx, features, category):
 
 def update_library_markdown(library_path):
     """Regenerate the complete library from specs while preserving known IDs."""
-    if __package__:
-        from .update_library_catalog import write_library_catalog
-    else:
-        from update_library_catalog import write_library_catalog
-
     write_library_catalog(library_file=Path(library_path), mods_dir=Path(library_path).parent)
 
 
 # ----------------------------------------------------------------------
 # Main Execution Pipeline
 # ----------------------------------------------------------------------
-def process_mod(query, output_dir=None, write_spec=False, update_library=False):
-    api_key = get_api_key()
-    if not api_key:
-        raise RuntimeError("MODIO_API_KEY environment variable is not set. Please export MODIO_API_KEY.")
+def process_mod(query="", pak_path=None, output_dir=None, write_spec=False, update_library=False):
+    if pak_path:
+        pak_file = Path(pak_path).resolve()
+        if not pak_file.is_file():
+            raise FileNotFoundError(f"PAK file not found: {pak_path}")
+        archive_bytes = pak_file.read_bytes()
+        mod_name = pak_file.stem
+        slug = normalize_mod_key(mod_name)
+        mod_meta = {
+            "id": 0,
+            "name": mod_name,
+            "name_id": slug,
+            "summary": f"Local package {pak_file.name}",
+        }
+    else:
+        if not query:
+            raise ValueError("Either query or pak_path must be provided.")
+        api_key = get_api_key()
+        if not api_key:
+            raise RuntimeError("MODIO_API_KEY environment variable is not set. Please export MODIO_API_KEY.")
 
-    # 1. Query mod.io
-    mod_meta = query_modio(query, api_key)
-    mod_name = mod_meta["name"]
-    slug = mod_meta["name_id"]
+        # 1. Query mod.io
+        mod_meta = query_modio(query, api_key)
+        mod_name = mod_meta["name"]
+        slug = mod_meta["name_id"]
+
+        # 2. Download mod
+        archive_bytes = download_mod_file(mod_meta, api_key)
 
     if not output_dir:
-        workspace_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-        output_dir = os.path.join(workspace_root, "mods", slug)
+        output_dir = str(MODS_DIR / slug)
 
     data_dir = os.path.join(output_dir, "data")
     os.makedirs(data_dir, exist_ok=True)
-
-    # 2. Download mod
-    archive_bytes = download_mod_file(mod_meta, api_key)
 
     # 3. Extract pak files from zip if zipped
     pak_payloads = []
@@ -1326,6 +893,11 @@ def process_mod(query, output_dir=None, write_spec=False, update_library=False):
                     out.write(content)
                 if floc.endswith(".xml"):
                     loc_dict.update(parse_localization_xml(content))
+                elif floc.endswith(".loca"):
+                    try:
+                        loc_dict.update(parse_loca_bytes(content))
+                    except Exception:
+                        pass
 
             elif fname.endswith("meta.lsx"):
                 content = archive.extract_file(f)
@@ -1440,8 +1012,9 @@ def process_mod(query, output_dir=None, write_spec=False, update_library=False):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Fetch, unpack, and parse BG3 mods from mod.io.")
-    parser.add_argument("--query", "-q", required=True, help="Mod name, slug, URL, or ID")
+    parser = argparse.ArgumentParser(description="Fetch, unpack, and parse BG3 mods from mod.io or local .pak archives.")
+    parser.add_argument("--query", "-q", help="Mod name, slug, URL, or ID on mod.io")
+    parser.add_argument("--pak", help="Path to local .pak file to unpack and document")
     parser.add_argument("--output-dir", "-o", help="Directory where mod spec and data will be saved")
     parser.add_argument("--write-spec", action="store_true", help="Write README.md directly to output directory")
     parser.add_argument("--update-library", action="store_true", help="Update mods/library.md with documented mod")
@@ -1449,9 +1022,13 @@ def main():
 
     args = parser.parse_args()
 
+    if not args.query and not args.pak:
+        parser.error("Either --query or --pak must be provided.")
+
     try:
         res = process_mod(
-            args.query,
+            query=args.query or "",
+            pak_path=args.pak,
             output_dir=args.output_dir,
             write_spec=args.write_spec,
             update_library=args.update_library,
@@ -1464,7 +1041,7 @@ def main():
             print(f"Features documented: {res['features_count']}")
             print(f"Directory: {res['output_dir']}")
     except Exception as e:
-        print(f"Error processing mod '{args.query}': {e}", file=sys.stderr)
+        print(f"Error processing mod '{args.query or args.pak}': {e}", file=sys.stderr)
         sys.exit(1)
 
 

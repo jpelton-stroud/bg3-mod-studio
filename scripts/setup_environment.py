@@ -29,8 +29,14 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
+from scripts.lib.env_paths import REPO_ROOT
+from scripts.lib.modio_client import BG3_GAME_ID, MODIO_API_HOST, USER_AGENT
+
+WORKSPACE_ROOT = REPO_ROOT
 ENV_PATH = WORKSPACE_ROOT / ".env"
 ENV_EXAMPLE_PATH = WORKSPACE_ROOT / ".env.example"
 
@@ -95,14 +101,14 @@ def detect_default_data_dir() -> str:
 
 
 def test_modio_api_key(api_key: str) -> tuple[bool, str]:
-    """Validate mod.io API key by querying the Baldur's Gate 3 game metadata (ID: 3716)."""
+    """Validate mod.io API key by querying the Baldur's Gate 3 game metadata (ID: 6715)."""
     if not api_key:
         return False, "API key is empty."
 
-    url = f"https://api.mod.io/v1/games/3716?api_key={urllib.parse.quote(api_key)}"
+    url = f"https://{MODIO_API_HOST}/v1/games/{BG3_GAME_ID}?api_key={urllib.parse.quote(api_key)}"
     req = urllib.request.Request(
         url,
-        headers={"User-Agent": "BG3-Mod-Studio-Setup/1.0", "Accept": "application/json"},
+        headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
     )
     try:
         with urllib.request.urlopen(req, timeout=10) as response:
@@ -127,14 +133,14 @@ def test_modio_pat(api_key: str, pat: str) -> tuple[bool, str]:
     if not pat:
         return False, "PAT is empty."
 
-    url = "https://api.mod.io/v1/me"
+    url = f"https://{MODIO_API_HOST}/v1/me"
     if api_key:
         url += f"?api_key={urllib.parse.quote(api_key)}"
 
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "BG3-Mod-Studio-Setup/1.0",
+            "User-Agent": USER_AGENT,
             "Authorization": f"Bearer {pat}",
             "Accept": "application/json",
         },
@@ -198,11 +204,18 @@ def write_env_file(path: Path, content: str) -> None:
     os.chmod(path, 0o600)  # O_CREAT mode is ignored for pre-existing files
 
 
-def check_environment_status():
+def check_environment_status(as_json: bool = False):
     """Non-interactive check of project environment configuration."""
-    print(f"\n{BOLD}=== Environment Configuration Status ==={RESET}")
     if not ENV_PATH.is_file():
-        print(f"{YELLOW}[!] No .env file found at {ENV_PATH}. Run './setup.sh' to configure.{RESET}\n")
+        if as_json:
+            print(json.dumps({
+                "env_path": str(ENV_PATH),
+                "configured": False,
+                "error": f"No .env file found at {ENV_PATH}."
+            }, indent=2))
+        else:
+            print(f"\n{BOLD}=== Environment Configuration Status ==={RESET}")
+            print(f"{YELLOW}[!] No .env file found at {ENV_PATH}. Run './setup.sh' to configure.{RESET}\n")
         return
 
     env = parse_env_file(ENV_PATH)
@@ -210,14 +223,28 @@ def check_environment_status():
     pat = env.get("MODIO_PAT", env.get("MODIO_OAUTH_TOKEN", ""))
     data_dir = env.get("BG3_DATA_DIR", "")
     author = env.get("BG3_MOD_AUTHOR", "")
+    data_dir_exists = Path(data_dir).exists() if data_dir else False
 
+    if as_json:
+        result = {
+            "env_path": str(ENV_PATH),
+            "configured": True,
+            "modio_api_key_configured": bool(api_key),
+            "modio_pat_configured": bool(pat),
+            "bg3_data_dir": data_dir,
+            "bg3_data_dir_exists": data_dir_exists,
+            "bg3_mod_author": author or "default",
+        }
+        print(json.dumps(result, indent=2))
+        return
+
+    print(f"\n{BOLD}=== Environment Configuration Status ==={RESET}")
     print(f"File location:    {ENV_PATH}")
     print(f"MODIO_API_KEY:    {'Configured (' + api_key[:4] + '***)' if api_key else RED + 'Missing' + RESET}")
     print(f"MODIO_PAT:        {'Configured (***)' if pat else YELLOW + 'Not set (Optional)' + RESET}")
     print(f"BG3_DATA_DIR:     {data_dir if data_dir else RED + 'Missing' + RESET}")
     if data_dir:
-        exists = Path(data_dir).exists()
-        status_text = f"{GREEN}Exists{RESET}" if exists else f"{YELLOW}Not found on disk{RESET}"
+        status_text = f"{GREEN}Exists{RESET}" if data_dir_exists else f"{YELLOW}Not found on disk{RESET}"
         print(f"  └ Directory:    {status_text}")
     print(f"BG3_MOD_AUTHOR:   {author if author else 'default'}")
     print("")
@@ -384,8 +411,15 @@ def main():
     )
     parser.add_argument(
         "--check",
+        "--check-only",
+        dest="check",
         action="store_true",
         help="Check and display current environment configuration without prompting",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output check results as JSON",
     )
     parser.add_argument(
         "--dry-run",
@@ -395,7 +429,7 @@ def main():
     args = parser.parse_args()
 
     if args.check:
-        check_environment_status()
+        check_environment_status(as_json=args.json)
     else:
         run_wizard(dry_run=args.dry_run)
 

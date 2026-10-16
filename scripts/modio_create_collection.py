@@ -13,21 +13,24 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, TextIO, Tuple
 
-if __package__:
-    from .lib.library_catalog import parse_library_rows
-else:
-    from lib.library_catalog import parse_library_rows
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
-LIBRARY_PATH = WORKSPACE_ROOT / "mods" / "library.md"
-BG3_GAME_ID = 6715
-API_ROOT = f"https://g-{BG3_GAME_ID}.modapi.io/v1"
-USER_AGENT = "BG3ModStudio/1.0"
+from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
+from scripts.lib.library_catalog import parse_library_rows
+from scripts.lib.modio_client import (
+    API_ROOT,
+    BG3_GAME_ID,
+    USER_AGENT,
+    ModioClient,
+    ModioError,
+    get_oauth_token,
+)
+
+WORKSPACE_ROOT = REPO_ROOT
+LIBRARY_PATH = MODS_DIR / "library.md"
 PAGE_SIZE = 100
-
-
-class ModioError(RuntimeError):
-    """Raised when catalog data or a mod.io operation is invalid."""
 
 
 @dataclass(frozen=True)
@@ -35,59 +38,6 @@ class ModEntry:
     name: str
     slug: str
     mod_id: int
-
-
-class ModioClient:
-    def __init__(self, token: str, opener: Any = urllib.request.urlopen) -> None:
-        self.token = token
-        self.opener = opener
-
-    def request(
-        self,
-        method: str,
-        path: str,
-        params: Optional[Dict[str, Any]] = None,
-        fields: Optional[Sequence[Tuple[str, str]]] = None,
-    ) -> Dict[str, Any]:
-        url = f"{API_ROOT}{path}"
-        if params:
-            url = f"{url}?{urllib.parse.urlencode(params)}"
-        headers = {
-            "Accept": "application/json",
-            "Authorization": f"Bearer {self.token}",
-            "User-Agent": USER_AGENT,
-        }
-        body = None
-        if fields is not None:
-            headers["Content-Type"] = "application/x-www-form-urlencoded"
-            body = urllib.parse.urlencode(fields).encode("utf-8")
-        request = urllib.request.Request(url, data=body, headers=headers, method=method)
-
-        try:
-            with self.opener(request, timeout=30) as response:
-                response_body = response.read()
-        except urllib.error.HTTPError as error:
-            detail = error.read().decode("utf-8", errors="replace").strip()
-            if self.token:
-                detail = detail.replace(self.token, "[REDACTED]")
-            raise ModioError(
-                f"mod.io API returned HTTP {error.code} {error.reason}"
-                + (f": {detail}" if detail else "")
-            ) from None
-        except urllib.error.URLError as error:
-            raise ModioError(f"Could not connect to mod.io: {error.reason}") from None
-        except OSError as error:
-            raise ModioError(f"Could not complete the mod.io request: {error}") from None
-
-        if not response_body:
-            return {}
-        try:
-            payload = json.loads(response_body.decode("utf-8"))
-        except (UnicodeDecodeError, json.JSONDecodeError):
-            raise ModioError("mod.io returned an invalid JSON response.") from None
-        if not isinstance(payload, dict):
-            raise ModioError("mod.io returned an unexpected response shape.")
-        return payload
 
 
 def parse_catalog(library_path: Path) -> Tuple[List[ModEntry], List[str], int]:
@@ -496,9 +446,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    token = os.environ.get("MODIO_PAT", "").strip()
+    token = get_oauth_token()
     if not token:
-        print("MODIO_PAT environment variable is required; token is never accepted as an argument.", file=sys.stderr)
+        print("MODIO_PAT environment variable or .env entry is required; token is never accepted as an argument.", file=sys.stderr)
         return 2
 
     try:

@@ -15,29 +15,18 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-WORKSPACE_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
-if SCRIPT_DIR not in sys.path:
-    sys.path.insert(0, SCRIPT_DIR)
+from pathlib import Path
 
-if __package__:
-    from .lib.library_catalog import parse_library_rows
-    from .modio_extract import (
-        get_api_key,
-        query_modio,
-        process_mod,
-        BG3_GAME_ID,
-        MODIO_API_HOST,
-    )
-else:
-    from lib.library_catalog import parse_library_rows
-    from modio_extract import (
-        get_api_key,
-        query_modio,
-        process_mod,
-        BG3_GAME_ID,
-        MODIO_API_HOST,
-    )
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
+from scripts.lib.library_catalog import parse_library_rows
+from scripts.lib.modio_client import BG3_GAME_ID, MODIO_API_HOST, get_api_key, query_modio
+from scripts.modio_extract import process_mod
+
+WORKSPACE_ROOT = str(REPO_ROOT)
 
 
 def get_tracked_mods(library_path=None):

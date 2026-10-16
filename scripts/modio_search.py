@@ -14,14 +14,15 @@ import re
 import sys
 import urllib.parse
 import urllib.request
+from pathlib import Path
 
-if __package__:
-    from .lib.library_catalog import parse_library_rows
-else:
-    from lib.library_catalog import parse_library_rows
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
-BG3_GAME_ID = 6715
-MODIO_API_HOST = "g-6715.modapi.io"
+from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
+from scripts.lib.library_catalog import parse_library_rows
+from scripts.lib.modio_client import BG3_GAME_ID, MODIO_API_HOST, USER_AGENT, get_api_key
 
 # Pre-mapped domain terms to mod.io tags
 TAG_MAPPINGS = {
@@ -82,49 +83,18 @@ STOP_WORDS = {
 }
 
 
-def get_api_key():
-    """Retrieve MODIO_API_KEY from environment or configuration files."""
-    key = os.environ.get("MODIO_API_KEY")
-    if key:
-        return key.strip()
-
-    # Check project .env
-    workspace_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    env_file = os.path.join(workspace_root, ".env")
-    if os.path.exists(env_file):
-        with open(env_file, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("MODIO_API_KEY="):
-                    return line.split("=", 1)[1].strip().strip('"').strip("'")
-
-    # Check ~/.config/modio/env
-    home_env = os.path.expanduser("~/.config/modio/env")
-    if os.path.exists(home_env):
-        with open(home_env, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("MODIO_API_KEY="):
-                    return line.split("=", 1)[1].strip().strip('"').strip("'")
-
-    return None
-
-
 def get_tracked_mods(workspace_root=None):
     """
     Parse mods/library.md to collect names and slugs of already tracked mods.
     """
-    if workspace_root is None:
-        workspace_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-
     tracked_slugs = set()
     tracked_names = set()
-
-    # Inspect mods/library.md
-    library_path = os.path.join(workspace_root, "mods", "library.md")
-    if os.path.isfile(library_path):
-        with open(library_path, "r", encoding="utf-8") as f:
-            rows = parse_library_rows(f.read())
+    if workspace_root:
+        library_path = Path(workspace_root) / "mods" / "library.md"
+    else:
+        library_path = MODS_DIR / "library.md"
+    if library_path.is_file():
+        rows = parse_library_rows(library_path.read_text(encoding="utf-8"))
         for row in rows:
             tracked_names.add(row["name"].lower())
             tracked_slugs.add(row["slug"].lower())

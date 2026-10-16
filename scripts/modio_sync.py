@@ -22,69 +22,28 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-# Ensure scripts directory is in python path
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-WORKSPACE_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
-if SCRIPT_DIR not in sys.path:
-    sys.path.insert(0, SCRIPT_DIR)
+from pathlib import Path
 
-if __package__:
-    from .lib.library_catalog import parse_library_rows
-    from .modio_extract import (
-        get_api_key,
-        process_mod,
-        BG3_GAME_ID,
-        MODIO_API_HOST,
-    )
-    from .modio_update import (
-        get_tracked_mods,
-        check_and_apply_update,
-    )
-else:
-    from lib.library_catalog import parse_library_rows
-    from modio_extract import (
-        get_api_key,
-        process_mod,
-        BG3_GAME_ID,
-        MODIO_API_HOST,
-    )
-    from modio_update import (
-        get_tracked_mods,
-        check_and_apply_update,
-    )
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
+from scripts.lib.library_catalog import parse_library_rows
+from scripts.lib.modio_client import (
+    BG3_GAME_ID,
+    MODIO_API_HOST,
+    USER_AGENT,
+    get_api_key,
+    get_oauth_token,
+)
+from scripts.modio_extract import process_mod
+from scripts.modio_update import check_and_apply_update, get_tracked_mods
+
+WORKSPACE_ROOT = str(REPO_ROOT)
 
 
-def get_oauth_token(cli_token=None):
-    """Resolve mod.io Personal Access Token (PAT) or OAuth token from CLI, env, or .env file."""
-    if cli_token:
-        return cli_token.strip()
 
-    env_token = os.environ.get("MODIO_PAT") or os.environ.get("MODIO_OAUTH_TOKEN")
-    if env_token:
-        return env_token.strip()
-
-    env_file = os.path.join(WORKSPACE_ROOT, ".env")
-    if os.path.exists(env_file):
-        with open(env_file, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("MODIO_PAT=") or line.startswith("MODIO_OAUTH_TOKEN="):
-                    val = line.split("=", 1)[1].strip().strip('"').strip("'")
-                    if val:
-                        return val
-
-    # Check home .config/modio/env fallback
-    home_env = os.path.expanduser("~/.config/modio/env")
-    if os.path.exists(home_env):
-        with open(home_env, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("MODIO_PAT=") or line.startswith("MODIO_OAUTH_TOKEN="):
-                    val = line.split("=", 1)[1].strip().strip('"').strip("'")
-                    if val:
-                        return val
-
-    return None
 
 
 def fetch_subscribed_mods(oauth_token, game_id=BG3_GAME_ID):

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-generate_mod_metadata.py
-------------------------
-Exports a custom mod's README.md as a standalone HTML document for publishing.
+render_modio_description.py
+---------------------------
+Exports a custom mod's README.md as a standalone HTML document or mod.io description.
+Supports headings, lists, inline markdown, code blocks, and GFM markdown tables.
 """
 
 import argparse
@@ -11,13 +12,24 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any, Dict, List
 
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
-MY_MODS_DIR = WORKSPACE_ROOT / "my_mods"
+from scripts.lib.env_paths import MY_MODS_DIR, REPO_ROOT, resolve_mod_dir
+
+WORKSPACE_ROOT = REPO_ROOT
 
 
 def find_mod_dir(mod_query: str) -> Path:
+    """Locate mod directory by path, name, or slug."""
+    try:
+        return resolve_mod_dir(mod_query)
+    except Exception:
+        pass
+
     query_path = Path(mod_query).expanduser()
     if query_path.is_dir():
         return query_path
@@ -33,6 +45,7 @@ def find_mod_dir(mod_query: str) -> Path:
 
 
 def render_inline_markdown(text: str) -> str:
+    """Convert inline markdown (*, **, `, links) to safe HTML."""
     escaped = html.escape(text, quote=True)
     escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
     escaped = re.sub(
@@ -45,17 +58,32 @@ def render_inline_markdown(text: str) -> str:
     return escaped
 
 
+def _is_table_row(line: str) -> bool:
+    stripped = line.strip()
+    return stripped.startswith("|") and stripped.endswith("|") and len(stripped) > 2
+
+
+def _is_table_separator(line: str) -> bool:
+    stripped = line.strip()
+    if not (stripped.startswith("|") and stripped.endswith("|")):
+        return False
+    cells = [c.strip() for c in stripped[1:-1].split("|")]
+    return len(cells) > 0 and all(re.match(r"^:?-+:?$", c) for c in cells if c)
+
+
 def markdown_to_html(markdown: str, title_fallback: str) -> str:
+    """Convert GFM markdown text into an HTML document."""
     lines = markdown.splitlines()
     title_match = next((re.match(r"^#\s+(.+?)\s*#*\s*$", line) for line in lines if line.startswith("# ")), None)
     title = title_match.group(1) if title_match else title_fallback
 
-    body = []
-    paragraph = []
-    list_items = []
+    body: List[str] = []
+    paragraph: List[str] = []
+    list_items: List[str] = []
     list_tag = ""
-    code_lines = []
+    code_lines: List[str] = []
     in_code_block = False
+    table_lines: List[str] = []
 
     def flush_paragraph() -> None:
         if paragraph:
@@ -80,10 +108,30 @@ def markdown_to_html(markdown: str, title_fallback: str) -> str:
             list_items.clear()
             list_tag = ""
 
+    def flush_table() -> None:
+        if not table_lines:
+            return
+        if len(table_lines) >= 2 and _is_table_separator(table_lines[1]):
+            header_cells = [c.strip() for c in table_lines[0].strip().strip("|").split("|")]
+            body.append("<table>")
+            body.append("<thead><tr>" + "".join(f"<th>{render_inline_markdown(c)}</th>" for c in header_cells) + "</tr></thead>")
+            body.append("<tbody>")
+            for row in table_lines[2:]:
+                cells = [c.strip() for c in row.strip().strip("|").split("|")]
+                body.append("<tr>" + "".join(f"<td>{render_inline_markdown(c)}</td>" for c in cells) + "</tr>")
+            body.append("</tbody>")
+            body.append("</table>")
+        else:
+            for r in table_lines:
+                paragraph.append(r)
+            flush_paragraph()
+        table_lines.clear()
+
     for line in lines:
         if line.strip().startswith("```"):
             flush_paragraph()
             flush_list()
+            flush_table()
             if in_code_block:
                 body.append(f"<pre><code>{html.escape(chr(10).join(code_lines))}</code></pre>")
                 code_lines.clear()
@@ -92,6 +140,14 @@ def markdown_to_html(markdown: str, title_fallback: str) -> str:
         if in_code_block:
             code_lines.append(line)
             continue
+
+        if _is_table_row(line):
+            flush_paragraph()
+            flush_list()
+            table_lines.append(line)
+            continue
+        elif table_lines:
+            flush_table()
 
         heading = re.match(r"^(#{1,6})\s+(.+?)\s*#*\s*$", line)
         if heading:
@@ -123,6 +179,7 @@ def markdown_to_html(markdown: str, title_fallback: str) -> str:
 
     flush_paragraph()
     flush_list()
+    flush_table()
     if in_code_block:
         body.append(f"<pre><code>{html.escape(chr(10).join(code_lines))}</code></pre>")
 
@@ -137,6 +194,9 @@ def markdown_to_html(markdown: str, title_fallback: str) -> str:
     code, pre {{ background: #f3f4f6; }}
     code {{ padding: 0.1em 0.3em; }}
     pre {{ overflow-x: auto; padding: 1rem; }}
+    table {{ border-collapse: collapse; width: 100%; margin: 1rem 0; }}
+    th, td {{ border: 1px solid #d1d5db; padding: 0.5rem; text-align: left; }}
+    th {{ background-color: #f9fafb; }}
   </style>
 </head>
 <body>
@@ -146,7 +206,8 @@ def markdown_to_html(markdown: str, title_fallback: str) -> str:
 """
 
 
-def process_mod_metadata(mod_query: str, write_file: bool = False, as_json: bool = False) -> dict:
+def render_mod_description(mod_query: str, write_file: bool = False, as_json: bool = False) -> Dict[str, Any]:
+    """Render a mod's README.md to HTML and optionally write modio_description.html."""
     mod_dir = find_mod_dir(mod_query)
     readme_file = mod_dir / "README.md"
     if not readme_file.is_file():
@@ -173,6 +234,9 @@ def process_mod_metadata(mod_query: str, write_file: bool = False, as_json: bool
     return result
 
 
+process_mod_metadata = render_mod_description
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Export a mod's README.md as a publishing-ready HTML document."
@@ -183,7 +247,7 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        process_mod_metadata(mod_query=args.mod, write_file=args.write, as_json=args.json)
+        render_mod_description(mod_query=args.mod, write_file=args.write, as_json=args.json)
     except (OSError, ValueError) as error:
         print(f"Error: {error}", file=sys.stderr)
         sys.exit(1)
