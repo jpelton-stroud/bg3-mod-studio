@@ -16,6 +16,7 @@ Features:
 
 import argparse
 import datetime
+import io
 import json
 import os
 import re
@@ -77,21 +78,14 @@ def detect_modsettings_path() -> Path | None:
 
 
 def create_default_modsettings(path: Path):
-    """Generate a clean skeleton modsettings.lsx with GustavDev."""
+    """Generate a clean Patch 7+ skeleton modsettings.lsx with GustavDev."""
     path.parent.mkdir(parents=True, exist_ok=True)
     xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <save>
-    <version major="4" minor="8" revision="0" build="500"/>
+    <version major="4" minor="8" revision="0" build="700"/>
     <region id="ModuleSettings">
         <node id="root">
             <children>
-                <node id="ModOrder">
-                    <children>
-                        <node id="Module">
-                            <attribute id="UUID" type="FixedString" value="{GUSTAV_DEV['UUID']}"/>
-                        </node>
-                    </children>
-                </node>
                 <node id="Mods">
                     <children>
                         <node id="ModuleShortDesc">
@@ -110,6 +104,21 @@ def create_default_modsettings(path: Path):
 </save>
 """
     path.write_text(xml_content, encoding="utf-8")
+
+
+def save_modsettings(path: Path, tree: ET.ElementTree):
+    """Save modsettings.lsx with clean 4-space indentation and standard Larian XML declaration."""
+    backup_file(path)
+    if hasattr(ET, "indent"):
+        ET.indent(tree, space="    ")
+    out = io.BytesIO()
+    tree.write(out, encoding="utf-8", xml_declaration=True)
+    raw = out.getvalue()
+    if raw.startswith(b"<?xml"):
+        header_end = raw.find(b"?>")
+        if header_end != -1:
+            raw = b'<?xml version="1.0" encoding="UTF-8"?>' + raw[header_end + 2:]
+    path.write_bytes(raw.rstrip() + b"\n")
 
 
 def parse_modsettings(path: Path) -> dict:
@@ -342,8 +351,7 @@ def isolate_load_order(path: Path, keep_uuids: set[str], dry_run: bool = False) 
             mod_order_children.remove(m_node)
 
     if removed_count > 0 and not dry_run:
-        backup_file(path)
-        tree.write(path, encoding="utf-8", xml_declaration=True)
+        save_modsettings(path, tree)
 
     return removed_count
 
@@ -355,8 +363,8 @@ def backup_file(path: Path) -> Path:
     return backup_path
 
 
-def _ensure_base_module(root: ET.Element, mods_children: ET.Element, mod_order_children: ET.Element) -> bool:
-    """Ensure base game module (GustavDev / GustavX) is present at index 0 in both Mods and ModOrder."""
+def _ensure_base_module(root: ET.Element, mods_children: ET.Element, mod_order_children: ET.Element | None = None) -> bool:
+    """Ensure base game module (GustavDev / GustavX) is present at index 0 in Mods (and ModOrder if present)."""
     modified = False
     base_module_uuid = None
     for desc_node in mods_children.findall("node[@id='ModuleShortDesc']"):
@@ -382,25 +390,26 @@ def _ensure_base_module(root: ET.Element, mods_children: ET.Element, mod_order_c
         mods_children.insert(0, gustav_desc)
         modified = True
 
-    # Check mod_order_children
-    order_modules = mod_order_children.findall("node[@id='Module']")
-    base_order_node = None
-    for m in order_modules:
-        u_attr = m.find("attribute[@id='UUID']")
-        if u_attr is not None and u_attr.get("value") == base_module_uuid:
-            base_order_node = m
-            break
+    # Check mod_order_children only if ModOrder exists in file (legacy compatibility)
+    if mod_order_children is not None:
+        order_modules = mod_order_children.findall("node[@id='Module']")
+        base_order_node = None
+        for m in order_modules:
+            u_attr = m.find("attribute[@id='UUID']")
+            if u_attr is not None and u_attr.get("value") == base_module_uuid:
+                base_order_node = m
+                break
 
-    if base_order_node is None:
-        base_order_node = ET.Element("node", id="Module")
-        ET.SubElement(base_order_node, "attribute", id="UUID", type="FixedString", value=base_module_uuid)
-        mod_order_children.insert(0, base_order_node)
-        modified = True
-    else:
-        if order_modules and order_modules[0] != base_order_node:
-            mod_order_children.remove(base_order_node)
+        if base_order_node is None:
+            base_order_node = ET.Element("node", id="Module")
+            ET.SubElement(base_order_node, "attribute", id="UUID", type="FixedString", value=base_module_uuid)
             mod_order_children.insert(0, base_order_node)
             modified = True
+        else:
+            if order_modules and order_modules[0] != base_order_node:
+                mod_order_children.remove(base_order_node)
+                mod_order_children.insert(0, base_order_node)
+                modified = True
 
     return modified
 
@@ -425,24 +434,18 @@ def enable_mod(path: Path, mod_meta: dict, order_index: int | None = None, dry_r
     if mods_children is None:
         raise ValueError("Invalid modsettings.lsx: missing Mods children node.")
 
-    if mod_order_children is None:
-        mod_order_node = root.find(".//node[@id='ModOrder']")
-        if mod_order_node is None:
-            root_children = root.find(".//node[@id='root']/children")
-            mod_order_node = ET.SubElement(root_children, "node", id="ModOrder")
-        mod_order_children = ET.SubElement(mod_order_node, "children")
-
     base_modified = _ensure_base_module(root, mods_children, mod_order_children)
 
     target_uuid = mod_meta["UUID"]
 
-    # Check if already present
+    # Check if already present in ModOrder (if present)
     existing_order_node = None
-    for mod_node in mod_order_children.findall("node[@id='Module']"):
-        u_attr = mod_node.find("attribute[@id='UUID']")
-        if u_attr is not None and u_attr.get("value") == target_uuid:
-            existing_order_node = mod_node
-            break
+    if mod_order_children is not None:
+        for mod_node in mod_order_children.findall("node[@id='Module']"):
+            u_attr = mod_node.find("attribute[@id='UUID']")
+            if u_attr is not None and u_attr.get("value") == target_uuid:
+                existing_order_node = mod_node
+                break
 
     existing_desc_node = None
     for desc_node in mods_children.findall("node[@id='ModuleShortDesc']"):
@@ -453,44 +456,45 @@ def enable_mod(path: Path, mod_meta: dict, order_index: int | None = None, dry_r
 
     if existing_desc_node is not None and order_index is None:
         if base_modified and not dry_run:
-            backup_file(path)
-            tree.write(path, encoding="utf-8", xml_declaration=True)
+            save_modsettings(path, tree)
             return True, "enabled"
         return False, "already_active"
 
     action_status = "reordered" if existing_desc_node is not None else "enabled"
 
     if not dry_run:
-        backup_file(path)
-
-        if existing_order_node is not None:
+        if existing_order_node is not None and mod_order_children is not None:
             mod_order_children.remove(existing_order_node)
         if existing_desc_node is not None:
             mods_children.remove(existing_desc_node)
 
-        new_order_node = ET.Element("node", id="Module")
-        ET.SubElement(new_order_node, "attribute", id="UUID", type="FixedString", value=target_uuid)
+        if mod_order_children is not None:
+            new_order_node = ET.Element("node", id="Module")
+            ET.SubElement(new_order_node, "attribute", id="UUID", type="FixedString", value=target_uuid)
+            if order_index is not None:
+                safe_idx = max(1, order_index)
+                order_len = len(mod_order_children.findall("node[@id='Module']"))
+                mod_order_children.insert(min(safe_idx, order_len), new_order_node)
+            else:
+                mod_order_children.append(new_order_node)
 
         new_desc_node = ET.Element("node", id="ModuleShortDesc")
         ET.SubElement(new_desc_node, "attribute", id="Folder", type="LSString", value=mod_meta["Folder"])
-        ET.SubElement(new_desc_node, "attribute", id="MD5", type="LSString", value=mod_meta["MD5"])
+        ET.SubElement(new_desc_node, "attribute", id="MD5", type="LSString", value=mod_meta.get("MD5", ""))
         ET.SubElement(new_desc_node, "attribute", id="Name", type="LSString", value=mod_meta["Name"])
-        ET.SubElement(new_desc_node, "attribute", id="PublishHandle", type="uint64", value=str(mod_meta["PublishHandle"]))
+        ET.SubElement(new_desc_node, "attribute", id="PublishHandle", type="uint64", value=str(mod_meta.get("PublishHandle", "0")))
         ET.SubElement(new_desc_node, "attribute", id="UUID", type="guid", value=target_uuid)
-        ET.SubElement(new_desc_node, "attribute", id="Version64", type="int64", value=str(mod_meta["Version64"]))
+        ET.SubElement(new_desc_node, "attribute", id="Version64", type="int64", value=str(mod_meta.get("Version64", "36028797018963968")))
 
         if order_index is not None:
             # Never insert at index 0 ahead of GustavDev/GustavX
             safe_idx = max(1, order_index)
-            order_len = len(mod_order_children.findall("node[@id='Module']"))
             desc_len = len(mods_children.findall("node[@id='ModuleShortDesc']"))
-            mod_order_children.insert(min(safe_idx, order_len), new_order_node)
             mods_children.insert(min(safe_idx, desc_len), new_desc_node)
         else:
-            mod_order_children.append(new_order_node)
             mods_children.append(new_desc_node)
 
-        tree.write(path, encoding="utf-8", xml_declaration=True)
+        save_modsettings(path, tree)
 
     return True, action_status
 
@@ -536,8 +540,6 @@ def disable_mod(path: Path, mod_name: str, dry_run: bool = False) -> bool:
         raise ValueError(f"Cannot disable core game module {target_name or 'GustavDev'}.")
 
     if not dry_run:
-        backup_file(path)
-
         if mod_order_children is not None:
             for m_node in list(mod_order_children.findall("node[@id='Module']")):
                 u_attr = m_node.find("attribute[@id='UUID']")
@@ -549,7 +551,7 @@ def disable_mod(path: Path, mod_name: str, dry_run: bool = False) -> bool:
             if u_attr is not None and u_attr.get("value") == target_uuid:
                 mods_children.remove(desc)
 
-        tree.write(path, encoding="utf-8", xml_declaration=True)
+        save_modsettings(path, tree)
 
     return True
 
@@ -703,9 +705,12 @@ def main():
                 verb = "[DRY-RUN] Would isolate" if args.dry_run else "Isolated"
                 print(f"✓ {verb} load order (disabled {isolated_count} unrelated mod{'s' if isolated_count != 1 else ''}).")
 
+        current_order_idx = 1
         dep_results = []
         for dep in resolved_deps:
-            dep_changed, dep_status = enable_mod(modsettings_path, dep, dry_run=args.dry_run)
+            req_idx = current_order_idx if args.isolate else None
+            dep_changed, dep_status = enable_mod(modsettings_path, dep, order_index=req_idx, dry_run=args.dry_run)
+            current_order_idx += 1
             dep_results.append({
                 "mod": dep.get("Name", dep["UUID"]),
                 "uuid": dep["UUID"],
@@ -718,7 +723,9 @@ def main():
 
         test_dep_results = []
         for tdep in resolved_test_deps:
-            tdep_changed, tdep_status = enable_mod(modsettings_path, tdep, dry_run=args.dry_run)
+            req_idx = current_order_idx if args.isolate else None
+            tdep_changed, tdep_status = enable_mod(modsettings_path, tdep, order_index=req_idx, dry_run=args.dry_run)
+            current_order_idx += 1
             test_dep_results.append({
                 "mod": tdep.get("Name", tdep["UUID"]),
                 "uuid": tdep["UUID"],
@@ -729,7 +736,8 @@ def main():
                 verb = "[DRY-RUN] Would enable test dependency" if args.dry_run else "Enabled test dependency"
                 print(f"  🧪 {verb} '{tdep.get('Name', tdep['UUID'])}' ({tdep['UUID']})")
 
-        changed, status_str = enable_mod(modsettings_path, mod_meta, order_index=args.order, dry_run=args.dry_run)
+        target_order = args.order if args.order is not None else (current_order_idx if args.isolate else None)
+        changed, status_str = enable_mod(modsettings_path, mod_meta, order_index=target_order, dry_run=args.dry_run)
         action_result["enable"] = {
             "mod": mod_meta["Name"],
             "uuid": mod_meta["UUID"],

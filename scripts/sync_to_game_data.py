@@ -115,16 +115,30 @@ def check_mod_dependencies(mod_path: Path, data_dir: Path) -> list:
             for dep in dep_nodes:
                 name_attr = dep.find("attribute[@id='Name']")
                 folder_attr = dep.find("attribute[@id='Folder']")
+                uuid_attr = dep.find("attribute[@id='UUID']")
                 dep_name = name_attr.get("value") if name_attr is not None else ""
                 dep_folder = folder_attr.get("value") if folder_attr is not None else dep_name
+                dep_uuid = uuid_attr.get("value", "").lower() if uuid_attr is not None else ""
                 if not dep_name or dep_name in BUILTIN_MODULES:
                     continue
 
                 in_data_mods = (data_dir / "Mods" / dep_folder).is_dir()
-                in_data_pak = (data_dir / f"{dep_name}.pak").is_file() or (data_dir / f"{dep_folder}.pak").is_file()
+                in_data_pak = (
+                    (data_dir / f"{dep_name}.pak").is_file()
+                    or (data_dir / f"{dep_folder}.pak").is_file()
+                    or (data_dir / "Mods" / f"{dep_name}.pak").is_file()
+                    or (data_dir / "Mods" / f"{dep_folder}.pak").is_file()
+                )
                 in_appdata_pak = False
                 if appdata_mods.is_dir():
-                    in_appdata_pak = any(dep_name.lower() in p.name.lower() for p in appdata_mods.glob("*.pak"))
+                    norm_folder = normalize_mod_key(dep_folder)
+                    norm_name = normalize_mod_key(dep_name)
+                    for p in appdata_mods.glob("*.pak"):
+                        p_stem = p.stem
+                        p_norm = normalize_mod_key(p_stem)
+                        if (dep_uuid and dep_uuid in p_stem.lower()) or p_norm == norm_folder or p_norm == norm_name:
+                            in_appdata_pak = True
+                            break
 
                 if not (in_data_mods or in_data_pak or in_appdata_pak):
                     missing.append(f"{dep_name} (folder: {dep_folder})")

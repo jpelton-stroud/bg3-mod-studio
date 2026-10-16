@@ -29,8 +29,8 @@ flowchart TD
 python3 scripts/pack_mod_pak.py --mod &lt;slug&gt; --publish-local --json"]
     
     subgraph P3A["Phase 3A: Clean-Room / Smoke Testing (Default Fast Path)"]
-        Pack --> DepEnable["Step 2: Enable Mod with Dependencies
-python3 scripts/manage_load_order.py --enable &lt;slug&gt; --with-deps --json"]
+        Pack --> DepEnable["Step 2: Enable Mod with Dependencies (Clean-Room Isolation)
+python3 scripts/manage_load_order.py --enable &lt;slug&gt; --with-deps --isolate --json"]
         DepEnable --> InGameSmoke["Step 3: In-Game Smoke Test in BG3
 Test mechanics, drops, tooltips on clean save"]
         InGameSmoke --> Gate3A{"Phase 3A Verification Result?"}
@@ -78,29 +78,25 @@ Verify in the JSON output:
 
 ## Phase 3A: Clean-Room / Smoke Testing (Default Fast Path)
 
-### Step 2: Configure Dependency-Aware Load Order & Pak Verification (QuickEnable)
+### Step 2: Configure Dependency-Aware Load Order & Clean-Room Isolation (QuickEnable)
 
-Activate the mod while automatically verifying `.pak` archives and enabling declared prerequisites (such as `UnlockLevelCurve`):
+Phase 3A is clean-room smoke testing: activate the mod while strictly isolating the load order so that **ONLY the target mod, its declared prerequisites (e.g. `UnlockLevelCurve`), and test companions are enabled**:
 
-```bash
-python3 scripts/manage_load_order.py --enable <mod-slug> --with-deps --json
-```
-
-To include temporary testing companions, cheat patches (e.g. `UnlockLevelCurve - Instant XP`), or fast-progression helpers:
-```bash
-python3 scripts/manage_load_order.py --enable <mod-slug> --with-deps --test-dep "UnlockLevelCurve - Instant XP" --json
-```
-*(Or record them permanently for testing in `my_mods/<mod-slug>/.test_deps.json` via `python3 scripts/add_mod_dependency.py --mod <mod-slug> --dep "UnlockLevelCurve - Instant XP" --test-only`)*
-
-For strict clean-room testing (disabling unrelated third-party mods to prevent mod interference):
 ```bash
 python3 scripts/manage_load_order.py --enable <mod-slug> --with-deps --isolate --json
 ```
 
+To include temporary testing companions, cheat patches (e.g. `UnlockLevelCurve - Instant XP`), or fast-progression helpers on the CLI:
+```bash
+python3 scripts/manage_load_order.py --enable <mod-slug> --with-deps --isolate --test-dep "UnlockLevelCurve - Instant XP" --json
+```
+*(Or record them permanently for testing in `my_mods/<mod-slug>/.test_deps.json` via `python3 scripts/add_mod_dependency.py --mod <mod-slug> --dep "UnlockLevelCurve - Instant XP" --test-only`, which are automatically picked up by `--with-deps`)*
+
 Verify in JSON output:
-- `enable.status`: `enabled` or `already_active`
+- `isolated_count`: confirms number of unrelated mods disabled to maintain clean test isolation.
+- `enable.status`: `enabled`, `reordered`, or `already_active`.
 - `enable.pak_sync`: confirms all dependency `.pak` files exist or were synchronized/downloaded into Steam `Data/Mods/` and AppData `Mods/`.
-- `enable.dependencies`: list of resolved prerequisites enabled ahead of the mod.
+- `enable.dependencies`: list of resolved prerequisites enabled ahead of the mod in topological sequence.
 - `enable.test_dependencies`: list of active temporary test companions enabled ahead of the mod.
 - `enable.missing_dependencies`: must be empty. If any dependencies are missing locally, halt and notify the user before launching the game.
 
