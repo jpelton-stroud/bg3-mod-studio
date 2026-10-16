@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from scripts.lib.env_paths import MY_MODS_DIR, REPO_ROOT as WORKSPACE_ROOT, get_env_var, normalize_mod_key
+from scripts.lib.env_paths import MODS_DIR, MY_MODS_DIR, REPO_ROOT as WORKSPACE_ROOT, detect_data_dir, get_env_var, normalize_mod_key
 
 DEFAULT_TOOLKIT_DIR = Path("/mnt/c/Program Files (x86)/Steam/steamapps/common/Baldurs Gate 3 Toolkit")
 
@@ -159,7 +159,7 @@ COMMON_EXCLUDES = {
     "bool", "guid", "float", "true", "false", "module", "gameproject", "addon",
     "gustav", "gustavx", "shared", "shareddev", "none", "null", "type", "name", "uuid",
     "author", "description", "folder", "md5", "filesize", "publishhandle", "tableuuid",
-    "progressiontype", "ismulticlass", "level", "comment"
+    "progressiontype", "ismulticlass", "level", "comment", "handle", "contentuid", "content", "value"
 }
 
 
@@ -170,7 +170,7 @@ def index_mod_content(mod_name: Optional[str] = None) -> Dict[str, List[Tuple[st
     """
     index: Dict[str, List[Tuple[str, int, str]]] = {}
 
-    target_dirs = []
+    target_dirs: List[Tuple[str, Path]] = []
     if mod_name:
         mod_path = MY_MODS_DIR / mod_name
         if mod_path.is_dir():
@@ -181,6 +181,33 @@ def index_mod_content(mod_name: Optional[str] = None) -> Dict[str, List[Tuple[st
                 if d.is_dir() and normalize_name(d.name) == norm_target:
                     target_dirs.append((d.name, d))
                     break
+
+        # Also discover and index declared dependency folders (scoped to mods/<slug> and Data/Mods/<dep_folder>)
+        for _, m_dir in list(target_dirs):
+            for meta_path in m_dir.glob("Mods/*/meta.lsx"):
+                try:
+                    tree = ET.parse(meta_path)
+                    for dep in tree.findall(".//node[@id='Dependencies']//node[@id='ModuleShortDesc']"):
+                        d_name_attr = dep.find("attribute[@id='Name']")
+                        d_folder_attr = dep.find("attribute[@id='Folder']")
+                        d_name = d_name_attr.get("value", "") if d_name_attr is not None else ""
+                        d_folder = d_folder_attr.get("value", "") if d_folder_attr is not None else d_name
+                        if not d_name or d_name.lower() in COMMON_EXCLUDES:
+                            continue
+                        # Check local mods/<slug>
+                        if MODS_DIR.is_dir():
+                            for m_slug in (d_name, d_folder):
+                                cand_dir = MODS_DIR / m_slug
+                                if cand_dir.is_dir() and (d_name, cand_dir) not in target_dirs:
+                                    target_dirs.append((d_name, cand_dir))
+                        # Check Data/Mods/<dep_folder> (strictly scoped to this specific unpacked mod folder)
+                        game_data = detect_data_dir()
+                        if game_data and d_folder:
+                            dep_data_dir = game_data / "Mods" / d_folder
+                            if dep_data_dir.is_dir() and (d_name, dep_data_dir) not in target_dirs:
+                                target_dirs.append((d_name, dep_data_dir))
+                except Exception:
+                    pass
     else:
         if MY_MODS_DIR.is_dir():
             for d in MY_MODS_DIR.iterdir():
@@ -190,6 +217,7 @@ def index_mod_content(mod_name: Optional[str] = None) -> Dict[str, List[Tuple[st
     guid_regex = re.compile(r"^[0-9a-fA-F-]{36}$")
     token_regex = re.compile(r"([A-Za-z0-9_-]{3,64})")
     val_regex = re.compile(r'value="([^"]+)"')
+    handle_regex = re.compile(r'(?:contentuid|handle)="([^"]+)"', re.IGNORECASE)
 
     for m_name, m_path in target_dirs:
         for ext in [".txt", ".lsx", ".xml"]:
@@ -215,6 +243,11 @@ def index_mod_content(mod_name: Optional[str] = None) -> Dict[str, List[Tuple[st
                                     item = item.strip()
                                     if len(item) >= 4 and not guid_regex.match(item) and item.lower() not in COMMON_EXCLUDES:
                                         index.setdefault(item, []).append((m_name, l_idx, rel_path))
+                            # Index explicit localization handles
+                            for m in handle_regex.finditer(line):
+                                h_val = m.group(1).strip()
+                                if h_val and h_val.lower() not in COMMON_EXCLUDES:
+                                    index.setdefault(h_val, []).append((m_name, l_idx, rel_path))
                             # Index tokens with underscores, hyphens, handles, or PascalCase
                             for m in token_regex.finditer(line):
                                 t = m.group(1)
@@ -231,10 +264,11 @@ def correlate_message(message: str, mod_index: Dict[str, List[Tuple[str, int, st
     correlations: List[Dict[str, Any]] = []
     seen = set()
 
-    # Look for tokens in quotes or common separators
-    candidates = re.findall(r"['\"`\s\(\)]([A-Za-z0-9_\-]{3,64})['\"`\s\(\):]", message)
-    # Also include the raw words
+    # Look for tokens in quotes, brackets, or common separators
+    candidates = re.findall(r"['\"`\s\(\)\[\]]([A-Za-z0-9_\-]{3,64})['\"`\s\(\)\[\]:]", message)
+    # Also include the raw words and handles
     candidates.extend(re.findall(r"\b([A-Za-z0-9_\-]{3,64})\b", message))
+    candidates.extend(re.findall(r"\b(h[0-9a-fA-F]{8}g[0-9a-fA-F0-9_]+)\b", message))
 
     for cand in candidates:
         if cand in mod_index and cand not in seen:
