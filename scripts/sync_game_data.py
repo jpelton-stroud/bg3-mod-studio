@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-sync_to_game_data.py
+sync_game_data.py
 --------------------
 Synchronizes custom Baldur's Gate 3 mods authored in `my_mods/` subdirectories
 directly into the game's Data directory (C:\\Program Files (x86)\\Steam\\steamapps\\common\\Baldurs Gate 3\\Data)
@@ -10,6 +10,7 @@ Features:
 - Idempotent and safe copy (only writes modified/new files)
 - Automatically excludes development artifacts (README.md, task.md, .git, etc.)
 - Mirrors localization XMLs to both Data/Localization/English and Data/Mods/<UUID>/Localization/English
+- Supports --clean-mod to purge unpacked development files for clean-room testing
 - Ensures project thumbnails and publish logos are synchronized
 - Supports --dry-run to preview changes
 - Supports --watch for automatic live-syncing during development
@@ -26,7 +27,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from scripts.lib.env_paths import detect_data_dir, get_env_var, normalize_mod_key
+from scripts.lib.env_paths import MY_MODS_DIR, detect_data_dir, get_env_var, normalize_mod_key, resolve_mod_dir
 from scripts.lib.larian_parsers import compile_xml_bytes_to_loca
 
 
@@ -336,23 +337,142 @@ def clean_legacy(data_dir: Path, dry_run: bool = False, quiet: bool = False) -> 
     return removed_count
 
 
-def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list = None, quiet: bool = False) -> int:
+def get_custom_mod_prefixes(source_dir: Path | None = None) -> list[str]:
+    """Dynamically collects mod directory and folder prefixes from my_mods/."""
+    prefixes = list(CUSTOM_STUDIO_MODS)
+    root = source_dir or Path(get_env_var("BG3_MODS_DIR") or MY_MODS_DIR)
+    if root.is_dir():
+        for mod_folder in root.iterdir():
+            if not mod_folder.is_dir() or mod_folder.name.startswith("."):
+                continue
+            prefixes.append(mod_folder.name)
+            mods_sub = mod_folder / "Mods"
+            if mods_sub.is_dir():
+                for sub in mods_sub.iterdir():
+                    if sub.is_dir():
+                        prefixes.append(sub.name)
+                        prefixes.append(sub.name.split("_")[0])
+    return sorted(set(prefixes))
+
+
+def clean_mod_data(mod_path: Path, data_dir: Path, dry_run: bool = False, quiet: bool = False) -> dict:
+    """
+    Purges a specific custom mod's loose files from Data/ (Projects, Mods, Public, Editor/Mods, Localization).
+    Does NOT touch base game files or other mods.
+    """
+    removed_paths = []
+    if not data_dir.exists():
+        return {
+            "status": "success",
+            "mod": mod_path.name,
+            "removed_count": 0,
+            "removed_paths": [],
+            "dry_run": dry_run,
+        }
+
+    # 1. Identify all folder names / UUIDs associated with this mod
+    folder_names = set()
+    for sub_rel in ["Mods", "Projects", "Public", "Editor/Mods"]:
+        sub_dir = mod_path / Path(sub_rel)
+        if sub_dir.is_dir():
+            for child in sub_dir.iterdir():
+                if child.is_dir():
+                    folder_names.add(child.name)
+                    folder_names.add(child.name.split("_")[0])
+
+    folder_names.add(mod_path.name)
+
+    # Filter out empty or unsafe names
+    safe_folder_names = set()
+    for name in folder_names:
+        clean_name = name.strip()
+        if not clean_name or clean_name in BUILTIN_MODULES:
+            continue
+        if any(clean_name.lower().startswith(b.lower()) for b in BUILTIN_MODULES):
+            continue
+        safe_folder_names.add(clean_name)
+
+    if not safe_folder_names:
+        if not quiet:
+            print(f"  ⚠️ No safe mod folder names resolved for '{mod_path.name}'.")
+        return {"status": "success", "mod": mod_path.name, "removed_count": 0, "removed_paths": [], "dry_run": dry_run}
+
+    if not quiet:
+        print(f"\n🧹 Purging loose Data files for mod '{mod_path.name}'...")
+
+    # 2. Remove matching subdirectories in Projects, Mods, Public, Editor/Mods
+    for subdir_name in ["Projects", "Mods", "Public", "Editor/Mods"]:
+        parent = data_dir / Path(subdir_name)
+        if not parent.exists():
+            continue
+        for item in parent.iterdir():
+            is_match = False
+            for safe_name in safe_folder_names:
+                if item.name == safe_name or item.name.startswith(f"{safe_name}_"):
+                    is_match = True
+                    break
+                if normalize_mod_key(item.name) == normalize_mod_key(safe_name):
+                    is_match = True
+                    break
+            if is_match and item.name not in BUILTIN_MODULES and not any(item.name.lower().startswith(b.lower()) for b in BUILTIN_MODULES):
+                rel_str = str(item.relative_to(data_dir))
+                removed_paths.append(rel_str)
+                if dry_run:
+                    if not quiet:
+                        print(f"  [-] Data purge (preview): {rel_str}")
+                else:
+                    if item.is_dir():
+                        shutil.rmtree(item)
+                    else:
+                        item.unlink()
+                    if not quiet:
+                        print(f"  [-] Data purged: {rel_str}")
+
+    # 3. Check and clean loose XMLs / .loca in Data/Localization/English/
+    loc_dir = data_dir / "Localization" / "English"
+    if loc_dir.exists():
+        for item in loc_dir.iterdir():
+            if any(pat.lower() in item.name.lower() for pat in safe_folder_names):
+                rel_str = str(item.relative_to(data_dir))
+                removed_paths.append(rel_str)
+                if dry_run:
+                    if not quiet:
+                        print(f"  [-] Localization purge (preview): {rel_str}")
+                else:
+                    item.unlink()
+                    if not quiet:
+                        print(f"  [-] Localization purged: {rel_str}")
+
+    if not quiet and not removed_paths:
+        print(f"  No loose Data files found for mod '{mod_path.name}'.")
+
+    return {
+        "status": "success",
+        "mod": mod_path.name,
+        "removed_count": len(removed_paths),
+        "removed_paths": removed_paths,
+        "dry_run": dry_run,
+    }
+
+
+def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list = None, quiet: bool = False, source_dir: Path | None = None) -> int:
     """
     Purges custom studio mods from Data/ without touching eldritch-blast baseline or base game files.
     """
     removed_count = 0
     keep_set = set(keep_mods or [])
+    custom_prefixes = get_custom_mod_prefixes(source_dir)
     if not quiet:
         print("\n🧹 Scanning for custom studio mod folders/files in Data/...")
 
     for subdir_name in ["Projects", "Mods", "Public", "Editor/Mods"]:
-        parent = data_dir / subdir_name
+        parent = data_dir / Path(subdir_name)
         if not parent.exists():
             continue
         for item in parent.iterdir():
             if "eldritch-blast" in item.name.lower():
                 continue
-            if any(item.name.startswith(p) for p in CUSTOM_STUDIO_MODS):
+            if any(item.name.startswith(p) for p in custom_prefixes):
                 if any(item.name.startswith(k) for k in keep_set):
                     continue
                 removed_count += 1
@@ -373,7 +493,7 @@ def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list = N
         for item in loc_dir.iterdir():
             if "eldritch-blast" in item.name.lower():
                 continue
-            if any(item.name.startswith(p) for p in CUSTOM_STUDIO_MODS):
+            if any(item.name.startswith(p) for p in custom_prefixes):
                 removed_count += 1
                 if dry_run:
                     if not quiet:
@@ -573,6 +693,10 @@ def main():
         help="Purge all custom studio mods from Steam Data (protects base game and eldritch-blast)",
     )
     parser.add_argument(
+        "--clean-mod",
+        help="Purge a specific custom mod's loose files from Steam Data/ (Projects, Mods, Public, Editor/Mods, Localization) and exit",
+    )
+    parser.add_argument(
         "--bump-build",
         action="store_true",
         help="Automatically increment build number (+1) in meta.lsx before syncing",
@@ -595,6 +719,25 @@ def main():
     )
 
     args = parser.parse_args()
+
+    if args.clean_mod:
+        mod_dir = resolve_mod_dir(args.clean_mod, prefer_my_mods=True)
+        if not mod_dir:
+            candidate = args.source_dir / args.clean_mod
+            if candidate.is_dir():
+                mod_dir = candidate
+        if not mod_dir:
+            msg = f"Mod '{args.clean_mod}' not found in my_mods/ or library."
+            if args.json:
+                print(json.dumps({"error": msg, "success": False}, indent=2))
+            else:
+                print(f"❌ Error: {msg}", file=sys.stderr)
+            sys.exit(1)
+        res = clean_mod_data(mod_dir, args.data_dir, dry_run=args.dry_run, quiet=args.json)
+        if args.json:
+            print(json.dumps(res, indent=2))
+        sys.exit(0)
+
     mod_filter = list(args.mods or [])
     if args.mod:
         mod_filter.append(args.mod)

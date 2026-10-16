@@ -22,7 +22,7 @@ flowchart TD
         Router["Discovery & Dispatch Hub\n(scripts/tools.py - 27 tools)"]
         SharedLib["Shared Engine Package\n(scripts/lib/: lspk, parsers, paths, modio)"]
         Scaffold["Scaffolding & Authoring\n(create_mod_scaffold, scaffold_stat, etc.)"]
-        Packaging["Binary Packaging & Sync\n(pack_mod_pak, sync_to_game_data)"]
+        Packaging["Binary Packaging & Sync\n(pack_mod_pak, sync_game_data)"]
         Diagnostics["Validation & Doctor\n(validate_mod, check_mod_conflicts, diagnose_logs)"]
         ModioSuite["Mod.io REST Client\n(modio_search, modio_extract, modio_update_metadata)"]
         QueryEngine["High-Speed Query Engine\n(query_mod_database)"]
@@ -177,7 +177,7 @@ Rather than relying on Windows-exclusive binaries (`LSLib/divine.exe`) or runnin
 
 ## 4. Synchronization & File Integrity Architecture
 
-### Idempotent Selective Synchronization (`sync_to_game_data.py`)
+### Idempotent Selective Synchronization (`sync_game_data.py`)
 
 The live synchronization system mirrors source files from `my_mods/<mod-slug>/` into the game installation directory (`Baldurs Gate 3/Data/`) for in-engine testing:
 

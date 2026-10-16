@@ -43,6 +43,7 @@ This library catalogs documented Baldur's Gate 3 mods, their in-game features, a
 
 | Mod Id | Mod Name | Mod Slug | Description | Features Documented | Spec Link |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| 6287097 | 1.25x XP table for UnlockLevelCurve | `125x-xp-table-for-unlocklevelcurve` | This is a very simple mod that applies the same 1.25x multiplier to the XP table that you find in the XP Rebalance mod for Extra encounters and extra monsters, just expanded to the full level 20 progression table from UnlockLevelCurve. | 0 implemented | [View Spec](125x-xp-table-for-unlocklevelcurve/README.md) |
 | 6451844 | EldritchAscension | `eldritchascension` | Eldritch Ascension: Simultaneous dual-wield binding, level-scaled Force damage (1d6 to 1d12), Devouring Blade extra attacks to Level 20, Lifedrinker vampiric drain, Eldritch Synergy, scaling Hex, and Eldritch Weaving. | 9 implemented | [View Spec](eldritchascension/README.md) |
 | 4166963 | UnlockLevelCurve - Level 13-20 \| Patch 8 | `unlocklevelcurve` | UnlockLevelCurve extends character progression in Baldur's Gate 3 from level 12 up to level 20, incorporating custom XP curves and full class/subclass progression trees for all base classes. It integrates higher-tier spell slots (up to 9th level), upcasted and newly scaled cla... | 989 implemented | [View Spec](unlocklevelcurve/README.md) |
 

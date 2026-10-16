@@ -12,7 +12,7 @@ A clear and concise description of what the bug is.
 **Script or Tool Affected**
 - [ ] `setup.sh` / `scripts/setup_environment.py`
 - [ ] `scripts/create_mod_scaffold.py`
-- [ ] `scripts/sync_to_game_data.py`
+- [ ] `scripts/sync_game_data.py`
 - [ ] `scripts/modio_search.py`
 - [ ] `scripts/modio_extract.py`
 - [ ] `scripts/modio_sync.py`

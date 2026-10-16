@@ -221,7 +221,14 @@ def verify_pak_archive(pak_bytes: bytes, original_files: list[tuple[str, bytes |
 
 def detect_mods_dir() -> Path | None:
     """Detect Baldur's Gate 3 Mods directory in AppData across WSL, native Linux, and Windows."""
-    env_override = get_env_var("BG3_MODS_DIR") or get_env_var("BG3_USER_MODS_DIR")
+    env_override = get_env_var("BG3_USER_MODS_DIR")
+    if not env_override:
+        # Check BG3_LOCALAPPDATA
+        bg3_local = get_env_var("BG3_LOCALAPPDATA")
+        if bg3_local:
+            candidate = Path(bg3_local) / "Mods"
+            if candidate.is_dir() or candidate.parent.exists():
+                return candidate
     if env_override:
         p = Path(env_override)
         if p.is_dir() or p.parent.exists():
@@ -256,6 +263,68 @@ def get_mod_pak_filename(mod_dir: Path) -> str:
     return f"{mod_dir.name}.pak"
 
 
+def clean_local_pak(mod_dir: Path, dry_run: bool = False) -> dict:
+    """
+    Deletes locally published .pak file(s) for the specified mod from AppData Mods directory.
+    """
+    mods_dir = detect_mods_dir()
+    if not mods_dir or not mods_dir.is_dir():
+        return {
+            "status": "success",
+            "mod": mod_dir.name,
+            "removed_count": 0,
+            "removed_paks": [],
+            "dry_run": dry_run,
+        }
+
+    # Extract mod identifiers
+    candidates = {get_mod_pak_filename(mod_dir).lower(), f"{mod_dir.name}.pak".lower()}
+    uuid_val = ""
+    folder_val = ""
+    meta_files = list(mod_dir.glob("Mods/*/meta.lsx")) or list(mod_dir.glob("Projects/*/meta.lsx"))
+    if meta_files:
+        try:
+            content = meta_files[0].read_text(encoding="utf-8")
+            mod_info = re.search(r'<node\s+id="ModuleInfo">(.*?)</node>', content, re.DOTALL)
+            target = mod_info.group(1) if mod_info else content
+            folder_match = re.search(r'<attribute\s+id="Folder"\s+type="LSString"\s+value="([^"]*)"', target)
+            uuid_match = re.search(r'<attribute\s+id="UUID"\s+type="(?:FixedString|guid|LSString)"\s+value="([^"]*)"', target)
+            if folder_match:
+                folder_val = folder_match.group(1).lower()
+                candidates.add(f"{folder_val}.pak")
+            if uuid_match:
+                uuid_val = uuid_match.group(1).lower()
+        except Exception:
+            pass
+
+    removed_paks = []
+    for pak_path in mods_dir.glob("*.pak"):
+        p_name = pak_path.name.lower()
+        matched = False
+        if p_name in candidates:
+            matched = True
+        elif uuid_val and uuid_val in p_name:
+            matched = True
+        elif folder_val and (p_name.startswith(f"{folder_val}_") or p_name == f"{folder_val}.pak"):
+            matched = True
+
+        if matched:
+            removed_paks.append(str(pak_path))
+            if not dry_run:
+                try:
+                    pak_path.unlink()
+                except OSError as e:
+                    raise OSError(f"Failed to delete local .pak at '{pak_path}': {e}")
+
+    return {
+        "status": "success",
+        "mod": mod_dir.name,
+        "removed_count": len(removed_paks),
+        "removed_paks": removed_paks,
+        "dry_run": dry_run,
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Pure-Python LSPK v18 .pak package builder for Baldur's Gate 3 mods."
@@ -269,6 +338,11 @@ def main():
         help="Publish .pak directly to the local BG3 AppData Mods directory, replacing the Toolkit's 'Publish Local' step.",
     )
     parser.add_argument(
+        "--clean-local",
+        action="store_true",
+        help="Purge local test .pak file(s) for this mod from the local BG3 AppData Mods directory.",
+    )
+    parser.add_argument(
         "--include-projects",
         action="store_true",
         help="Include Projects/ directory (normally excluded in release packages).",
@@ -277,6 +351,11 @@ def main():
         "--uncompressed",
         action="store_true",
         help="Store files uncompressed instead of using standard zlib.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview operations without modifying files on disk.",
     )
     parser.add_argument(
         "--json",
@@ -289,6 +368,19 @@ def main():
     try:
         mod_dir = resolve_mod_dir(args.mod, prefer_my_mods=True)
         mod_slug = mod_dir.name
+
+        if args.clean_local:
+            res = clean_local_pak(mod_dir, dry_run=args.dry_run)
+            if args.json:
+                print(json.dumps(res, indent=2))
+            else:
+                if res["removed_count"] > 0:
+                    action_word = "Would remove" if args.dry_run else "Removed"
+                    for p in res["removed_paks"]:
+                        print(f"[✓] {action_word} local test .pak: {p}")
+                else:
+                    print(f"No local test .pak found for mod '{mod_slug}' in {detect_mods_dir()}.")
+            return 0
 
         if args.publish_local:
             mods_dir = detect_mods_dir()

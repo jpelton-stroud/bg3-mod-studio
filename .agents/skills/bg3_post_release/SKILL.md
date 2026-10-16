@@ -13,6 +13,9 @@ Inspect tool arguments, flags, and schema definitions with:
 
 ```bash
 python3 scripts/tools.py --info post-release
+python3 scripts/tools.py --info sync-game
+python3 scripts/tools.py --info pack-pak
+python3 scripts/tools.py --info load-order
 python3 scripts/tools.py --info render-description
 ```
 
@@ -85,6 +88,27 @@ Provide the resolved profile's manual confirmation link:
 ```text
 https://mod.io/g/baldursgate3/m/<resolved-mod-slug>/admin/settings
 ```
+
+### 6. Post-Release Environment Teardown & Live Subscription Verification
+
+Once the mod is confirmed published and live on mod.io, switch from developer authoring mode to consumer subscriber mode. Deleting local test artifacts prevents Patch 7 UUID collisions, "third-party mod" warnings, and multiplayer checksum mismatches:
+
+```bash
+# 1. Purge loose files synced to <Game>/Data/ for Toolkit publishing
+python3 scripts/sync_game_data.py --clean-mod <mod-slug> --json
+
+# 2. Delete local test .pak from AppData/Mods/
+python3 scripts/pack_mod_pak.py --mod <mod-slug> --clean-local --json
+
+# 3. Remove local test entry from modsettings.lsx
+python3 scripts/manage_load_order.py --disable <mod-slug> --json
+```
+
+Instruct the user:
+1. Launch **Baldur's Gate 3**.
+2. Open the in-game **Mod Manager**.
+3. Locate the newly published mod in the browser, subscribe, and enable it.
+4. Verify clean download, activation, and game launch as an official mod.io subscriber.
 
 ## Safety Rules
 

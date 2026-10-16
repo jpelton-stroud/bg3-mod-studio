@@ -67,6 +67,7 @@ Tools for generating game content, mechanics, items, and progressions.
 | `inject-drop` | [`inject_treasure_table.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/inject_treasure_table.py) | Injects custom mod items into Tutorial Chest, Camp Chest, or early vendors via `TreasureTable.txt`. |
 | `scaffold-icons` | [`scaffold_icon_uvs.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/scaffold_icon_uvs.py) | Calculates normalized UV coordinates and generates `GUI/Icons.lsx` definitions for custom icon grids. |
 | `compat-patch` | [`generate_compat_patch.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/generate_compat_patch.py) | Auto-generates compatibility patches (standalone or Compatibility Framework) between colliding mods. |
+| `add-dependency` | [`add_mod_dependency.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/add_mod_dependency.py) | Injects permanent and test dependencies into `meta.lsx`, `.test_deps.json`, and `README.md`. |
 
 ---
 
@@ -75,8 +76,8 @@ Tools for packaging archives and syncing mods into the game engine.
 
 | Command Alias | Script | Description |
 | :--- | :--- | :--- |
-| `pack-pak` | [`pack_mod_pak.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/pack_mod_pak.py) | Pure-Python LSPK v18 `.pak` packager with automatic `.loca` compilation and local publish support (`--publish-local`). |
-| `sync-game` | [`sync_to_game_data.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/sync_to_game_data.py) | Syncs custom mods to Steam BG3 `Data/` with compiled binary `.loca` generation and live watch mode. |
+| `pack-pak` | [`pack_mod_pak.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/pack_mod_pak.py) | Pure-Python LSPK v18 `.pak` packager with automatic `.loca` compilation, local publish (`--publish-local`), and local purge (`--clean-local`). |
+| `sync-game` | [`sync_game_data.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/sync_game_data.py) | Syncs custom mods to Steam BG3 `Data/` with compiled `.loca` generation, live watch mode, and targeted loose data cleanup (`--clean-mod`). |
 
 ---
 
