@@ -213,7 +213,7 @@ class ModValidator:
                         line = line.strip()
                         if not line or line.startswith("//"):
                             continue
-                        if any(k in line for k in ('data "DisplayName"', 'data "Description"', 'data "ExtraDescription"', 'data "TechnicalDescription"')):
+                        if line.startswith("data "):
                             for match in HANDLE_PATTERN.finditer(line):
                                 h = match.group(1)
                                 self.referenced_handles.add(h)
