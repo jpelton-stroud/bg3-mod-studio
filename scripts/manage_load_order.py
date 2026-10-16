@@ -215,42 +215,8 @@ def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
 
     my_mods_dir = Path(os.environ.get("BG3_MODS_DIR", MY_MODS_DIR))
     mods_dir = Path(os.environ.get("BG3_LIBRARY_DIR", MODS_DIR))
-    for base_dir in (my_mods_dir, mods_dir):
-        if not base_dir.is_dir():
-            continue
-        for d in sorted(base_dir.iterdir()):
-            if not d.is_dir():
-                continue
-            d_norm = normalize_mod_key(d.name)
-            if query_norm == d_norm or query_norm in d_norm or query_raw in d.name.lower():
-                meta_files = find_mod_meta_files(d)
-                for mf in meta_files:
-                    try:
-                        parsed = _extract_meta_from_xml_text(mf.read_text(encoding="utf-8", errors="ignore"), d.name)
-                        if parsed:
-                            return parsed
-                    except Exception:
-                        pass
 
-    # 2. Search AppData/.../Mods/*.pak
-    for appdata in detect_bg3_appdata_dirs():
-        pak_dir = appdata / "Mods"
-        if not pak_dir.is_dir():
-            continue
-        for pak_file in sorted(pak_dir.glob("*.pak")):
-            if query_norm in normalize_mod_key(pak_file.stem) or query_raw in pak_file.stem.lower():
-                try:
-                    archive = LspkArchive(pak_file.read_bytes())
-                    for entry in archive.files:
-                        if entry["name"].replace("\\", "/").lower().endswith("meta.lsx"):
-                            xml_txt = archive.extract_file(entry).decode("utf-8", errors="ignore")
-                            parsed = _extract_meta_from_xml_text(xml_txt, pak_file.stem)
-                            if parsed:
-                                return parsed
-                except Exception:
-                    pass
-
-    # 3. Fallback: Search all meta files in workspace for UUID match
+    # 1. Direct UUID lookup across all meta files if query looks like a UUID
     if "-" in query_raw and len(query_raw) >= 32:
         for base_dir in (my_mods_dir, mods_dir):
             if not base_dir.is_dir():
@@ -265,6 +231,73 @@ def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
                             return parsed
                     except Exception:
                         pass
+
+    # 2. Pass 1: Exact directory name match
+    for base_dir in (my_mods_dir, mods_dir):
+        if not base_dir.is_dir():
+            continue
+        for d in sorted(base_dir.iterdir()):
+            if not d.is_dir():
+                continue
+            d_norm = normalize_mod_key(d.name)
+            if query_norm == d_norm:
+                meta_files = find_mod_meta_files(d)
+                for mf in meta_files:
+                    try:
+                        parsed = _extract_meta_from_xml_text(mf.read_text(encoding="utf-8", errors="ignore"), d.name)
+                        if parsed:
+                            return parsed
+                    except Exception:
+                        pass
+
+    # 3. Pass 2: Substring directory name match
+    for base_dir in (my_mods_dir, mods_dir):
+        if not base_dir.is_dir():
+            continue
+        for d in sorted(base_dir.iterdir()):
+            if not d.is_dir():
+                continue
+            d_norm = normalize_mod_key(d.name)
+            if query_norm in d_norm or query_raw in d.name.lower():
+                meta_files = find_mod_meta_files(d)
+                for mf in meta_files:
+                    try:
+                        parsed = _extract_meta_from_xml_text(mf.read_text(encoding="utf-8", errors="ignore"), d.name)
+                        if parsed:
+                            return parsed
+                    except Exception:
+                        pass
+
+    # 4. Search AppData/.../Mods/*.pak (exact stem first, then substring)
+    for appdata in detect_bg3_appdata_dirs():
+        pak_dir = appdata / "Mods"
+        if not pak_dir.is_dir():
+            continue
+        for pak_file in sorted(pak_dir.glob("*.pak")):
+            p_norm = normalize_mod_key(pak_file.stem)
+            if query_norm == p_norm or query_raw == pak_file.stem.lower():
+                try:
+                    archive = LspkArchive(pak_file.read_bytes())
+                    for entry in archive.files:
+                        if entry["name"].replace("\\", "/").lower().endswith("meta.lsx"):
+                            xml_txt = archive.extract_file(entry).decode("utf-8", errors="ignore")
+                            parsed = _extract_meta_from_xml_text(xml_txt, pak_file.stem)
+                            if parsed:
+                                return parsed
+                except Exception:
+                    pass
+        for pak_file in sorted(pak_dir.glob("*.pak")):
+            if query_norm in normalize_mod_key(pak_file.stem) or query_raw in pak_file.stem.lower():
+                try:
+                    archive = LspkArchive(pak_file.read_bytes())
+                    for entry in archive.files:
+                        if entry["name"].replace("\\", "/").lower().endswith("meta.lsx"):
+                            xml_txt = archive.extract_file(entry).decode("utf-8", errors="ignore")
+                            parsed = _extract_meta_from_xml_text(xml_txt, pak_file.stem)
+                            if parsed:
+                                return parsed
+                except Exception:
+                    pass
 
     return None
 
@@ -292,11 +325,11 @@ def resolve_all_dependencies(
             continue
         visited.add(dep_uuid)
 
-        # Lookup in workspace or AppData Mods
+        # Lookup in workspace or AppData Mods (UUID first, then Name, then Folder)
         installed = (
-            get_mod_metadata_from_workspace(dep.get("Name", ""))
+            get_mod_metadata_from_workspace(dep_uuid)
+            or get_mod_metadata_from_workspace(dep.get("Name", ""))
             or get_mod_metadata_from_workspace(dep.get("Folder", ""))
-            or get_mod_metadata_from_workspace(dep_uuid)
         )
         if installed:
             actual_meta = installed
