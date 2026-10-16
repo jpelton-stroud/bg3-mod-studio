@@ -24,9 +24,9 @@ import sys
 from pathlib import Path
 
 if __package__:
-    from .library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
+    from .lib.library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
 else:
-    from library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
+    from lib.library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
 
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent

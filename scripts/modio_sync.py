@@ -29,7 +29,7 @@ if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
 
 if __package__:
-    from .library_catalog import parse_library_rows
+    from .lib.library_catalog import parse_library_rows
     from .modio_extract import (
         get_api_key,
         process_mod,
@@ -41,7 +41,7 @@ if __package__:
         check_and_apply_update,
     )
 else:
-    from library_catalog import parse_library_rows
+    from lib.library_catalog import parse_library_rows
     from modio_extract import (
         get_api_key,
         process_mod,

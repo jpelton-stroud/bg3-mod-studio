@@ -16,9 +16,9 @@ import urllib.parse
 import urllib.request
 
 if __package__:
-    from .library_catalog import parse_library_rows
+    from .lib.library_catalog import parse_library_rows
 else:
-    from library_catalog import parse_library_rows
+    from lib.library_catalog import parse_library_rows
 
 BG3_GAME_ID = 6715
 MODIO_API_HOST = "g-6715.modapi.io"

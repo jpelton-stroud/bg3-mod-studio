@@ -14,9 +14,9 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, TextIO, Tuple
 
 if __package__:
-    from .library_catalog import parse_library_rows
+    from .lib.library_catalog import parse_library_rows
 else:
-    from library_catalog import parse_library_rows
+    from lib.library_catalog import parse_library_rows
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 LIBRARY_PATH = WORKSPACE_ROOT / "mods" / "library.md"
