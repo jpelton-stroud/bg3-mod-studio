@@ -6,7 +6,7 @@
             <children>
                 <node id="SpellList">
                     <attribute id="Comment" type="LSString" value="Paladin Level 2 Spells with Misty Step"/>
-                    <attribute id="Spells" type="LSString" value="Teleportation_MistyStep;Zone_Aid;Target_BrandingSmite;Target_LesserRestoration;Shout_MagicWeapon;Target_ProtectionFromPoison"/>
+                    <attribute id="Spells" type="LSString" value="Target_MistyStep;Shout_Aid;Target_Smite_Branding;Target_LesserRestoration;Target_MagicWeapon;Target_ProtectionFromPoison"/>
                     <attribute id="UUID" type="guid" value="c1c19892-6f18-40eb-a02b-af8fb251f8b5"/>
                 </node>
             </children>
