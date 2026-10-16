@@ -39,7 +39,7 @@ For a deep-dive into feature & functionality specifics, as well as example agent
 ### Custom Mod Authorship (5-Stage Shift-Left Lifecycle)
 
 - **Stage 1 (Creation: `/bg3_create_mod`)**: Autonomous scaffolding under `my_mods/<slug>/`, parallel subagents for stats/progressions/loca/docs, and read-only validation.
-- **Stage 2 (Diagnostics & Toolkit Sync: `/bg3_diagnose_mod`)**: Phase 2A static checks & collision triage on `my_mods/` -> Phase 2B sync to `<Game>/Data/` (with automatic binary `.loca` compilation) & BG3 Toolkit (`Glasses.exe`) log diagnosis.
+- **Stage 2 (Diagnostics & Toolkit Sync: `/bg3_diagnose_mod`)**: Phase 2A static checks, game data sync (with binary `.loca` compilation), and Toolkit (`Glasses.exe`) log generation prompt -> Phase 2B runtime log diagnosis, automated fixes, and verification loop.
 - **Stage 3 (In-Game Testing: `/bg3_test_mod`)**: Standalone `.pak` packaging (`--publish-local`), load order activation (`/bg3_manage_load_order`), and save-game compatibility audits (`scripts/inspect_save_game.py`).
 - **Stage 4 (Release Prep: `/bg3_release_prep`)**: Atomic semantic version bump, strict validation, GFM HTML description rendering (`scripts/render_modio_description.py`), and distribution `.pak` packaging.
 - **Stage 5 (Post-Release: `/bg3_post_release`)**: Review allowed tags, preview API mutations, and publish metadata to mod.io via REST API (`scripts/modio_update_metadata.py`).

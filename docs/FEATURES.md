@@ -70,7 +70,7 @@ Orchestrates mod authoring in `my_mods/<ModSlug>/`. Conducts an interactive `/gr
 
 #### 2. `/bg3_diagnose_mod` (Stage 2: Diagnostics & Toolkit Sync)
 
-Acts as an autonomous mod doctor with a two-phase protocol: Phase 2A runs static pre-flight and conflict triage on `my_mods/`; Phase 2B syncs assets and compiled binary `.loca` to `<Game>/Data/` and triages BG3 Toolkit (`Glasses.exe`) runtime logs.
+Acts as an autonomous mod doctor with a two-phase protocol: Phase 2A runs static pre-flight checks, syncs assets and compiled binary `.loca` to `<Game>/Data/`, and directs Toolkit (`Glasses.exe`) log generation; Phase 2B triages runtime logs, applies automated fixes, and loops back to Phase 2A until clean before offering Stage 3 testing.
 
 - **Example Prompt**:
   ```text
