@@ -152,7 +152,7 @@ def resolve_mod_directories(mod_name_or_path: str, workspace_root: Path) -> tupl
     - localization xml file: Localization/English/<ModName>.xml
     - mod name
     """
-    candidate = resolve_mod_dir(mod_name_or_path, roots=(workspace_root / "my_mods", MY_MODS_DIR))
+    candidate = resolve_mod_dir(mod_name_or_path, prefer_my_mods=True)
     if candidate is None or not candidate.is_dir():
         raise FileNotFoundError(f"Mod directory not found: '{mod_name_or_path}'")
 

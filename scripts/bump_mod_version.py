@@ -197,17 +197,23 @@ def bump_version(
     new_v64 = calculate_version64(new_major, new_minor, new_rev, new_bld)
     new_version_str = format_version_tuple((new_major, new_minor, new_rev, new_bld))
 
+    def _rel_path(p: Path, base: Path) -> str:
+        try:
+            return str(p.relative_to(base))
+        except ValueError:
+            return str(p)
+
     updated_files = []
     if action != "show":
         for mf in meta_files:
             if update_meta_version(mf, new_v64, dry_run=dry_run):
-                updated_files.append(str(mf.relative_to(WORKSPACE_ROOT)))
+                updated_files.append(_rel_path(mf, WORKSPACE_ROOT))
         if update_readme_version(target_mod, new_version_str, dry_run=dry_run):
-            updated_files.append(str((target_mod / "README.md").relative_to(WORKSPACE_ROOT)))
+            updated_files.append(_rel_path(target_mod / "README.md", WORKSPACE_ROOT))
 
     result = {
         "mod_name": target_mod.name,
-        "mod_dir": str(target_mod.relative_to(WORKSPACE_ROOT)),
+        "mod_dir": _rel_path(target_mod, WORKSPACE_ROOT),
         "action": action,
         "previous_version": old_version_str,
         "previous_version64": raw_val,
@@ -223,7 +229,7 @@ def bump_version(
         if action == "show":
             print(f"Mod '{target_mod.name}' version: {old_version_str} (Version64: {raw_val})")
             for mf in meta_files:
-                print(f"  └ {mf.relative_to(WORKSPACE_ROOT)}")
+                print(f"  └ {_rel_path(mf, WORKSPACE_ROOT)}")
         else:
             action_desc = f"[DRY-RUN] Would update" if dry_run else "Successfully updated"
             print(f"{action_desc} '{target_mod.name}': {old_version_str} -> {new_version_str} (Version64: {new_v64})")

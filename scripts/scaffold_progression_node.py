@@ -85,7 +85,7 @@ EMPTY_SPELLLISTS_LSX = """<?xml version="1.0" encoding="UTF-8"?>
 
 def resolve_mod_public_dir(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, str]:
     """Finds mod's Public/<ModFolder> directory."""
-    candidate = resolve_mod_dir(mod_path_or_slug, roots=(workspace_root / "my_mods", MY_MODS_DIR))
+    candidate = resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
     if candidate is None or not candidate.is_dir():
         raise FileNotFoundError(f"Mod directory not found: '{mod_path_or_slug}'")
 

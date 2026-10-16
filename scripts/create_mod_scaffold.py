@@ -453,8 +453,8 @@ def main():
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("my_mods"),
-        help="Base directory for mods (default: my_mods)",
+        default=Path(os.environ.get("BG3_MODS_DIR", "my_mods")),
+        help="Base directory for mods (default: my_mods or $BG3_MODS_DIR)",
     )
     parser.add_argument("--dry-run", action="store_true", help="Preview without writing files to disk")
     parser.add_argument("--json", action="store_true", help="Output JSON result to stdout")

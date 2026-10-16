@@ -64,7 +64,7 @@ else:
 
 def resolve_mod_stats_dir(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, str]:
     """Resolves target mod and its Public/<ModFolder>/Stats/Generated/Data directory."""
-    candidate = resolve_mod_dir(mod_path_or_slug, roots=(workspace_root / "my_mods", MY_MODS_DIR))
+    candidate = resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
     if candidate is None or not candidate.is_dir():
         raise FileNotFoundError(f"Mod directory not found: '{mod_path_or_slug}'")
 

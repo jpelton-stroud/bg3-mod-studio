@@ -4,6 +4,8 @@ import ctypes
 import io
 import struct
 import zlib
+from pathlib import Path
+from typing import Union
 
 _LIBZSTD = None
 for _libname in ("libzstd.so.1", "libzstd.so", "libzstd.dylib", "libzstd.dll"):
@@ -146,6 +148,11 @@ def decompress_pak_file_data(
 
 class LspkArchive:
     """LSPK v18 package reader supporting both .pak mod archives and .lsv save files."""
+
+    @classmethod
+    def open(cls, path: str | Path) -> "LspkArchive":
+        """Read and construct an LspkArchive from a file path."""
+        return cls(Path(path).read_bytes())
 
     def __init__(self, data_bytes: bytes):
         self.data = data_bytes

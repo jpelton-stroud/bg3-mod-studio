@@ -63,13 +63,18 @@ def normalize_mod_key(value: str) -> str:
 
 def resolve_mod_dir(
     identifier: str,
-    roots: Sequence[Path] = (MY_MODS_DIR, MODS_DIR),
+    roots: Optional[Sequence[Path]] = None,
     allow_substring: bool = True,
     prefer_my_mods: Optional[bool] = None,
 ) -> Optional[Path]:
     """Resolve a mod directory across my_mods/ and mods/ by path, slug, Name, or <ModName>_<UUID>."""
+    if roots is None:
+        my_mods = Path(os.environ.get("BG3_MODS_DIR", MY_MODS_DIR))
+        mods = Path(os.environ.get("BG3_LIBRARY_DIR", MODS_DIR))
+        roots = (my_mods, mods)
+
     if prefer_my_mods is not None:
-        roots = (MY_MODS_DIR, MODS_DIR) if prefer_my_mods else (MODS_DIR, MY_MODS_DIR)
+        roots = (roots[0], roots[1]) if prefer_my_mods else (roots[1], roots[0])
 
     if not identifier or not identifier.strip():
         if prefer_my_mods is not None:

@@ -169,8 +169,9 @@ def get_mod_metadata_from_workspace(mod_name: str) -> dict | None:
     """Find mod in my_mods/, mods/, or AppData/.../Mods/*.pak and extract metadata for modsettings injection."""
     query_norm = normalize_mod_key(mod_name)
 
-    # 1. Search my_mods/ and mods/
-    for base_dir in (MY_MODS_DIR, MODS_DIR):
+    my_mods_dir = Path(os.environ.get("BG3_MODS_DIR", MY_MODS_DIR))
+    mods_dir = Path(os.environ.get("BG3_LIBRARY_DIR", MODS_DIR))
+    for base_dir in (my_mods_dir, mods_dir):
         if not base_dir.is_dir():
             continue
         for d in sorted(base_dir.iterdir()):

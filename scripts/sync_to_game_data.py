@@ -518,8 +518,8 @@ def main():
     parser.add_argument(
         "--source-dir",
         type=Path,
-        default=Path("my_mods"),
-        help="Path to source directory containing mods (default: my_mods)",
+        default=Path(os.environ.get("BG3_MODS_DIR", "my_mods")),
+        help="Path to source directory containing mods (default: my_mods or $BG3_MODS_DIR)",
     )
     parser.add_argument(
         "--data-dir",
