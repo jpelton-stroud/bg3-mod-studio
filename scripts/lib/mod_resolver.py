@@ -32,6 +32,7 @@ from .env_paths import (
 )
 from .larian_parsers import find_mod_meta_files, parse_meta_lsx
 from .library_catalog import parse_library_rows
+from .lspk import LspkArchive
 
 # Known common core dependencies
 KNOWN_DEPENDENCIES: Dict[str, Dict[str, Any]] = {
@@ -265,20 +266,35 @@ def find_installed_pak(dep: Dict[str, Any], search_dirs: Sequence[Path]) -> Opti
     norm_folder = normalize_mod_key(folder)
     norm_name = normalize_mod_key(name)
 
+    # 1. Fast filename stem matching
     for s_dir in search_dirs:
         if not s_dir.is_dir():
             continue
         for pak_file in sorted(s_dir.glob("*.pak")):
             p_stem = pak_file.stem
             p_norm = normalize_mod_key(p_stem)
-            if (
-                p_norm == norm_folder
-                or p_norm == norm_name
-                or (norm_folder and norm_folder in p_norm)
-                or (norm_name and norm_name in p_norm)
-                or (dep_uuid and dep_uuid in p_stem.lower())
-            ):
+            # Require exact UUID match or exact normalized folder/name equality to avoid falsely matching sub-patches
+            if (dep_uuid and dep_uuid in p_stem.lower()) or p_norm == norm_folder or p_norm == norm_name:
                 return pak_file
+
+    # 2. Deep fallback: Inspect internal meta.lsx in .pak archives for hashed/truncated filenames (e.g. mod.io *-xxxx.pak)
+    if dep_uuid:
+        for s_dir in search_dirs:
+            if not s_dir.is_dir():
+                continue
+            for pak_file in sorted(s_dir.glob("*.pak")):
+                try:
+                    archive = LspkArchive(pak_file.read_bytes())
+                    for entry in archive.files:
+                        if entry["name"].replace("\\", "/").lower().endswith("meta.lsx"):
+                            xml_bytes = archive.extract_file(entry)
+                            parsed_meta = parse_meta_lsx(xml_bytes)
+                            if parsed_meta.get("UUID", "").lower() == dep_uuid:
+                                return pak_file
+                            break
+                except Exception:
+                    pass
+
     return None
 
 
@@ -311,6 +327,8 @@ def ensure_dependency_paks(
         if existing_pak and existing_pak.is_file():
             # Synchronize to any target directories missing it
             for t_dir in target_dirs:
+                if find_installed_pak(dep, [t_dir]):
+                    continue
                 dest = t_dir / existing_pak.name
                 if not dest.is_file():
                     t_dir.mkdir(parents=True, exist_ok=True)
