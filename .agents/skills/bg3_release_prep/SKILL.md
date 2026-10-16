@@ -37,7 +37,7 @@ python3 scripts/check_mod_conflicts.py --candidate &lt;slug&gt; --against-librar
 python3 scripts/render_modio_description.py --mod &lt;slug&gt; --write --json"]
     Step3 -->|Fail| Halt["Halt: Report Errors & Propose Fixes"]
     Step4 --> Step5["5. Final Game Data Sync & Dist .pak
-python3 scripts/sync_to_game_data.py --mods &lt;slug&gt; --json
+python3 scripts/sync_game_data.py --mods &lt;slug&gt; --json
 python3 scripts/pack_mod_pak.py --mod &lt;slug&gt; --out dist/&lt;slug&gt;.pak --json"]
     Step5 --> Step6["6. Toolkit Publishing Instructions & Handoff to Stage 5:
 ask_question -> /bg3_post_release &lt;slug&gt;"]
@@ -100,7 +100,7 @@ This writes `my_mods/<mod-slug>/modio_description.html` beside the README, forma
 Deploy the updated mod into the game's active `Data/` folder so the official Toolkit detects all recent changes and the compiled binary `.loca`:
 
 ```bash
-python3 scripts/sync_to_game_data.py --mods <mod-slug> --json
+python3 scripts/sync_game_data.py --mods <mod-slug> --json
 ```
 
 Package a distribution `.pak` for Nexus Mods or manual archive sharing:

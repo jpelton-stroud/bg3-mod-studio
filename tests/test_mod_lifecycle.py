@@ -75,10 +75,13 @@ class ModLifecycleTests(unittest.TestCase):
         (self.profile_dir / "modsettings.lsx").write_text(initial_modsettings, encoding="utf-8")
 
         # Set up custom environment pointing to our temp directories
+        self.appdata_mods_dir = self.temp_path / "AppData" / "Mods"
+        self.appdata_mods_dir.mkdir(parents=True)
         self.env = os.environ.copy()
         self.env["BG3_MODS_DIR"] = str(self.my_mods_dir)
         self.env["BG3_DATA_DIR"] = str(self.game_data_dir)
         self.env["BG3_LOCALAPPDATA"] = str(self.temp_path / "AppData")
+        self.env["BG3_USER_MODS_DIR"] = str(self.appdata_mods_dir)
         self.env["PYTHONPATH"] = f"{REPO_ROOT}:{SCRIPTS_DIR}"
 
     def tearDown(self):
@@ -221,7 +224,7 @@ class ModLifecycleTests(unittest.TestCase):
         # ---------------------------------------------------------
         # Sync to game Data with automatic binary .loca compilation
         code, out, data = self.run_script(
-            "sync_to_game_data.py",
+            "sync_game_data.py",
             "--mods", mod_slug,
             "--json",
         )
@@ -243,9 +246,21 @@ class ModLifecycleTests(unittest.TestCase):
         self.assertTrue(any("Blade of Lifecycle" in text for text in entries.values()))
 
         # ---------------------------------------------------------
-        # STAGE 3: IN-GAME TESTING (Packaging & Load Order Activation)
+        # STAGE 3: IN-GAME TESTING (Clean Data, Packaging & Load Order)
         # ---------------------------------------------------------
-        # 3.1 Pack mod into standalone .pak archive
+        # 3.0 Clean loose Data files before packaging to ensure clean-room isolation
+        code, out, data = self.run_script(
+            "sync_game_data.py",
+            "--clean-mod", mod_slug,
+            "--json",
+        )
+        self.assertEqual(code, 0, f"Clean mod data failed: {out}")
+        self.assertIsNotNone(data)
+        self.assertGreater(data.get("removed_count", 0), 0)
+        self.assertFalse(synced_mod_dir.exists(), "Loose Mods/<folder> lingered after --clean-mod")
+        self.assertFalse(synced_public_dir.exists(), "Loose Public/<folder> lingered after --clean-mod")
+
+        # 3.1 Pack mod into standalone .pak archive and publish local
         target_pak = self.dist_dir / f"{mod_slug}.pak"
         code, out, data = self.run_script(
             "pack_mod_pak.py",
@@ -256,6 +271,17 @@ class ModLifecycleTests(unittest.TestCase):
         self.assertEqual(code, 0, f"Pack mod failed: {out}")
         self.assertTrue(target_pak.is_file())
         self.assertGreater(target_pak.stat().st_size, 0)
+
+        # 3.2 Publish local test .pak to AppData Mods directory
+        code, out, data = self.run_script(
+            "pack_mod_pak.py",
+            "--mod", mod_slug,
+            "--publish-local",
+            "--json",
+        )
+        self.assertEqual(code, 0, f"Publish local failed: {out}")
+        local_pak = self.appdata_mods_dir / f"{larian_folder}.pak"
+        self.assertTrue(local_pak.is_file(), f"Local test pak missing at {local_pak}")
 
         # Verify LSPK archive contents (verify compiled .loca is present and README is excluded)
         archive = LspkArchive.open(str(target_pak))
@@ -322,6 +348,31 @@ class ModLifecycleTests(unittest.TestCase):
         )
         self.assertEqual(code, 0, f"Strict validation failed: {out}")
         self.assertTrue(data["summary"]["all_passed"], f"Strict validation errors: {data}")
+
+        # ---------------------------------------------------------
+        # STAGE 5: POST-RELEASE TEARDOWN (Clean-Room Subscriber Reset)
+        # ---------------------------------------------------------
+        # 5.1 Clean local test .pak from AppData Mods/
+        code, out, data = self.run_script(
+            "pack_mod_pak.py",
+            "--mod", mod_slug,
+            "--clean-local",
+            "--json",
+        )
+        self.assertEqual(code, 0, f"Clean local pak failed: {out}")
+        self.assertIsNotNone(data)
+        self.assertGreater(data.get("removed_count", 0), 0)
+        self.assertFalse(local_pak.exists(), f"Local test pak lingered at {local_pak}")
+
+        # 5.2 Remove test entry from modsettings.lsx
+        code, out, data = self.run_script(
+            "manage_load_order.py",
+            "--disable", mod_slug,
+            "--path", str(self.profile_dir / "modsettings.lsx"),
+        )
+        self.assertEqual(code, 0, f"Disable mod failed: {out}")
+        modsettings_after = (self.profile_dir / "modsettings.lsx").read_text(encoding="utf-8")
+        self.assertNotIn(larian_folder, modsettings_after, "Mod lingered in modsettings.lsx after disable")
 
 
 if __name__ == "__main__":

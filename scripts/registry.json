@@ -169,17 +169,19 @@
       "summary": "Adds community or core mod dependencies and test dependencies to custom mods.",
       "description": "Resolves dependency metadata from mods/library.md or mod.io, injects ModuleShortDesc nodes into meta.lsx, updates README.md, and manages test dependencies in .test_deps.json.",
       "intents": ["add dependency", "mod dependency", "test dependency", "inject dependency", "require mod", "companion mod"],
-      "cli_usage": "python3 scripts/add_mod_dependency.py --mod <mod> --dep <dep> [--test-only] [--dry-run] [--json]",
+      "cli_usage": "python3 scripts/add_mod_dependency.py [--mod <mod>] [--dep <deps>] [--test-dep <test_deps>] [--test-only [test_deps]] [--dry-run] [--json]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": true, "description": "Custom mod name, slug, or directory in my_mods/"},
-        {"name": "--dep", "type": "str", "required": true, "description": "Dependency mod name, slug, or UUID"},
-        {"name": "--test-only", "type": "bool", "required": false, "description": "Add as a temporary test dependency (.test_deps.json) instead of meta.lsx"},
+        {"name": "--mod", "type": "str", "required": false, "description": "Custom mod name, slug, or directory in my_mods/ (optional if run inside mod directory)"},
+        {"name": "--dep", "type": "str", "required": false, "description": "Permanent dependency mod name(s), slug(s), or UUID(s) (comma-separated or repeated)"},
+        {"name": "--test-dep", "type": "str", "required": false, "description": "Test dependency mod name(s), slug(s), or UUID(s) (comma-separated or repeated)"},
+        {"name": "--test-only", "type": "str|bool", "required": false, "description": "Add as test dependency (.test_deps.json); can be a bare flag or take comma-separated mod slugs"},
         {"name": "--dry-run", "type": "bool", "required": false, "description": "Preview changes without modifying files"},
         {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
       ],
       "examples": [
         "python3 scripts/add_mod_dependency.py --mod arcane-progression --dep unlocklevelcurve --json",
-        "python3 scripts/add_mod_dependency.py --mod arcane-progression --dep \"UnlockLevelCurve - Instant XP\" --test-only --json"
+        "python3 scripts/add_mod_dependency.py --mod arcane-progression --test-only unlocklevelcurve,unlocklevelcurve-instant-xp --json",
+        "python3 scripts/add_mod_dependency.py --mod arcane-progression --dep unlocklevelcurve --test-only unlocklevelcurve-instant-xp --json"
       ]
     },
     {
@@ -195,31 +197,37 @@
         {"name": "--source-dir", "type": "str", "required": false, "description": "Explicit source directory to package"},
         {"name": "--output-dir", "type": "str", "required": false, "description": "Output directory for .pak file"},
         {"name": "--output-file", "type": "str", "required": false, "description": "Explicit output .pak file path"},
+        {"name": "--publish-local", "type": "bool", "required": false, "description": "Publish .pak directly to local BG3 AppData Mods directory"},
+        {"name": "--clean-local", "type": "bool", "required": false, "description": "Purge local test .pak file(s) from local BG3 AppData Mods directory"},
         {"name": "--uncompressed", "type": "bool", "required": false, "description": "Store files without zlib compression"},
+        {"name": "--dry-run", "type": "bool", "required": false, "description": "Preview operations without modifying files on disk"},
         {"name": "--verify", "type": "bool", "required": false, "description": "Verify archive integrity with LspkArchive after packing"},
         {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
       ],
       "examples": [
-        "python3 scripts/pack_mod_pak.py --mod arcane-progression --output-dir dist/ --verify --json"
+        "python3 scripts/pack_mod_pak.py --mod arcane-progression --publish-local --json",
+        "python3 scripts/pack_mod_pak.py --mod arcane-progression --clean-local --json"
       ]
     },
     {
-      "name": "sync_to_game_data.py",
+      "name": "sync_game_data.py",
       "command": "sync-game",
       "category": "packaging",
-      "summary": "Syncs custom BG3 mods from my_mods/ to Steam Baldurs Gate 3/Data directory.",
-      "description": "Deploys mod assets (Projects, Mods, Public, Localization) directly into the game's active Data directory so changes are detected immediately in-game and by the Toolkit.",
-      "intents": ["sync game data", "deploy mod", "install mod", "test in game", "copy to data", "bump build"],
-      "cli_usage": "python3 scripts/sync_to_game_data.py [--mod <mod>] [options]",
+      "summary": "Syncs and cleans custom BG3 mods between my_mods/ and Steam Baldurs Gate 3/Data directory.",
+      "description": "Deploys mod assets (Projects, Mods, Public, Localization) directly into the game's active Data directory for the Toolkit, and purges unpacked development files before testing.",
+      "intents": ["sync game data", "deploy mod", "install mod", "test in game", "copy to data", "bump build", "clean mod data", "clean game data"],
+      "cli_usage": "python3 scripts/sync_game_data.py [--mod <mod>] [--clean-mod <mod>] [options]",
       "flags": [
         {"name": "--mod", "type": "str", "required": false, "description": "Specific mod to sync (defaults to all in my_mods/)"},
+        {"name": "--clean-mod", "type": "str", "required": false, "description": "Purge specific mod loose files from Data/ directory"},
         {"name": "--data-dir", "type": "str", "required": false, "description": "Explicit Steam BG3 Data directory path"},
         {"name": "--bump-build", "type": "bool", "required": false, "description": "Increment mod build version before syncing"},
-        {"name": "--dry-run", "type": "bool", "required": false, "description": "List files that would be copied without copying"},
-        {"name": "--clean", "type": "bool", "required": false, "description": "Clean target mod folders before copying"}
+        {"name": "--dry-run", "type": "bool", "required": false, "description": "List files that would be copied or purged without disk modifications"},
+        {"name": "--clean-custom", "type": "bool", "required": false, "description": "Purge all custom studio mods from Data/ directory"}
       ],
       "examples": [
-        "python3 scripts/sync_to_game_data.py --mod arcane-progression --bump-build"
+        "python3 scripts/sync_game_data.py --mod arcane-progression --bump-build",
+        "python3 scripts/sync_game_data.py --clean-mod arcane-progression --json"
       ]
     },
     {

@@ -90,17 +90,17 @@ Run the synchronizer to copy files into your game's `Data/` directory:
 
 ### Preview Sync Changes
 ```bash
-python3 scripts/sync_to_game_data.py --dry-run
+python3 scripts/sync_game_data.py --dry-run
 ```
 
 ### Execute One-Time Sync
 ```bash
-python3 scripts/sync_to_game_data.py
+python3 scripts/sync_game_data.py
 ```
 
 ### Continuous Live Development (Watcher Mode)
 ```bash
-python3 scripts/sync_to_game_data.py --watch
+python3 scripts/sync_game_data.py --watch
 ```
 Any changes saved in `my_mods/` will automatically sync to your game's Data directory within seconds.
 

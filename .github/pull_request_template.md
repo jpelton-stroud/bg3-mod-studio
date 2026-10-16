@@ -17,7 +17,7 @@ Please check the verification steps performed:
 
 - [ ] Python syntax validation passed: `python3 -m py_compile scripts/*.py`
 - [ ] Mod scaffolds validated with `create_mod_scaffold.py`
-- [ ] Game Data sync tested with `sync_to_game_data.py --dry-run`
+- [ ] Game Data sync tested with `sync_game_data.py --dry-run`
 - [ ] `.env` and secrets verified as untracked via `git status`
 
 ## Related Issues

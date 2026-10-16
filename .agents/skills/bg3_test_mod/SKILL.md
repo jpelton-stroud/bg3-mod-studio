@@ -14,6 +14,7 @@ This skill defines the **Stage 3 (In-Game Testing)** workflow of the custom mod 
 Inspect tool arguments, flags, and schema definitions with:
 
 ```bash
+python3 scripts/tools.py --info sync-game
 python3 scripts/tools.py --info pack-pak
 python3 scripts/tools.py --info load-order
 python3 scripts/tools.py --info inspect-save
@@ -25,7 +26,8 @@ python3 scripts/tools.py --info inspect-save
 
 ```mermaid
 flowchart TD
-    Trigger["Trigger: /bg3_test_mod &lt;slug&gt;"] --> Pack["Step 1: Build & Deploy Local .pak
+    Trigger["Trigger: /bg3_test_mod &lt;slug&gt;"] --> Pack["Step 1: Clean Loose Data & Deploy Local .pak
+python3 scripts/sync_game_data.py --clean-mod &lt;slug&gt; --json
 python3 scripts/pack_mod_pak.py --mod &lt;slug&gt; --publish-local --json"]
     
     subgraph P3A["Phase 3A: Clean-Room / Smoke Testing (Default Fast Path)"]
@@ -61,15 +63,20 @@ python3 scripts/inspect_save_game.py --json"]
 
 ## Execution Steps
 
-### Step 1: Package and Deploy Local Test `.pak`
+### Step 1: Clean Loose Data Files & Deploy Local Test `.pak`
 
-Build a clean `.pak` archive containing automatically compiled binary `.loca` files and deploy it directly to `%LOCALAPPDATA%/Larian Studios/Baldur's Gate 3/Mods/`:
+Before packing and testing in-game, purge any unpacked development files from the game's `Data/` directory. Because Larian's Virtual File System (VFS) prioritizes loose files over `.pak` archives, cleaning loose files ensures the game engine tests **strictly against the packaged `.pak` file** without stale file shadowing:
 
 ```bash
+# 1. Purge loose Toolkit development files from Data/
+python3 scripts/sync_game_data.py --clean-mod <mod-slug> --json
+
+# 2. Build clean .pak archive and deploy directly to AppData Mods/
 python3 scripts/pack_mod_pak.py --mod <mod-slug> --publish-local --json
 ```
 
 Verify in the JSON output:
+- Loose `Projects/`, `Mods/`, `Public/`, and `Editor/Mods/` folders purged from `Data/`
 - Source directories packaged (`Mods/`, `Public/`, compiled `Localization/`)
 - Repository-only files excluded (`README.md`, `modio_description.*`, root thumbnails, `.gitkeep`)
 - Destination `.pak` created in game's `Mods/` directory

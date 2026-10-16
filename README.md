@@ -135,10 +135,11 @@ python3 scripts/create_mod_scaffold.py --name "ArcaneProgression" --json
 
 # Stage 2: Pre-flight validation & game sync
 python3 scripts/validate_mod.py --mod arcane-progression --json
-python3 scripts/sync_to_game_data.py --mods arcane-progression --json
+python3 scripts/sync_game_data.py --mods arcane-progression --json
 python3 scripts/diagnose_toolkit_logs.py --mod arcane-progression --severity warning --json
 
 # Stage 3: In-game testing & load order
+python3 scripts/sync_game_data.py --clean-mod arcane-progression --json
 python3 scripts/pack_mod_pak.py --mod arcane-progression --publish-local --json
 python3 scripts/manage_load_order.py --enable arcane-progression --validate --json
 python3 scripts/inspect_save_game.py --audit --json

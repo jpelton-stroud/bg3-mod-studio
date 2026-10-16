@@ -43,7 +43,7 @@ sync_localization --prune, patch files"]
         Patch2A --> Val
         Fix2A -- "Circuit Breaker / Override" --> Sync
         Fix2A -- "No" --> Sync["4. Sync Assets & Binary .loca to Data/
-python3 scripts/sync_to_game_data.py --mods &lt;slug&gt; --json"]
+python3 scripts/sync_game_data.py --mods &lt;slug&gt; --json"]
         Sync --> PromptUser["5. Direct User to Load Mod in Toolkit (Glasses.exe)
 Prompt: Logs generated?"]
     end
@@ -106,11 +106,11 @@ python3 scripts/check_mod_conflicts.py --candidate <mod-slug> --against-library 
 Once static checks pass cleanly (or after explicit user override):
 
 ```bash
-python3 scripts/sync_to_game_data.py --mods <mod-slug> --json
+python3 scripts/sync_game_data.py --mods <mod-slug> --json
 ```
 
 > [!NOTE]
-> `sync_to_game_data.py` automatically compiles `Localization/English/*.xml` into `Data/Mods/<ModName>_<UUID>/Localization/English/<ModName>.loca` so the BG3 Toolkit loads strings cleanly without crashing.
+> `sync_game_data.py` automatically compiles `Localization/English/*.xml` into `Data/Mods/<ModName>_<UUID>/Localization/English/<ModName>.loca` so the BG3 Toolkit loads strings cleanly without crashing.
 
 #### 3. Direct User to Generate Logs in BG3 Toolkit (Glasses.exe)
 Instruct the user:
@@ -151,7 +151,7 @@ If log warnings/errors are detected:
    - If identical log error signatures persist after a patch, trip the circuit breaker and escalate to user via `ask_question`.
 4. **Automatically loop back to Step 2A**:
    - Re-run static checks (`validate_mod.py`, `sync_localization.py --check`).
-   - Re-sync to game data (`sync_to_game_data.py`).
+   - Re-sync to game data (`sync_game_data.py`).
    - Prompt the user to reload the project in `Glasses.exe` to generate fresh logs.
 
 Repeat until logs are clean (0 warnings/errors) or the user opts to proceed.

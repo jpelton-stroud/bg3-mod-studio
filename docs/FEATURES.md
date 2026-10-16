@@ -21,7 +21,7 @@ The workspace combines autonomous AI orchestration with deterministic Python aut
   Generates and parses standard Larian v4.8 XML structures, handles deterministic UUIDv4 generation, automatically allocates localization string handles in `Localization/English/*.xml`, and scaffolds `_merged.lsx` RootTemplates with valid 3D presets.
 - **Sub-10ms Mod Database Query Engine (`query_mod_database.py`)**:
   Indexes over 2,200 cataloged community mod items, passives, spells, and boosts. Provides fuzzy search, slot filtering, and handle lookups in milliseconds.
-- **Idempotent Differential Game Synchronization (`sync_to_game_data.py`)**:
+- **Idempotent Differential Game Synchronization (`sync_game_data.py`)**:
   Selectively mirrors source mod files from `my_mods/<ModSlug>/` to your `Baldurs Gate 3/.../Data/` directory. Features SHA/timestamp caching to prevent redundant disk I/O and an optional file watcher (`--watch`) for instant hot-reloading during Toolkit authoring.
 - **Mod.io REST Integration Suite**:
   Automates mod discovery, platform-tag filtering (`windows`, `mac`, `playstation_5`, `xboxseries`), archive extraction, and catalog synchronization using personal mod.io API keys and access tokens.
@@ -277,11 +277,11 @@ All studio scripts are located in [`scripts/`](scripts/) and registered in [`scr
 - **Purpose**: Pure-Python LSPK v18 packager. Compresses mod files using zlib and writes binary headers directly to `.pak` format without third-party dependencies.
 - **Usage**: `python3 scripts/pack_mod_pak.py --mod my_mods/Shadowblade --output dist/Shadowblade.pak`
 
-#### `scripts/sync_to_game_data.py`
+#### `scripts/sync_game_data.py`
 
 - **Command Alias**: `sync-game`
-- **Purpose**: Performs idempotent synchronization of mod source trees from `my_mods/` to Steam `Baldurs Gate 3/Data/`. Supports continuous file watching with `--watch`.
-- **Usage**: `python3 scripts/sync_to_game_data.py --mod Shadowblade [--watch]`
+- **Purpose**: Performs idempotent synchronization of mod source trees from `my_mods/` to Steam `Baldurs Gate 3/Data/`. Supports continuous file watching with `--watch` and targeted loose data cleanup with `--clean-mod`.
+- **Usage**: `python3 scripts/sync_game_data.py --mod Shadowblade [--watch]`
 
 ---
 
