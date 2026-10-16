@@ -224,5 +224,6 @@ Mod '<ModName>' successfully authored and verified in my_mods/<mod-slug>!
 ```
 
 Use `ask_question` to transition:
-- **Proceed to Stage 2 Diagnostics**: Run `/bg3_diagnose_mod <mod-slug>` to perform static conflict checks, sync assets and compiled `.loca` to `<Game>/Data/`, and triage BG3 Toolkit (`Glasses.exe`) logs.
+- **Proceed to Stage 2 Diagnostics**: Run `/bg3_diagnose_mod <mod-slug>` to perform Phase 2A static checks and game sync, load into the BG3 Toolkit (`Glasses.exe`), and execute Phase 2B runtime log triage.
 - **Review Workspace Files**: Keep working in `my_mods/<mod-slug>` before proceeding to diagnostics.
+

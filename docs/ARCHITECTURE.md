@@ -77,9 +77,8 @@ flowchart TD
 - Read-only smoke check on my_mods/<slug>/"]
     
     S2["Stage 2: Diagnostics (/bg3_diagnose_mod)
-- Phase 2A: Static pre-flight & conflict triage on my_mods/
-- Phase 2B: Differential sync to Data/ with compiled binary .loca
-- BG3 Toolkit (Glasses.exe) runtime log triage"]
+- Phase 2A: Static pre-flight, Data/ sync & Glasses.exe log launch
+- Phase 2B: Runtime log triage, auto-fixes & verification loop"]
     
     S3["Stage 3: In-Game Testing (/bg3_test_mod)
 - pack_mod_pak --publish-local to %LOCALAPPDATA%/.../Mods/
