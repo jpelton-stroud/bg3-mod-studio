@@ -23,4 +23,8 @@
   <!-- Level 20: Righteous Strikes Apex (1d12 + CHA) -->
   <content contentuid="hdaccd62ag3eaeg8279g8458gaca5b30d17b8" version="1">Righteous Strikes: Apex</content>
   <content contentuid="hde521abdg01fdgaf4dg7dd5g8fd8db288e2a" version="1">You become an avatar of cosmic justice. Your melee weapon attacks deal an additional 1d12 Radiant damage plus your Charisma Modifier.</content>
+
+  <!-- Spell Slot Unlock: Level 4 -->
+  <content contentuid="he2fe3974g385ag4681ga3aag5ca6d540e617" version="1">Unlocked Level 4 Spell Slot</content>
+  <content contentuid="h255e9839gfaa0g4b70gb4b0g4c3b4ce4fe1e" version="1">You have unlocked 4th-level Spell Slots.</content>
 </contentList>
