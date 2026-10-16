@@ -14,13 +14,13 @@ Paladin's Call modernizes the Paladin class in Baldur's Gate 3 by addressing tur
 
 ### Mobility & Tactical Movement
 
-- **Universal Misty Step:** Adds `Teleportation_MistyStep` to the base Paladin 2nd-level spell list (`c1c19892-6f18-40eb-a02b-af8fb251f8b5`). All Paladins, including Oath of Devotion and Oathbreaker, can prepare and cast _Misty Step_ at Level 5.
+- **Universal Misty Step:** Adds `Target_MistyStep` to the base Paladin 2nd-level spell list (`c1c19892-6f18-40eb-a02b-af8fb251f8b5`). All Paladins, including Oath of Devotion and Oathbreaker, can prepare and cast _Misty Step_ at Level 5.
 
 ### Modern Action Economy (D&D 2024 Standards)
 
 - **Sacred Weapon (Oath of Devotion):** Changed from an Action to a Bonus Action (`BonusActionPoint:1;ChannelOath:1`).
 - **Nature's Wrath (Oath of the Ancients):** Changed to a Bonus Action with an expanded tactical range (18m).
-- **Lay on Hands (all variants):** Converted to a Bonus Action (`Target_LayOnHands`, `LesserHealing`, `GreaterHealing`, and `Cure`). Heal allies, remove diseases or poisons, or revive downed companions while maintaining offensive momentum.
+- **Lay on Hands (all variants):** Converted to a Bonus Action (`Target_LayOnHands`, `SmallHeal`, `BigHeal`, and `Cure`). Heal allies, remove diseases or poisons, or revive downed companions while maintaining offensive momentum.
 
 ### Sustained Smite Economy: Divine Abundance (Crit Refund)
 
