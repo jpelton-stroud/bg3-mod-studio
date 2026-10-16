@@ -79,7 +79,7 @@ Acts as an autonomous mod doctor with a two-phase protocol: Phase 2A runs static
 
 #### 3. `/bg3_test_mod` (Stage 3: In-Game Testing)
 
-Builds a local test `.pak` (`pack_mod_pak.py --publish-local`), activates and orders the mod in `modsettings.lsx`, performs save-game audits (`inspect_save_game.py`), and guides functional in-game verification with loopback to Stage 2 or progression to Stage 4.
+Features a two-tier progressive gating architecture: Phase 3A builds a local test `.pak` (`pack_mod_pak.py --publish-local`), activates the mod alongside declared prerequisites (`manage_load_order.py --enable <slug> --with-deps`), and guides clean-room in-game functional verification. Phase 3B is an opt-in gate for multi-mod load order optimization (`--validate`) and campaign save-game audits (`inspect_save_game.py`) before handing off to Stage 4.
 
 - **Example Prompt**:
   ```text

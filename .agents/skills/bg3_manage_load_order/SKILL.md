@@ -43,8 +43,11 @@ python3 scripts/manage_load_order.py --list --json
 ### 2. Enable / Activate a Mod
 Activate a mod by its folder slug, module folder name, or UUID:
 ```bash
-# Enable at end of load order:
-python3 scripts/manage_load_order.py --enable "<mod_slug_or_UUID>" --json
+# Enable at end of load order (automatically resolves & activates declared dependencies by default):
+python3 scripts/manage_load_order.py --enable "<mod_slug_or_UUID>" --with-deps --json
+
+# Clean-room test isolation (disable all unrelated mods, keeping only GustavDev + dependencies + target mod):
+python3 scripts/manage_load_order.py --enable "<mod_slug_or_UUID>" --isolate --json
 
 # Or insert at specific load order position (1-indexed):
 python3 scripts/manage_load_order.py --enable "<mod_slug_or_UUID>" --order 3 --json

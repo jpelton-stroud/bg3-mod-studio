@@ -30,11 +30,14 @@ from scripts.lib.env_paths import (
     MY_MODS_DIR,
     REPO_ROOT as WORKSPACE_ROOT,
     detect_bg3_appdata_dirs,
+    detect_data_dir,
     get_env_var,
     normalize_mod_key,
+    resolve_mod_dir,
 )
 from scripts.lib.larian_parsers import find_mod_meta_files
 from scripts.lib.lspk import LspkArchive
+from scripts.lib.mod_resolver import ensure_dependency_paks, resolve_dependency_metadata
 
 # ANSI Colors
 BOLD = "\033[1m"
@@ -142,6 +145,36 @@ def parse_modsettings(path: Path) -> dict:
     return {"order": order, "mods": mods}
 
 
+def _extract_dependencies_from_xml_text(content: str) -> list[dict]:
+    """Extract list of dependency module metadata dicts from meta.lsx XML text."""
+    deps = []
+    try:
+        root = ET.fromstring(content)
+        for node in root.iter("node"):
+            if node.get("id") == "Dependencies":
+                for sub in node.iter("node"):
+                    if sub.get("id") == "ModuleShortDesc":
+                        attrs = {a.get("id"): a.get("value", "") for a in sub.findall("attribute")}
+                        u_str = attrs.get("UUID", "")
+                        n_str = attrs.get("Name", "")
+                        f_str = attrs.get("Folder", "")
+                        if not u_str:
+                            continue
+                        if u_str == GUSTAV_DEV["UUID"] or n_str.lower() in CORE_GUSTAV_NAMES or f_str.lower() in CORE_GUSTAV_NAMES:
+                            continue
+                        deps.append({
+                            "Folder": f_str,
+                            "MD5": attrs.get("MD5", ""),
+                            "Name": n_str,
+                            "PublishHandle": attrs.get("PublishHandle", "0"),
+                            "UUID": u_str,
+                            "Version64": attrs.get("Version64", "36028797018963968"),
+                        })
+    except Exception:
+        pass
+    return deps
+
+
 def _extract_meta_from_xml_text(content: str, fallback_name: str) -> dict | None:
     mod_info = re.search(r'<node\s+id="ModuleInfo">(.*?)</node>', content, re.DOTALL)
     target = mod_info.group(1) if mod_info else content
@@ -155,6 +188,7 @@ def _extract_meta_from_xml_text(content: str, fallback_name: str) -> dict | None
 
     if uuid_val:
         return {
+            "Dependencies": _extract_dependencies_from_xml_text(content),
             "Folder": folder.group(1) if folder else fallback_name,
             "MD5": md5.group(1) if md5 else "",
             "Name": name.group(1) if name else fallback_name,
@@ -165,9 +199,10 @@ def _extract_meta_from_xml_text(content: str, fallback_name: str) -> dict | None
     return None
 
 
-def get_mod_metadata_from_workspace(mod_name: str) -> dict | None:
+def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
     """Find mod in my_mods/, mods/, or AppData/.../Mods/*.pak and extract metadata for modsettings injection."""
-    query_norm = normalize_mod_key(mod_name)
+    query_norm = normalize_mod_key(mod_name_or_uuid)
+    query_raw = mod_name_or_uuid.strip().lower()
 
     my_mods_dir = Path(os.environ.get("BG3_MODS_DIR", MY_MODS_DIR))
     mods_dir = Path(os.environ.get("BG3_LIBRARY_DIR", MODS_DIR))
@@ -178,7 +213,7 @@ def get_mod_metadata_from_workspace(mod_name: str) -> dict | None:
             if not d.is_dir():
                 continue
             d_norm = normalize_mod_key(d.name)
-            if query_norm == d_norm or query_norm in d_norm:
+            if query_norm == d_norm or query_norm in d_norm or query_raw in d.name.lower():
                 meta_files = find_mod_meta_files(d)
                 for mf in meta_files:
                     try:
@@ -194,7 +229,7 @@ def get_mod_metadata_from_workspace(mod_name: str) -> dict | None:
         if not pak_dir.is_dir():
             continue
         for pak_file in sorted(pak_dir.glob("*.pak")):
-            if query_norm in normalize_mod_key(pak_file.stem):
+            if query_norm in normalize_mod_key(pak_file.stem) or query_raw in pak_file.stem.lower():
                 try:
                     archive = LspkArchive(pak_file.read_bytes())
                     for entry in archive.files:
@@ -206,7 +241,111 @@ def get_mod_metadata_from_workspace(mod_name: str) -> dict | None:
                 except Exception:
                     pass
 
+    # 3. Fallback: Search all meta files in workspace for UUID match
+    if "-" in query_raw and len(query_raw) >= 32:
+        for base_dir in (my_mods_dir, mods_dir):
+            if not base_dir.is_dir():
+                continue
+            for d in sorted(base_dir.iterdir()):
+                if not d.is_dir():
+                    continue
+                for mf in find_mod_meta_files(d):
+                    try:
+                        parsed = _extract_meta_from_xml_text(mf.read_text(encoding="utf-8", errors="ignore"), d.name)
+                        if parsed and parsed.get("UUID", "").lower() == query_raw:
+                            return parsed
+                    except Exception:
+                        pass
+
     return None
+
+
+def resolve_all_dependencies(
+    mod_meta: dict, visited: set[str] | None = None
+) -> tuple[list[dict], list[dict]]:
+    """Recursively resolve declared dependencies for a mod.
+
+    Returns:
+        (resolved_dependencies_in_topological_order, missing_dependencies)
+    """
+    if visited is None:
+        visited = set()
+    resolved: list[dict] = []
+    missing: list[dict] = []
+
+    cand_uuid = mod_meta.get("UUID")
+    if cand_uuid:
+        visited.add(cand_uuid)
+
+    for dep in mod_meta.get("Dependencies", []):
+        dep_uuid = dep.get("UUID")
+        if not dep_uuid or dep_uuid in visited:
+            continue
+        visited.add(dep_uuid)
+
+        # Lookup in workspace or AppData Mods
+        installed = (
+            get_mod_metadata_from_workspace(dep.get("Name", ""))
+            or get_mod_metadata_from_workspace(dep.get("Folder", ""))
+            or get_mod_metadata_from_workspace(dep_uuid)
+        )
+        if installed:
+            actual_meta = installed
+            sub_resolved, sub_missing = resolve_all_dependencies(actual_meta, visited)
+            resolved.extend(sub_resolved)
+            missing.extend(sub_missing)
+            resolved.append(actual_meta)
+        else:
+            missing.append(dep)
+            resolved.append(dep)
+
+    return resolved, missing
+
+
+def isolate_load_order(path: Path, keep_uuids: set[str], dry_run: bool = False) -> int:
+    """Disables all mods in modsettings.lsx except GustavDev/GustavX and those in keep_uuids."""
+    if not path.is_file():
+        return 0
+
+    tree = ET.parse(path)
+    root = tree.getroot()
+
+    mod_order_children = root.find(".//node[@id='ModOrder']/children")
+    mods_children = root.find(".//node[@id='Mods']/children")
+
+    if mods_children is None:
+        return 0
+
+    removed_count = 0
+    # Clean Mods
+    for desc in list(mods_children.findall("node[@id='ModuleShortDesc']")):
+        u_attr = desc.find("attribute[@id='UUID']")
+        n_attr = desc.find("attribute[@id='Name']")
+        f_attr = desc.find("attribute[@id='Folder']")
+        u_val = u_attr.get("value", "") if u_attr is not None else ""
+        n_val = (n_attr.get("value", "") if n_attr is not None else "").lower()
+        f_val = (f_attr.get("value", "") if f_attr is not None else "").lower()
+
+        if u_val == GUSTAV_DEV["UUID"] or n_val in CORE_GUSTAV_NAMES or f_val in CORE_GUSTAV_NAMES:
+            continue
+        if u_val not in keep_uuids:
+            mods_children.remove(desc)
+            removed_count += 1
+
+    # Clean ModOrder
+    if mod_order_children is not None:
+        for m_node in list(mod_order_children.findall("node[@id='Module']")):
+            u_attr = m_node.find("attribute[@id='UUID']")
+            u_val = u_attr.get("value", "") if u_attr is not None else ""
+            if u_val == GUSTAV_DEV["UUID"] or u_val in keep_uuids:
+                continue
+            mod_order_children.remove(m_node)
+
+    if removed_count > 0 and not dry_run:
+        backup_file(path)
+        tree.write(path, encoding="utf-8", xml_declaration=True)
+
+    return removed_count
 
 
 def backup_file(path: Path) -> Path:
@@ -214,6 +353,56 @@ def backup_file(path: Path) -> Path:
     backup_path = path.with_suffix(f".lsx.{ts}.bak")
     shutil.copy2(path, backup_path)
     return backup_path
+
+
+def _ensure_base_module(root: ET.Element, mods_children: ET.Element, mod_order_children: ET.Element) -> bool:
+    """Ensure base game module (GustavDev / GustavX) is present at index 0 in both Mods and ModOrder."""
+    modified = False
+    base_module_uuid = None
+    for desc_node in mods_children.findall("node[@id='ModuleShortDesc']"):
+        u_attr = desc_node.find("attribute[@id='UUID']")
+        n_attr = desc_node.find("attribute[@id='Name']")
+        f_attr = desc_node.find("attribute[@id='Folder']")
+        u_val = u_attr.get("value", "") if u_attr is not None else ""
+        n_val = (n_attr.get("value", "") if n_attr is not None else "").lower()
+        f_val = (f_attr.get("value", "") if f_attr is not None else "").lower()
+        if u_val == GUSTAV_DEV["UUID"] or n_val in CORE_GUSTAV_NAMES or f_val in CORE_GUSTAV_NAMES:
+            base_module_uuid = u_val
+            break
+
+    if not base_module_uuid:
+        base_module_uuid = GUSTAV_DEV["UUID"]
+        gustav_desc = ET.Element("node", id="ModuleShortDesc")
+        ET.SubElement(gustav_desc, "attribute", id="Folder", type="LSString", value=GUSTAV_DEV["Folder"])
+        ET.SubElement(gustav_desc, "attribute", id="MD5", type="LSString", value=GUSTAV_DEV["MD5"])
+        ET.SubElement(gustav_desc, "attribute", id="Name", type="LSString", value=GUSTAV_DEV["Name"])
+        ET.SubElement(gustav_desc, "attribute", id="PublishHandle", type="uint64", value=str(GUSTAV_DEV["PublishHandle"]))
+        ET.SubElement(gustav_desc, "attribute", id="UUID", type="guid", value=GUSTAV_DEV["UUID"])
+        ET.SubElement(gustav_desc, "attribute", id="Version64", type="int64", value=str(GUSTAV_DEV["Version64"]))
+        mods_children.insert(0, gustav_desc)
+        modified = True
+
+    # Check mod_order_children
+    order_modules = mod_order_children.findall("node[@id='Module']")
+    base_order_node = None
+    for m in order_modules:
+        u_attr = m.find("attribute[@id='UUID']")
+        if u_attr is not None and u_attr.get("value") == base_module_uuid:
+            base_order_node = m
+            break
+
+    if base_order_node is None:
+        base_order_node = ET.Element("node", id="Module")
+        ET.SubElement(base_order_node, "attribute", id="UUID", type="FixedString", value=base_module_uuid)
+        mod_order_children.insert(0, base_order_node)
+        modified = True
+    else:
+        if order_modules and order_modules[0] != base_order_node:
+            mod_order_children.remove(base_order_node)
+            mod_order_children.insert(0, base_order_node)
+            modified = True
+
+    return modified
 
 
 def enable_mod(path: Path, mod_meta: dict, order_index: int | None = None, dry_run: bool = False) -> tuple[bool, str]:
@@ -243,6 +432,8 @@ def enable_mod(path: Path, mod_meta: dict, order_index: int | None = None, dry_r
             mod_order_node = ET.SubElement(root_children, "node", id="ModOrder")
         mod_order_children = ET.SubElement(mod_order_node, "children")
 
+    base_modified = _ensure_base_module(root, mods_children, mod_order_children)
+
     target_uuid = mod_meta["UUID"]
 
     # Check if already present
@@ -261,6 +452,10 @@ def enable_mod(path: Path, mod_meta: dict, order_index: int | None = None, dry_r
             break
 
     if existing_desc_node is not None and order_index is None:
+        if base_modified and not dry_run:
+            backup_file(path)
+            tree.write(path, encoding="utf-8", xml_declaration=True)
+            return True, "enabled"
         return False, "already_active"
 
     action_status = "reordered" if existing_desc_node is not None else "enabled"
@@ -402,6 +597,10 @@ def main():
     parser.add_argument("--enable", "--activate", dest="enable", help="Enable a mod by name/slug from my_mods/, mods/, or AppData Mods")
     parser.add_argument("--order", type=int, help="Target load order index (>= 1) when enabling or reordering a mod")
     parser.add_argument("--disable", help="Disable a mod by name/UUID from active load order")
+    parser.add_argument("--with-deps", dest="with_deps", action="store_true", default=True, help="Automatically enable declared dependencies from meta.lsx (default: True)")
+    parser.add_argument("--no-deps", dest="with_deps", action="store_false", help="Do not automatically enable dependencies")
+    parser.add_argument("--test-dep", action="append", default=[], dest="test_deps", help="Temporary test dependency name, slug, or UUID to activate ahead of the mod")
+    parser.add_argument("--isolate", "--clean", dest="isolate", action="store_true", help="Clean-room isolation: disable all other mods except base game and dependencies")
     parser.add_argument("--validate", action="store_true", help="Validate current load order rules")
     parser.add_argument("--create-default", action="store_true", help="Create default modsettings.lsx if missing")
     parser.add_argument("--dry-run", action="store_true", help="Preview modifications without writing to disk")
@@ -457,6 +656,79 @@ def main():
                 print(f"{RED}Error: {msg}{RESET}", file=sys.stderr)
             sys.exit(1)
 
+        resolved_deps: list[dict] = []
+        missing_deps: list[dict] = []
+        if args.with_deps:
+            resolved_deps, missing_deps = resolve_all_dependencies(mod_meta)
+
+        # Collect test dependencies from CLI and .test_deps.json if mod is in my_mods/
+        mod_dir = resolve_mod_dir(args.enable, prefer_my_mods=True)
+        test_dep_queries = list(args.test_deps)
+        if mod_dir and (mod_dir / ".test_deps.json").is_file():
+            try:
+                cfg = json.loads((mod_dir / ".test_deps.json").read_text(encoding="utf-8"))
+                for td in cfg.get("test_dependencies", []):
+                    if td not in test_dep_queries:
+                        test_dep_queries.append(td)
+            except Exception:
+                pass
+
+        resolved_test_deps: list[dict] = []
+        for t_query in test_dep_queries:
+            t_meta = get_mod_metadata_from_workspace(t_query)
+            if not t_meta:
+                try:
+                    t_meta = resolve_dependency_metadata(t_query, auto_document=True)
+                except Exception:
+                    pass
+            if t_meta and t_meta.get("UUID"):
+                resolved_test_deps.append(t_meta)
+
+        # Ensure .pak files exist in Steam Data/Mods and AppData Mods
+        pak_sync_results = []
+        if args.with_deps and not args.dry_run:
+            all_deps = list(resolved_deps) + list(resolved_test_deps)
+            pak_sync_results = ensure_dependency_paks(all_deps)
+
+        isolated_count = 0
+        if args.isolate:
+            keep_uuids = {
+                mod_meta["UUID"],
+                *(d["UUID"] for d in resolved_deps),
+                *(d["UUID"] for d in resolved_test_deps),
+            }
+            isolated_count = isolate_load_order(modsettings_path, keep_uuids, dry_run=args.dry_run)
+            action_result["isolated_count"] = isolated_count
+            if not args.json and isolated_count > 0:
+                verb = "[DRY-RUN] Would isolate" if args.dry_run else "Isolated"
+                print(f"✓ {verb} load order (disabled {isolated_count} unrelated mod{'s' if isolated_count != 1 else ''}).")
+
+        dep_results = []
+        for dep in resolved_deps:
+            dep_changed, dep_status = enable_mod(modsettings_path, dep, dry_run=args.dry_run)
+            dep_results.append({
+                "mod": dep.get("Name", dep["UUID"]),
+                "uuid": dep["UUID"],
+                "changed": dep_changed,
+                "status": dep_status,
+            })
+            if not args.json and dep_changed:
+                verb = "[DRY-RUN] Would enable dependency" if args.dry_run else "Enabled dependency"
+                print(f"  ↳ {verb} '{dep.get('Name', dep['UUID'])}' ({dep['UUID']})")
+
+        test_dep_results = []
+        for tdep in resolved_test_deps:
+            tdep_changed, tdep_status = enable_mod(modsettings_path, tdep, dry_run=args.dry_run)
+            test_dep_results.append({
+                "mod": tdep.get("Name", tdep["UUID"]),
+                "uuid": tdep["UUID"],
+                "changed": tdep_changed,
+                "status": tdep_status,
+            })
+            if not args.json and tdep_changed:
+                verb = "[DRY-RUN] Would enable test dependency" if args.dry_run else "Enabled test dependency"
+                print(f"  🧪 {verb} '{tdep.get('Name', tdep['UUID'])}' ({tdep['UUID']})")
+
         changed, status_str = enable_mod(modsettings_path, mod_meta, order_index=args.order, dry_run=args.dry_run)
         action_result["enable"] = {
             "mod": mod_meta["Name"],
@@ -465,6 +737,10 @@ def main():
             "status": status_str,
             "order_index": args.order,
             "dry_run": args.dry_run,
+            "dependencies": dep_results,
+            "test_dependencies": test_dep_results,
+            "pak_sync": pak_sync_results,
+            "missing_dependencies": missing_deps,
         }
         if not args.json:
             if changed:
@@ -472,6 +748,11 @@ def main():
                 print(f"✓ {verb} '{mod_meta['Name']}' ({mod_meta['UUID']}) in load order at {modsettings_path}!")
             else:
                 print(f"Mod '{mod_meta['Name']}' is already active in load order.")
+
+            if missing_deps:
+                print(f"{YELLOW}⚠ Warning: {len(missing_deps)} declared dependenc{'y' if len(missing_deps) == 1 else 'ies'} not found in workspace or AppData Mods:{RESET}")
+                for md in missing_deps:
+                    print(f"  • {md.get('Name', 'Unknown')} ({md.get('UUID', 'No UUID')})")
 
     if args.disable:
         try:
