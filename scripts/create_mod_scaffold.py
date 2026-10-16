@@ -27,9 +27,11 @@ from pathlib import Path
 if __package__:
     from .lib.env_paths import load_env_file
     from .lib.larian_parsers import calculate_version64
+    from .lib.mod_resolver import KNOWN_DEPENDENCIES, resolve_dependency_metadata
 else:
     from lib.env_paths import load_env_file
     from lib.larian_parsers import calculate_version64
+    from lib.mod_resolver import KNOWN_DEPENDENCIES, resolve_dependency_metadata
 
 
 README_TEMPLATE_PATH = Path(__file__).parent / "templates" / "custom_mod_readme.md"
@@ -315,19 +317,21 @@ def scaffold_mod(
         for dep in dependencies:
             if dep in ("GustavX", "GustavDev"):
                 continue
-            if dep in KNOWN_DEPENDENCIES:
-                resolved_deps.append(KNOWN_DEPENDENCIES[dep])
-            elif isinstance(dep, dict) and "UUID" in dep:
+            if isinstance(dep, dict) and "UUID" in dep:
                 resolved_deps.append(dep)
             else:
-                resolved_deps.append({
-                    "Folder": str(dep),
-                    "MD5": "",
-                    "Name": str(dep),
-                    "PublishHandle": 0,
-                    "UUID": generate_uuid(),
-                    "Version64": 36028797018963968,
-                })
+                meta = resolve_dependency_metadata(str(dep), auto_document=True)
+                if meta and meta.get("UUID"):
+                    resolved_deps.append(meta)
+                else:
+                    resolved_deps.append({
+                        "Folder": str(dep),
+                        "MD5": "",
+                        "Name": str(dep),
+                        "PublishHandle": 0,
+                        "UUID": generate_uuid(),
+                        "Version64": 36028797018963968,
+                    })
 
     if not description:
         description = f"{clean_name}: Custom mod for Baldur's Gate 3."

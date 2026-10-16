@@ -83,7 +83,7 @@ Before drafting any plan or generating UUIDs/folders, the Orchestrator **MUST un
    - **Branch A (Mod Identity & Theme)**: Name (PascalCase, e.g. `ArcaneProgression`, `EldritchAscension`), summary, and character fantasy.
    - **Branch B (Classes & Progression)**: Target classes/subclasses, level bounds (e.g. 1-12 vanilla vs. 13-20 `UnlockLevelCurve`), and progression unlock levels.
    - **Branch C (Spells, Passives & Abilities)**: Action economy (Action, Bonus Action, Reaction), resource costs (Ki, Spell Slots, Action Surge), and damage/status effects.
-   - **Branch D (Parent Dependencies)**: Base game only (`GustavDev`) or companion frameworks like `UnlockLevelCurve` (`a2ffd0e4-c407-8642-2611-c934ea0b0a77`).
+   - **Branch D (Parent Dependencies)**: Base game only (`GustavDev`), companion frameworks like `UnlockLevelCurve` (`a2ffd0e4-c407-8642-2611-c934ea0b0a77`), or any community mod cataloged in `mods/library.md` (or on mod.io).
    - **Branch E (In-Game Acquisition & Item Drops)**: For equipment or item mods, identify container drop locations (Tutorial Chest on Nautiloid, Camp Chest, or Act 1-3 vendors like Arron or Dammon) for `scripts/inject_treasure_table.py`.
 3. **Format Options**: Prefix the recommended option with `(Recommended)` and list it first. Format all options as direct user responses.
 
@@ -131,6 +131,7 @@ python3 scripts/create_mod_scaffold.py \
   --author "MTGHillGiant" \
   --description "<Description>" \
   [--unlock-level-curve] \
+  [--dependency "<CommunityModNameOrSlug>"] \
   --json
 ```
 

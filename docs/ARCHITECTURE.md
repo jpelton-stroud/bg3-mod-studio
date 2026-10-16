@@ -81,9 +81,9 @@ flowchart TD
 - Phase 2B: Runtime log triage, auto-fixes & verification loop"]
     
     S3["Stage 3: In-Game Testing (/bg3_test_mod)
-- pack_mod_pak --publish-local to %LOCALAPPDATA%/.../Mods/
-- manage_load_order --enable --order --validate
-- inspect_save_game --audit & user in-game verification"]
+- Phase 3A: Clean smoke test with dependency closure (--with-deps / --isolate)
+- Phase 3B: Multi-mod campaign integration & save audit (optional gate)
+- User in-game verification & loopback/release gate"]
     
     S4["Stage 4: Release Preparation (/bg3_release_prep)
 - bump_mod_version (atomic meta.lsx & README sync)
