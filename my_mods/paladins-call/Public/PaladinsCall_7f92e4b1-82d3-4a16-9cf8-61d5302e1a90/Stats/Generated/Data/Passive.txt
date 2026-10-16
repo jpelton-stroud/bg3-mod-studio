@@ -53,3 +53,11 @@ data "Description" "hde521abdg01fdgaf4dg7dd5g8fd8db288e2a;You become an avatar o
 data "Icon" "PassiveFeature_ImprovedDivineSmite"
 data "Properties" "Highlighted"
 data "Boosts" "IF(IsMeleeAttack()):DamageBonus(1d12,Radiant);IF(IsMeleeAttack()):DamageBonus(CharismaModifier,Radiant)"
+
+// Fallback / Standalone spell slot unlock passive for Level 4 spell slot
+new entry "UnlockedSpellSlotLevel4"
+type "PassiveData"
+using "UnlockedSpellSlotLevel1"
+data "DisplayName" "he2fe3974g385ag4681ga3aag5ca6d540e617;Unlocked Level 4 Spell Slot"
+data "Description" "h255e9839gfaa0g4b70gb4b0g4c3b4ce4fe1e;You have unlocked 4th-level Spell Slots."
+
