@@ -37,25 +37,27 @@ flowchart TD
 
 ### 1. View Current Load Order
 ```bash
-python3 scripts/manage_load_order.py --json
+python3 scripts/manage_load_order.py --list --json
 ```
 
-### 2. Activate a Mod
-To activate a mod from `my_mods/` or `mods/`:
-1. Find the mod's UUID and Name from its `meta.lsx`.
-2. Run:
+### 2. Enable / Activate a Mod
+Activate a mod by its folder slug, module folder name, or UUID:
 ```bash
-python3 scripts/manage_load_order.py --activate "<UUID>" "<ModFolder>" --json
+# Enable at end of load order:
+python3 scripts/manage_load_order.py --enable "<mod_slug_or_UUID>" --json
+
+# Or insert at specific load order position (1-indexed):
+python3 scripts/manage_load_order.py --enable "<mod_slug_or_UUID>" --order 3 --json
 ```
 
 ### 3. Disable a Mod
 ```bash
-python3 scripts/manage_load_order.py --disable "<UUID>" --json
+python3 scripts/manage_load_order.py --disable "<mod_slug_or_UUID>" --json
 ```
 
 ### 4. Validate Active Profile Integrity
 ```bash
-python3 scripts/manage_load_order.py --validate
+python3 scripts/manage_load_order.py --validate --json
 ```
 
 > [!TIP]

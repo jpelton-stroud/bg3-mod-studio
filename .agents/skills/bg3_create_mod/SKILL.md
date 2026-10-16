@@ -1,19 +1,32 @@
 ---
 name: bg3_create_mod
-description: Orchestrates concurrent subagents to grill, plan, scaffold, author, validate, and sync Baldur's Gate 3 mods into my_mods/<ModSlug> and game Data. Triggers on /bg3_create_mod or requests to create a new BG3 mod.
+description: Orchestrates concurrent subagents to grill, plan, scaffold, author, and validate Baldur's Gate 3 mods in my_mods/<ModSlug> (Stage 1 of the mod lifecycle). Triggers on /bg3_create_mod or requests to create a new BG3 mod.
 ---
 
-# BG3 Mod Creation Orchestrator (`bg3_create_mod`)
+# BG3 Mod Creation Orchestrator (Stage 1)
 
-This skill defines the **Orchestrator Persona** and automated parallel subagent pipeline for designing, scaffolding, authoring, validating, and synchronizing custom *Baldur's Gate 3* mods.
+This skill defines the **Stage 1 (Creation)** orchestrator and automated parallel subagent pipeline for designing, scaffolding, authoring, and smoke-validating custom *Baldur's Gate 3* mods in `my_mods/<ModSlug>`.
 
-The Orchestrator coordinates the complete lifecycle:
+Stage 1 is strictly scoped to the repository workspace:
 1. Conducts an interactive **`grill-me`** interview to resolve all design branches.
 2. Drafts a technical mod plan and pauses for **interactive user approval**.
 3. Scaffolds `my_mods/<ModSlug>` with internal `<ModName>_<UUID>` Larian subdirectories via [`scripts/create_mod_scaffold.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/create_mod_scaffold.py).
 4. Dispatches specialized **concurrent subagents in parallel** to author stats, progressions, localization, and documentation.
-5. Reactively cross-validates file syntax and identifiers.
-6. Synchronizes mod assets to the game's `Data/` directory via [`scripts/sync_to_game_data.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/sync_to_game_data.py).
+5. Runs read-only smoke checks (`validate_mod.py`, `sync_localization.py --check`) without modifying external game directories or `AppData/`.
+6. Executes a **Progressive Gate Handoff** to **Stage 2: Diagnostics & Toolkit Sync** (`/bg3_diagnose_mod`).
+
+## Discovery & Tooling
+
+Inspect tool arguments, flags, and schema definitions with:
+
+```bash
+python3 scripts/tools.py --info create-scaffold
+python3 scripts/tools.py --info scaffold-stat
+python3 scripts/tools.py --info scaffold-progression
+python3 scripts/tools.py --info scaffold-template
+python3 scripts/tools.py --info inject-treasure
+python3 scripts/tools.py --info validate
+```
 
 ---
 
@@ -30,14 +43,14 @@ Scope, Class Progression, Spells, Stats, Dependencies"]
     E -- "Changes Requested" --> C
     E -- "Approved" --> F["Step 3: Execute Workspace Scaffolding
 python3 scripts/create_mod_scaffold.py --json"]
-    F --> G["Scaffolded: my_mods/&lt;ModName&gt;_&lt;UUID&gt;/
+    F --> G["Scaffolded: my_mods/&lt;ModSlug&gt;/
 - Projects/ & Mods/ meta.lsx
 - Directory trees & placeholder icons"]
     G --> H["Step 4: Dispatch Concurrent Subagents via invoke_subagent"]
     
     subgraph Parallel Subagents
         H --> I1["Subagent 1: Stats & Spells Specialist
-Stats/Generated/Data/*.txt"]
+Stats/Generated/Data/*.txt, RootTemplates, Treasure"]
         H --> I2["Subagent 2: Progression & Lists Specialist
 Progressions.lsx, SpellLists.lsx"]
         H --> I3["Subagent 3: Localization Specialist
@@ -51,12 +64,11 @@ README.md & mod spec tables"]
     I3 --> J
     I4 --> J
     
-    J --> K["Step 5: Orchestrator Cross-Validation
-- XML/LSX syntax check
-- Handle & ID cross-references"]
-    K --> L["Step 6: Targeted Game Data Sync
-python3 scripts/sync_to_game_data.py --mods &lt;ModName&gt;_&lt;UUID&gt;"]
-    L --> M["Step 7: Final Status Report & Toolkit Instructions"]
+    J --> K["Step 5: Read-Only Validation Gate
+python3 scripts/validate_mod.py --mod &lt;slug&gt; --json
+python3 scripts/sync_localization.py --mod &lt;slug&gt; --check --json"]
+    K --> L["Step 6: Progressive Gate Handoff
+ask_question -> Proceed to Stage 2: /bg3_diagnose_mod &lt;slug&gt;"]
 ```
 
 ---
@@ -181,62 +193,36 @@ The Orchestrator launches specialized subagents in parallel to author the mod's 
 
 ---
 
-## Step 5: Reactive Supervision, Validation & Metadata Generation
+## Step 5: Orchestrator Reactive Validation Smoke Check
 
 The Orchestrator halts tool execution and waits for reactive completion messages from all subagents.
 
-Once all subagents have reported success:
-1. **Run Deterministic Mod Validator**:
-   Execute [`scripts/validate_mod.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/validate_mod.py):
-   ```bash
-   python3 scripts/validate_mod.py --mod <ModName>
-   ```
-   This automatically verifies:
-   - XML and LSX well-formedness
-   - Metadata parity between `Projects/` and `Mods/` `meta.lsx`
-   - Localization handle references (`h...;1`) against `English/<ModName>.xml`
-   - Spell references in `SpellLists.lsx` against local stats
-   - Compliance of 512×512 PNG thumbnails and logos
+Once all subagents have reported success, run read-only validation on the workspace files without touching game `Data/` or `AppData/`:
 
-2. **Export the README for Publishing**:
-   Execute [`scripts/generate_mod_metadata.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/generate_mod_metadata.py):
-   ```bash
-   python3 scripts/generate_mod_metadata.py --mod <ModName> --write
-   ```
-   This exports the complete templated `README.md` as `my_mods/<ModName>/modio_description.html`.
+```bash
+python3 scripts/validate_mod.py --mod <mod-slug> --json
+python3 scripts/sync_localization.py --mod <mod-slug> --check --json
+```
+
+Verify:
+- XML and LSX well-formedness
+- Metadata parity between `Projects/` and `Mods/` `meta.lsx`
+- Localization handle references (`h...;1`) against `English/<ModName>.xml`
+- Spell references in `SpellLists.lsx` against local stats
+- Compliance of 512×512 PNG thumbnails and logos
+
+If any errors or missing handles are found, prompt the subagents to repair them in `my_mods/<mod-slug>`.
 
 ---
 
-## Step 6: Targeted Game Data Sync
+## Step 6: Progressive Gate Handoff to Stage 2
 
-Run [`scripts/sync_to_game_data.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/sync_to_game_data.py) targeting only the active mod (optionally with `--bump-build`):
+Do not synchronize files to `<Game>/Data/` or build `.pak` archives in Stage 1. Instead, present a concise status report of scaffolded and authored files, then hand off to **Stage 2: Diagnostics & Toolkit Sync**:
 
-```bash
-python3 scripts/sync_to_game_data.py --mods <ModName>_<UUID> --bump-build
+```text
+Mod '<ModName>' successfully authored and verified in my_mods/<mod-slug>!
 ```
 
-The script will:
-1. Copy `Projects/<ModName>_<UUID>` into the game's `Data/Projects/`.
-2. Copy `Mods/<ModName>_<UUID>` into the game's `Data/Mods/`.
-3. Copy `Public/<ModName>_<UUID>` into the game's `Data/Public/`.
-4. Mirror `Localization/English/<ModName>.xml` to both `Data/Localization/English/` and `Data/Mods/<ModName>_<UUID>/Localization/English/`.
-5. Sync thumbnails and publish logos.
-
-Optionally, package a standalone `.pak` for manual installation or sharing:
-```bash
-python3 scripts/pack_mod_pak.py --mod <ModName>
-```
-
----
-
-## Step 7: Completion Report & Toolkit Guidance
-
-Present the user with a summary table:
-- **Mod Name & UUID**: `<ModName>` (`<UUID>`)
-- **Source Folder**: `my_mods/<ModName>_<UUID>`
-- **Synced Files**: Total files created and mirrored
-- **Toolkit Instructions**:
-  1. Open Baldur's Gate 3 Toolkit.
-  2. Select **File -> Open Project...** and choose `<ModName>`.
-  3. Verify that stats and progressions load cleanly in the editor.
-  4. Click **Publish Mod** to package for mod.io or local load orders.
+Use `ask_question` to transition:
+- **Proceed to Stage 2 Diagnostics**: Run `/bg3_diagnose_mod <mod-slug>` to perform static conflict checks, sync assets and compiled `.loca` to `<Game>/Data/`, and triage BG3 Toolkit (`Glasses.exe`) logs.
+- **Review Workspace Files**: Keep working in `my_mods/<mod-slug>` before proceeding to diagnostics.

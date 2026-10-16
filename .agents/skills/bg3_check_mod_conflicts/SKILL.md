@@ -126,17 +126,16 @@ When assigned to evaluate conflicts *between* the set of candidate mods returned
 When actionable conflicts or stat collisions are detected between two mods (or when requested by the user), offer automated patch generation:
 
 ```bash
-# Generate a standalone compatibility override patch
-python3 scripts/generate_compat_patch.py --mod1 <mod1> --mod2 <mod2> --strategy merge_all --patch-name "<Mod1>_<Mod2>_Patch"
+# Generate a standalone compatibility override patch mod
+python3 scripts/generate_compat_patch.py --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json
 
-# Or generate a Compatibility Framework json payload
-python3 scripts/generate_compat_patch.py --mod1 <mod1> --mod2 <mod2> --format compat_framework
+# Or generate a Compatibility Framework config payload
+python3 scripts/generate_compat_patch.py --mod1 <mod1> --mod2 <mod2> --mode cf --json
 ```
 
-Supported resolution strategies:
-- `merge_all`: Merges distinct non-conflicting properties and keeps higher-value parameters.
-- `override_mod1`: Explicitly prioritizes values from Mod 1.
-- `override_mod2`: Explicitly prioritizes values from Mod 2.
+Supported modes:
+- `standalone`: Scaffolds a full patch mod under `my_mods/` merging colliding stats.
+- `cf`: Emits Compatibility Framework config JSON for programmatic runtime injection.
 
 > [!TIP]
 > **Tool Discovery & Schema Inspection**:

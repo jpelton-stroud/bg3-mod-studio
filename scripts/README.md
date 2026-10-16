@@ -22,7 +22,7 @@ python3 scripts/tools.py --search "unpack pak"
 python3 scripts/tools.py --info scaffold-stat
 python3 scripts/tools.py --info pack-pak
 
-# 3. List all 24 tools or filter by category
+# 3. List all 27 tools or filter by category
 python3 scripts/tools.py --list
 python3 scripts/tools.py --list --category authoring
 
@@ -36,6 +36,20 @@ python3 scripts/tools.py --verify
 python3 scripts/tools.py --audit-skills
 ```
 
+---
+
+## 📦 Shared Architecture Package (`scripts/lib/`)
+
+Non-CLI shared utilities and binary parsers reside in [`scripts/lib/`](file:///home/jpstroud/projects/BaldursGate3/scripts/lib/):
+
+| Module | Responsibility |
+| :--- | :--- |
+| `env_paths.py` | Cross-platform Steam, Game `Data/`, AppData, and save game path discovery across Linux, WSL, and Windows. |
+| `lspk.py` | Pure Python Larian LSPK v18 `.pak` archive reader and writer with zlib compression. |
+| `larian_parsers.py` | Bitwise `Version64` calculation, dual-layout `meta.lsx` parsing, functor splitting, and binary `.loca` compiling/decoding. |
+| `modio_client.py` | Zero-dependency mod.io REST v1 client with streaming downloads and multipart/form-data payload construction. |
+| `library_catalog.py` | Structured 6-column catalog parser, validator, and table generator for `mods/library.md`. |
+| `mod_overrides.py` | Centralized overrides for non-standard folder layouts and community mod archive naming. |
 
 ---
 
@@ -51,7 +65,7 @@ Tools for generating game content, mechanics, items, and progressions.
 | `scaffold-progression` | [`scaffold_progression_node.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/scaffold_progression_node.py) | Scaffolds and merges Larian v4.8 Progression and companion `SpellLists.lsx` nodes with automatic `TableUUID` resolution. |
 | `scaffold-template` | [`scaffold_root_template.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/scaffold_root_template.py) | Binds stat entries to 3D visual GameObjects in `_merged.lsx` linking meshes, collision, and handles. |
 | `inject-drop` | [`inject_treasure_table.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/inject_treasure_table.py) | Injects custom mod items into Tutorial Chest, Camp Chest, or early vendors via `TreasureTable.txt`. |
-| `generate-icons` | [`generate_icon_atlas.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/generate_icon_atlas.py) | Calculates normalized UV coordinates and generates `GUI/Icons.lsx` definitions for custom icon grids. |
+| `scaffold-icons` | [`scaffold_icon_uvs.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/scaffold_icon_uvs.py) | Calculates normalized UV coordinates and generates `GUI/Icons.lsx` definitions for custom icon grids. |
 | `compat-patch` | [`generate_compat_patch.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/generate_compat_patch.py) | Auto-generates compatibility patches (standalone or Compatibility Framework) between colliding mods. |
 
 ---
@@ -61,8 +75,8 @@ Tools for packaging archives and syncing mods into the game engine.
 
 | Command Alias | Script | Description |
 | :--- | :--- | :--- |
-| `pack-pak` | [`pack_mod_pak.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/pack_mod_pak.py) | Pure-Python LSPK v18 `.pak` packager with zlib compression (no LSLib/Wine needed). |
-| `sync-game` | [`sync_to_game_data.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/sync_to_game_data.py) | Syncs custom mods from `my_mods/` to the Steam `Baldurs Gate 3/Data` directory with build bumping. |
+| `pack-pak` | [`pack_mod_pak.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/pack_mod_pak.py) | Pure-Python LSPK v18 `.pak` packager with automatic `.loca` compilation and local publish support (`--publish-local`). |
+| `sync-game` | [`sync_to_game_data.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/sync_to_game_data.py) | Syncs custom mods to Steam BG3 `Data/` with compiled binary `.loca` generation and live watch mode. |
 
 ---
 
@@ -73,8 +87,9 @@ Tools for health checks, syntax validation, collision detection, and save audits
 | :--- | :--- | :--- |
 | `validate` | [`validate_mod.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/validate_mod.py) | Deterministic static validator verifying LSX XML syntax, handle integrity, and assets. |
 | `check-conflicts` | [`check_mod_conflicts.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/check_mod_conflicts.py) | Static entry collision analyzer checking stat overlaps and console-incompatible DLLs. |
-| `sync-loca` | [`sync_localization.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/sync_localization.py) | Prunes orphaned string handles (`.bak` backups), audits missing handles, and syncs multi-language XMLs. |
-| `inspect-save` | [`inspect_save_game.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/inspect_save_game.py) | Extracts mod load orders from `.lsv` saves and audits against `modsettings.lsx` to diagnose crashes. |
+| `sync-loca` | [`sync_localization.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/sync_localization.py) | Prunes orphaned string handles, compiles binary `.loca`, and audits missing handles. |
+| `diagnose-logs` | [`diagnose_toolkit_logs.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/diagnose_toolkit_logs.py) | Triages BG3 Toolkit (`Glasses.exe`) runtime logs, correlating errors to workspace mods. |
+| `inspect-save` | [`inspect_save_game.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/inspect_save_game.py) | Extracts mod load orders from `.lsv` saves (Zstd/LSOF v7) and audits against `modsettings.lsx`. |
 
 ---
 
@@ -83,10 +98,11 @@ Tools for load order configuration, versioning, and publishing metadata.
 
 | Command Alias | Script | Description |
 | :--- | :--- | :--- |
-| `load-order` | [`manage_load_order.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/manage_load_order.py) | Inspects, activates, disables, and validates mod load order in `modsettings.lsx`. |
-| `bump-version` | [`bump_mod_version.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/bump_mod_version.py) | Increments semantic versions and encodes 64-bit uint `Version64` across `meta.lsx`. |
-| `gen-metadata` | [`generate_mod_metadata.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/generate_mod_metadata.py) | Renders a mod's root `README.md` as `modio_description.html`. |
-| `modio-update-metadata` | [`modio_update_metadata.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_update_metadata.py) | Previews then updates a local BG3 mod's mod.io description, approved tags, selected profile settings, non-commercial reuse permissions, and visibility; writes require `--confirm`. |
+| `load-order` | [`manage_load_order.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/manage_load_order.py) | Inspects, activates, disables, orders, and validates mod load order in `modsettings.lsx`. |
+| `bump-version` | [`bump_mod_version.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/bump_mod_version.py) | Atomically increments semantic versions across `meta.lsx` and synchronizes `README.md`. |
+| `render-description` | [`render_modio_description.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/render_modio_description.py) | Renders a mod's root `README.md` as GFM-table-formatted `modio_description.html`. |
+| `post-release` | [`modio_update_metadata.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_update_metadata.py) | Previews and applies approved mod.io metadata, tags, non-commercial permissions, and visibility. |
+| `modio-collection` | [`modio_create_collection.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_create_collection.py) | Creates or updates public mod.io collections from cataloged mods in `mods/library.md`. |
 | `setup-env` | [`setup_environment.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/setup_environment.py) | Setup wizard checking Python, Steam BG3, AppData, and mod.io configuration. |
 
 ---
@@ -96,12 +112,12 @@ Tools for querying cataloged community mods and interacting with mod.io.
 
 | Command Alias | Script | Description |
 | :--- | :--- | :--- |
-| `query-db` | [`query_mod_database.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/query_mod_database.py) | High-speed (sub-10ms) query engine searching 2,200+ mod items, passives, spells, and boosts. |
-| `update-catalog` | [`update_library_catalog.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/update_library_catalog.py) | Compiles and validates six-column categorized rows (Mod Id, Mod Name, Mod Slug, Description, Features Documented, Spec Link) in [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md), preserving verified IDs and leaving unknown IDs blank. |
+| `query-db` | [`query_mod_database.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/query_mod_database.py) | High-speed query engine searching mod items, passives, spells, and boosts. |
+| `update-catalog` | [`update_library_catalog.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/update_library_catalog.py) | Compiles and validates 6-column categorized rows in [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md). |
 | `modio-search` | [`modio_search.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_search.py) | Searches mod.io with natural language and platform filters (`console`, `windows`, etc.). |
 | `modio-sync` | [`modio_sync.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_sync.py) | Downloads and syncs subscribed mods from mod.io into `mods/`. |
 | `modio-update` | [`modio_update.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_update.py) | Checks tracked mods against remote mod.io releases and updates specifications. |
-| `modio-extract` | [`modio_extract.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_extract.py) | Unpacks LSPK `.pak` archives, extracts files, and indexes mod capabilities. |
+| `modio-extract` | [`modio_extract.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_extract.py) | Unpacks remote or local LSPK `.pak` archives, extracts files, and indexes mod capabilities. |
 
 ---
 
@@ -157,10 +173,6 @@ High-volume generation tasks (such as `bg3_create_build_guide`) follow the **Art
 - Full 20-level progression tables, stat matrices, and complete gear catalogs are written directly to disk (`build_guides/<build_slug>.md`).
 - Only an executive summary (class concept, key gear linchpins, Turn 1 rotation DPR) is rendered into chat, avoiding thousands of redundant context tokens.
 
-### 4. Session Lifecycle & Hygiene
-- For distinct features, start fresh chat sessions or clear working context to avoid carrying forward large multi-turn history.
-- Use `scripts/tools.py --search` or direct script execution rather than dumping full registry schemas into conversation memory.
-
 ---
 
 ## 🧪 Verification & Continuous Testing
@@ -176,8 +188,8 @@ python3 scripts/tools.py --audit-skills
 ```
 
 This verifies that:
-1. Every script on disk in `scripts/*.py` is registered in `registry.json`.
+1. Every script on disk in `scripts/*.py` is registered in `registry.json` (27 / 27 tools).
 2. Every registered tool exists on disk.
 3. Every script compiles without Python syntax errors.
 4. Every script cleanly handles `--help` CLI invocation.
-5. Every agent skill in `.agents/skills/` uses valid registered scripts and provides dynamic tool discovery guidance.
+5. Every agent skill in `.agents/skills/` uses valid registered scripts and provides dynamic tool discovery guidance (15 / 15 skills).

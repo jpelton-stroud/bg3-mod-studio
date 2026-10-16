@@ -7,6 +7,14 @@ description: Creates or updates a public Baldur's Gate 3 mod.io collection from 
 
 Use `scripts/modio_create_collection.py` to create a public BG3 collection or update one of the authenticated user's collections using numeric Mod Id values in the six-column categorized rows of `mods/library.md`.
 
+## Discovery & Tooling
+
+Inspect tool arguments and schema details with:
+
+```bash
+python3 scripts/tools.py --info modio-collection
+```
+
 ## Safety and credentials
 
 - Require `MODIO_PAT` in the process environment. Never ask the user to paste it, pass it as a CLI argument, print it, or put it in logs.
