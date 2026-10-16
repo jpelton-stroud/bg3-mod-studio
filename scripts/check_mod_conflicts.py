@@ -24,10 +24,8 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
-MODS_DIR = WORKSPACE_ROOT / "mods"
-MY_MODS_DIR = WORKSPACE_ROOT / "my_mods"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.env_paths import MODS_DIR, MY_MODS_DIR, REPO_ROOT as WORKSPACE_ROOT, normalize_mod_key, resolve_mod_dir
 
 # ANSI Terminal Colors
 BOLD = "\033[1m"
@@ -37,25 +35,23 @@ RED = "\033[31m"
 CYAN = "\033[36m"
 RESET = "\033[0m"
 
+BUILTIN_MODULES = {
+    "gustav",
+    "gustavdev",
+    "gustavx",
+    "shared",
+    "shareddev",
+    "engine",
+    "photomode",
+    "honour",
+    "mainui",
+    "modbrowser",
+    "fw3",
+}
+
 
 def resolve_mod_path(query: str) -> Path:
-    p = Path(query)
-    if p.exists() and p.is_dir():
-        return p
-
-    # Check my_mods
-    if MY_MODS_DIR.exists():
-        for d in MY_MODS_DIR.iterdir():
-            if d.is_dir() and query.lower() in d.name.lower():
-                return d
-
-    # Check mods
-    if MODS_DIR.exists():
-        for d in MODS_DIR.iterdir():
-            if d.is_dir() and query.lower() in d.name.lower():
-                return d
-
-    raise FileNotFoundError(f"Could not resolve mod path for query '{query}'.")
+    return resolve_mod_dir(query, prefer_my_mods=True)
 
 
 def extract_stats_entries(mod_dir: Path) -> dict[str, dict]:
@@ -128,6 +124,39 @@ def extract_progressions(mod_dir: Path) -> dict[tuple[str, str], dict]:
     return progressions
 
 
+def extract_root_templates(mod_dir: Path) -> dict[str, dict]:
+    """
+    Extracts GameObjects MapKey UUIDs from RootTemplates LSX files.
+    """
+    templates = {}
+    lsx_files = [
+        f for f in mod_dir.rglob("*.lsx")
+        if "roottemplate" in str(f.relative_to(mod_dir)).lower() or f.name.lower() == "_merged.lsx"
+    ]
+    for f in lsx_files:
+        try:
+            tree = ET.parse(f)
+            for node in tree.findall(".//node[@id='GameObjects']"):
+                map_key = ""
+                t_name = ""
+                for attr in node.findall("attribute"):
+                    aid = attr.get("id")
+                    val = attr.get("value", "")
+                    if aid == "MapKey":
+                        map_key = val
+                    elif aid == "Name":
+                        t_name = val
+                if map_key:
+                    templates[map_key] = {
+                        "map_key": map_key,
+                        "name": t_name,
+                        "file": f.name,
+                    }
+        except Exception:
+            pass
+    return templates
+
+
 def check_native_dlls(mod_dir: Path) -> list[str]:
     """Detects .dll or .so binary files indicating native PC code / BG3SE requirement."""
     binaries = []
@@ -143,13 +172,47 @@ def get_mod_dependencies(mod_dir: Path) -> list[str]:
     meta_files = list(mod_dir.rglob("meta.lsx"))
     if not meta_files:
         return deps
-    try:
-        content = meta_files[0].read_text(encoding="utf-8")
-        for m in re.finditer(r'<node\s+id="ModuleShortDesc">.*?<attribute\s+id="Name"\s+type="LSString"\s+value="([^"]+)".*?</node>', content, re.DOTALL):
-            deps.append(m.group(1))
-    except Exception:
-        pass
+    for mf in meta_files:
+        try:
+            content = mf.read_text(encoding="utf-8")
+            dep_block = re.search(r'<node\s+id="Dependencies">(.*?)</node>\s*(?:<node\s+id="ModuleInfo"|</children>)', content, re.DOTALL)
+            target = dep_block.group(1) if dep_block else content
+            for m in re.finditer(r'<node\s+id="ModuleShortDesc">.*?<attribute\s+id="Name"\s+type="[^"]*"\s+value="([^"]+)".*?</node>', target, re.DOTALL):
+                dep_name = m.group(1).strip()
+                if dep_name and dep_name.lower() not in BUILTIN_MODULES and not dep_name.lower().startswith("diceset"):
+                    if dep_name not in deps:
+                        deps.append(dep_name)
+        except Exception:
+            pass
     return deps
+
+
+def find_missing_local_dependencies(mod_dir: Path) -> list[str]:
+    """Checks whether declared dependencies in meta.lsx exist in my_mods/ or mods/."""
+    deps = get_mod_dependencies(mod_dir)
+    if not deps:
+        return []
+
+    known_keys: set[str] = set()
+    for base in (MY_MODS_DIR, MODS_DIR):
+        if base.is_dir():
+            for d in base.iterdir():
+                if d.is_dir():
+                    known_keys.add(normalize_mod_key(d.name))
+                    for mf in d.rglob("meta.lsx"):
+                        try:
+                            txt = mf.read_text(encoding="utf-8", errors="ignore")
+                            for m in re.finditer(r'<attribute\s+id="(?:Name|Folder)"\s+type="[^"]*"\s+value="([^"]+)"', txt):
+                                known_keys.add(normalize_mod_key(m.group(1)))
+                        except Exception:
+                            pass
+
+    missing = []
+    for dep in deps:
+        dep_norm = normalize_mod_key(dep)
+        if not any(dep_norm == k or dep_norm in k or k in dep_norm for k in known_keys if k):
+            missing.append(dep)
+    return missing
 
 
 def compare_two_mods(mod1_dir: Path, mod2_dir: Path) -> dict:
@@ -161,6 +224,9 @@ def compare_two_mods(mod1_dir: Path, mod2_dir: Path) -> dict:
 
     progs1 = extract_progressions(mod1_dir)
     progs2 = extract_progressions(mod2_dir)
+
+    rt1 = extract_root_templates(mod1_dir)
+    rt2 = extract_root_templates(mod2_dir)
 
     dlls1 = check_native_dlls(mod1_dir)
     dlls2 = check_native_dlls(mod2_dir)
@@ -186,7 +252,18 @@ def compare_two_mods(mod1_dir: Path, mod2_dir: Path) -> dict:
             "mod2_uuid": progs2[p].get("uuid", ""),
         })
 
-    has_conflict = bool(stat_collisions or prog_collisions)
+    # 3. RootTemplate MapKey overlaps
+    rt_collisions = []
+    common_rts = set(rt1.keys()) & set(rt2.keys())
+    for rk in sorted(common_rts):
+        rt_collisions.append({
+            "map_key": rk,
+            "name": rt1[rk].get("name") or rt2[rk].get("name", ""),
+            "mod1_file": rt1[rk]["file"],
+            "mod2_file": rt2[rk]["file"],
+        })
+
+    has_conflict = bool(stat_collisions or prog_collisions or rt_collisions)
 
     return {
         "mod1": mod1_name,
@@ -194,6 +271,11 @@ def compare_two_mods(mod1_dir: Path, mod2_dir: Path) -> dict:
         "has_conflicts": has_conflict,
         "stat_collisions": stat_collisions,
         "progression_collisions": prog_collisions,
+        "root_template_collisions": rt_collisions,
+        "missing_dependencies": {
+            mod1_name: find_missing_local_dependencies(mod1_dir),
+            mod2_name: find_missing_local_dependencies(mod2_dir),
+        },
         "console_incompatible": {
             mod1_name: dlls1,
             mod2_name: dlls2,
@@ -244,6 +326,8 @@ def main():
                     "has_conflicts": res["has_conflicts"],
                     "stat_collision_count": len(res.get("stat_collisions", [])),
                     "progression_collision_count": len(res.get("progression_collisions", [])),
+                    "root_template_collision_count": len(res.get("root_template_collisions", [])),
+                    "missing_dependencies": res.get("missing_dependencies", {}),
                 }
                 print(json.dumps(res_out, indent=2))
             else:
@@ -252,7 +336,7 @@ def main():
             print(f"\n{BOLD}{CYAN}=== BG3 Mod Compatibility Analysis ==={RESET}")
             print(f"Comparing: {BOLD}{res['mod1']}{RESET} vs {BOLD}{res['mod2']}{RESET}\n")
             if not res["has_conflicts"]:
-                print(f"{GREEN}✓ No stat or progression collisions detected between these mods.{RESET}")
+                print(f"{GREEN}✓ No stat, progression, or template collisions detected between these mods.{RESET}")
             else:
                 if res["stat_collisions"]:
                     print(f"{YELLOW}⚠ Stat Entry Overrides ({len(res['stat_collisions'])}):{RESET}")
@@ -262,6 +346,14 @@ def main():
                     print(f"{RED}✗ Class Progression Collisions ({len(res['progression_collisions'])}):{RESET}")
                     for pc in res["progression_collisions"]:
                         print(f"  • Class '{pc['class']}' Level {pc['level']} overwritten by both mods")
+                if res.get("root_template_collisions"):
+                    print(f"{RED}✗ RootTemplate MapKey Collisions ({len(res['root_template_collisions'])}):{RESET}")
+                    for rc in res["root_template_collisions"]:
+                        print(f"  • MapKey '{rc['map_key']}' ({rc['name']}) defined in both mods")
+
+            for mname, mdeps in res.get("missing_dependencies", {}).items():
+                if mdeps:
+                    print(f"{YELLOW}⚠ Missing Local Dependencies for {mname}:{RESET} {', '.join(mdeps)}")
 
             # Check dlls
             for mname, dlls in res["console_incompatible"].items():
@@ -281,6 +373,7 @@ def main():
 
         results = compare_candidate_against_catalog(cand_path, catalog)
         cand_dlls = check_native_dlls(cand_path)
+        cand_missing_deps = find_missing_local_dependencies(cand_path)
 
         if args.json:
             if args.summary:
@@ -289,12 +382,14 @@ def main():
                         "mod2": r["mod2"],
                         "stat_collision_count": len(r.get("stat_collisions", [])),
                         "progression_collision_count": len(r.get("progression_collisions", [])),
+                        "root_template_collision_count": len(r.get("root_template_collisions", [])),
                     }
                     for r in results
                 ]
                 output = {
                     "candidate": cand_path.name,
                     "console_incompatible": cand_dlls,
+                    "missing_dependencies": cand_missing_deps,
                     "conflict_count": len(results),
                     "conflicts": summary_conflicts,
                 }
@@ -302,6 +397,7 @@ def main():
                 output = {
                     "candidate": cand_path.name,
                     "console_incompatible": cand_dlls,
+                    "missing_dependencies": cand_missing_deps,
                     "conflict_count": len(results),
                     "conflicts": results,
                 }
@@ -312,6 +408,8 @@ def main():
             print(f"Candidate: {BOLD}{cand_path.name}{RESET}")
             if cand_dlls:
                 print(f"{RED}✗ Native DLLs detected (Console Incompatible): {cand_dlls}{RESET}")
+            if cand_missing_deps:
+                print(f"{YELLOW}⚠ Missing Local Dependencies: {', '.join(cand_missing_deps)}{RESET}")
 
             if not results:
                 print(f"{GREEN}✓ No conflicts found with any tracked mods in catalog ({len(catalog)} checked).{RESET}\n")
@@ -324,6 +422,8 @@ def main():
                         print(f"    • Overlap: '{sc['entry']}' in {sc['mod2_file']}")
                     for pc in r["progression_collisions"]:
                         print(f"    • Progression collision: {pc['class']} Lvl {pc['level']}")
+                    for rc in r.get("root_template_collisions", []):
+                        print(f"    • RootTemplate MapKey collision: {rc['map_key']} ({rc['name']})")
                 print("")
                 sys.exit(1)
 

@@ -23,8 +23,9 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
-MY_MODS_DIR = WORKSPACE_ROOT / "my_mods"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.env_paths import MY_MODS_DIR, REPO_ROOT as WORKSPACE_ROOT, get_env_var, normalize_mod_key
+
 DEFAULT_TOOLKIT_DIR = Path("/mnt/c/Program Files (x86)/Steam/steamapps/common/Baldurs Gate 3 Toolkit")
 
 # ANSI Colors
@@ -47,24 +48,10 @@ LOG_LINE_REGEX = re.compile(
 
 
 def load_env_toolkit_dir() -> Optional[Path]:
-    """Inspect .env file for BG3_TOOLKIT_DIR."""
-    env_file = WORKSPACE_ROOT / ".env"
-    if env_file.is_file():
-        try:
-            with open(env_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith("BG3_TOOLKIT_DIR="):
-                        val = line.split("=", 1)[1].strip().strip('"').strip("'")
-                        if val:
-                            p = Path(val)
-                            if p.exists():
-                                return p
-        except Exception:
-            pass
-    env_var = os.environ.get("BG3_TOOLKIT_DIR")
-    if env_var:
-        p = Path(env_var)
+    """Inspect .env or environment for BG3_TOOLKIT_DIR."""
+    val = get_env_var("BG3_TOOLKIT_DIR")
+    if val:
+        p = Path(val)
         if p.exists():
             return p
     return None

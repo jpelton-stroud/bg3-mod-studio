@@ -9,34 +9,22 @@ against modsettings.lsx to warn of missing or mismatched mods before loading the
 import argparse
 import json
 import os
+import re
+import struct
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-# Ensure workspace root and scripts are in sys.path
-workspace_dir = Path(__file__).resolve().parent.parent
-if str(workspace_dir) not in sys.path:
-    sys.path.insert(0, str(workspace_dir))
-if str(workspace_dir / "scripts") not in sys.path:
-    sys.path.insert(0, str(workspace_dir / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.env_paths import detect_bg3_appdata_dirs
+from scripts.lib.lspk import LspkArchive
 
-# Import LSPK unpacker
-try:
-    from scripts.modio_extract import LspkArchive
-except ImportError:
-    try:
-        from modio_extract import LspkArchive
-    except ImportError:
-        LspkArchive = None
 
-STANDARD_SAVE_SEARCH_PATHS = [
-    # Linux native / Wine / Proton paths
-    Path.home() / ".steam/steam/steamapps/compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/PlayerProfiles/Public/Savegames/Story",
-    Path.home() / ".local/share/Steam/steamapps/compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/PlayerProfiles/Public/Savegames/Story",
-    Path.home() / ".local/share/Larian Studios/Baldur's Gate 3/PlayerProfiles/Public/Savegames/Story",
-    # Windows native
-    Path(os.environ.get("LOCALAPPDATA", "")) / "Larian Studios/Baldur's Gate 3/PlayerProfiles/Public/Savegames/Story",
-]
+def get_save_search_paths() -> list[Path]:
+    paths: list[Path] = []
+    for appdata in detect_bg3_appdata_dirs():
+        paths.append(appdata / "PlayerProfiles/Public/Savegames/Story")
+    return paths
 
 
 def find_save_file(save_arg: str | None = None, save_dir_arg: str | None = None) -> Path:
@@ -50,12 +38,12 @@ def find_save_file(save_arg: str | None = None, save_dir_arg: str | None = None)
     search_dirs = []
     if save_dir_arg:
         search_dirs.append(Path(save_dir_arg))
-    search_dirs.extend(STANDARD_SAVE_SEARCH_PATHS)
+    search_dirs.extend(get_save_search_paths())
 
     candidates = []
     for d in search_dirs:
         if d.is_dir():
-            for f in d.glob("*.lsv"):
+            for f in d.rglob("*.lsv"):
                 try:
                     candidates.append((f.stat().st_mtime, f))
                 except Exception:
@@ -72,28 +60,78 @@ def find_save_file(save_arg: str | None = None, save_dir_arg: str | None = None)
     return candidates[0][1]
 
 
+def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict]:
+    """Extracts ModuleShortDesc entries from binary LSOF v7 meta.lsf values chunk."""
+    from scripts.lib.lspk import lz4_frame_or_block_decompress
+
+    payload = lsf_bytes
+    if len(lsf_bytes) >= 64 and lsf_bytes[:4] == b"LSOF":
+        try:
+            vals = struct.unpack_from("<4sIqIIIIIIIIII", lsf_bytes, 0)
+            hdr_sz = 64 if vals[1] >= 7 else 56
+            val_off = hdr_sz + vals[4] + vals[6] + vals[8] + vals[10]
+            val_uncomp_sz, val_comp_sz = vals[11], vals[12]
+            if val_comp_sz > 0 and val_off + val_comp_sz <= len(lsf_bytes):
+                payload = lz4_frame_or_block_decompress(
+                    lsf_bytes[val_off : val_off + val_comp_sz], val_uncomp_sz
+                )
+        except Exception:
+            payload = lsf_bytes
+
+    mods = []
+    # In LSOF values table, each ModuleShortDesc stores:
+    # 16-byte Larian GUID (<IHHHHHH) + 8-byte Version64 + 32-char MD5 + \x00 + Folder + \x00 + Name + \x00
+    pattern = re.compile(rb"([0-9a-f]{32})\x00([A-Za-z0-9_\-\. ]{2,128})\x00([A-Za-z0-9_\-\. ]{2,128})\x00")
+    for m in pattern.finditer(payload):
+        md5_pos = m.start()
+        folder = m.group(2).decode("utf-8", errors="ignore")
+        name = m.group(3).decode("utf-8", errors="ignore")
+        mod_uuid = ""
+        ver_str = ""
+        # Check if Folder has trailing _<UUID>
+        uuid_suffix = re.search(r"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$", folder)
+        if uuid_suffix:
+            mod_uuid = uuid_suffix.group(1)
+        elif md5_pos >= 24:
+            guid_bytes = payload[md5_pos - 24 : md5_pos - 8]
+            d1, d2, d3, d4, d5, d6, d7 = struct.unpack("<IHHHHHH", guid_bytes)
+            mod_uuid = f"{d1:08x}-{d2:04x}-{d3:04x}-{d4:04x}-{d5:04x}{d6:04x}{d7:04x}"
+        if md5_pos >= 8:
+            ver_int = struct.unpack("<q", payload[md5_pos - 8 : md5_pos])[0]
+            ver_str = str(ver_int)
+        if mod_uuid:
+            mods.append({
+                "uuid": mod_uuid,
+                "name": name,
+                "folder": folder,
+                "version": ver_str,
+            })
+    return mods
+
+
 def extract_save_metadata(save_path: Path) -> dict:
-    """Extracts meta.lsx from the .lsv LSPK package."""
+    """Extracts meta.lsx or meta.lsf + SaveInfo.json from the .lsv LSPK package."""
     if LspkArchive is None:
         raise ImportError("LspkArchive unpacker not available in environment.")
 
     data_bytes = save_path.read_bytes()
     archive = LspkArchive(data_bytes)
 
-    meta_entry = None
+    meta_lsx_entry = None
+    meta_lsf_entry = None
+    save_info_entry = None
     for entry in archive.files:
         norm = entry["name"].replace("\\", "/").lower()
         if norm.endswith("meta.lsx"):
-            meta_entry = entry
-            break
+            meta_lsx_entry = entry
+        elif norm.endswith("meta.lsf"):
+            meta_lsf_entry = entry
+        elif norm.endswith("saveinfo.json"):
+            save_info_entry = entry
 
-    if not meta_entry:
-        raise ValueError(f"No meta.lsx found inside save archive: {save_path.name}")
+    if not meta_lsx_entry and not meta_lsf_entry:
+        raise ValueError(f"No meta.lsx or meta.lsf found inside save archive: {save_path.name}")
 
-    meta_bytes = archive.extract_file(meta_entry)
-    tree = ET.fromstring(meta_bytes)
-
-    # Extract save attributes
     save_info = {
         "save_file": str(save_path),
         "save_name": save_path.stem,
@@ -104,31 +142,45 @@ def extract_save_metadata(save_path: Path) -> dict:
         "mods": [],
     }
 
-    # Meta node search
-    for attr in tree.findall(".//attribute"):
-        attr_id = attr.get("id")
-        val = attr.get("value", "")
-        if attr_id == "LevelName":
-            save_info["level_name"] = val
-        elif attr_id == "Timestamp":
-            save_info["save_time"] = val
-        elif attr_id == "Version64":
-            save_info["version"] = val
+    if save_info_entry is not None:
+        try:
+            info_json = json.loads(archive.extract_file(save_info_entry).decode("utf-8", errors="ignore"))
+            save_info["level_name"] = info_json.get("Current Level", "")
+            save_info["version"] = info_json.get("Game Version", "")
+        except Exception:
+            pass
 
-    # Extract mod list
-    for mod_node in tree.findall(".//node[@id='Mod']"):
-        uuid_attr = mod_node.find("attribute[@id='UUID']")
-        name_attr = mod_node.find("attribute[@id='Name']")
-        folder_attr = mod_node.find("attribute[@id='Folder']")
-        ver_attr = mod_node.find("attribute[@id='Version']")
+    if meta_lsx_entry is not None:
+        meta_bytes = archive.extract_file(meta_lsx_entry)
+        tree = ET.fromstring(meta_bytes)
 
-        if uuid_attr is not None:
-            save_info["mods"].append({
-                "uuid": uuid_attr.get("value", ""),
-                "name": name_attr.get("value", "") if name_attr is not None else "",
-                "folder": folder_attr.get("value", "") if folder_attr is not None else "",
-                "version": ver_attr.get("value", "") if ver_attr is not None else "",
-            })
+        for attr in tree.findall(".//attribute"):
+            attr_id = attr.get("id")
+            val = attr.get("value", "")
+            if attr_id == "LevelName" and not save_info["level_name"]:
+                save_info["level_name"] = val
+            elif attr_id == "Timestamp":
+                save_info["save_time"] = val
+            elif attr_id == "Version64" and not save_info["version"]:
+                save_info["version"] = val
+
+        mod_nodes = tree.findall(".//node[@id='Mod']") or tree.findall(".//node[@id='Mods']//node[@id='ModuleShortDesc']")
+        for mod_node in mod_nodes:
+            uuid_attr = mod_node.find("attribute[@id='UUID']")
+            name_attr = mod_node.find("attribute[@id='Name']")
+            folder_attr = mod_node.find("attribute[@id='Folder']")
+            ver_attr = mod_node.find("attribute[@id='Version']") or mod_node.find("attribute[@id='Version64']")
+
+            if uuid_attr is not None:
+                save_info["mods"].append({
+                    "uuid": uuid_attr.get("value", ""),
+                    "name": name_attr.get("value", "") if name_attr is not None else "",
+                    "folder": folder_attr.get("value", "") if folder_attr is not None else "",
+                    "version": ver_attr.get("value", "") if ver_attr is not None else "",
+                })
+    elif meta_lsf_entry is not None:
+        lsf_bytes = archive.extract_file(meta_lsf_entry)
+        save_info["mods"] = _parse_lsf_save_mods(lsf_bytes)
 
     return save_info
 
@@ -136,9 +188,9 @@ def extract_save_metadata(save_path: Path) -> dict:
 def audit_against_modsettings(save_mods: list[dict], workspace_root: Path) -> dict:
     """Compares save mod list against active modsettings.lsx."""
     try:
-        from scripts.manage_load_order import detect_modsettings_path, parse_modsettings
+        from scripts.manage_load_order import CORE_GUSTAV_NAMES, detect_modsettings_path, parse_modsettings
     except ImportError:
-        from manage_load_order import detect_modsettings_path, parse_modsettings
+        from manage_load_order import CORE_GUSTAV_NAMES, detect_modsettings_path, parse_modsettings
 
     settings_file = detect_modsettings_path()
     if not settings_file or not settings_file.exists():
@@ -154,11 +206,17 @@ def audit_against_modsettings(save_mods: list[dict], workspace_root: Path) -> di
     parsed = parse_modsettings(settings_file)
     active_mods = parsed.get("mods", {})
 
-    active_by_uuid = {u.lower(): m for u, m in active_mods.items()}
-    save_by_uuid = {m["uuid"].lower(): m for m in save_mods}
+    active_by_uuid = {
+        u.lower(): m for u, m in active_mods.items()
+        if (m.get("Name") or m.get("Folder") or "").lower() not in CORE_GUSTAV_NAMES
+    }
+    save_by_uuid = {
+        m["uuid"].lower(): m for m in save_mods
+        if (m.get("name") or m.get("folder") or "").lower() not in CORE_GUSTAV_NAMES
+    }
 
-    # Exclude base game GustavDev
-    gustav_uuid = "28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8".lower()
+    # Exclude base game GustavDev UUID explicitly as well
+    gustav_uuid = "28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8"
     save_by_uuid.pop(gustav_uuid, None)
     active_by_uuid.pop(gustav_uuid, None)
 

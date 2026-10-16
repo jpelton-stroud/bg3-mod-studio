@@ -1,8 +1,36 @@
-"""Pure-Python LZ4 block decompressor and Larian LSPK v18 (.pak / .lsv) archive reader."""
+"""Pure-Python LZ4 block/frame decompressor, Zstandard ctypes helper, and Larian LSPK v18 (.pak / .lsv) archive reader."""
 
+import ctypes
 import io
 import struct
 import zlib
+
+_LIBZSTD = None
+for _libname in ("libzstd.so.1", "libzstd.so", "libzstd.dylib", "libzstd.dll"):
+    try:
+        _lib = ctypes.CDLL(_libname)
+        _lib.ZSTD_decompress.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_size_t,
+            ctypes.c_char_p,
+            ctypes.c_size_t,
+        ]
+        _lib.ZSTD_decompress.restype = ctypes.c_size_t
+        _LIBZSTD = _lib
+        break
+    except Exception:
+        continue
+
+
+def zstd_decompress(compressed_data: bytes, uncompressed_size: int) -> bytes:
+    """Decompress Zstandard frame data using system libzstd via stdlib ctypes."""
+    if _LIBZSTD is None or uncompressed_size <= 0:
+        return compressed_data
+    buf = ctypes.create_string_buffer(uncompressed_size)
+    res = _LIBZSTD.ZSTD_decompress(buf, uncompressed_size, compressed_data, len(compressed_data))
+    if res > uncompressed_size:
+        raise ValueError(f"ZSTD_decompress error code: {res}")
+    return buf.raw[:res]
 
 
 def lz4_block_decompress(compressed_data: bytes, uncompressed_size: int) -> bytes:
@@ -60,6 +88,33 @@ def lz4_block_decompress(compressed_data: bytes, uncompressed_size: int) -> byte
     return bytes(dst)
 
 
+def lz4_frame_or_block_decompress(compressed_data: bytes, uncompressed_size: int) -> bytes:
+    """Decompress either an LZ4 Frame (magic 04 22 4D 18) or raw LZ4 block."""
+    if len(compressed_data) >= 11 and compressed_data[:4] == b"\x04\x22\x4d\x18":
+        flg = compressed_data[4]
+        has_content_size = bool(flg & 0x08)
+        has_dict_id = bool(flg & 0x01)
+        has_block_checksum = bool(flg & 0x10)
+        pos = 6 + (8 if has_content_size else 0) + (4 if has_dict_id else 0) + 1
+        out = bytearray()
+        while pos + 4 <= len(compressed_data) and len(out) < uncompressed_size:
+            blk_hdr = struct.unpack_from("<I", compressed_data, pos)[0]
+            pos += 4
+            if blk_hdr == 0:
+                break
+            is_uncompressed = bool(blk_hdr & 0x80000000)
+            blk_size = blk_hdr & 0x7FFFFFFF
+            blk_data = compressed_data[pos : pos + blk_size]
+            pos += blk_size + (4 if has_block_checksum else 0)
+            if is_uncompressed:
+                out.extend(blk_data)
+            else:
+                remaining = uncompressed_size - len(out)
+                out.extend(lz4_block_decompress(blk_data, remaining))
+        return bytes(out)
+    return lz4_block_decompress(compressed_data, uncompressed_size)
+
+
 def decompress_pak_file_data(
     pak_bytes: bytes, offset: int, disk_size: int, uncomp_size: int, flags: int
 ) -> bytes:
@@ -67,19 +122,24 @@ def decompress_pak_file_data(
     raw = pak_bytes[offset : offset + disk_size]
     method = flags & 0x0F
 
-    if method == 0 or disk_size == uncomp_size:
+    if method == 0 or (disk_size == uncomp_size and raw[:4] != b"\x28\xb5\x2f\xfd"):
         return raw
     elif method == 1:
         return zlib.decompress(raw)
     elif method == 2:
         try:
-            return lz4_block_decompress(raw, uncomp_size)
+            return lz4_frame_or_block_decompress(raw, uncomp_size)
         except Exception:
             if len(raw) > 4:
                 try:
                     return lz4_block_decompress(raw[4:], uncomp_size)
                 except Exception:
                     pass
+            return raw
+    elif method == 3 or raw[:4] == b"\x28\xb5\x2f\xfd":
+        try:
+            return zstd_decompress(raw, uncomp_size)
+        except Exception:
             return raw
     return raw
 

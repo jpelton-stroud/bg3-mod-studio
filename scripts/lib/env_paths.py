@@ -65,9 +65,15 @@ def resolve_mod_dir(
     identifier: str,
     roots: Sequence[Path] = (MY_MODS_DIR, MODS_DIR),
     allow_substring: bool = True,
+    prefer_my_mods: Optional[bool] = None,
 ) -> Optional[Path]:
     """Resolve a mod directory across my_mods/ and mods/ by path, slug, Name, or <ModName>_<UUID>."""
+    if prefer_my_mods is not None:
+        roots = (MY_MODS_DIR, MODS_DIR) if prefer_my_mods else (MODS_DIR, MY_MODS_DIR)
+
     if not identifier or not identifier.strip():
+        if prefer_my_mods is not None:
+            raise FileNotFoundError(f"Mod directory not found: '{identifier}'")
         return None
 
     direct = Path(identifier)
@@ -110,6 +116,8 @@ def resolve_mod_dir(
                 if child.is_dir() and query_norm in normalize_mod_key(child.name):
                     return child.resolve()
 
+    if prefer_my_mods is not None:
+        raise FileNotFoundError(f"Mod directory not found: '{identifier}'")
     return None
 
 

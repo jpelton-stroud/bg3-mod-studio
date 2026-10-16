@@ -25,9 +25,9 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
-MY_MODS_DIR = WORKSPACE_ROOT / "my_mods"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.env_paths import MY_MODS_DIR, REPO_ROOT as WORKSPACE_ROOT, resolve_mod_dir
+from scripts.lib.larian_parsers import HANDLE_PATTERN, has_balanced_parens
 
 # ANSI Colors
 GREEN = "\033[32m"
@@ -47,7 +47,9 @@ class ModValidator:
         self.meta_projects: dict = {}
         self.meta_mods: dict = {}
         self.defined_handles: set[str] = set()
+        self.referenced_handles: set[str] = set()
         self.defined_spells: set[str] = set()
+        self.defined_root_templates: set[str] = set()
 
     def add_error(self, msg: str):
         self.errors.append(msg)
@@ -201,29 +203,107 @@ class ModValidator:
                 except Exception:
                     pass
 
-        # 2. Extract handles referenced in Stats/Generated/Data/*.txt
+        # 2. Extract handles referenced across Stats/*.txt, RootTemplates/*.lsx, and Progressions/*.lsx
         stats_dirs = list(self.mod_dir.glob("Public/*/Stats/Generated/Data"))
-        if not stats_dirs:
-            return
+        for sdir in stats_dirs:
+            for txt_file in sdir.glob("*.txt"):
+                try:
+                    content = txt_file.read_text(encoding="utf-8", errors="replace")
+                    for line in content.splitlines():
+                        line = line.strip()
+                        if not line or line.startswith("//"):
+                            continue
+                        if any(k in line for k in ('data "DisplayName"', 'data "Description"', 'data "ExtraDescription"', 'data "TechnicalDescription"')):
+                            for match in HANDLE_PATTERN.finditer(line):
+                                h = match.group(1)
+                                self.referenced_handles.add(h)
+                                if h not in self.defined_handles:
+                                    self.add_error(
+                                        f"Missing localization handle '{h}' in {txt_file.name} (not found in English XML)."
+                                    )
+                except Exception as e:
+                    self.add_warning(f"Could not read {txt_file.name}: {e}")
 
-        handle_pattern = re.compile(r'(h[0-9a-fA-F]{32}|h[a-zA-Z0-9_]{30,40})(?:;\d+)?')
-
-        for txt_file in stats_dirs[0].glob("*.txt"):
+        # Scan RootTemplates and Progressions LSX files for TranslatedString handles
+        lsx_targets = (
+            list(self.mod_dir.glob("Public/*/RootTemplates/*.lsx"))
+            + list(self.mod_dir.glob("Public/*/Progressions/*.lsx"))
+        )
+        for lsx_file in lsx_targets:
             try:
-                content = txt_file.read_text(encoding="utf-8", errors="replace")
-                for line in content.splitlines():
-                    line = line.strip()
-                    if not line or line.startswith("//"):
-                        continue
-                    if 'data "DisplayName"' in line or 'data "Description"' in line or 'data "ExtraDescription"' in line:
-                        for match in handle_pattern.finditer(line):
-                            h = match.group(1)
-                            if h not in self.defined_handles:
-                                self.add_error(
-                                    f"Missing localization handle '{h}' in {txt_file.name} (not found in English XML)."
-                                )
+                content = lsx_file.read_text(encoding="utf-8", errors="replace")
+                for match in HANDLE_PATTERN.finditer(content):
+                    h = match.group(1)
+                    self.referenced_handles.add(h)
+                    if h not in self.defined_handles:
+                        self.add_error(
+                            f"Missing localization handle '{h}' in {lsx_file.name} (not found in English XML)."
+                        )
             except Exception as e:
-                self.add_warning(f"Could not read {txt_file.name}: {e}")
+                self.add_warning(f"Could not read {lsx_file.name}: {e}")
+
+        # Also collect any handles referenced in Mods/*/meta.lsx or Projects/*/meta.lsx
+        for meta_file in list(self.mod_dir.glob("Mods/*/meta.lsx")) + list(self.mod_dir.glob("Projects/*/meta.lsx")):
+            try:
+                content = meta_file.read_text(encoding="utf-8", errors="replace")
+                for match in HANDLE_PATTERN.finditer(content):
+                    self.referenced_handles.add(match.group(1))
+            except Exception:
+                pass
+
+        # 3. Warn on orphan handles in Localization/English/*.xml
+        orphans = self.defined_handles - self.referenced_handles
+        if orphans:
+            self.add_warning(
+                f"{len(orphans)} orphaned localization handle(s) in English XML not referenced in Stats/LSX "
+                f"(run 'sync_localization.py --mod {self.mod_dir.name} --prune' to clean)."
+            )
+
+    def validate_stats_and_templates(self):
+        # 1. Collect defined RootTemplate MapKey UUIDs in Public/*/RootTemplates/*.lsx
+        for rt_file in self.mod_dir.glob("Public/*/RootTemplates/*.lsx"):
+            try:
+                tree = ET.parse(rt_file)
+                for node in tree.findall(".//node[@id='GameObjects']"):
+                    for attr in node.findall("attribute[@id='MapKey']"):
+                        val = attr.get("value", "").strip()
+                        if val:
+                            self.defined_root_templates.add(val)
+            except Exception:
+                pass
+
+        # 2. Validate RootTemplate references & balanced functor parentheses in Stats/*.txt
+        guid_re = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+        paren_keys = {"Boosts", "DefaultBoosts", "PassivesOnEquip", "SpellProperties", "StatsFunctors", "OnEquipFunctors"}
+        data_re = re.compile(r'^data\s+"([^"]+)"\s+"(.*)"$')
+
+        for sdir in self.mod_dir.glob("Public/*/Stats/Generated/Data"):
+            for txt_file in sdir.glob("*.txt"):
+                try:
+                    lines = txt_file.read_text(encoding="utf-8", errors="replace").splitlines()
+                    for idx, raw_line in enumerate(lines, 1):
+                        line = raw_line.strip()
+                        if not line or line.startswith("//"):
+                            continue
+                        m = data_re.match(line)
+                        if not m:
+                            continue
+                        key, val = m.group(1), m.group(2)
+                        if key in paren_keys and val and not has_balanced_parens(val):
+                            self.add_error(
+                                f"Unbalanced parentheses in {txt_file.name}:{idx} data \"{key}\": '{val}'"
+                            )
+                        if key == "RootTemplate" and val:
+                            if not guid_re.match(val):
+                                self.add_error(
+                                    f"Invalid RootTemplate UUID format in {txt_file.name}:{idx}: '{val}'"
+                                )
+                            elif self.defined_root_templates and val not in self.defined_root_templates:
+                                self.add_warning(
+                                    f"RootTemplate '{val}' in {txt_file.name}:{idx} is not defined in local RootTemplates/*.lsx (ensure it is a valid vanilla template)."
+                                )
+                except Exception:
+                    pass
 
     def validate_spell_references(self):
         # 1. Collect spells defined in Stats/Generated/Data/Spell_*.txt
@@ -294,6 +374,7 @@ class ModValidator:
         self.validate_xml_syntax()
         self.validate_metadata_parity()
         self.validate_localization_handles()
+        self.validate_stats_and_templates()
         self.validate_spell_references()
         self.validate_assets()
 
@@ -336,27 +417,24 @@ def check_uuid_uniqueness(mod_dirs: list[Path]) -> list[str]:
 
 def main():
     parser = argparse.ArgumentParser(description="Deterministic static validator and linter for BG3 mods.")
-    parser.add_argument("--mod", help="Specific mod name or folder in my_mods/ to validate")
+    parser.add_argument("--mod", help="Specific mod name, slug, or directory path to validate")
     parser.add_argument("--all", action="store_true", help="Validate all custom mods in my_mods/")
     parser.add_argument("--strict", action="store_true", help="Treat warnings as errors")
     parser.add_argument("--json", action="store_true", help="Output results in JSON format")
 
     args = parser.parse_args()
 
-    if not MY_MODS_DIR.exists():
-        print(f"Error: {MY_MODS_DIR} does not exist.", file=sys.stderr)
-        sys.exit(1)
-
     targets = []
     if args.mod:
-        norm = args.mod.strip().lower().replace("-", "").replace("_", "")
-        for d in MY_MODS_DIR.iterdir():
-            if d.is_dir() and norm in d.name.lower().replace("-", "").replace("_", ""):
-                targets.append(d)
-        if not targets:
+        try:
+            targets.append(resolve_mod_dir(args.mod, prefer_my_mods=True))
+        except FileNotFoundError:
             print(f"Error: No mod found matching '{args.mod}'.", file=sys.stderr)
             sys.exit(1)
     else:
+        if not MY_MODS_DIR.exists():
+            print(f"Error: {MY_MODS_DIR} does not exist.", file=sys.stderr)
+            sys.exit(1)
         targets = sorted([d for d in MY_MODS_DIR.iterdir() if d.is_dir()])
 
     results = []
