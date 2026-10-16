@@ -3,7 +3,7 @@
 This document details the system architecture, component layering, data pipelines, and engine structural contracts of the **Baldur's Gate 3 Mod Studio & Mod.io Toolkit**.
 
 > [!NOTE]
-> For user guides, autonomous agent slash commands, example prompts, and the CLI flags reference for all 24 studio tools, refer to the [Features & Functionality Guide](docs/FEATURES.md).
+> For user guides, autonomous agent slash commands, example prompts, and the CLI flags reference for all 27 studio tools, refer to the [Features & Functionality Guide](docs/FEATURES.md).
 
 ---
 
@@ -14,16 +14,17 @@ The studio operates across four architectural layers: the **Agent & Orchestratio
 ```mermaid
 flowchart TD
     subgraph Tier1["1. Agent & Orchestration Tier (.agents/skills/)"]
-        Agents["Autonomous Subagent Skills\n(/bg3_create_mod, /bg3_document_mods, etc.)"]
+        Agents["15 Autonomous Subagent Skills\n(/bg3_create_mod, /bg3_diagnose_mod, /bg3_test_mod, etc.)"]
         GrillMe["Clarification Engine\n(/grill-me Interactive Trees)"]
     end
 
     subgraph Tier2["2. Automation & Tooling Tier (scripts/)"]
-        Router["Discovery & Dispatch Hub\n(scripts/tools.py)"]
+        Router["Discovery & Dispatch Hub\n(scripts/tools.py - 27 tools)"]
+        SharedLib["Shared Engine Package\n(scripts/lib/: lspk, parsers, paths, modio)"]
         Scaffold["Scaffolding & Authoring\n(create_mod_scaffold, scaffold_stat, etc.)"]
         Packaging["Binary Packaging & Sync\n(pack_mod_pak, sync_to_game_data)"]
-        Diagnostics["Validation & Linters\n(validate_mod, check_mod_conflicts)"]
-        ModioSuite["Mod.io REST Client\n(modio_search, modio_extract, modio_sync)"]
+        Diagnostics["Validation & Doctor\n(validate_mod, check_mod_conflicts, diagnose_logs)"]
+        ModioSuite["Mod.io REST Client\n(modio_search, modio_extract, modio_update_metadata)"]
         QueryEngine["High-Speed Query Engine\n(query_mod_database)"]
     end
 
@@ -37,11 +38,12 @@ flowchart TD
     subgraph Tier4["4. Engine & Game Boundary"]
         GameData["Larian Game Data Directory\n(Baldurs Gate 3/Data/)"]
         ProfileSettings["Active Player Profile\n(modsettings.lsx)"]
-        ModioRemote["Remote mod.io REST API\n(v1/games/4388)"]
+        ModioRemote["Remote mod.io REST API\n(v1/games/6715)"]
         Distribution["LSPK v18 Package\n(*.pak)"]
     end
 
     Tier1 -->|Routes or executes| Router
+    Router --> SharedLib
     Router --> Scaffold
     Router --> Packaging
     Router --> Diagnostics
@@ -49,11 +51,11 @@ flowchart TD
     Router --> QueryEngine
 
     Scaffold -->|Generates source| MyMods
-    Packaging -->|Mirrors source| GameData
+    Packaging -->|Mirrors source & compiled .loca| GameData
     Packaging -->|Compiles package| Distribution
     Diagnostics -->|Linters & audits| MyMods
-    Diagnostics -->|Inspects load order| ProfileSettings
-    ModioSuite -->|Queries & downloads| ModioRemote
+    Diagnostics -->|Inspects load order & saves| ProfileSettings
+    ModioSuite -->|Queries & updates metadata| ModioRemote
     ModioSuite -->|Extracts & indexes| ModsLib
     QueryEngine -->|Fuzzy search / BiS| ModsLib
     Tier1 -->|Streams matrices| Sandboxes
@@ -63,35 +65,42 @@ flowchart TD
 
 ## 2. Core Workflows & Data Pipelines
 
-### Subagent Mod Authoring Lifecycle
+### 5-Stage Shift-Left & Loopback Lifecycle
 
-The creation and deployment pipeline combines conversational requirement clarification, automated scaffolding, deterministic stat insertion, localization handle allocation, strict validation, and continuous game synchronization.
+Custom mod authoring follows a strict 5-stage pipeline with Progressive Gate Handoffs and loopback diagnostics:
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor User
-    participant Agent as Autonomous Agent (/bg3_create_mod)
-    participant Grill as Interview Engine (/grill-me)
-    participant Tools as Studio Tools (scripts/tools.py)
-    participant FS as Workspace (my_mods/)
-    participant Game as Game Engine (Data/)
-
-    User->>Agent: Request mod creation
-    Agent->>Grill: Clarify mechanics, class, balance constraints
-    Grill->>User: Interactive design tree questions
-    User-->>Grill: Selections and intent
-    Grill-->>Agent: Validated design specification
-
-    Agent->>Tools: run scaffold-mod <Name>
-    Tools->>FS: Scaffold Larian folder hierarchy, UUIDs, meta.lsx, PNG thumbnail
-    Agent->>Tools: run scaffold-stat, scaffold-progression, scaffold-template
-    Tools->>FS: Append stats to Data/*.txt, allocate localization handles in XML
-    Agent->>Tools: run validate --mod <Name>
-    Tools-->>Agent: Validation report (clean XML, resolved UUIDs, no orphaned handles)
-    Agent->>Tools: run sync-game --mod <Name>
-    Tools->>Game: Idempotent differential copy to Baldurs Gate 3/Data/
-    Agent-->>User: Report completed mod & sync status
+flowchart TD
+    S1["Stage 1: Creation (/bg3_create_mod)
+- /grill-me interview & specification plan
+- Scaffolding & parallel subagents (stats, progressions, loca, docs)
+- Read-only smoke check on my_mods/<slug>/"]
+    
+    S2["Stage 2: Diagnostics (/bg3_diagnose_mod)
+- Phase 2A: Static pre-flight & conflict triage on my_mods/
+- Phase 2B: Differential sync to Data/ with compiled binary .loca
+- BG3 Toolkit (Glasses.exe) runtime log triage"]
+    
+    S3["Stage 3: In-Game Testing (/bg3_test_mod)
+- pack_mod_pak --publish-local to %LOCALAPPDATA%/.../Mods/
+- manage_load_order --enable --order --validate
+- inspect_save_game --audit & user in-game verification"]
+    
+    S4["Stage 4: Release Preparation (/bg3_release_prep)
+- bump_mod_version (atomic meta.lsx & README sync)
+- validate_mod --strict & localization prune/compile
+- render_modio_description (GFM HTML table generation)
+- Final Data/ sync & dist/<slug>.pak packaging"]
+    
+    S5["Stage 5: Post-Release (/bg3_post_release)
+- modio_update_metadata (2-stage tag/setting preview + confirmation)
+- Optional: modio_create_collection"]
+    
+    S1 -->|Stage 1 Gate| S2
+    S2 -->|Stage 2 Gate| S3
+    S3 -->|Testing Passed| S4
+    S3 -.->|Issues Found (Loopback)| S2
+    S4 -->|Publish in Toolkit| S5
 ```
 
 ### Community Mod Discovery & Ingestion Pipeline
@@ -100,7 +109,7 @@ When exploring community mods on mod.io, the ingestion pipeline decompresses ups
 
 ```mermaid
 flowchart LR
-    Remote["mod.io REST API\n(v1/games/4388)"] -->|modio_search.py| SearchResults["Candidate Mod\n(Platform Filtered)"]
+    Remote["mod.io REST API\n(v1/games/6715)"] -->|modio_search.py| SearchResults["Candidate Mod\n(Platform Filtered)"]
     SearchResults -->|modio_extract.py| DL["Download Archive\n(.pak / .zip)"]
     DL --> Extract["Pure-Python Unpacker\n(zlib + struct)"]
     Extract --> Parse["Larian Engine Parsers\n(XML & TXT)"]
@@ -196,7 +205,7 @@ The community mod library (`mods/`) indexes over 2,200 unique community gear ite
 
 ## 5. Architectural Principles & Isolation
 
-- **Zero-Dependency Philosophy**: All 24 tools in `scripts/` use strictly the Python 3.10+ standard library. They run out-of-the-box on Linux, WSL, and Windows without virtual environment setups or `pip install` requirements.
+- **Zero-Dependency Philosophy**: All 27 tools in `scripts/` use strictly the Python 3.10+ standard library. They run out-of-the-box on Linux, WSL, and Windows without virtual environment setups or `pip install` requirements.
 - **Safe Sandboxing**:
   - Custom authored mods remain safe in `my_mods/` and tracked by version control.
   - Theorycrafting scratchpads reside in `build_guides/` and are explicitly excluded from Git to prevent repository bloat.

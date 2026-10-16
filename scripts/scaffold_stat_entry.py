@@ -16,6 +16,13 @@ import uuid
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+if __package__:
+    from .lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+    from .lib.larian_parsers import split_larian_items
+else:
+    from lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+    from lib.larian_parsers import split_larian_items
+
 # Mapping of entry types to their file and default schema
 TYPE_CONFIG = {
     "weapon": {
@@ -145,10 +152,8 @@ def resolve_mod_directories(mod_name_or_path: str, workspace_root: Path) -> tupl
     - localization xml file: Localization/English/<ModName>.xml
     - mod name
     """
-    candidate = Path(mod_name_or_path)
-    if not candidate.is_dir():
-        candidate = workspace_root / "my_mods" / mod_name_or_path
-    if not candidate.is_dir():
+    candidate = resolve_mod_dir(mod_name_or_path, prefer_my_mods=True)
+    if candidate is None or not candidate.is_dir():
         raise FileNotFoundError(f"Mod directory not found: '{mod_name_or_path}'")
 
     public_dir = candidate / "Public"
@@ -311,7 +316,7 @@ def parse_props(props_str: str | None) -> dict[str, str]:
     if not props_str:
         return {}
     res = {}
-    for item in props_str.split(","):
+    for item in split_larian_items(props_str, separators=(",",)):
         if "=" in item:
             k, v = item.split("=", 1)
             res[k.strip()] = v.strip()

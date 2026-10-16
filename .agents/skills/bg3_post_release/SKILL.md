@@ -1,11 +1,20 @@
 ---
-name: bg3_update_modio_metadata
-description: Recommends and applies approved metadata and profile-setting updates for a local Baldur's Gate 3 mod already published on mod.io. Triggers on /bg3_update_modio_metadata or requests to update a local mod's mod.io profile metadata.
+name: bg3_post_release
+description: Applies approved metadata, profile tags, and description updates for a local Baldur's Gate 3 mod already published on mod.io (Stage 5 of the mod lifecycle). Triggers on /bg3_post_release, /bg3_update_modio_metadata, or when handed off by bg3_release_prep.
 ---
 
-# Update BG3 mod.io Profile Metadata
+# Post-Release Publishing & Profile Metadata (Stage 5)
 
-Use this skill to update a published mod profile through the mod.io REST API. This does not publish or upload a mod file; publishing BG3 mods remains a Baldur's Gate 3 Toolkit workflow.
+Use this skill as **Stage 5** of the custom mod lifecycle to update a published mod profile through the mod.io REST API. This does not upload a `.pak` file; binary publishing is performed via the official Baldur's Gate 3 Toolkit (`Glasses.exe`).
+
+## Discovery & Tooling
+
+Inspect tool arguments, flags, and schema definitions with:
+
+```bash
+python3 scripts/tools.py --info post-release
+python3 scripts/tools.py --info render-description
+```
 
 ## Required Interaction
 
@@ -18,7 +27,7 @@ Never write to mod.io until both the proposed tag list and the complete set of p
 Accept a mod name or slug that identifies exactly one folder under `my_mods/`, for example:
 
 ```text
-/bg3_update_modio_metadata paladins-call
+/bg3_post_release paladins-call
 ```
 
 Use the local folder name as the CLI `--mod` argument. If there is no exact normalized local folder match, or more than one match, stop and report the issue. Do not guess or use a path outside `my_mods/`.
@@ -35,7 +44,7 @@ Run an initial no-write preview to fetch the game-approved tags, resolve the mat
 python3 scripts/modio_update_metadata.py --mod "<local-folder>" --json
 ```
 
-If `modio_description.html` is missing, the CLI generates it from the local README using `scripts/generate_mod_metadata.py`. If the README, generated description, token, API lookup, or preflight is invalid, report the error and stop without API writes.
+If `modio_description.html` is missing, the CLI generates it from the local README using `scripts/render_modio_description.py`. If the README, generated description, token, API lookup, or preflight is invalid, report the error and stop without API writes.
 
 Use the preview's `allowed_tags` and the README's content to prepare concise, relevant tag suggestions. Suggest only names present in `allowed_tags`. Present the suggestions and let the user add, remove, or edit individual choices; validate the final choices against `allowed_tags`. If the remote profile does not resolve uniquely to the local mod, stop without writes.
 
@@ -85,3 +94,8 @@ https://mod.io/g/baldursgate3/m/<resolved-mod-slug>/admin/settings
 - Never remove existing tags.
 - Never enable commercial use/resale or change mod status.
 - Never publish or upload mod files through this workflow.
+
+## Optional Next Steps
+
+Once profile metadata and tags are confirmed live, you can optionally include the mod in a public or curated collection:
+- Run `/bg3_create_modio_collection` to update or create a public mod.io collection including this mod.

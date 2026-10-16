@@ -16,6 +16,13 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.dom import minidom
 
+if __package__:
+    from .lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+    from .lib.larian_parsers import split_larian_items
+else:
+    from lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+    from lib.larian_parsers import split_larian_items
+
 # Standard Vanilla Class Table UUIDs
 CLASS_TABLE_UUIDS = {
     "barbarian": "60bb7dc1-7143-400e-ae34-7d8da6c8a782",
@@ -30,6 +37,25 @@ CLASS_TABLE_UUIDS = {
     "sorcerer": "e2416b02-953d-422f-beca-90802c6cad3e",
     "warlock": "a7a9b714-d4ee-46de-821b-0e3919e3f446",
     "wizard": "d77e6444-37dc-40c2-90ea-4c54964648a8",
+}
+
+SUBCLASS_TABLE_UUIDS = {
+    "berserker": "b2a9d222-3e38-4f66-81a0-72185c51320b",
+    "wildheart": "32879c22-4858-48e2-9756-a7f7a3873b7d",
+    "lore": "d108c112-8a58-49a4-b11a-95d74d027f75",
+    "valour": "49093221-f83f-4c63-8828-43a77b398217",
+    "swords": "c4598bdb-fc07-40dd-a62c-90cc138bd76f",
+    "battlemaster": "e668c3a1-2e57-46c0-9f56-8f8a41e87951",
+    "eldritchknight": "d6bf0171-6349-4c9a-b73e-387a7728162a",
+    "champion": "b3296827-4a76-4810-9657-68482441b70c",
+    "devotion": "2b86d60e-7646-472b-a214-79d86716885c",
+    "ancients": "4b66c63b-7552-4929-8013-6239619b0b12",
+    "vengeance": "1482c616-e910-4b23-891c-8c563a8b5169",
+    "oathbreaker": "7a82041c-9126-4405-b91e-26606503165b",
+    "fiend": "2f907a95-332b-4718-885b-422a2a75313c",
+    "greatoldone": "e9183948-4138-4605-8822-2c308941328b",
+    "archfey": "71b95758-4116-432b-b039-310722761380",
+    "hexblade": "662b1086-1848-465c-8114-563722456789",
 }
 
 EMPTY_PROGRESSIONS_LSX = """<?xml version="1.0" encoding="UTF-8"?>
@@ -59,10 +85,8 @@ EMPTY_SPELLLISTS_LSX = """<?xml version="1.0" encoding="UTF-8"?>
 
 def resolve_mod_public_dir(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, str]:
     """Finds mod's Public/<ModFolder> directory."""
-    candidate = Path(mod_path_or_slug)
-    if not candidate.is_dir():
-        candidate = workspace_root / "my_mods" / mod_path_or_slug
-    if not candidate.is_dir():
+    candidate = resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
+    if candidate is None or not candidate.is_dir():
         raise FileNotFoundError(f"Mod directory not found: '{mod_path_or_slug}'")
 
     public_dir = candidate / "Public"
@@ -250,8 +274,16 @@ def main():
 
         # Determine TableUUID
         class_key = args.class_name.strip().lower()
+        sub_key = args.subclass.strip().lower().replace(" ", "").replace("-", "").replace("_", "") if args.subclass else ""
         if args.table_uuid:
             table_uuid = args.table_uuid.strip()
+        elif args.subclass:
+            if sub_key in SUBCLASS_TABLE_UUIDS:
+                table_uuid = SUBCLASS_TABLE_UUIDS[sub_key]
+            else:
+                raise ValueError(
+                    f"Unknown subclass '{args.subclass}' for TableUUID lookup. Specify --table-uuid explicitly."
+                )
         elif class_key in CLASS_TABLE_UUIDS:
             table_uuid = CLASS_TABLE_UUIDS[class_key]
         else:
@@ -260,10 +292,10 @@ def main():
         progression_type = 1 if args.subclass else 0
         target_name = args.subclass if args.subclass else args.class_name
 
-        # Parse lists
-        passives_list = [p.strip() for p in args.passives.replace(";", ",").split(",") if p.strip()] if args.passives else []
-        boosts_list = [b.strip() for b in args.boosts.replace(";", ",").split(",") if b.strip()] if args.boosts else []
-        spells_list = [s.strip() for s in args.spells.replace(";", ",").split(",") if s.strip()] if args.spells else []
+        # Parse lists using parenthesis-aware splitter
+        passives_list = split_larian_items(args.passives) if args.passives else []
+        boosts_list = split_larian_items(args.boosts) if args.boosts else []
+        spells_list = split_larian_items(args.spells) if args.spells else []
 
         selectors_list = []
         spell_list_uuid = None

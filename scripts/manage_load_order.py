@@ -24,10 +24,17 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
-MY_MODS_DIR = WORKSPACE_ROOT / "my_mods"
-MODS_DIR = WORKSPACE_ROOT / "mods"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.env_paths import (
+    MODS_DIR,
+    MY_MODS_DIR,
+    REPO_ROOT as WORKSPACE_ROOT,
+    detect_bg3_appdata_dirs,
+    get_env_var,
+    normalize_mod_key,
+)
+from scripts.lib.larian_parsers import find_mod_meta_files
+from scripts.lib.lspk import LspkArchive
 
 # ANSI Colors
 BOLD = "\033[1m"
@@ -47,31 +54,19 @@ GUSTAV_DEV = {
     "Version64": "145100393449790344",
 }
 
+CORE_GUSTAV_NAMES = {"gustavdev", "gustavx", "gustav"}
+
 
 def detect_modsettings_path() -> Path | None:
     """Detect modsettings.lsx path across WSL, native Linux, and Windows."""
-    env_override = os.environ.get("BG3_MODSETTINGS_PATH")
+    env_override = get_env_var("BG3_MODSETTINGS_PATH")
     if env_override:
         p = Path(env_override)
         if p.exists() or p.parent.exists():
             return p
 
-    # WSL detection
-    users_dir = Path("/mnt/c/Users")
-    if users_dir.is_dir():
-        for user_folder in users_dir.iterdir():
-            if user_folder.is_dir() and user_folder.name not in ("All Users", "Default", "Default User", "Public"):
-                target = user_folder / "AppData/Local/Larian Studios/Baldur's Gate 3/PlayerProfiles/Public/modsettings.lsx"
-                if target.exists():
-                    return target
-                # Check if parent directory exists even if file doesn't exist yet
-                if target.parent.is_dir():
-                    return target
-
-    # Native Windows detection
-    local_app_data = os.environ.get("LOCALAPPDATA")
-    if local_app_data:
-        target = Path(local_app_data) / "Larian Studios/Baldur's Gate 3/PlayerProfiles/Public/modsettings.lsx"
+    for appdata in detect_bg3_appdata_dirs():
+        target = appdata / "PlayerProfiles/Public/modsettings.lsx"
         if target.exists() or target.parent.is_dir():
             return target
 
@@ -139,52 +134,78 @@ def parse_modsettings(path: Path) -> dict:
         if "UUID" in m_info:
             mods[m_info["UUID"]] = m_info
 
+    # If ModOrder is empty (modern BG3 Patch 7+ often relies solely on Mods/ModuleShortDesc order),
+    # populate order from Mods node sequence.
+    if not order and mods:
+        order = list(mods.keys())
+
     return {"order": order, "mods": mods}
 
 
+def _extract_meta_from_xml_text(content: str, fallback_name: str) -> dict | None:
+    mod_info = re.search(r'<node\s+id="ModuleInfo">(.*?)</node>', content, re.DOTALL)
+    target = mod_info.group(1) if mod_info else content
+
+    name = re.search(r'<attribute\s+id="Name"\s+type="[^"]*"\s+value="([^"]*)"', target)
+    folder = re.search(r'<attribute\s+id="Folder"\s+type="[^"]*"\s+value="([^"]*)"', target)
+    uuid_val = re.search(r'<attribute\s+id="UUID"\s+type="(?:FixedString|guid|LSString)"\s+value="([^"]*)"', target)
+    v64 = re.search(r'<attribute\s+id="Version64"\s+type="int64"\s+value="(\d+)"', target)
+    md5 = re.search(r'<attribute\s+id="MD5"\s+type="[^"]*"\s+value="([^"]*)"', target)
+    handle = re.search(r'<attribute\s+id="PublishHandle"\s+type="[^"]*"\s+value="([^"]*)"', target)
+
+    if uuid_val:
+        return {
+            "Folder": folder.group(1) if folder else fallback_name,
+            "MD5": md5.group(1) if md5 else "",
+            "Name": name.group(1) if name else fallback_name,
+            "PublishHandle": handle.group(1) if handle else "0",
+            "UUID": uuid_val.group(1),
+            "Version64": v64.group(1) if v64 else "36028797018963968",
+        }
+    return None
+
+
 def get_mod_metadata_from_workspace(mod_name: str) -> dict | None:
-    """Find mod in my_mods/ and extract its metadata for modsettings injection."""
-    if not MY_MODS_DIR.exists():
-        return None
+    """Find mod in my_mods/, mods/, or AppData/.../Mods/*.pak and extract metadata for modsettings injection."""
+    query_norm = normalize_mod_key(mod_name)
 
-    candidates = [d for d in MY_MODS_DIR.iterdir() if d.is_dir()]
-    target_dir = None
-    query_norm = mod_name.strip().lower().replace("-", "").replace("_", "")
-    for d in candidates:
-        if query_norm in d.name.lower().replace("-", "").replace("_", ""):
-            target_dir = d
-            break
+    my_mods_dir = Path(os.environ.get("BG3_MODS_DIR", MY_MODS_DIR))
+    mods_dir = Path(os.environ.get("BG3_LIBRARY_DIR", MODS_DIR))
+    for base_dir in (my_mods_dir, mods_dir):
+        if not base_dir.is_dir():
+            continue
+        for d in sorted(base_dir.iterdir()):
+            if not d.is_dir():
+                continue
+            d_norm = normalize_mod_key(d.name)
+            if query_norm == d_norm or query_norm in d_norm:
+                meta_files = find_mod_meta_files(d)
+                for mf in meta_files:
+                    try:
+                        parsed = _extract_meta_from_xml_text(mf.read_text(encoding="utf-8", errors="ignore"), d.name)
+                        if parsed:
+                            return parsed
+                    except Exception:
+                        pass
 
-    if not target_dir:
-        return None
+    # 2. Search AppData/.../Mods/*.pak
+    for appdata in detect_bg3_appdata_dirs():
+        pak_dir = appdata / "Mods"
+        if not pak_dir.is_dir():
+            continue
+        for pak_file in sorted(pak_dir.glob("*.pak")):
+            if query_norm in normalize_mod_key(pak_file.stem):
+                try:
+                    archive = LspkArchive(pak_file.read_bytes())
+                    for entry in archive.files:
+                        if entry["name"].replace("\\", "/").lower().endswith("meta.lsx"):
+                            xml_txt = archive.extract_file(entry).decode("utf-8", errors="ignore")
+                            parsed = _extract_meta_from_xml_text(xml_txt, pak_file.stem)
+                            if parsed:
+                                return parsed
+                except Exception:
+                    pass
 
-    meta_files = list(target_dir.glob("Mods/*/meta.lsx")) or list(target_dir.glob("Projects/*/meta.lsx"))
-    if not meta_files:
-        return None
-
-    try:
-        content = meta_files[0].read_text(encoding="utf-8")
-        mod_info = re.search(r'<node\s+id="ModuleInfo">(.*?)</node>', content, re.DOTALL)
-        target = mod_info.group(1) if mod_info else content
-
-        name = re.search(r'<attribute\s+id="Name"\s+type="LSString"\s+value="([^"]*)"', target)
-        folder = re.search(r'<attribute\s+id="Folder"\s+type="LSString"\s+value="([^"]*)"', target)
-        uuid_val = re.search(r'<attribute\s+id="UUID"\s+type="FixedString"\s+value="([^"]*)"', target)
-        v64 = re.search(r'<attribute\s+id="Version64"\s+type="int64"\s+value="(\d+)"', target)
-        md5 = re.search(r'<attribute\s+id="MD5"\s+type="LSString"\s+value="([^"]*)"', target)
-        handle = re.search(r'<attribute\s+id="PublishHandle"\s+type="uint64"\s+value="([^"]*)"', target)
-
-        if uuid_val:
-            return {
-                "Folder": folder.group(1) if folder else target_dir.name,
-                "MD5": md5.group(1) if md5 else "",
-                "Name": name.group(1) if name else target_dir.name,
-                "PublishHandle": handle.group(1) if handle else "0",
-                "UUID": uuid_val.group(1),
-                "Version64": v64.group(1) if v64 else "36028797018963968",
-            }
-    except Exception:
-        pass
     return None
 
 
@@ -195,9 +216,16 @@ def backup_file(path: Path) -> Path:
     return backup_path
 
 
-def enable_mod(path: Path, mod_meta: dict, dry_run: bool = False) -> bool:
+def enable_mod(path: Path, mod_meta: dict, order_index: int | None = None, dry_run: bool = False) -> tuple[bool, str]:
+    """
+    Enables or reorders a mod in modsettings.lsx.
+    Returns (changed, action_status) where action_status is 'enabled', 'reordered', or 'already_active'.
+    """
     if not path.is_file():
-        create_default_modsettings(path)
+        if not dry_run:
+            create_default_modsettings(path)
+        else:
+            return True, "enabled"
 
     tree = ET.parse(path)
     root = tree.getroot()
@@ -205,26 +233,50 @@ def enable_mod(path: Path, mod_meta: dict, dry_run: bool = False) -> bool:
     mod_order_children = root.find(".//node[@id='ModOrder']/children")
     mods_children = root.find(".//node[@id='Mods']/children")
 
-    if mod_order_children is None or mods_children is None:
-        raise ValueError("Invalid modsettings.lsx: missing ModOrder or Mods children nodes.")
+    if mods_children is None:
+        raise ValueError("Invalid modsettings.lsx: missing Mods children node.")
+
+    if mod_order_children is None:
+        mod_order_node = root.find(".//node[@id='ModOrder']")
+        if mod_order_node is None:
+            root_children = root.find(".//node[@id='root']/children")
+            mod_order_node = ET.SubElement(root_children, "node", id="ModOrder")
+        mod_order_children = ET.SubElement(mod_order_node, "children")
 
     target_uuid = mod_meta["UUID"]
 
-    # Check if already enabled
+    # Check if already present
+    existing_order_node = None
     for mod_node in mod_order_children.findall("node[@id='Module']"):
         u_attr = mod_node.find("attribute[@id='UUID']")
         if u_attr is not None and u_attr.get("value") == target_uuid:
-            return False  # Already enabled
+            existing_order_node = mod_node
+            break
+
+    existing_desc_node = None
+    for desc_node in mods_children.findall("node[@id='ModuleShortDesc']"):
+        u_attr = desc_node.find("attribute[@id='UUID']")
+        if u_attr is not None and u_attr.get("value") == target_uuid:
+            existing_desc_node = desc_node
+            break
+
+    if existing_desc_node is not None and order_index is None:
+        return False, "already_active"
+
+    action_status = "reordered" if existing_desc_node is not None else "enabled"
 
     if not dry_run:
         backup_file(path)
 
-        # 1. Append to ModOrder
-        new_order_node = ET.SubElement(mod_order_children, "node", id="Module")
+        if existing_order_node is not None:
+            mod_order_children.remove(existing_order_node)
+        if existing_desc_node is not None:
+            mods_children.remove(existing_desc_node)
+
+        new_order_node = ET.Element("node", id="Module")
         ET.SubElement(new_order_node, "attribute", id="UUID", type="FixedString", value=target_uuid)
 
-        # 2. Append to Mods
-        new_desc_node = ET.SubElement(mods_children, "node", id="ModuleShortDesc")
+        new_desc_node = ET.Element("node", id="ModuleShortDesc")
         ET.SubElement(new_desc_node, "attribute", id="Folder", type="LSString", value=mod_meta["Folder"])
         ET.SubElement(new_desc_node, "attribute", id="MD5", type="LSString", value=mod_meta["MD5"])
         ET.SubElement(new_desc_node, "attribute", id="Name", type="LSString", value=mod_meta["Name"])
@@ -232,9 +284,20 @@ def enable_mod(path: Path, mod_meta: dict, dry_run: bool = False) -> bool:
         ET.SubElement(new_desc_node, "attribute", id="UUID", type="guid", value=target_uuid)
         ET.SubElement(new_desc_node, "attribute", id="Version64", type="int64", value=str(mod_meta["Version64"]))
 
+        if order_index is not None:
+            # Never insert at index 0 ahead of GustavDev/GustavX
+            safe_idx = max(1, order_index)
+            order_len = len(mod_order_children.findall("node[@id='Module']"))
+            desc_len = len(mods_children.findall("node[@id='ModuleShortDesc']"))
+            mod_order_children.insert(min(safe_idx, order_len), new_order_node)
+            mods_children.insert(min(safe_idx, desc_len), new_desc_node)
+        else:
+            mod_order_children.append(new_order_node)
+            mods_children.append(new_desc_node)
+
         tree.write(path, encoding="utf-8", xml_declaration=True)
 
-    return True
+    return True, action_status
 
 
 def disable_mod(path: Path, mod_name: str, dry_run: bool = False) -> bool:
@@ -247,37 +310,45 @@ def disable_mod(path: Path, mod_name: str, dry_run: bool = False) -> bool:
     mod_order_children = root.find(".//node[@id='ModOrder']/children")
     mods_children = root.find(".//node[@id='Mods']/children")
 
-    if mod_order_children is None or mods_children is None:
+    if mods_children is None:
         return False
 
-    # Find target UUID by matching name or folder or UUID directly
+    query_norm = normalize_mod_key(mod_name)
     target_uuid = None
+    target_name = ""
     for desc in mods_children.findall("node[@id='ModuleShortDesc']"):
         name_attr = desc.find("attribute[@id='Name']")
+        folder_attr = desc.find("attribute[@id='Folder']")
         uuid_attr = desc.find("attribute[@id='UUID']")
-        if name_attr is not None and uuid_attr is not None:
-            n_val = name_attr.get("value", "")
+        if uuid_attr is not None:
+            n_val = name_attr.get("value", "") if name_attr is not None else ""
+            f_val = folder_attr.get("value", "") if folder_attr is not None else ""
             u_val = uuid_attr.get("value", "")
-            if mod_name.lower() in n_val.lower() or mod_name.lower() == u_val.lower():
+            if (
+                mod_name.lower() in n_val.lower()
+                or query_norm in normalize_mod_key(n_val)
+                or query_norm in normalize_mod_key(f_val)
+                or mod_name.lower() == u_val.lower()
+            ):
                 target_uuid = u_val
+                target_name = n_val or f_val
                 break
 
     if not target_uuid:
         return False
 
-    if target_uuid == GUSTAV_DEV["UUID"]:
-        raise ValueError("Cannot disable core game module GustavDev.")
+    if target_uuid == GUSTAV_DEV["UUID"] or target_name.lower() in CORE_GUSTAV_NAMES:
+        raise ValueError(f"Cannot disable core game module {target_name or 'GustavDev'}.")
 
     if not dry_run:
         backup_file(path)
 
-        # Remove from ModOrder
-        for m_node in list(mod_order_children.findall("node[@id='Module']")):
-            u_attr = m_node.find("attribute[@id='UUID']")
-            if u_attr is not None and u_attr.get("value") == target_uuid:
-                mod_order_children.remove(m_node)
+        if mod_order_children is not None:
+            for m_node in list(mod_order_children.findall("node[@id='Module']")):
+                u_attr = m_node.find("attribute[@id='UUID']")
+                if u_attr is not None and u_attr.get("value") == target_uuid:
+                    mod_order_children.remove(m_node)
 
-        # Remove from Mods
         for desc in list(mods_children.findall("node[@id='ModuleShortDesc']")):
             u_attr = desc.find("attribute[@id='UUID']")
             if u_attr is not None and u_attr.get("value") == target_uuid:
@@ -297,8 +368,13 @@ def validate_load_order(parsed: dict) -> list[str]:
         issues.append("Load order is empty.")
         return issues
 
-    if order[0] != GUSTAV_DEV["UUID"]:
-        issues.append(f"GustavDev must be at load order index 0 (found {order[0]}).")
+    first_uuid = order[0]
+    first_mod = mods.get(first_uuid, {})
+    first_name = (first_mod.get("Name") or first_mod.get("Folder") or "").lower()
+    if first_uuid != GUSTAV_DEV["UUID"] and first_name not in CORE_GUSTAV_NAMES:
+        issues.append(
+            f"Base game module (GustavDev / GustavX) must be at load order index 0 (found '{first_mod.get('Name', first_uuid)}')."
+        )
 
     for u in order:
         if u not in mods:
@@ -308,21 +384,23 @@ def validate_load_order(parsed: dict) -> list[str]:
     ulc_uuid = "a2ffd0e4-c407-8642-2611-c934ea0b0a77"
     if ulc_uuid in order:
         ulc_idx = order.index(ulc_uuid)
-        # Check any custom mods that depend on ULC
         for idx, u in enumerate(order):
-            if idx < ulc_idx and u != GUSTAV_DEV["UUID"]:
-                issues.append(f"Warning: Mod '{mods.get(u, {}).get('Name', u)}' is loaded before UnlockLevelCurve.")
+            mod_entry = mods.get(u, {})
+            m_name = (mod_entry.get("Name") or mod_entry.get("Folder") or "").lower()
+            if idx < ulc_idx and u != GUSTAV_DEV["UUID"] and m_name not in CORE_GUSTAV_NAMES:
+                issues.append(f"Warning: Mod '{mod_entry.get('Name', u)}' is loaded before UnlockLevelCurve.")
 
     return issues
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Inspect, activate, and validate Baldur's Gate 3 modsettings.lsx load order."
+        description="Inspect, activate, reorder, and validate Baldur's Gate 3 modsettings.lsx load order."
     )
     parser.add_argument("--path", help="Explicit path to modsettings.lsx")
     parser.add_argument("--list", action="store_true", help="Display active mod load order")
-    parser.add_argument("--enable", help="Enable a mod by name from my_mods/ in load order")
+    parser.add_argument("--enable", "--activate", dest="enable", help="Enable a mod by name/slug from my_mods/, mods/, or AppData Mods")
+    parser.add_argument("--order", type=int, help="Target load order index (>= 1) when enabling or reordering a mod")
     parser.add_argument("--disable", help="Disable a mod by name/UUID from active load order")
     parser.add_argument("--validate", action="store_true", help="Validate current load order rules")
     parser.add_argument("--create-default", action="store_true", help="Create default modsettings.lsx if missing")
@@ -334,79 +412,135 @@ def main():
     modsettings_path = Path(args.path) if args.path else detect_modsettings_path()
 
     if not modsettings_path:
-        print(f"{RED}Error: Could not locate modsettings.lsx. Specify path with --path.{RESET}", file=sys.stderr)
+        msg = "Could not locate modsettings.lsx. Specify path with --path."
+        if args.json:
+            print(json.dumps({"error": msg, "success": False}, indent=2))
+        else:
+            print(f"{RED}Error: {msg}{RESET}", file=sys.stderr)
         sys.exit(1)
 
     if args.create_default:
-        if modsettings_path.is_file():
-            print(f"modsettings.lsx already exists at: {modsettings_path}")
-        else:
+        created = False
+        if not modsettings_path.is_file():
             create_default_modsettings(modsettings_path)
-            print(f"✓ Created default modsettings.lsx at: {modsettings_path}")
+            created = True
+        if args.json:
+            print(json.dumps({"status": "created" if created else "already_exists", "path": str(modsettings_path)}, indent=2))
+        else:
+            if created:
+                print(f"✓ Created default modsettings.lsx at: {modsettings_path}")
+            else:
+                print(f"modsettings.lsx already exists at: {modsettings_path}")
         sys.exit(0)
 
     if not modsettings_path.is_file() and not args.enable:
-        print(f"{YELLOW}Notice: modsettings.lsx does not exist yet at {modsettings_path}.{RESET}")
-        print("Run with --create-default to initialize, or --enable <Mod> to generate with mod.")
-        sys.exit(0)
-
-    parsed = parse_modsettings(modsettings_path)
-
-    if args.list:
         if args.json:
-            print(json.dumps(parsed, indent=2))
+            print(json.dumps({"status": "missing_modsettings", "path": str(modsettings_path), "order": [], "mods": {}}, indent=2))
         else:
-            print(f"\n{BOLD}{CYAN}=== Active Baldur's Gate 3 Load Order ==={RESET}")
-            print(f"Location: {modsettings_path}\n")
-            print(f"{'Idx':<4} | {'Mod Name':<28} | {'UUID':<38} | {'Version'}")
-            print("-" * 85)
-            for idx, u in enumerate(parsed["order"]):
-                m = parsed["mods"].get(u, {})
-                name = m.get("Name", "Unknown")
-                v64 = m.get("Version64", "-")
-                print(f"{idx:<4} | {name:<28} | {u:<38} | {v64}")
-            print(f"\nTotal active mods: {len(parsed['order'])}\n")
+            print(f"{YELLOW}Notice: modsettings.lsx does not exist yet at {modsettings_path}.{RESET}")
+            print("Run with --create-default to initialize, or --enable <Mod> to generate with mod.")
         sys.exit(0)
+
+    # Default to --list when --json is passed without an explicit action
+    if args.json and not (args.list or args.enable or args.disable or args.validate):
+        args.list = True
+
+    action_result = {}
 
     if args.enable:
         mod_meta = get_mod_metadata_from_workspace(args.enable)
         if not mod_meta:
-            print(f"{RED}Error: Mod '{args.enable}' not found in my_mods/ or missing meta.lsx.{RESET}", file=sys.stderr)
+            msg = f"Mod '{args.enable}' not found in my_mods/, mods/, or AppData Mods."
+            if args.json:
+                print(json.dumps({"error": msg, "success": False}, indent=2))
+            else:
+                print(f"{RED}Error: {msg}{RESET}", file=sys.stderr)
             sys.exit(1)
 
-        success = enable_mod(modsettings_path, mod_meta, dry_run=args.dry_run)
-        if success:
-            action_desc = "[DRY-RUN] Would enable" if args.dry_run else "Successfully enabled"
-            print(f"✓ {action_desc} '{mod_meta['Name']}' ({mod_meta['UUID']}) in load order at {modsettings_path}!")
-        else:
-            print(f"Mod '{mod_meta['Name']}' is already active in load order.")
-        sys.exit(0)
+        changed, status_str = enable_mod(modsettings_path, mod_meta, order_index=args.order, dry_run=args.dry_run)
+        action_result["enable"] = {
+            "mod": mod_meta["Name"],
+            "uuid": mod_meta["UUID"],
+            "changed": changed,
+            "status": status_str,
+            "order_index": args.order,
+            "dry_run": args.dry_run,
+        }
+        if not args.json:
+            if changed:
+                verb = "[DRY-RUN] Would enable/reorder" if args.dry_run else f"Successfully {status_str}"
+                print(f"✓ {verb} '{mod_meta['Name']}' ({mod_meta['UUID']}) in load order at {modsettings_path}!")
+            else:
+                print(f"Mod '{mod_meta['Name']}' is already active in load order.")
 
     if args.disable:
         try:
-            success = disable_mod(modsettings_path, args.disable, dry_run=args.dry_run)
-            if success:
-                action_desc = "[DRY-RUN] Would disable" if args.dry_run else "Successfully disabled"
-                print(f"✓ {action_desc} '{args.disable}' from load order at {modsettings_path}!")
-            else:
-                print(f"Mod '{args.disable}' was not found in active load order.")
+            changed = disable_mod(modsettings_path, args.disable, dry_run=args.dry_run)
+            action_result["disable"] = {
+                "mod": args.disable,
+                "changed": changed,
+                "dry_run": args.dry_run,
+            }
+            if not args.json:
+                if changed:
+                    action_desc = "[DRY-RUN] Would disable" if args.dry_run else "Successfully disabled"
+                    print(f"✓ {action_desc} '{args.disable}' from load order at {modsettings_path}!")
+                else:
+                    print(f"Mod '{args.disable}' was not found in active load order.")
         except Exception as e:
-            print(f"{RED}Error: {e}{RESET}", file=sys.stderr)
+            if args.json:
+                print(json.dumps({"error": str(e), "success": False}, indent=2))
+            else:
+                print(f"{RED}Error: {e}{RESET}", file=sys.stderr)
             sys.exit(1)
-        sys.exit(0)
+
+    parsed = parse_modsettings(modsettings_path)
 
     if args.validate:
         issues = validate_load_order(parsed)
-        if not issues:
-            print(f"{GREEN}✓ Load order is valid ({len(parsed['order'])} mods active).{RESET}")
-            sys.exit(0)
-        else:
-            print(f"{YELLOW}Load order issues detected:{RESET}")
-            for issue in issues:
-                print(f"  • {issue}")
-            sys.exit(1)
+        action_result["validation"] = {
+            "valid": len(issues) == 0,
+            "active_count": len(parsed["order"]),
+            "issues": issues,
+        }
+        if not args.json:
+            if not issues:
+                print(f"{GREEN}✓ Load order is valid ({len(parsed['order'])} mods active).{RESET}")
+            else:
+                print(f"{YELLOW}Load order issues detected:{RESET}")
+                for issue in issues:
+                    print(f"  • {issue}")
 
-    # Default action if no flags
+    if args.list and not args.json:
+        print(f"\n{BOLD}{CYAN}=== Active Baldur's Gate 3 Load Order ==={RESET}")
+        print(f"Location: {modsettings_path}\n")
+        print(f"{'Idx':<4} | {'Mod Name':<28} | {'UUID':<38} | {'Version'}")
+        print("-" * 85)
+        for idx, u in enumerate(parsed["order"]):
+            m = parsed["mods"].get(u, {})
+            name = m.get("Name", "Unknown")
+            v64 = m.get("Version64", "-")
+            print(f"{idx:<4} | {name:<28} | {u:<38} | {v64}")
+        print(f"\nTotal active mods: {len(parsed['order'])}\n")
+
+    if args.json:
+        payload = {
+            "path": str(modsettings_path),
+            "order": parsed["order"],
+            "mods": parsed["mods"],
+            **action_result,
+        }
+        print(json.dumps(payload, indent=2))
+        if args.validate and action_result.get("validation", {}).get("issues"):
+            sys.exit(1)
+        sys.exit(0)
+
+    if args.validate and action_result.get("validation", {}).get("issues"):
+        sys.exit(1)
+
+    if args.list or args.enable or args.disable or args.validate:
+        sys.exit(0)
+
     parser.print_help()
 
 

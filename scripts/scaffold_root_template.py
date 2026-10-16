@@ -107,11 +107,15 @@ EMPTY_ROOT_TEMPLATES_LSX = """<?xml version="1.0" encoding="utf-8"?>
 """
 
 
+if __package__:
+    from .lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+else:
+    from lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+
+
 def resolve_mod_directories(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, Path, str]:
-    candidate = Path(mod_path_or_slug)
-    if not candidate.is_dir():
-        candidate = workspace_root / "my_mods" / mod_path_or_slug
-    if not candidate.is_dir():
+    candidate = resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
+    if candidate is None or not candidate.is_dir():
         raise FileNotFoundError(f"Mod directory not found: '{mod_path_or_slug}'")
 
     public_dir = candidate / "Public"
@@ -123,6 +127,37 @@ def resolve_mod_directories(mod_path_or_slug: str, workspace_root: Path) -> tupl
         raise FileNotFoundError(f"No mod folder found under '{public_dir}'")
 
     return candidate, subdirs[0], candidate.name
+
+
+def link_stat_root_template(mod_dir: Path, stat_name: str, map_key: str, dry_run: bool = False) -> str | None:
+    """Injects or updates data "RootTemplate" "<map_key>" in the item's stat block."""
+    stats_root = mod_dir / "Public"
+    if not stats_root.is_dir():
+        return None
+
+    for txt_file in sorted(stats_root.rglob("*.txt")):
+        try:
+            content = txt_file.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        pattern = rf'(new\s+entry\s+"{re.escape(stat_name)}"\s*\n(?:(?!new\s+entry\s+").*\n?)*)'
+        m = re.search(pattern, content, re.IGNORECASE)
+        if not m:
+            continue
+
+        block = m.group(1)
+        rt_pattern = r'(data\s+"RootTemplate"\s+")([^"]*)(")'
+        if re.search(rt_pattern, block, re.IGNORECASE):
+            new_block = re.sub(rt_pattern, rf'\g<1>{map_key}\g<3>', block, count=1, flags=re.IGNORECASE)
+        else:
+            stripped_block = block.rstrip("\n")
+            new_block = f'{stripped_block}\ndata "RootTemplate" "{map_key}"\n'
+
+        if new_block != block and not dry_run:
+            new_content = content[: m.start(1)] + new_block + content[m.end(1) :]
+            txt_file.write_text(new_content, encoding="utf-8")
+        return str(txt_file)
+    return None
 
 
 def lookup_stat_handles(mod_dir: Path, stat_name: str) -> tuple[str, str]:
@@ -266,6 +301,7 @@ def main():
     parser.add_argument("--display-handle", help="DisplayName handle (e.g. h...;1). Defaults to auto-lookup.")
     parser.add_argument("--description-handle", help="Description handle (e.g. h...;1). Defaults to auto-lookup.")
     parser.add_argument("--icon", help="Icon resource name (e.g. Item_WPN_HUM_Greatsword_A_0).")
+    parser.add_argument("--no-link-stat", action="store_true", help="Do not automatically write data \"RootTemplate\" back into the stat entry.")
     parser.add_argument("--list-presets", action="store_true", help="List available visual presets and exit.")
     parser.add_argument("--dry-run", action="store_true", help="Preview output without modifying files.")
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON.")
@@ -325,6 +361,15 @@ def main():
             dry_run=args.dry_run,
         )
         result["mod"] = mod_slug
+        linked_stat_file = None
+        if not args.no_link_stat:
+            linked_stat_file = link_stat_root_template(
+                mod_dir=mod_dir,
+                stat_name=args.item,
+                map_key=result["map_key"],
+                dry_run=args.dry_run,
+            )
+        result["linked_stat_file"] = linked_stat_file
 
         if args.json:
             print(json.dumps(result, indent=2))

@@ -84,3 +84,34 @@ When planning a mod load order or evaluating custom mods against community creat
   1. Overlapping root template or stat overrides.
   2. Missing prerequisite frameworks (`UnlockLevelCurve`, `CompatibilityFramework`, `CommunityLibrary`).
   3. Console platform compatibility (e.g. verifying no external native DLLs or Script Extender requirements).
+
+---
+
+## 6. Updating Profile Metadata & Tags (`/bg3_post_release`)
+
+Update a published mod's mod.io profile metadata and approved tags via the REST API (game ID `6715`):
+
+```bash
+# Preview allowed tags and remote settings (no API writes)
+python3 scripts/modio_update_metadata.py --mod <mod-slug> --json
+
+# Preview specific tags to add
+python3 scripts/modio_update_metadata.py --mod <mod-slug> --tags "Classes,Spells" --json
+
+# Apply approved updates (writes require explicit --confirm)
+python3 scripts/modio_update_metadata.py --mod <mod-slug> --tags "Classes,Spells" --confirm --json
+```
+
+---
+
+## 7. Curating mod.io Collections (`/bg3_create_modio_collection`)
+
+Create or update public collections on mod.io using the cataloged entries in `mods/library.md`:
+
+```bash
+# Dry run: preview mod selection and additions without API writes
+python3 scripts/modio_create_collection.py --dry-run
+
+# Run collection sync
+python3 scripts/modio_create_collection.py
+```

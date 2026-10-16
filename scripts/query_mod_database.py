@@ -15,6 +15,13 @@ import sys
 import time
 from pathlib import Path
 
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
+from scripts.lib.larian_parsers import parse_loca_bytes
+
 # Files to scan within mod directories
 TARGET_STAT_FILES = {
     "weapon.txt": "Weapon",
@@ -23,6 +30,15 @@ TARGET_STAT_FILES = {
     "passive.txt": "Passive",
     "passives.txt": "Passive",
     "status_boost.txt": "Status_BOOST",
+    "spell_projectile.txt": "Spell",
+    "spell_target.txt": "Spell",
+    "spell_shout.txt": "Spell",
+    "spell_zone.txt": "Spell",
+    "spell_rush.txt": "Spell",
+    "spell_teleportation.txt": "Spell",
+    "spell_throw.txt": "Spell",
+    "spell_wall.txt": "Spell",
+    "spells.txt": "Spell",
 }
 
 HANDLE_REGEX = re.compile(r'(h[0-9a-fA-F]{32}|h[a-zA-Z0-9_]{30,40})(?:;\d+)?')
@@ -63,8 +79,18 @@ def infer_slot(entry_type: str, slot_val: str, using_val: str, entry_name: str) 
 
 
 def load_localization_strings(mod_dir: Path) -> dict[str, str]:
-    """Loads handle-to-string mappings from any XML files in the mod."""
+    """Loads handle-to-string mappings from any XML or binary LOCA files in the mod."""
     strings = {}
+
+    # 1. Parse binary .loca files if present
+    for loca_file in mod_dir.rglob("*.loca"):
+        try:
+            entries = parse_loca_bytes(loca_file.read_bytes())
+            strings.update(entries)
+        except Exception:
+            pass
+
+    # 2. Parse XML localization files
     for xml_file in mod_dir.rglob("*.xml"):
         # Ignore non-localization XMLs
         if "meta.lsx" in xml_file.name.lower() or xml_file.name.endswith(".lsx"):
@@ -100,10 +126,12 @@ def parse_mod_stat_entries(mod_dir: Path, mod_slug: str) -> list[dict]:
     # Find all .txt files
     for txt_path in mod_dir.rglob("*.txt"):
         filename_lower = txt_path.name.lower()
-        if filename_lower not in TARGET_STAT_FILES:
+        if filename_lower in TARGET_STAT_FILES:
+            category = TARGET_STAT_FILES[filename_lower]
+        elif filename_lower.startswith("spell_") and filename_lower.endswith(".txt"):
+            category = "Spell"
+        else:
             continue
-
-        category = TARGET_STAT_FILES[filename_lower]
 
         try:
             content = txt_path.read_text(encoding="utf-8", errors="replace")

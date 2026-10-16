@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 
 from scripts.modio_extract import generate_spec_markdown
-from scripts.library_catalog import parse_library_rows
+from scripts.lib.library_catalog import parse_library_rows
 from scripts.update_library_catalog import (
     generate_library_markdown,
     parse_existing_mod_ids,

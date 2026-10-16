@@ -18,7 +18,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.dom import minidom
 
-HANDLE_PATTERN = re.compile(r'(h[0-9a-fA-F]{32}|h[a-zA-Z0-9_]{30,40})(?:;\d+)?')
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.env_paths import resolve_mod_dir as _resolve_mod_dir
+from scripts.lib.larian_parsers import HANDLE_PATTERN, compile_xml_to_loca
 
 LANGUAGE_DIR_MAP = {
     "de": "German",
@@ -38,15 +40,8 @@ LANGUAGE_DIR_MAP = {
 }
 
 
-def resolve_mod_dir(mod_path_or_slug: str, workspace_root: Path) -> Path:
-    candidate = Path(mod_path_or_slug)
-    if candidate.is_dir():
-        return candidate
-    for parent in ["my_mods", "mods"]:
-        c = workspace_root / parent / mod_path_or_slug
-        if c.is_dir():
-            return c
-    raise FileNotFoundError(f"Mod directory not found: '{mod_path_or_slug}'")
+def resolve_mod_dir(mod_path_or_slug: str, workspace_root: Path | None = None) -> Path:
+    return _resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
 
 
 def collect_referenced_handles(mod_dir: Path) -> dict[str, list[str]]:
@@ -100,14 +95,14 @@ def load_english_xml(mod_dir: Path) -> tuple[Path, dict[str, str], ET.ElementTre
     return target_file, handle_map, tree
 
 
-def prune_orphan_handles(xml_file: Path, orphans: set[str], dry_run: bool = False) -> None:
-    """Removes orphan content tags from the XML file and creates a backup."""
+def prune_orphan_handles(xml_file: Path, orphans: set[str], dry_run: bool = False, backup: bool = False) -> None:
+    """Removes orphan content tags from the XML file (optionally creating a backup)."""
     if not orphans or dry_run:
         return
 
-    # Backup
-    backup_path = xml_file.with_suffix(f".xml.{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.bak")
-    shutil.copy2(xml_file, backup_path)
+    if backup:
+        backup_path = xml_file.with_suffix(f".xml.{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.bak")
+        shutil.copy2(xml_file, backup_path)
 
     tree = ET.parse(xml_file)
     root = tree.getroot()
@@ -134,7 +129,6 @@ def sync_language_skeletons(
     dry_run: bool = False,
 ) -> list[str]:
     """Generates skeleton XMLs for target foreign languages."""
-    tree = ET.parse(source_xml)
     created = []
 
     for lang_code in languages:
@@ -153,13 +147,32 @@ def sync_language_skeletons(
     return created
 
 
+def compile_mod_localization(mod_dir: Path, dry_run: bool = False) -> list[str]:
+    """Compiles all Localization/<Lang>/*.xml files into binary .loca files alongside the XMLs."""
+    compiled = []
+    loc_root = mod_dir / "Localization"
+    if not loc_root.is_dir():
+        return compiled
+
+    for xml_file in sorted(loc_root.rglob("*.xml")):
+        loca_path = xml_file.with_suffix(".loca")
+        if dry_run:
+            compiled.append(f"[dry-run] {loca_path.relative_to(mod_dir)}")
+        else:
+            compile_xml_to_loca(xml_file, loca_path)
+            compiled.append(str(loca_path.relative_to(mod_dir)))
+    return compiled
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Audit, prune orphaned string handles, and sync multi-language localization XMLs."
+        description="Audit, prune orphaned string handles, compile binary .loca files, and sync multi-language localization XMLs."
     )
     parser.add_argument("--mod", required=True, help="Mod name/slug or directory path.")
     parser.add_argument("--check", action="store_true", help="Audit mode (exits with code 1 if missing handles found).")
-    parser.add_argument("--prune", action="store_true", help="Remove orphan handles from English XML (creates .bak backup).")
+    parser.add_argument("--prune", action="store_true", help="Remove orphan handles from English XML.")
+    parser.add_argument("--backup", action="store_true", help="Write a timestamped .bak file before pruning XML.")
+    parser.add_argument("--compile", action="store_true", help="Compile Localization/<Lang>/*.xml files to binary .loca files.")
     parser.add_argument(
         "--sync-languages",
         help="Comma-separated language codes to generate translation skeletons for (e.g. 'de,es,fr,it,ru').",
@@ -183,13 +196,17 @@ def main():
 
         pruned_count = 0
         if args.prune and orphans:
-            prune_orphan_handles(xml_file, orphans, dry_run=args.dry_run)
+            prune_orphan_handles(xml_file, orphans, dry_run=args.dry_run, backup=args.backup)
             pruned_count = len(orphans)
 
         synced_files = []
         if args.sync_languages:
             langs = [l.strip() for l in args.sync_languages.split(",") if l.strip()]
             synced_files = sync_language_skeletons(mod_dir, xml_file, langs, dry_run=args.dry_run)
+
+        compiled_files = []
+        if args.compile:
+            compiled_files = compile_mod_localization(mod_dir, dry_run=args.dry_run)
 
         res = {
             "mod": mod_dir.name,
@@ -202,7 +219,8 @@ def main():
             "missing": sorted(list(missing)),
             "pruned": pruned_count,
             "synced_languages": synced_files,
-            "status": "clean" if (not missing and not orphans) else "issues_detected",
+            "compiled_loca": compiled_files,
+            "status": "clean" if (not missing and (not orphans or args.prune)) else "issues_detected",
         }
 
         if args.json:
@@ -215,7 +233,7 @@ def main():
             print(f"  Orphaned handles in XML:   {len(orphans)}")
             print(f"  Missing handles in XML:    {len(missing)}")
 
-            if orphans:
+            if orphans and not args.prune:
                 print(f"\n  Orphaned Handles ({len(orphans)}):")
                 for h in sorted(list(orphans))[:10]:
                     print(f"    - {h} ('{declared_handles[h]}')")
@@ -238,6 +256,11 @@ def main():
                 print(f"\n[✓] Synchronized language skeletons:")
                 for sf in synced_files:
                     print(f"    - {sf}")
+
+            if compiled_files:
+                print(f"\n[✓] Compiled binary .loca files:")
+                for cf in compiled_files:
+                    print(f"    - {cf}")
 
         if args.check and missing:
             return 1

@@ -121,13 +121,13 @@
       ]
     },
     {
-      "name": "generate_icon_atlas.py",
-      "command": "generate-icons",
+      "name": "scaffold_icon_uvs.py",
+      "command": "scaffold-icon-uvs",
       "category": "authoring",
       "summary": "Calculates UV coordinates and generates GUI/Icons.lsx for custom BG3 icons.",
       "description": "Calculates exact normalized UV coordinates ([U1, V1, U2, V2]) and generates GUI/Icons.lsx texture atlas definitions for custom item and spell icons.",
-      "intents": ["icon atlas", "uv coordinates", "custom icons", "gui icons", "icons.lsx", "texture atlas"],
-      "cli_usage": "python3 scripts/generate_icon_atlas.py --mod <mod> [options]",
+      "intents": ["icon atlas", "uv coordinates", "custom icons", "gui icons", "icons.lsx", "texture atlas", "scaffold icon uvs"],
+      "cli_usage": "python3 scripts/scaffold_icon_uvs.py --mod <mod> [options]",
       "flags": [
         {"name": "--mod", "type": "str", "required": false, "description": "Mod directory name in my_mods/ or path"},
         {"name": "--icons", "type": "str", "required": false, "description": "Comma-separated list of icon names"},
@@ -138,7 +138,7 @@
         {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
       ],
       "examples": [
-        "python3 scripts/generate_icon_atlas.py --icons \"Icon_Staff,Icon_Robe,Icon_Ring\" --sheet-size 1024x1024 --icon-size 64x64 --json"
+        "python3 scripts/scaffold_icon_uvs.py --icons \"Icon_Staff,Icon_Robe,Icon_Ring\" --sheet-size 1024x1024 --icon-size 64x64 --json"
       ]
     },
     {
@@ -321,20 +321,20 @@
       ]
     },
     {
-      "name": "generate_mod_metadata.py",
-      "command": "gen-metadata",
+      "name": "render_modio_description.py",
+      "command": "render-description",
       "category": "management",
-      "summary": "Exports a custom mod README as HTML for publication.",
-      "description": "Reads a mod's root README.md and renders the full document as modio_description.html.",
-      "intents": ["mod metadata", "README HTML export", "HTML description", "toolkit description", "publish description", "mod.io description"],
-      "cli_usage": "python3 scripts/generate_mod_metadata.py --mod <mod> [options]",
+      "summary": "Exports a custom mod README as HTML for publication with GFM table support.",
+      "description": "Reads a mod's root README.md and renders the full document as modio_description.html or stdout HTML.",
+      "intents": ["mod metadata", "README HTML export", "HTML description", "toolkit description", "publish description", "mod.io description", "render description"],
+      "cli_usage": "python3 scripts/render_modio_description.py --mod <mod> [options]",
       "flags": [
         {"name": "--mod", "type": "str", "required": true, "description": "Mod directory name in my_mods/ or path"},
         {"name": "--write", "type": "bool", "required": false, "description": "Write modio_description.html beside README.md"},
         {"name": "--json", "type": "bool", "required": false, "description": "Emit structured output paths as JSON"}
       ],
       "examples": [
-        "python3 scripts/generate_mod_metadata.py --mod arcane-progression --write --json"
+        "python3 scripts/render_modio_description.py --mod paladins-call --write --json"
       ]
     },
     {
@@ -473,19 +473,37 @@
       "name": "modio_extract.py",
       "command": "modio-extract",
       "category": "library",
-      "summary": "Fetches, unpacks, and parses BG3 mods from mod.io.",
+      "summary": "Fetches, unpacks, and parses BG3 mods from mod.io or local .pak archives.",
       "description": "Parses LSPK .pak archives, extracts internal files, generates rich documentation specs, and indexes mod capabilities.",
       "intents": ["extract pak", "unpack mod", "inspect pak", "parse pak", "read pak headers"],
-      "cli_usage": "python3 scripts/modio_extract.py --pak <path> [options]",
+      "cli_usage": "python3 scripts/modio_extract.py [--query <query>] [--pak <path>] [options]",
       "flags": [
+        {"name": "--query", "type": "str", "required": false, "description": "Mod name, slug, URL, or ID on mod.io"},
         {"name": "--pak", "type": "str", "required": false, "description": "Path to local .pak archive"},
-        {"name": "--mod-id", "type": "int", "required": false, "description": "Mod.io ID to download and unpack"},
-        {"name": "--out-dir", "type": "str", "required": false, "description": "Destination directory"},
+        {"name": "--output-dir", "type": "str", "required": false, "description": "Destination directory (default: mods/<slug>/)"},
         {"name": "--write-spec", "type": "bool", "required": false, "description": "Write markdown specification in mods/<slug>/README.md"},
+        {"name": "--update-library", "type": "bool", "required": false, "description": "Update mods/library.md with documented mod"},
         {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
       ],
       "examples": [
-        "python3 scripts/modio_extract.py --pak downloads/sample.pak --out-dir mods/sample/ --json"
+        "python3 scripts/modio_extract.py --pak downloads/sample.pak --output-dir mods/sample/ --json",
+        "python3 scripts/modio_extract.py --query \"Paladin's Call\" --write-spec --update-library --json"
+      ]
+    },
+    {
+      "name": "modio_create_collection.py",
+      "command": "modio-collection",
+      "category": "library",
+      "summary": "Creates or updates a public Baldur's Gate 3 collection on mod.io from mods/library.md.",
+      "description": "Reads documented mods from mods/library.md, prompts or previews changes against mod.io collections, and creates or updates collection items.",
+      "intents": ["mod.io collection", "create collection", "update collection", "publish collection", "community collection"],
+      "cli_usage": "python3 scripts/modio_create_collection.py [options]",
+      "flags": [
+        {"name": "--library", "type": "str", "required": false, "description": "Path to library markdown catalog (default: mods/library.md)"},
+        {"name": "--dry-run", "type": "bool", "required": false, "description": "Preview collection changes without API writes"}
+      ],
+      "examples": [
+        "python3 scripts/modio_create_collection.py --dry-run"
       ]
     },
     {

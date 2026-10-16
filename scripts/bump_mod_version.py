@@ -3,78 +3,66 @@
 bump_mod_version.py
 -------------------
 Inspects and updates semantic version numbers and Larian Version64 integers
-atomically across both `Projects/<UUID>/meta.lsx` and `Mods/<UUID>/meta.lsx`.
+atomically across `Mods/<UUID>/meta.lsx` (and legacy `Projects/<UUID>/meta.lsx`),
+and keeps `my_mods/<slug>/README.md` in sync so documentation and metadata never drift.
 
 Features:
 - Encodes and decodes 64-bit integer versions: (major << 55) | (minor << 47) | (revision << 31) | build
 - Supports semantic increments: --build, --patch, --minor, --major, or explicit --set
-- Atomic double-update: updates both Projects/ and Mods/ meta.lsx in place
-- Clean regex-based replacement preserving exact XML formatting and indentation
+- Atomic update across meta.lsx and README.md
+- Clean regex-based replacement preserving exact XML and Markdown formatting
 """
 
 import argparse
 import json
-import os
 import re
 import sys
 from pathlib import Path
+from typing import List, Tuple
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from scripts.lib.env_paths import MY_MODS_DIR, REPO_ROOT, resolve_mod_dir
+from scripts.lib.larian_parsers import (
+    calculate_version64,
+    decode_version64,
+    format_version_tuple,
+    parse_version_str,
+)
+
+WORKSPACE_ROOT = REPO_ROOT
 
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
-MY_MODS_DIR = WORKSPACE_ROOT / "my_mods"
-
-
-def calculate_version64(major: int = 1, minor: int = 0, revision: int = 0, build: int = 0) -> int:
-    """Encode major.minor.revision.build into Larian Version64 integer."""
-    return (major << 55) | (minor << 47) | (revision << 31) | (build & 0x7FFFFFFF)
-
-
-def decode_version64(v: int) -> tuple[int, int, int, int]:
-    """Decode Larian Version64 integer into (major, minor, revision, build)."""
-    major = (v >> 55) & 0x1FF
-    minor = (v >> 47) & 0xFF
-    revision = (v >> 31) & 0xFFFF
-    build = v & 0x7FFFFFFF
-    return major, minor, revision, build
-
-
-def format_version_tuple(tup: tuple[int, int, int, int]) -> str:
-    return f"{tup[0]}.{tup[1]}.{tup[2]}.{tup[3]}"
-
-
-def parse_version_str(ver_str: str) -> tuple[int, int, int, int]:
-    parts = ver_str.strip().split(".")
-    if len(parts) == 1:
-        return int(parts[0]), 0, 0, 0
-    elif len(parts) == 2:
-        return int(parts[0]), int(parts[1]), 0, 0
-    elif len(parts) == 3:
-        return int(parts[0]), int(parts[1]), int(parts[2]), 0
-    elif len(parts) == 4:
-        return int(parts[0]), int(parts[1]), int(parts[2]), int(parts[3])
-    else:
-        raise ValueError(f"Invalid version string format: '{ver_str}' (expected major.minor.revision.build)")
-
-
-def find_mod_directories(mod_query: str = "") -> list[Path]:
+def find_mod_directories(mod_query: str = "") -> List[Path]:
     """Find mod directories in my_mods matching query or return all."""
+    if not mod_query:
+        if not MY_MODS_DIR.exists():
+            return []
+        return sorted([d for d in MY_MODS_DIR.iterdir() if d.is_dir()])
+
+    try:
+        target = resolve_mod_dir(mod_query)
+        if target.is_dir():
+            return [target]
+    except Exception:
+        pass
+
     if not MY_MODS_DIR.exists():
         return []
 
-    candidates = [d for d in MY_MODS_DIR.iterdir() if d.is_dir()]
-    if not mod_query:
-        return sorted(candidates)
-
     query_norm = mod_query.strip().lower().replace("-", "").replace("_", "")
     matches = []
-    for d in candidates:
-        name_norm = d.name.lower().replace("-", "").replace("_", "")
-        if query_norm in name_norm:
-            matches.append(d)
+    for d in MY_MODS_DIR.iterdir():
+        if d.is_dir():
+            name_norm = d.name.lower().replace("-", "").replace("_", "")
+            if query_norm in name_norm:
+                matches.append(d)
     return sorted(matches)
 
 
-def get_meta_files(mod_dir: Path) -> list[Path]:
+def get_meta_files(mod_dir: Path) -> List[Path]:
     """Find meta.lsx files in Mods/ (and legacy Projects/ with ModuleInfo) to update Version64."""
     files = []
     # Always include runtime module descriptors in Mods/
@@ -95,7 +83,7 @@ def get_meta_files(mod_dir: Path) -> list[Path]:
     return files
 
 
-def read_mod_version(meta_path: Path) -> tuple[int, int, int, int, int]:
+def read_mod_version(meta_path: Path) -> Tuple[int, int, int, int, int]:
     """Extract Version64 integer and decoded tuple from a meta.lsx file."""
     content = meta_path.read_text(encoding="utf-8")
     
@@ -145,6 +133,28 @@ def update_meta_version(meta_path: Path, new_v64: int, dry_run: bool = False) ->
     return True
 
 
+def update_readme_version(mod_dir: Path, new_version_str: str, dry_run: bool = False) -> bool:
+    """Update version line in README.md if present to avoid documentation drift."""
+    readme_path = mod_dir / "README.md"
+    if not readme_path.is_file():
+        return False
+
+    content = readme_path.read_text(encoding="utf-8")
+    pattern = r'(?i)(-\s*\*\*Version:\*\*\s*[`"]?|\*{0,2}Version:?\*{0,2}\s*[:=]?\s*[`"]?)(\d+(?:\.\d+)*)([`"]?)'
+    new_content, count = re.subn(
+        pattern,
+        rf"\g<1>{new_version_str}\g<3>",
+        content,
+        count=1,
+    )
+    if count == 0 or new_content == content:
+        return False
+
+    if not dry_run:
+        readme_path.write_text(new_content, encoding="utf-8")
+    return True
+
+
 def bump_version(
     mod_name: str,
     action: str = "show",
@@ -187,15 +197,23 @@ def bump_version(
     new_v64 = calculate_version64(new_major, new_minor, new_rev, new_bld)
     new_version_str = format_version_tuple((new_major, new_minor, new_rev, new_bld))
 
+    def _rel_path(p: Path, base: Path) -> str:
+        try:
+            return str(p.relative_to(base))
+        except ValueError:
+            return str(p)
+
     updated_files = []
     if action != "show":
         for mf in meta_files:
             if update_meta_version(mf, new_v64, dry_run=dry_run):
-                updated_files.append(str(mf.relative_to(WORKSPACE_ROOT)))
+                updated_files.append(_rel_path(mf, WORKSPACE_ROOT))
+        if update_readme_version(target_mod, new_version_str, dry_run=dry_run):
+            updated_files.append(_rel_path(target_mod / "README.md", WORKSPACE_ROOT))
 
     result = {
         "mod_name": target_mod.name,
-        "mod_dir": str(target_mod.relative_to(WORKSPACE_ROOT)),
+        "mod_dir": _rel_path(target_mod, WORKSPACE_ROOT),
         "action": action,
         "previous_version": old_version_str,
         "previous_version64": raw_val,
@@ -211,7 +229,7 @@ def bump_version(
         if action == "show":
             print(f"Mod '{target_mod.name}' version: {old_version_str} (Version64: {raw_val})")
             for mf in meta_files:
-                print(f"  └ {mf.relative_to(WORKSPACE_ROOT)}")
+                print(f"  └ {_rel_path(mf, WORKSPACE_ROOT)}")
         else:
             action_desc = f"[DRY-RUN] Would update" if dry_run else "Successfully updated"
             print(f"{action_desc} '{target_mod.name}': {old_version_str} -> {new_version_str} (Version64: {new_v64})")
@@ -225,7 +243,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Auto-generate and bump semantic versions and Larian Version64 integers in BG3 mods."
     )
-    parser.add_argument("--mod", required=True, help="Mod name or folder in my_mods/ (e.g. arcane-progression)")
+    parser.add_argument("--mod", required=True, help="Mod name or folder in my_mods/ (e.g. paladins-call)")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--show", action="store_true", help="Display current version without modifying")
     group.add_argument("--build", "-b", action="store_true", help="Increment build number (+1)")

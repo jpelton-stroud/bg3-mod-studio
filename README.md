@@ -36,13 +36,13 @@ For a deep-dive into feature & functionality specifics, as well as example agent
 - **Tactical Combat Sequences**: Script turn-by-turn combat openers and action economy allocations (actions, bonus actions, reactions, spell slots) to maximize tactical output.
 - **Sandboxed Build Guides**: Keep build guides organized and isolated in `build_guides/` without cluttering version control or game directories.
 
-### Custom Mod Authorship
+### Custom Mod Authorship (5-Stage Shift-Left Lifecycle)
 
-- **Autonomous Mod Scaffolding**: Generate engine-compliant Larian packages under `my_mods/<mod_slug>/` with valid UUIDv4 identifiers, bitwise Larian `Version64` calculation, and valid `meta.lsx` descriptors (`/bg3_create_mod`, `scripts/create_mod_scaffold.py`).
-- **Zero-Dependency Asset Generation**: Automatically produce clean 512x512 PNG thumbnails using Python's standard library (`zlib`/`struct`) with no PIL/Pillow dependency required.
-- **Two-Way Live Sync & Hot Reload**: Mirror source mods directly into your game's `Data/` directory with selective idempotency and watcher support for live reload while authoring (`scripts/sync_to_game_data.py`).
-- **Active Load Order Control**: Inspect, activate, deactivate, and reorder mods directly within `modsettings.lsx` without opening external managers (`/bg3_manage_load_order`).
-- **Diagnostics & Toolkit Release Preparation**: Run static validation checks for missing localization or corrupted stat references (`/bg3_diagnose_mod`), then bump versions and prepare release assets for the official Larian Toolkit (`/bg3_release_prep`).
+- **Stage 1 (Creation: `/bg3_create_mod`)**: Autonomous scaffolding under `my_mods/<slug>/`, parallel subagents for stats/progressions/loca/docs, and read-only validation.
+- **Stage 2 (Diagnostics & Toolkit Sync: `/bg3_diagnose_mod`)**: Phase 2A static checks & collision triage on `my_mods/` -> Phase 2B sync to `<Game>/Data/` (with automatic binary `.loca` compilation) & BG3 Toolkit (`Glasses.exe`) log diagnosis.
+- **Stage 3 (In-Game Testing: `/bg3_test_mod`)**: Standalone `.pak` packaging (`--publish-local`), load order activation (`/bg3_manage_load_order`), and save-game compatibility audits (`scripts/inspect_save_game.py`).
+- **Stage 4 (Release Prep: `/bg3_release_prep`)**: Atomic semantic version bump, strict validation, GFM HTML description rendering (`scripts/render_modio_description.py`), and distribution `.pak` packaging.
+- **Stage 5 (Post-Release: `/bg3_post_release`)**: Review allowed tags, preview API mutations, and publish metadata to mod.io via REST API (`scripts/modio_update_metadata.py`).
 
 ---
 
@@ -83,18 +83,22 @@ You can review your configuration anytime with:
 
 ```text
 BaldursGate3/
-├── .agents/skills/            # Autonomous AI agent workflows
+├── .agents/skills/            # Autonomous AI agent workflows (15 specialized skills)
 ├── docs/                      # Technical documentation & guides
 │   ├── ARCHITECTURE.md        # System architecture and design
+│   ├── FEATURES.md            # Features, workflows, and example agent prompts
 │   ├── MOD_CREATION_WORKFLOW.md # Step-by-step mod authoring guide
 │   └── MODIO_INTEGRATION.md   # mod.io API and library reference
 ├── mods/                      # Documented mod specifications
-│   ├── library.md             # Master mod catalog
+│   ├── library.md             # Master mod catalog (6-column categorized table)
 │   └── <mod_slug>/            # Whitelisted mod specifications & data
 ├── my_mods/                   # Custom authored mods
 │   └── <mod_slug>/            # Mod package (Projects, Mods, Public, Localization)
 ├── build_guides/              # Sandbox for Level 20 build crafting (ignored by Git)
-├── scripts/                   # Pure Python automation tools
+├── scripts/                   # Pure Python automation tooling suite (27 CLI tools)
+│   ├── lib/                   # Shared engine parsers, LSPK packager, and mod.io client
+│   ├── tools.py               # Tool discovery and execution hub
+│   └── registry.json          # Machine-readable tools registry
 ├── .env.example               # Environment variables template
 ├── .gitignore                 # Production-grade gitignore with whitelist rules
 ├── setup.sh                   # Setup wizard launcher
@@ -106,45 +110,46 @@ BaldursGate3/
 
 ---
 
-## CLI Reference
+## CLI Reference & Tool Hub
 
-### Mod Creation & Scaffolding
+Explore, query, and run any of the 27 registered automation tools via the centralized discovery hub:
 
 ```bash
-# Scaffold a new mod
-python3 scripts/create_mod_scaffold.py --name "ArcaneProgression" --description "Expanded arcane progression"
+# Discover tools by natural language query
+python3 scripts/tools.py --search "stat handles"
+python3 scripts/tools.py --search "load order"
 
-# Scaffold a mod dependent on UnlockLevelCurve (Levels 13-20)
-python3 scripts/create_mod_scaffold.py --name "EldritchAscension" --unlock-level-curve
+# Inspect tool flags and schemas
+python3 scripts/tools.py --info scaffold-stat
+python3 scripts/tools.py --info pack-pak
+
+# Run any tool directly or through the dispatcher
+python3 scripts/tools.py run query-db --slot Weapon --limit 5 --json
 ```
 
-### Live Syncing to Game Data
+### 5-Stage Custom Mod Lifecycle
 
 ```bash
-# Preview files that would be synced
-python3 scripts/sync_to_game_data.py --dry-run
+# Stage 1: Scaffold and author
+python3 scripts/create_mod_scaffold.py --name "ArcaneProgression" --json
 
-# Perform one-time synchronization
-python3 scripts/sync_to_game_data.py
+# Stage 2: Pre-flight validation & game sync
+python3 scripts/validate_mod.py --mod arcane-progression --json
+python3 scripts/sync_to_game_data.py --mods arcane-progression --json
+python3 scripts/diagnose_toolkit_logs.py --mod arcane-progression --severity warning --json
 
-# Watch mode for automatic synchronization on file save
-python3 scripts/sync_to_game_data.py --watch
-```
+# Stage 3: In-game testing & load order
+python3 scripts/pack_mod_pak.py --mod arcane-progression --publish-local --json
+python3 scripts/manage_load_order.py --enable arcane-progression --validate --json
+python3 scripts/inspect_save_game.py --audit --json
 
-### mod.io Exploration & Extraction
+# Stage 4: Version bump & release prep
+python3 scripts/bump_mod_version.py --mod arcane-progression --patch --json
+python3 scripts/render_modio_description.py --mod arcane-progression --write --json
+python3 scripts/pack_mod_pak.py --mod arcane-progression --out dist/arcane-progression.pak --json
 
-```bash
-# Search for mods on mod.io
-python3 scripts/modio_search.py "paladin"
-
-# Search for console-compatible mods (PS5 or Xbox)
-python3 scripts/modio_search.py "spells" --platform ps5
-
-# Download, extract, and document a mod by ID
-python3 scripts/modio_extract.py --mod-id 4166963 --output-dir mods/unlocklevelcurve
-
-# Synchronize personal subscribed mods
-python3 scripts/modio_sync.py --list
+# Stage 5: Post-release metadata & tags
+python3 scripts/modio_update_metadata.py --mod arcane-progression --tags "Classes,Spells" --json
 ```
 
 ---

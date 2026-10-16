@@ -18,19 +18,20 @@ Features:
 """
 
 import argparse
+import json
 import os
 import re
 import sys
 from pathlib import Path
 
-if __package__:
-    from .library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
-else:
-    from library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
+from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
+from scripts.lib.library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
-MODS_DIR = WORKSPACE_ROOT / "mods"
+WORKSPACE_ROOT = REPO_ROOT
 LIBRARY_FILE = MODS_DIR / "library.md"
 
 CATEGORY_ORDER = [
@@ -249,6 +250,7 @@ def main():
     parser.add_argument("--write", action="store_true", help="Write changes to mods/library.md")
     parser.add_argument("--check", action="store_true", help="Check if mods/library.md is up to date without modifying")
     parser.add_argument("--stdout", action="store_true", help="Output generated catalog to stdout")
+    parser.add_argument("--json", action="store_true", help="Emit catalog status as JSON")
 
     args = parser.parse_args()
 
@@ -268,6 +270,19 @@ def main():
         print(generated_md)
         return
 
+    if args.write:
+        LIBRARY_FILE.write_text(generated_md, encoding="utf-8")
+
+    if args.json:
+        result = {
+            "catalog_file": str(LIBRARY_FILE.relative_to(WORKSPACE_ROOT)),
+            "mod_count": len(mods_data),
+            "up_to_date": is_identical,
+            "written": bool(args.write),
+        }
+        print(json.dumps(result, indent=2))
+        sys.exit(0 if (is_identical or args.write) else 1)
+
     if args.check:
         if is_identical:
             print(f"✓ mods/library.md is fully up to date ({len(mods_data)} mods cataloged).")
@@ -277,7 +292,6 @@ def main():
             sys.exit(1)
 
     if args.write:
-        LIBRARY_FILE.write_text(generated_md, encoding="utf-8")
         print(f"✓ Successfully regenerated {LIBRARY_FILE.relative_to(WORKSPACE_ROOT)} with {len(mods_data)} cataloged mods.")
     else:
         print(f"Scanned {len(mods_data)} mods. Use --write to update mods/library.md or --stdout to inspect.")

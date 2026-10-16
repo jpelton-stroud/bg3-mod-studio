@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-generate_icon_atlas.py - Calculates UV coordinates and generates GUI/Icons.lsx for custom BG3 icons.
+scaffold_icon_uvs.py - Calculates UV coordinates and scaffolds GUI/Icons.lsx for custom BG3 icons.
 
-Computes exact normalized floating-point UV coordinates (U1, V1, U2, V2) on a
-power-of-two texture atlas and emits engine-compliant Larian Icons.lsx.
+Computes normalized floating-point UV coordinates (U1, V1, U2, V2) on a
+power-of-two texture atlas grid and emits engine-compliant Larian Icons.lsx.
 """
 
 import argparse
@@ -16,12 +16,15 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.dom import minidom
 
+if __package__:
+    from .lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+else:
+    from lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+
 
 def resolve_mod_public_dir(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, str]:
-    candidate = Path(mod_path_or_slug)
-    if not candidate.is_dir():
-        candidate = workspace_root / "my_mods" / mod_path_or_slug
-    if not candidate.is_dir():
+    candidate = resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
+    if candidate is None or not candidate.is_dir():
         raise FileNotFoundError(f"Mod directory not found: '{mod_path_or_slug}'")
 
     public_dir = candidate / "Public"

@@ -17,6 +17,7 @@ Features:
 
 import argparse
 import filecmp
+import json
 import os
 import shutil
 import sys
@@ -24,14 +25,18 @@ import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.env_paths import detect_data_dir, get_env_var, normalize_mod_key
+from scripts.lib.larian_parsers import compile_xml_bytes_to_loca
 
-DEFAULT_WSL_DATA_DIR = Path("/mnt/c/Program Files (x86)/Steam/steamapps/common/Baldurs Gate 3/Data")
-DEFAULT_WIN_DATA_DIR = Path(r"C:\Program Files (x86)\Steam\steamapps\common\Baldurs Gate 3\Data")
 
 EXCLUDED_FILENAMES = {
     "README.md",
     "task.md",
+    "modio_description.md",
+    "modio_description.html",
     ".gitignore",
+    ".gitkeep",
     ".DS_Store",
     "Thumbs.db",
 }
@@ -42,31 +47,23 @@ EXCLUDED_EXTENSIONS = {
 }
 
 
-def load_env_defaults() -> dict:
-    """Load key-value pairs from .env if present."""
-    env = {}
-    env_file = Path(__file__).resolve().parent.parent / ".env"
-    if env_file.is_file():
-        try:
-            with open(env_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith("#") and "=" in line:
-                        k, v = line.split("=", 1)
-                        env[k.strip()] = v.strip().strip("'\"")
-        except Exception:
-            pass
-    return env
-
-
 def get_default_data_dir() -> Path:
-    env_vars = load_env_defaults()
-    configured = os.environ.get("BG3_DATA_DIR") or env_vars.get("BG3_DATA_DIR")
-    if configured:
-        return Path(configured)
-    if os.name == "nt":
-        return DEFAULT_WIN_DATA_DIR
-    return DEFAULT_WSL_DATA_DIR
+    return detect_data_dir()
+
+
+def write_bytes_if_different(data: bytes, dst: Path, dry_run: bool = False) -> str:
+    """Writes bytes to dst if dst does not exist or content differs."""
+    if not dst.exists():
+        action = "created"
+    elif dst.read_bytes() != data:
+        action = "updated"
+    else:
+        return "unchanged"
+
+    if not dry_run:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_bytes(data)
+    return action
 
 
 def copy_file_if_different(src: Path, dst: Path, dry_run: bool = False) -> str:
@@ -137,17 +134,19 @@ def check_mod_dependencies(mod_path: Path, data_dir: Path) -> list:
     return missing
 
 
-def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False) -> dict:
+def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False, quiet: bool = False) -> dict:
     """
     Synchronizes a single mod folder into Data/.
     """
-    stats = {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0}
+    stats = {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0, "compiled_loca": 0, "missing_dependencies": []}
     mod_name = mod_path.name
-    print(f"\n📦 Processing mod: {mod_name} ({mod_path})")
+    if not quiet:
+        print(f"\n📦 Processing mod: {mod_name} ({mod_path})")
 
     # Check dependencies before syncing
     missing_deps = check_mod_dependencies(mod_path, data_dir)
-    if missing_deps:
+    stats["missing_dependencies"] = missing_deps
+    if missing_deps and not quiet:
         print(f"  ⚠️  WARNING: Mod '{mod_name}' has unresolved dependencies:")
         for m in missing_deps:
             print(f"      - {m}")
@@ -174,10 +173,12 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False) -> dict:
                 action = copy_file_if_different(src_file, dst_file, dry_run)
                 if action == "created":
                     stats["created"] += 1
-                    print(f"  [+] Create: {dst_file.relative_to(data_dir)}")
+                    if not quiet:
+                        print(f"  [+] Create: {dst_file.relative_to(data_dir)}")
                 elif action == "updated":
                     stats["updated"] += 1
-                    print(f"  [*] Update: {dst_file.relative_to(data_dir)}")
+                    if not quiet:
+                        print(f"  [*] Update: {dst_file.relative_to(data_dir)}")
                 else:
                     stats["unchanged"] += 1
 
@@ -186,7 +187,7 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False) -> dict:
     # Note: NEVER write loose XMLs to Data/Localization/English/ or Data/Mods/.../Localization/
     # because Larian's TranslatedStringRepository::LoadFromXmlFile crashes during module unload
     # with EXCEPTION_ACCESS_VIOLATION (null FileSystem pointer at offset 0x70).
-    # Only compiled binary .loca files should be copied.
+    # Automatically compile .xml files into binary .loca files and copy any pre-existing .loca files.
     src_loc = mod_path / "Localization"
     if src_loc.exists():
         src_mods = mod_path / "Mods"
@@ -196,17 +197,44 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False) -> dict:
                     dst_loc_mod = data_dir / "Mods" / mod_uuid_dir.name / "Localization"
                     for root, dirs, files in os.walk(src_loc):
                         rel_root = Path(root).relative_to(src_loc)
-                        for file in files:
-                            if file.endswith(".loca"):
-                                src_file = Path(root) / file
+                        files_set = set(files)
+                        for file in sorted(files):
+                            src_file = Path(root) / file
+                            if file.endswith(".xml"):
+                                loca_name = Path(file).with_suffix(".loca").name
+                                dst_file = dst_loc_mod / rel_root / loca_name
+                                try:
+                                    loca_bytes = compile_xml_bytes_to_loca(src_file.read_bytes())
+                                    action = write_bytes_if_different(loca_bytes, dst_file, dry_run)
+                                    stats["compiled_loca"] += 1
+                                    if action == "created":
+                                        stats["created"] += 1
+                                        if not quiet:
+                                            print(f"  [+] Compile .loca: {dst_file.relative_to(data_dir)}")
+                                    elif action == "updated":
+                                        stats["updated"] += 1
+                                        if not quiet:
+                                            print(f"  [*] Compile .loca: {dst_file.relative_to(data_dir)}")
+                                    else:
+                                        stats["unchanged"] += 1
+                                except Exception as e:
+                                    if not quiet:
+                                        print(f"  ⚠️ Warning: Failed to compile {src_file.name} to .loca: {e}")
+                            elif file.endswith(".loca"):
+                                # Only copy raw .loca if a matching .xml wasn't just compiled
+                                xml_equivalent = Path(file).with_suffix(".xml").name
+                                if xml_equivalent in files_set:
+                                    continue
                                 dst_file = dst_loc_mod / rel_root / file
                                 action = copy_file_if_different(src_file, dst_file, dry_run)
                                 if action == "created":
                                     stats["created"] += 1
-                                    print(f"  [+] Create (mod-local): {dst_file.relative_to(data_dir)}")
+                                    if not quiet:
+                                        print(f"  [+] Create (mod-local): {dst_file.relative_to(data_dir)}")
                                 elif action == "updated":
                                     stats["updated"] += 1
-                                    print(f"  [*] Update (mod-local): {dst_file.relative_to(data_dir)}")
+                                    if not quiet:
+                                        print(f"  [*] Update (mod-local): {dst_file.relative_to(data_dir)}")
                                 else:
                                     stats["unchanged"] += 1
 
@@ -221,7 +249,8 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False) -> dict:
                     act = copy_file_if_different(root_thumb, dst_thumb, dry_run)
                     if act in ("created", "updated"):
                         stats[act] += 1
-                        print(f"  [{'+' if act == 'created' else '*'}] {act.capitalize()} (fallback): {dst_thumb.relative_to(data_dir)}")
+                        if not quiet:
+                            print(f"  [{'+' if act == 'created' else '*'}] {act.capitalize()} (fallback): {dst_thumb.relative_to(data_dir)}")
                     else:
                         stats["unchanged"] += 1
 
@@ -233,7 +262,8 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False) -> dict:
                     act = copy_file_if_different(root_thumb, dst_logo, dry_run)
                     if act in ("created", "updated"):
                         stats[act] += 1
-                        print(f"  [{'+' if act == 'created' else '*'}] {act.capitalize()} (fallback): {dst_logo.relative_to(data_dir)}")
+                        if not quiet:
+                            print(f"  [{'+' if act == 'created' else '*'}] {act.capitalize()} (fallback): {dst_logo.relative_to(data_dir)}")
                     else:
                         stats["unchanged"] += 1
 
@@ -247,12 +277,13 @@ LEGACY_PATTERNS = [
 ]
 
 
-def clean_legacy(data_dir: Path, dry_run: bool = False) -> int:
+def clean_legacy(data_dir: Path, dry_run: bool = False, quiet: bool = False) -> int:
     """
     Finds and removes legacy mod folders and files from Steam Data/ directory.
     """
     removed_count = 0
-    print("\n🧹 Scanning for legacy mod folders and files in Data/...")
+    if not quiet:
+        print("\n🧹 Scanning for legacy mod folders and files in Data/...")
 
     for subdir_name in ["Projects", "Mods", "Public", "Editor/Mods"]:
         parent = data_dir / subdir_name
@@ -262,13 +293,15 @@ def clean_legacy(data_dir: Path, dry_run: bool = False) -> int:
             if any(pat in item.name for pat in LEGACY_PATTERNS):
                 removed_count += 1
                 if dry_run:
-                    print(f"  [-] Legacy purge (preview): {item.relative_to(data_dir)}")
+                    if not quiet:
+                        print(f"  [-] Legacy purge (preview): {item.relative_to(data_dir)}")
                 else:
                     if item.is_dir():
                         shutil.rmtree(item)
                     else:
                         item.unlink()
-                    print(f"  [-] Legacy purged: {item.relative_to(data_dir)}")
+                    if not quiet:
+                        print(f"  [-] Legacy purged: {item.relative_to(data_dir)}")
 
     # Check Localization/English/
     loc_dir = data_dir / "Localization" / "English"
@@ -277,23 +310,26 @@ def clean_legacy(data_dir: Path, dry_run: bool = False) -> int:
             if any(pat in item.name for pat in LEGACY_PATTERNS):
                 removed_count += 1
                 if dry_run:
-                    print(f"  [-] Legacy purge (preview): {item.relative_to(data_dir)}")
+                    if not quiet:
+                        print(f"  [-] Legacy purge (preview): {item.relative_to(data_dir)}")
                 else:
                     item.unlink()
-                    print(f"  [-] Legacy purged: {item.relative_to(data_dir)}")
+                    if not quiet:
+                        print(f"  [-] Legacy purged: {item.relative_to(data_dir)}")
 
-    if removed_count == 0:
+    if removed_count == 0 and not quiet:
         print("  No legacy mod files found.")
     return removed_count
 
 
-def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list = None) -> int:
+def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list = None, quiet: bool = False) -> int:
     """
     Purges custom studio mods from Data/ without touching eldritch-blast baseline or base game files.
     """
     removed_count = 0
     keep_set = set(keep_mods or [])
-    print("\n🧹 Scanning for custom studio mod folders/files in Data/...")
+    if not quiet:
+        print("\n🧹 Scanning for custom studio mod folders/files in Data/...")
 
     for subdir_name in ["Projects", "Mods", "Public", "Editor/Mods"]:
         parent = data_dir / subdir_name
@@ -307,13 +343,15 @@ def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list = N
                     continue
                 removed_count += 1
                 if dry_run:
-                    print(f"  [-] Custom purge (preview): {item.relative_to(data_dir)}")
+                    if not quiet:
+                        print(f"  [-] Custom purge (preview): {item.relative_to(data_dir)}")
                 else:
                     if item.is_dir():
                         shutil.rmtree(item)
                     else:
                         item.unlink()
-                    print(f"  [-] Custom purged: {item.relative_to(data_dir)}")
+                    if not quiet:
+                        print(f"  [-] Custom purged: {item.relative_to(data_dir)}")
 
     # Check and clean loose XMLs in Data/Localization/English/
     loc_dir = data_dir / "Localization" / "English"
@@ -324,10 +362,12 @@ def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list = N
             if any(item.name.startswith(p) for p in CUSTOM_STUDIO_MODS):
                 removed_count += 1
                 if dry_run:
-                    print(f"  [-] Custom localization purge (preview): {item.relative_to(data_dir)}")
+                    if not quiet:
+                        print(f"  [-] Custom localization purge (preview): {item.relative_to(data_dir)}")
                 else:
                     item.unlink()
-                    print(f"  [-] Custom localization purged: {item.relative_to(data_dir)}")
+                    if not quiet:
+                        print(f"  [-] Custom localization purged: {item.relative_to(data_dir)}")
 
     # Check and clean any loose XMLs in Data/Mods/*/Localization
     mods_dir = data_dir / "Mods"
@@ -339,14 +379,33 @@ def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list = N
                     for xml_file in list(m_loc.rglob("*.xml")):
                         removed_count += 1
                         if dry_run:
-                            print(f"  [-] Loose XML purge (preview): {xml_file.relative_to(data_dir)}")
+                            if not quiet:
+                                print(f"  [-] Loose XML purge (preview): {xml_file.relative_to(data_dir)}")
                         else:
                             xml_file.unlink()
-                            print(f"  [-] Loose XML purged: {xml_file.relative_to(data_dir)}")
+                            if not quiet:
+                                print(f"  [-] Loose XML purged: {xml_file.relative_to(data_dir)}")
 
-    if removed_count == 0:
+    if removed_count == 0 and not quiet:
         print("  No custom studio mod files found to clean.")
     return removed_count
+
+
+def matches_mod_filter(mod_dir: Path, filters: list[str]) -> bool:
+    """Matches mod directory by slug, PascalCase name, or <ModName>_<UUID> folder name."""
+    candidates = {normalize_mod_key(mod_dir.name), mod_dir.name.lower()}
+    mods_sub = mod_dir / "Mods"
+    if mods_sub.is_dir():
+        for child in mods_sub.iterdir():
+            if child.is_dir():
+                candidates.add(child.name.lower())
+                candidates.add(normalize_mod_key(child.name.split("_")[0]))
+    for f in filters:
+        f_low = f.strip().lower()
+        f_norm = normalize_mod_key(f)
+        if f_low in candidates or f_norm in candidates or any(f_norm and f_norm in c for c in candidates):
+            return True
+    return False
 
 
 def run_sync(
@@ -357,36 +416,50 @@ def run_sync(
     clean: bool = False,
     clean_custom: bool = False,
     bump_build: bool = False,
+    json_mode: bool = False,
 ):
     if not source_dir.exists():
-        print(f"❌ Error: Source directory does not exist: {source_dir}", file=sys.stderr)
+        msg = f"Source directory does not exist: {source_dir}"
+        if json_mode:
+            print(json.dumps({"error": msg, "success": False}, indent=2))
+        else:
+            print(f"❌ Error: {msg}", file=sys.stderr)
         sys.exit(1)
 
     if not data_dir.exists():
         if dry_run:
-            print(f"⚠️ Warning: Target Data directory does not exist (dry run): {data_dir}")
+            if not json_mode:
+                print(f"⚠️ Warning: Target Data directory does not exist (dry run): {data_dir}")
         else:
-            print(f"❌ Error: Target Data directory does not exist: {data_dir}", file=sys.stderr)
+            msg = f"Target Data directory does not exist: {data_dir}"
+            if json_mode:
+                print(json.dumps({"error": msg, "success": False}, indent=2))
+            else:
+                print(f"❌ Error: {msg}", file=sys.stderr)
             sys.exit(1)
 
-    print(f"=== BG3 Custom Mod Sync ===")
-    print(f"Source:      {source_dir.resolve()}")
-    print(f"Destination: {data_dir.resolve()}")
-    print(f"Mode:        {'DRY RUN (no files modified)' if dry_run else 'LIVE SYNC'}")
+    if not json_mode:
+        print(f"=== BG3 Custom Mod Sync ===")
+        print(f"Source:      {source_dir.resolve()}")
+        print(f"Destination: {data_dir.resolve()}")
+        print(f"Mode:        {'DRY RUN (no files modified)' if dry_run else 'LIVE SYNC'}")
 
-    if clean:
-        clean_legacy(data_dir, dry_run)
+    if clean and data_dir.exists():
+        clean_legacy(data_dir, dry_run, quiet=json_mode)
 
-    if clean_custom:
-        clean_custom_mods(data_dir, dry_run)
+    if clean_custom and data_dir.exists():
+        clean_custom_mods(data_dir, dry_run, quiet=json_mode)
 
     # Discover mods
     mod_folders = [d for d in source_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
     if mod_filter:
-        mod_folders = [d for d in mod_folders if d.name in mod_filter]
+        mod_folders = [d for d in mod_folders if matches_mod_filter(d, mod_filter)]
 
     if not mod_folders:
-        print("No mod directories found to synchronize.")
+        if json_mode:
+            print(json.dumps({"status": "no_mods_matched", "mods_synced": [], "summary": {}}, indent=2))
+        else:
+            print("No mod directories found to synchronize.")
         return
 
     # Auto-bump build number if requested
@@ -396,21 +469,36 @@ def run_sync(
             for mod_path in sorted(mod_folders):
                 bump_version(mod_path.name, action="build", dry_run=dry_run)
         except Exception as e:
-            print(f"⚠️ Warning: Failed to auto-bump build version: {e}")
+            if not json_mode:
+                print(f"⚠️ Warning: Failed to auto-bump build version: {e}")
 
-    total_stats = {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0}
+    total_stats = {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0, "compiled_loca": 0}
+    per_mod_results = []
     for mod_path in sorted(mod_folders):
-        stats = sync_mod(mod_path, data_dir, dry_run)
-        for k, v in stats.items():
-            total_stats[k] += v
+        stats = sync_mod(mod_path, data_dir, dry_run, quiet=json_mode)
+        for k in total_stats:
+            total_stats[k] += stats.get(k, 0)
+        per_mod_results.append({"mod": mod_path.name, **stats})
 
-    print("\n" + "=" * 40)
-    print("Sync Summary:")
-    print(f"  Files created:   {total_stats['created']}")
-    print(f"  Files updated:   {total_stats['updated']}")
-    print(f"  Files unchanged: {total_stats['unchanged']}")
-    print(f"  Files skipped:   {total_stats['skipped']}")
-    print("=" * 40 + "\n")
+    if json_mode:
+        print(json.dumps({
+            "status": "success",
+            "source_dir": str(source_dir.resolve()),
+            "data_dir": str(data_dir.resolve()),
+            "dry_run": dry_run,
+            "mods_synced": [m["mod"] for m in per_mod_results],
+            "summary": total_stats,
+            "results": per_mod_results,
+        }, indent=2))
+    else:
+        print("\n" + "=" * 40)
+        print("Sync Summary:")
+        print(f"  Files created:   {total_stats['created']}")
+        print(f"  Files updated:   {total_stats['updated']}")
+        print(f"  Files unchanged: {total_stats['unchanged']}")
+        print(f"  Files skipped:   {total_stats['skipped']}")
+        print(f"  Compiled .loca:  {total_stats['compiled_loca']}")
+        print("=" * 40 + "\n")
 
 
 def watch_and_sync(source_dir: Path, data_dir: Path, mod_filter: list = None, interval: float = 2.0, clean: bool = False, clean_custom: bool = False):
@@ -430,8 +518,8 @@ def main():
     parser.add_argument(
         "--source-dir",
         type=Path,
-        default=Path("my_mods"),
-        help="Path to source directory containing mods (default: my_mods)",
+        default=Path(os.environ.get("BG3_MODS_DIR", "my_mods")),
+        help="Path to source directory containing mods (default: my_mods or $BG3_MODS_DIR)",
     )
     parser.add_argument(
         "--data-dir",
@@ -442,7 +530,11 @@ def main():
     parser.add_argument(
         "--mods",
         nargs="+",
-        help="Specific mod names to sync (default: all subdirectories)",
+        help="Specific mod slugs or names to sync (default: all subdirectories)",
+    )
+    parser.add_argument(
+        "--mod",
+        help="Single mod slug or name to sync (alias for --mods)",
     )
     parser.add_argument(
         "--dry-run",
@@ -482,20 +574,29 @@ def main():
         default=2.0,
         help="Watch interval in seconds (default: 2.0)",
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output machine-readable JSON summary",
+    )
 
     args = parser.parse_args()
+    mod_filter = list(args.mods or [])
+    if args.mod:
+        mod_filter.append(args.mod)
 
     if args.watch:
-        watch_and_sync(args.source_dir, args.data_dir, args.mods, args.interval, clean=args.clean_legacy, clean_custom=args.clean_custom)
+        watch_and_sync(args.source_dir, args.data_dir, mod_filter or None, args.interval, clean=args.clean_legacy, clean_custom=args.clean_custom)
     else:
         run_sync(
             args.source_dir,
             args.data_dir,
-            args.mods,
+            mod_filter or None,
             args.dry_run,
             clean=args.clean_legacy,
             clean_custom=args.clean_custom,
             bump_build=args.bump_build,
+            json_mode=args.json,
         )
 
 

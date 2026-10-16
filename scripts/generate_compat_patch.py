@@ -11,31 +11,26 @@ import argparse
 import json
 import os
 import re
+import struct
 import sys
 import uuid
 import xml.etree.ElementTree as ET
+import zlib
 from pathlib import Path
 from xml.dom import minidom
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.env_paths import resolve_mod_dir as _resolve_mod_dir
+from scripts.lib.larian_parsers import find_mod_meta_files, find_mod_progression_files
 
-def resolve_mod_dir(mod_name_or_path: str, workspace_root: Path) -> Path:
-    p = Path(mod_name_or_path)
-    if p.is_dir():
-        return p
-    for parent in ["my_mods", "mods"]:
-        candidate = workspace_root / parent / mod_name_or_path
-        if candidate.is_dir():
-            return candidate
-    raise FileNotFoundError(f"Mod directory not found: '{mod_name_or_path}'")
+
+def resolve_mod_dir(mod_name_or_path: str, workspace_root: Path | None = None) -> Path:
+    return _resolve_mod_dir(mod_name_or_path, prefer_my_mods=True)
 
 
 def extract_mod_meta(mod_dir: Path) -> dict:
-    """Extracts UUID, Name, Folder, and Version64 from meta.lsx."""
-    meta_files = list(mod_dir.glob("Mods/*/meta.lsx")) + list(mod_dir.glob("meta.lsx"))
-    if not meta_files:
-        # Fallback to Projects
-        meta_files = list(mod_dir.glob("Projects/*/meta.lsx"))
-
+    """Extracts UUID, Name, Folder, and Version64 from meta.lsx across my_mods/ and mods/."""
+    meta_files = find_mod_meta_files(mod_dir)
     if not meta_files:
         raise FileNotFoundError(f"No meta.lsx found in {mod_dir}")
 
@@ -60,9 +55,9 @@ def extract_mod_meta(mod_dir: Path) -> dict:
 
 
 def parse_progressions(mod_dir: Path) -> dict[tuple[str, str], ET.Element]:
-    """Parses Progressions.lsx and returns map of (class_name.lower(), level) -> node."""
+    """Parses Progressions.lsx across my_mods/ and mods/data/ and returns map of (class_name.lower(), level) -> node."""
     nodes = {}
-    for p_file in mod_dir.glob("Public/*/Progressions/Progressions.lsx"):
+    for p_file in find_mod_progression_files(mod_dir):
         try:
             tree = ET.parse(p_file)
             for p_node in tree.findall(".//node[@id='Progression']"):
@@ -101,7 +96,7 @@ def merge_progression_attributes(node1: ET.Element, node2: ET.Element) -> dict[s
     return res
 
 
-def build_meta_lsx(patch_name: str, patch_uuid: str, folder_name: str, deps: list[dict]) -> str:
+def build_mods_meta_lsx(patch_name: str, patch_uuid: str, folder_name: str, deps: list[dict]) -> str:
     dep_nodes = []
     for d in deps:
         dep_nodes.append(f"""                        <node id="ModuleShortDesc">
@@ -131,20 +126,77 @@ def build_meta_lsx(patch_name: str, patch_uuid: str, folder_name: str, deps: lis
                     <attribute id="CharacterCreationLevelName" type="FixedString" value=""/>
                     <attribute id="Description" type="LSString" value="Compatibility Patch for {deps[0]['Name']} and {deps[1]['Name']}"/>
                     <attribute id="Folder" type="LSString" value="{folder_name}"/>
-                    <attribute id="Larian" type="bool" value="false"/>
+                    <attribute id="GMTemplate" type="FixedString" value=""/>
+                    <attribute id="LobbyLevelName" type="FixedString" value=""/>
                     <attribute id="MD5" type="LSString" value=""/>
+                    <attribute id="MainMenuBackgroundVideo" type="FixedString" value=""/>
+                    <attribute id="MenuLevelName" type="FixedString" value=""/>
                     <attribute id="Name" type="LSString" value="{patch_name}"/>
                     <attribute id="NumPlayers" type="uint8" value="4"/>
                     <attribute id="PhotoBooth" type="FixedString" value=""/>
+                    <attribute id="PublishHandle" type="uint64" value="0"/>
                     <attribute id="StartupLevelName" type="FixedString" value=""/>
-                    <attribute id="UUID" type="guid" value="{patch_uuid}"/>
+                    <attribute id="UUID" type="FixedString" value="{patch_uuid}"/>
                     <attribute id="Version64" type="int64" value="36028797018963968"/>
+                    <children>
+                        <node id="PublishVersion">
+                            <attribute id="Version64" type="int64" value="36028797018963968"/>
+                        </node>
+                        <node id="Scripts"/>
+                        <node id="TargetModes">
+                            <children>
+                                <node id="Target">
+                                    <attribute id="Object" type="FixedString" value="Story"/>
+                                </node>
+                            </children>
+                        </node>
+                    </children>
                 </node>
             </children>
         </node>
     </region>
 </save>
 """
+
+
+def build_projects_meta_lsx(patch_name: str, patch_uuid: str, project_uuid: str) -> str:
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="8" revision="0" build="500"/>
+    <region id="MetaData">
+        <node id="root">
+            <attribute id="GameProject" type="LSString" value=""/>
+            <attribute id="Module" type="LSString" value="{patch_uuid}"/>
+            <attribute id="Name" type="LSString" value="{patch_name}"/>
+            <attribute id="UUID" type="LSString" value="{project_uuid}"/>
+            <attribute id="UpdatedDependencies" type="bool" value="true"/>
+            <children>
+                <node id="Categories"/>
+            </children>
+        </node>
+    </region>
+</save>
+"""
+
+
+def generate_512_png(r: int = 35, g: int = 25, b: int = 55) -> bytes:
+    width, height = 512, 512
+    raw_row = b"\x00" + bytes([r, g, b, 255]) * width
+    raw_image = raw_row * height
+    compressed = zlib.compress(raw_image, 9)
+
+    def make_chunk(chunk_type: bytes, data: bytes) -> bytes:
+        chunk = chunk_type + data
+        crc = zlib.crc32(chunk) & 0xFFFFFFFF
+        return struct.pack(">I", len(data)) + chunk + struct.pack(">I", crc)
+
+    ihdr = struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0)
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + make_chunk(b"IHDR", ihdr)
+        + make_chunk(b"IDAT", compressed)
+        + make_chunk(b"IEND", b"")
+    )
 
 
 def prettify_xml_element(elem: ET.Element) -> str:
@@ -191,6 +243,7 @@ def main():
         patch_slug = f"{mod1_dir.name}-{mod2_dir.name}-patch".lower()
 
         patch_uuid = str(uuid.uuid4())
+        project_uuid = str(uuid.uuid4())
         folder_name = f"{patch_name}_{patch_uuid}"
         patch_dir = workspace_root / "my_mods" / patch_slug
 
@@ -236,12 +289,29 @@ def main():
             }
 
         if not args.dry_run:
-            # 1. meta.lsx
-            meta_content = build_meta_lsx(patch_name, patch_uuid, folder_name, [meta1, meta2])
-            (patch_dir / "Projects" / folder_name).mkdir(parents=True, exist_ok=True)
-            (patch_dir / "Mods" / folder_name).mkdir(parents=True, exist_ok=True)
-            (patch_dir / "Projects" / folder_name / "meta.lsx").write_text(meta_content, encoding="utf-8")
-            (patch_dir / "Mods" / folder_name / "meta.lsx").write_text(meta_content, encoding="utf-8")
+            # 1. Projects & Mods meta.lsx + PNG assets
+            mods_meta_content = build_mods_meta_lsx(patch_name, patch_uuid, folder_name, [meta1, meta2])
+            proj_meta_content = build_projects_meta_lsx(patch_name, patch_uuid, project_uuid)
+            png_bytes = generate_512_png()
+
+            proj_folder = patch_dir / "Projects" / folder_name
+            mods_folder = patch_dir / "Mods" / folder_name
+            pub_folder = patch_dir / "Public" / folder_name
+            loc_folder = patch_dir / "Localization" / "English"
+
+            proj_folder.mkdir(parents=True, exist_ok=True)
+            mods_folder.mkdir(parents=True, exist_ok=True)
+            pub_folder.mkdir(parents=True, exist_ok=True)
+            loc_folder.mkdir(parents=True, exist_ok=True)
+
+            (proj_folder / "meta.lsx").write_text(proj_meta_content, encoding="utf-8")
+            (mods_folder / "meta.lsx").write_text(mods_meta_content, encoding="utf-8")
+            (proj_folder / "thumbnail.png").write_bytes(png_bytes)
+            (mods_folder / "mod_publish_logo.png").write_bytes(png_bytes)
+            (loc_folder / f"{patch_name}.xml").write_text(
+                '<?xml version="1.0" encoding="utf-8"?>\n<contentList date="15/10/2026 00:00">\n</contentList>\n',
+                encoding="utf-8",
+            )
 
             # 2. Progressions.lsx
             if merged_nodes:
@@ -266,13 +336,13 @@ def main():
                     for k, v in mn["attrs"].items():
                         ET.SubElement(node, "attribute", id=k, type="LSString" if k != "AllowImprovement" else "bool", value=v)
 
-                prog_file = patch_dir / "Public" / folder_name / "Progressions" / "Progressions.lsx"
+                prog_file = pub_folder / "Progressions" / "Progressions.lsx"
                 prog_file.parent.mkdir(parents=True, exist_ok=True)
                 prog_file.write_text(prettify_xml_element(root_tree), encoding="utf-8")
 
             # 3. CF Config if mode == cf
             if cf_config:
-                cf_file = patch_dir / "Public" / folder_name / "CompatibilityFramework" / "Config.json"
+                cf_file = pub_folder / "CompatibilityFramework" / "Config.json"
                 cf_file.parent.mkdir(parents=True, exist_ok=True)
                 cf_file.write_text(json.dumps(cf_config, indent=2), encoding="utf-8")
 

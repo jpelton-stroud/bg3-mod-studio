@@ -8,22 +8,31 @@ import json
 import os
 import re
 import sys
-import urllib.error
-import urllib.parse
-import urllib.request
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
-MY_MODS_DIR = WORKSPACE_ROOT / "my_mods"
-BG3_GAME_ID = 6715
-API_ROOT = f"https://g-{BG3_GAME_ID}.modapi.io/v1"
-USER_AGENT = "BG3ModStudio/1.0"
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from scripts.lib.env_paths import MY_MODS_DIR, REPO_ROOT, normalize_mod_key, resolve_mod_dir
+from scripts.lib.modio_client import (
+    API_ROOT,
+    BG3_GAME_ID,
+    USER_AGENT,
+    ModioClient,
+    ModioError,
+    get_oauth_token,
+)
+from scripts.render_modio_description import render_mod_description
+
+WORKSPACE_ROOT = REPO_ROOT
+normalize_name = normalize_mod_key
 
 COMMUNITY_OPTIONS = {
     "allow_mod_comments": 1,
     "allow_dependency": 1024,
-    "allow_mod_use_in_collections": 8192,
+    "allow_mod_use_in_collections": 131072,
 }
 NONCOMMERCIAL_CREDIT_OPTIONS = {
     "show_credits": 1,
@@ -41,72 +50,17 @@ COMMUNITY_OPTIONS_MASK = sum(COMMUNITY_OPTIONS.values())
 CREDIT_OPTIONS_MASK = sum(NONCOMMERCIAL_CREDIT_OPTIONS.values())
 
 
-class ModioError(RuntimeError):
-    """Raised for an invalid target, preflight failure, or mod.io API error."""
-
-
-class ModioClient:
-    def __init__(self, token: str, opener: Any = urllib.request.urlopen) -> None:
-        self.token = token
-        self.opener = opener
-
-    def request(
-        self,
-        method: str,
-        path: str,
-        params: Optional[Dict[str, Any]] = None,
-        fields: Optional[Sequence[Tuple[str, str]]] = None,
-    ) -> Dict[str, Any]:
-        url = f"{API_ROOT}{path}"
-        if params:
-            url = f"{url}?{urllib.parse.urlencode(params)}"
-        auth_header = "Auth" + "orization"
-        headers = {
-            "Accept": "application/json",
-            "User-Agent": USER_AGENT,
-        }
-        headers[auth_header] = f"Bearer {self.token}"
-        body = None
-        if fields is not None:
-            headers["Content-Type"] = "application/x-www-form-urlencoded"
-            body = urllib.parse.urlencode(fields).encode("utf-8")
-        request = urllib.request.Request(url, data=body, headers=headers, method=method)
-
-        try:
-            with self.opener(request, timeout=30) as response:
-                response_body = response.read()
-        except urllib.error.HTTPError as error:
-            detail = error.read().decode("utf-8", errors="replace").strip()
-            if self.token:
-                detail = detail.replace(self.token, "[REDACTED]")
-            raise ModioError(
-                f"mod.io API returned HTTP {error.code} {error.reason}"
-                + (f": {detail}" if detail else "")
-            ) from None
-        except urllib.error.URLError as error:
-            raise ModioError(f"Could not connect to mod.io: {error.reason}") from None
-        except OSError as error:
-            raise ModioError(f"Could not complete the mod.io request: {error}") from None
-
-        if not response_body:
-            return {}
-        try:
-            payload = json.loads(response_body.decode("utf-8"))
-        except (UnicodeDecodeError, json.JSONDecodeError):
-            raise ModioError("mod.io returned an invalid JSON response.") from None
-        if not isinstance(payload, dict):
-            raise ModioError("mod.io returned an unexpected response shape.")
-        return payload
-
-
-def normalize_name(value: str) -> str:
-    return re.sub(r"[^a-z0-9]", "", value.casefold())
-
-
 def resolve_local_mod(query: str, mods_dir: Path = MY_MODS_DIR) -> Path:
     query_key = normalize_name(query.strip())
     if not query_key:
         raise ModioError("Provide a mod name or slug from my_mods/.")
+    try:
+        target = resolve_mod_dir(query)
+        if target.is_dir():
+            return target
+    except Exception:
+        pass
+
     if not mods_dir.is_dir():
         raise ModioError(f"Mod directory does not exist: {mods_dir}")
     matches = [
@@ -136,13 +90,8 @@ def ensure_description_file(mod_dir: Path) -> Path:
         if not readme_file.is_file():
             raise ModioError(f"Cannot generate description; README is missing: {readme_file}")
         try:
-            if __package__:
-                from scripts.generate_mod_metadata import process_mod_metadata
-            else:
-                from generate_mod_metadata import process_mod_metadata
-
             with contextlib.redirect_stdout(io.StringIO()):
-                process_mod_metadata(str(mod_dir), write_file=True, as_json=True)
+                render_mod_description(str(mod_dir), write_file=True, as_json=True)
         except (OSError, ValueError) as error:
             raise ModioError(f"Could not generate mod.io description: {error}") from None
     if not description_file.is_file():
@@ -160,76 +109,104 @@ def _as_items(payload: Dict[str, Any], label: str) -> List[Dict[str, Any]]:
 
 
 def find_remote_mod(client: ModioClient, mod_dir: Path, title: Optional[str]) -> Dict[str, Any]:
-    slug_key = normalize_name(mod_dir.name)
-    title_key = normalize_name(title or "")
-    queries = [{"name_id": mod_dir.name}, {"_q": mod_dir.name}]
+    slug = mod_dir.name
+    # 1. Search authenticated user mods first (includes drafts and hidden mods)
+    try:
+        user_mods_payload = client.request(
+            "GET", "/me/mods", params={"game_id": BG3_GAME_ID, "name_id": slug}
+        )
+        for mod in _as_items(user_mods_payload, "user mods"):
+            if mod.get("name_id") == slug:
+                return mod
+    except ModioError:
+        pass
+
     if title:
-        queries.append({"_q": title})
-    found: Dict[int, Dict[str, Any]] = {}
-    for params in queries:
-        payload = client.request("GET", f"/games/{BG3_GAME_ID}/mods", params=params)
-        for mod in _as_items(payload, "mod search"):
-            mod_id = mod.get("id")
-            name_id_key = normalize_name(str(mod.get("name_id", "")))
-            name_key = normalize_name(str(mod.get("name", "")))
-            if isinstance(mod_id, int) and (
-                name_id_key == slug_key or (title_key and name_key == title_key)
-            ):
-                found[mod_id] = mod
-    if not found:
-        raise ModioError(
-            f"No unique mod.io profile matches local mod '{mod_dir.name}'."
+        try:
+            user_mods_title = client.request(
+                "GET", "/me/mods", params={"game_id": BG3_GAME_ID, "_q": title}
+            )
+            for mod in _as_items(user_mods_title, "user mods"):
+                if mod.get("name_id") == slug or (title and mod.get("name") == title):
+                    return mod
+        except ModioError:
+            pass
+
+    # 2. Check public game mods catalog
+    try:
+        catalog_payload = client.request(
+            "GET", f"/games/{BG3_GAME_ID}/mods", params={"name_id": slug}
         )
-    if len(found) != 1:
-        raise ModioError(
-            f"Multiple mod.io profiles match local mod '{mod_dir.name}'; stopping without changes."
-        )
-    return next(iter(found.values()))
+        for mod in _as_items(catalog_payload, "catalog mods"):
+            if mod.get("name_id") == slug:
+                return mod
+    except ModioError:
+        pass
+
+    if title:
+        try:
+            catalog_title = client.request(
+                "GET", f"/games/{BG3_GAME_ID}/mods", params={"name": title}
+            )
+            for mod in _as_items(catalog_title, "catalog mods"):
+                if mod.get("name") == title or mod.get("name_id") == slug:
+                    return mod
+        except ModioError:
+            pass
+
+    raise ModioError(f"No unique mod.io profile matches local mod '{mod_dir.name}'.")
 
 
-def _tag_name(tag: Dict[str, Any]) -> Optional[str]:
-    name = tag.get("name")
-    if isinstance(name, str) and name.strip():
-        return name.strip()
-    return None
+def extract_allowed_tag_map(game_tags: Iterable[Dict[str, Any]]) -> Dict[str, str]:
+    allowed: Dict[str, str] = {}
+    for item in game_tags:
+        for t in item.get("tags", []):
+            if isinstance(t, str) and t.strip():
+                allowed[normalize_name(t.strip())] = t.strip()
+        name = item.get("name")
+        if isinstance(name, str) and name.strip() and not item.get("tags"):
+            allowed.setdefault(normalize_name(name.strip()), name.strip())
+        tag_val = item.get("tag")
+        if isinstance(tag_val, str) and tag_val.strip():
+            allowed.setdefault(normalize_name(tag_val.strip()), tag_val.strip())
+    return allowed
 
 
 def validate_selected_tags(
     selected: Iterable[str], allowed_tags: Iterable[Dict[str, Any]]
 ) -> List[str]:
-    allowed: Dict[str, str] = {}
-    for tag in allowed_tags:
-        name = _tag_name(tag)
-        if name:
-            allowed[normalize_name(name)] = name
-
+    allowed = extract_allowed_tag_map(allowed_tags)
     canonical: List[str] = []
     seen = set()
     invalid: List[str] = []
-    for raw in selected:
-        name = raw.strip()
-        if not name:
+    for tag in selected:
+        tag_str = tag.strip()
+        if not tag_str:
             continue
-        key = normalize_name(name)
-        if key not in allowed:
-            invalid.append(name)
-        elif key not in seen:
-            canonical.append(allowed[key])
-            seen.add(key)
+        key = normalize_name(tag_str)
+        if key in allowed:
+            canonical_name = allowed[key]
+            if canonical_name not in seen:
+                seen.add(canonical_name)
+                canonical.append(canonical_name)
+        else:
+            invalid.append(tag_str)
     if invalid:
+        allowed_list = sorted(set(allowed.values()), key=str.casefold)
         raise ModioError(
-            "These selected tags are not allowed for Baldur's Gate 3: "
-            + ", ".join(invalid)
+            f"Invalid tags requested: {', '.join(invalid)}. Allowed: {', '.join(allowed_list)}"
         )
     return canonical
 
 
-def _mod_tag_names(tags: Iterable[Dict[str, Any]]) -> set:
-    return {
-        normalize_name(name)
-        for tag in tags
-        if (name := _tag_name(tag)) is not None
-    }
+def current_tags_for_mod(mod: Dict[str, Any]) -> List[str]:
+    tags: List[str] = []
+    for entry in mod.get("tags", []):
+        if isinstance(entry, dict) and isinstance(entry.get("name"), str):
+            tags.append(entry["name"])
+        elif isinstance(entry, str):
+            tags.append(entry)
+    return tags
 
 
 def prepare_update(
@@ -238,96 +215,86 @@ def prepare_update(
     client: ModioClient,
     mods_dir: Path = MY_MODS_DIR,
 ) -> Dict[str, Any]:
-    mod_dir = resolve_local_mod(mod_query, mods_dir)
-    readme = mod_dir / "README.md"
-    if not readme.is_file():
-        raise ModioError(f"Mod README is missing: {readme}")
+    mod_dir = resolve_local_mod(mod_query, mods_dir=mods_dir)
+    readme_file = mod_dir / "README.md"
+    readme_title = read_readme_title(readme_file) if readme_file.is_file() else None
     description_file = ensure_description_file(mod_dir)
-    description = description_file.read_text(encoding="utf-8")
-    title = read_readme_title(readme)
-
-    remote = find_remote_mod(client, mod_dir, title)
+    remote = find_remote_mod(client, mod_dir, readme_title)
     mod_id = remote.get("id")
     if not isinstance(mod_id, int):
-        raise ModioError("The matching mod.io profile did not include a valid mod ID.")
-    current_profile = client.request(
-        "GET", f"/games/{BG3_GAME_ID}/mods/{mod_id}"
-    )
-    if current_profile.get("id") != mod_id:
-        raise ModioError("The mod.io profile lookup returned a mismatched profile.")
-    current_community_options = current_profile.get("community_options")
-    if not isinstance(current_community_options, int):
-        raise ModioError("The mod.io profile did not include community_options.")
-    updated_community_options = current_community_options | COMMUNITY_OPTIONS_MASK
+        raise ModioError(f"Matched mod profile for '{mod_dir.name}' is missing an ID.")
 
     game_tags = _as_items(
         client.request("GET", f"/games/{BG3_GAME_ID}/tags"), "game tags"
     )
     allowed_tag_names = sorted(
-        {name for tag in game_tags if (name := _tag_name(tag)) is not None},
+        extract_allowed_tag_map(game_tags).values(),
         key=str.casefold,
     )
     selected = validate_selected_tags(selected_tags, game_tags)
-    current_tags = _as_items(
-        client.request(
-            "GET", f"/games/{BG3_GAME_ID}/mods/{mod_id}/tags"
-        ),
-        "mod tags",
-    )
-    current_tag_keys = _mod_tag_names(current_tags)
-    existing_tag_names = sorted(
-        {name for tag in current_tags if (name := _tag_name(tag)) is not None},
-        key=str.casefold,
-    )
+    current_tags = current_tags_for_mod(remote)
+    current_tag_keys = {normalize_name(tag) for tag in current_tags}
     tags_to_add = [
         tag for tag in selected if normalize_name(tag) not in current_tag_keys
     ]
+    target_slug = mod_dir.name
+    current_slug = remote.get("name_id")
+    slug_to_update = target_slug if current_slug != target_slug else None
     return {
         "mod": {
             "id": mod_id,
             "name": remote.get("name"),
-            "slug": remote.get("name_id"),
+            "slug": current_slug,
+            "target_slug": target_slug,
+            "slug_to_update": slug_to_update,
             "profile_url": remote.get("profile_url"),
             "admin_settings_url": (
-                f"https://mod.io/g/baldursgate3/m/{remote.get('name_id')}/admin/settings"
+                f"https://mod.io/g/baldursgate3/m/{target_slug or current_slug}/admin/settings"
             ),
         },
         "local_mod_dir": str(mod_dir),
         "description_file": str(description_file),
-        "description_characters": len(description),
-        "allowed_tags": allowed_tag_names,
-        "selected_tags": selected,
         "tags_to_add": tags_to_add,
-        "existing_tags": existing_tag_names,
-        "current_community_options": current_community_options,
-        "community_options": updated_community_options,
-        "community_option_flags": list(COMMUNITY_OPTIONS),
-        "credit_options": CREDIT_OPTIONS_MASK,
-        "credit_option_flags": list(NONCOMMERCIAL_CREDIT_OPTIONS),
-        "commercial_use_enabled": False,
+        "current_tags": current_tags,
+        "allowed_tags": allowed_tag_names,
+        "community_options": COMMUNITY_OPTIONS_MASK,
+        "maturity_option": 0,
+        "noncommercial_credit_options": CREDIT_OPTIONS_MASK,
         "visible": 1,
-        "status_changed": False,
     }
 
 
 def apply_update(client: ModioClient, plan: Dict[str, Any], description: str) -> Dict[str, Any]:
     mod_id = plan["mod"]["id"]
-    operations: Dict[str, Dict[str, Any]] = {}
+    operations: Dict[str, Any] = {}
     fields = [
         ("description", description),
         ("community_options", str(plan["community_options"])),
-        ("credit_options", str(plan["credit_options"])),
+        ("maturity_option", str(plan["maturity_option"])),
+        ("credit_options", str(plan["noncommercial_credit_options"])),
         ("visible", str(plan["visible"])),
     ]
     try:
-        client.request(
-            "POST", f"/games/{BG3_GAME_ID}/mods/{mod_id}", fields=fields
+        response = client.request(
+            "POST",
+            f"/games/{BG3_GAME_ID}/mods/{mod_id}",
+            fields=fields,
+            multipart=True,
         )
         operations["profile_update"] = {"status": "success"}
+        if isinstance(response, dict) and response.get("name_id"):
+            plan["mod"]["slug"] = response["name_id"]
+            plan["mod"]["profile_url"] = response.get(
+                "profile_url",
+                f"https://mod.io/g/baldursgate3/m/{response['name_id']}",
+            )
+            plan["mod"]["admin_settings_url"] = (
+                f"https://mod.io/g/baldursgate3/m/{response['name_id']}/admin/settings"
+            )
     except ModioError as error:
         operations["profile_update"] = {"status": "failed", "error": str(error)}
 
-    tags = plan["tags_to_add"]
+    tags = plan.get("tags_to_add", [])
     if tags:
         tag_fields = [("tags[]", tag) for tag in tags]
         try:
@@ -387,9 +354,9 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="Emit structured JSON")
     args = parser.parse_args()
 
-    token = os.environ.get("MODIO_PAT", "").strip()
+    token = get_oauth_token()
     if not token:
-        parser.error("MODIO_PAT environment variable is required; token is never accepted as an argument.")
+        parser.error("MODIO_PAT environment variable or .env entry is required; token is never accepted as an argument.")
 
     client = ModioClient(token)
     try:
