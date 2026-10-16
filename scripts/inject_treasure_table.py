@@ -56,12 +56,16 @@ CONTAINER_ALIASES = {
 STANDARD_HEADER = 'treasure itemtypes "Common","Uncommon","Rare","Epic","Legendary","Divine","Unique"\n'
 
 
+if __package__:
+    from .lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+else:
+    from lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+
+
 def resolve_mod_stats_dir(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, str]:
     """Resolves target mod and its Public/<ModFolder>/Stats/Generated/Data directory."""
-    candidate = Path(mod_path_or_slug)
-    if not candidate.is_dir():
-        candidate = workspace_root / "my_mods" / mod_path_or_slug
-    if not candidate.is_dir():
+    candidate = resolve_mod_dir(mod_path_or_slug, roots=(workspace_root / "my_mods", MY_MODS_DIR))
+    if candidate is None or not candidate.is_dir():
         raise FileNotFoundError(f"Mod directory not found: '{mod_path_or_slug}'")
 
     public_dir = candidate / "Public"
@@ -116,16 +120,7 @@ def inject_into_treasure_table(
                 "modified": False,
             }
 
-        # Append subtable to existing table block or at end
-        addition = f'\nnew subtable "{subtable_ratio}"\n'
-        if start_level is not None:
-            addition += f'StartLevel "{start_level}"\n'
-        addition += f"{item_line}\n"
-
-        # Find the table block and append after its last entry
-        # A simple and robust engine-compliant way is appending another mergeable table or subtable
-        # Since CanMerge 1 allows multiple declarations of the same table across files and blocks,
-        # appending a distinct block is 100% compliant with Larian engine parser.
+        # Append a mergeable block (CanMerge 1)
         block = f'\nnew treasuretable "{table_id}"\nCanMerge 1\nnew subtable "{subtable_ratio}"\n'
         if start_level is not None:
             block += f'StartLevel "{start_level}"\n'

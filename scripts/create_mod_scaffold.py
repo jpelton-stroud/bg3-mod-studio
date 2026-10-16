@@ -24,6 +24,13 @@ import uuid
 import zlib
 from pathlib import Path
 
+if __package__:
+    from .lib.env_paths import load_env_file
+    from .lib.larian_parsers import calculate_version64
+else:
+    from lib.env_paths import load_env_file
+    from lib.larian_parsers import calculate_version64
+
 
 README_TEMPLATE_PATH = Path(__file__).parent / "templates" / "custom_mod_readme.md"
 
@@ -226,16 +233,18 @@ def build_meta_lsx_content(
 """
 
 
-def build_localization_xml(mod_name: str, placeholder_handles: list) -> str:
+def build_localization_xml(mod_name: str = "", placeholder_handles: list = None) -> str:
     entries = []
-    for h in placeholder_handles:
+    for h in (placeholder_handles or []):
         entries.append(f'  <content contentuid="{h}" version="1">{mod_name} Display Name</content>')
-    entries_str = "\n".join(entries) if entries else ""
-    return f"""<?xml version="1.0" encoding="utf-8"?>
-<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-{entries_str}
-</contentList>
-"""
+    entries_str = ("\n" + "\n".join(entries) + "\n") if entries else "\n"
+    return (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" '
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
+        f"{entries_str}"
+        "</contentList>\n"
+    )
 
 
 def build_readme_content(
@@ -299,8 +308,8 @@ def scaffold_mod(
     v_parts = [int(p) for p in (version_str.split(".") + [0, 0, 0, 0])[:4]]
     version64 = calculate_version64(*v_parts)
 
-    # Dependencies: default to GustavX (Patch 8 base game module) unless GustavDev requested
-    base_dep = "GustavDev" if (dependencies and "GustavDev" in dependencies) else "GustavX"
+    # Dependencies: default to GustavDev unless GustavX is explicitly requested
+    base_dep = "GustavX" if (dependencies and "GustavX" in dependencies) else "GustavDev"
     resolved_deps = [KNOWN_DEPENDENCIES[base_dep]]
     if dependencies:
         for dep in dependencies:
@@ -311,7 +320,6 @@ def scaffold_mod(
             elif isinstance(dep, dict) and "UUID" in dep:
                 resolved_deps.append(dep)
             else:
-                # Custom named dependency fallback
                 resolved_deps.append({
                     "Folder": str(dep),
                     "MD5": "",
@@ -345,9 +353,6 @@ def scaffold_mod(
         loc_dir,
     ]
 
-    # Pre-allocate 10 standard handles for subagents
-    allocated_handles = [generate_handle() for _ in range(10)]
-
     # File contents
     project_uuid = generate_uuid()
     project_meta_xml = build_project_meta_lsx_content(
@@ -364,7 +369,8 @@ def scaffold_mod(
         version64=version64,
         dependencies=resolved_deps,
     )
-    loc_xml = build_localization_xml(clean_name, allocated_handles[:2])
+    # Initialize clean empty <contentList>; item/progression scaffolders deterministically own handle creation
+    loc_xml = build_localization_xml(clean_name, [])
     readme_md = build_readme_content(
         clean_name,
         mod_uuid,
@@ -412,26 +418,13 @@ def scaffold_mod(
         "lists_dir": str(lists_dir),
         "localization_file": str(loc_dir / f"{clean_name}.xml"),
         "readme_file": str(mod_root / "README.md"),
-        "allocated_handles": allocated_handles,
         "dependencies": [d["Name"] for d in resolved_deps],
     }
 
 
 def load_env_defaults() -> dict:
     """Load key-value pairs from .env if present."""
-    env = {}
-    env_file = Path(__file__).resolve().parent.parent / ".env"
-    if env_file.is_file():
-        try:
-            with open(env_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith("#") and "=" in line:
-                        k, v = line.split("=", 1)
-                        env[k.strip()] = v.strip().strip("'\"")
-        except Exception:
-            pass
-    return env
+    return load_env_file()
 
 
 def main():
@@ -494,7 +487,6 @@ def main():
         print(f"  Author:         {args.author}")
         print(f"  Root Dir:       {result['root_dir']}")
         print(f"  Dependencies:   {', '.join(result['dependencies'])}")
-        print(f"  Allocated Handles: {len(result['allocated_handles'])} handles ready for localization")
         print(f"\nReady to build assets in: {result['public_dir']}")
 
 
