@@ -173,20 +173,6 @@ def resolve_dependency_metadata(
                         meta["PublishHandle"] = cat_entry["ModioID"]
                     return meta
 
-    # 3. Search local directories in mods/ and my_mods/
-    for base in (MODS_DIR, MY_MODS_DIR):
-        if not base.is_dir():
-            continue
-        for child in sorted(base.iterdir()):
-            if not child.is_dir():
-                continue
-            c_norm = normalize_mod_key(child.name)
-            if c_norm == norm_id or norm_id in c_norm:
-                for meta_path in find_mod_meta_files(child):
-                    meta = extract_metadata_from_meta_lsx(meta_path, child.name)
-                    if meta:
-                        return meta
-
     # Check by UUID if identifier looks like a UUID
     if "-" in clean_id and len(clean_id) >= 32:
         for base in (MODS_DIR, MY_MODS_DIR):
@@ -198,6 +184,34 @@ def resolve_dependency_metadata(
                 for meta_path in find_mod_meta_files(child):
                     meta = extract_metadata_from_meta_lsx(meta_path, child.name)
                     if meta and meta["UUID"].lower() == clean_id.lower():
+                        return meta
+
+    # 3. Search local directories in mods/ and my_mods/ (exact match first)
+    for base in (MODS_DIR, MY_MODS_DIR):
+        if not base.is_dir():
+            continue
+        for child in sorted(base.iterdir()):
+            if not child.is_dir():
+                continue
+            c_norm = normalize_mod_key(child.name)
+            if c_norm == norm_id:
+                for meta_path in find_mod_meta_files(child):
+                    meta = extract_metadata_from_meta_lsx(meta_path, child.name)
+                    if meta:
+                        return meta
+
+    # 3b. Search local directories (substring match fallback)
+    for base in (MODS_DIR, MY_MODS_DIR):
+        if not base.is_dir():
+            continue
+        for child in sorted(base.iterdir()):
+            if not child.is_dir():
+                continue
+            c_norm = normalize_mod_key(child.name)
+            if norm_id in c_norm:
+                for meta_path in find_mod_meta_files(child):
+                    meta = extract_metadata_from_meta_lsx(meta_path, child.name)
+                    if meta:
                         return meta
 
     # 4. Remote fallback to mod.io REST API
