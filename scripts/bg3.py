@@ -108,6 +108,186 @@ class JsonCompliantArgumentParser(argparse.ArgumentParser):
         super().error(message)
 
 
+def setup_scaffold_subparsers(subparsers_obj, common_parser: argparse.ArgumentParser) -> None:
+    """Configures the unified asset scaffolding subcommands across 'bg3 scaffold' and 'bg3 mod scaffold'."""
+    # 1. class
+    sc_class = subparsers_obj.add_parser("class", help="Scaffold Class/Subclass definition, ProgressionDescriptions, and parent progression wiring", parents=[common_parser])
+    sc_class.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_class.add_argument("--name", required=True, help="Internal class or subclass name")
+    sc_class.add_argument("--display-name", help="Display name in UI")
+    sc_class.add_argument("--description", help="Description for level-up UI")
+    sc_class.add_argument("--parent-class", help="Vanilla parent class preset (e.g. rogue, wizard, paladin)")
+    sc_class.add_argument("--parent-guid", help="Explicit parent class GUID")
+    sc_class.add_argument("--class-uuid", help="Explicit UUID for this class")
+    sc_class.add_argument("--table-uuid", help="Explicit ProgressionTableUUID")
+    sc_class.add_argument("--base-hp", type=int, default=8, help="Base HP at level 1")
+    sc_class.add_argument("--hp-per-level", type=int, default=5, help="HP gain per level")
+    sc_class.add_argument("--primary-ability", type=int, default=1, help="Primary ability score enum")
+    sc_class.add_argument("--spell-ability", type=int, default=0, help="Spellcasting ability enum")
+    sc_class.add_argument("--register-in-parent", action="store_true", default=True, help="Inject subclass into parent's Progressions.lsx")
+    sc_class.add_argument("--no-register-in-parent", dest="register_in_parent", action="store_false", help="Do not inject subclass into parent's Progressions.lsx")
+    sc_class.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
+
+    # 2. feat
+    sc_feat = subparsers_obj.add_parser("feat", help="Scaffold Feats and FeatDescriptions with localization", parents=[common_parser])
+    sc_feat.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_feat.add_argument("--name", required=True, help="Internal feat name")
+    sc_feat.add_argument("--display-name", help="Display name in UI")
+    sc_feat.add_argument("--description", help="Description for tooltip")
+    sc_feat.add_argument("--passives", nargs="*", help="Passives granted by feat")
+    sc_feat.add_argument("--selectors", nargs="*", help="Selectors expressions")
+    sc_feat.add_argument("--requirements", help="Feat requirements")
+    sc_feat.add_argument("--can-be-picked-multiple-times", action="store_true", help="Allow selecting feat multiple times")
+    sc_feat.add_argument("--feat-uuid", help="Explicit UUID for this feat")
+    sc_feat.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
+
+    # 3. action-resource
+    sc_res = subparsers_obj.add_parser("action-resource", aliases=["resource"], help="Scaffold ActionResourceDefinitions with replenish type", parents=[common_parser])
+    sc_res.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_res.add_argument("--name", required=True, help="Internal resource name")
+    sc_res.add_argument("--display-name", help="Display name in UI")
+    sc_res.add_argument("--description", help="Description for tooltip")
+    sc_res.add_argument("--replenish-type", choices=["Rest", "ShortRest", "Never", "Combat"], default="ShortRest", help="Replenish condition")
+    sc_res.add_argument("--max-level", type=int, default=0, help="Maximum resource tier")
+    sc_res.add_argument("--dice-type", type=int, default=0, help="Die size (4, 6, 8, 10, 12)")
+    sc_res.add_argument("--show-on-action-panel", action="store_true", default=True, help="Display on action bar")
+    sc_res.add_argument("--hide-from-action-panel", dest="show_on_action_panel", action="store_false", help="Hide from action bar")
+    sc_res.add_argument("--is-spell-resource", action="store_true", help="Mark as spell resource")
+    sc_res.add_argument("--party-resource", action="store_true", help="Mark as party-wide resource")
+    sc_res.add_argument("--resource-uuid", help="Explicit UUID for this resource")
+    sc_res.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
+
+    # 4. spell-list
+    sc_spl = subparsers_obj.add_parser("spell-list", aliases=["spell_list"], help="Scaffold standalone SpellLists and PassiveLists", parents=[common_parser])
+    sc_spl.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_spl.add_argument("--comment", help="Documentation label/comment")
+    sc_spl.add_argument("--spells", nargs="*", help="Spell names for SpellLists.lsx")
+    sc_spl.add_argument("--passives", nargs="*", help="Passive names for PassiveLists.lsx")
+    sc_spl.add_argument("--uuid", help="Explicit UUID for this list")
+    sc_spl.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
+
+    # 5. level-map
+    sc_lm = subparsers_obj.add_parser("level-map", aliases=["level_map"], help="Scaffold LevelMapValues scaling curves across levels 1-20", parents=[common_parser])
+    sc_lm.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_lm.add_argument("--name", required=True, help="Internal curve name")
+    sc_lm.add_argument("--levels", required=True, help="Level mappings (e.g. '1=1d6,3=2d6,5=3d6')")
+    sc_lm.add_argument("--dice-type", type=int, help="Override preferred dice type")
+    sc_lm.add_argument("--uuid", help="Explicit UUID for this level map")
+    sc_lm.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
+
+    # 6. default-values
+    sc_dv = subparsers_obj.add_parser("default-values", aliases=["default_values"], help="Scaffold Character Creation DefaultValues (Abilities, Skills, Spells)", parents=[common_parser])
+    sc_dv.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_dv.add_argument("--class", dest="class_name", required=True, help="Target class name")
+    sc_dv.add_argument("--abilities", nargs="*", help="Recommended abilities")
+    sc_dv.add_argument("--skills", nargs="*", help="Default skill proficiencies")
+    sc_dv.add_argument("--spells", nargs="*", help="Default spells/cantrips")
+    sc_dv.add_argument("--table-uuid", help="Explicit TableUUID")
+    sc_dv.add_argument("--level", type=int, default=1, help="Level for default values")
+    sc_dv.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
+
+    # 7. tag
+    sc_tag = subparsers_obj.add_parser("tag", help="Scaffold dialogue and identity tag definitions in Tags/<UUID>.lsx", parents=[common_parser])
+    sc_tag.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_tag.add_argument("--name", required=True, help="Internal tag name (e.g. SHADOW_STALKER)")
+    sc_tag.add_argument("--display-name", help="Display name in character sheet")
+    sc_tag.add_argument("--description", help="Description for tag")
+    sc_tag.add_argument("--category", action="append", help="Tag category (e.g. Class, Subclass, Dialog). Can specify multiple.")
+    sc_tag.add_argument("--uuid", help="Explicit UUID for this tag")
+    sc_tag.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
+
+    # 8. race
+    sc_race = subparsers_obj.add_parser("race", help="Scaffold Races.lsx and RaceDescriptions.lsx custom races and subraces", parents=[common_parser])
+    sc_race.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_race.add_argument("--name", required=True, help="Internal race/subrace name")
+    sc_race.add_argument("--display-name", help="Display name in UI")
+    sc_race.add_argument("--description", help="Description in character creation")
+    sc_race.add_argument("--parent-race", help="Vanilla parent race preset (e.g. elf, drow, human)")
+    sc_race.add_argument("--parent-guid", help="Explicit parent race GUID")
+    sc_race.add_argument("--race-uuid", help="Explicit UUID for this race")
+    sc_race.add_argument("--table-uuid", help="Explicit ProgressionTableUUID")
+    sc_race.add_argument("--equipment", help="Starting CC equipment preset name")
+    sc_race.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
+
+    # 9. origin
+    sc_orig = subparsers_obj.add_parser("origin", help="Scaffold Origins.lsx playable origin characters", parents=[common_parser])
+    sc_orig.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_orig.add_argument("--name", required=True, help="Internal origin name")
+    sc_orig.add_argument("--display-name", help="Display name in UI")
+    sc_orig.add_argument("--description", help="Description in character creation")
+    sc_orig.add_argument("--equipment", help="ClassEquipmentOverride preset name")
+    sc_orig.add_argument("--class-uuid", help="Default class GUID")
+    sc_orig.add_argument("--race-uuid", help="Default race GUID")
+    sc_orig.add_argument("--body-type", type=int, choices=[0, 1], default=0, help="0=Male, 1=Female")
+    sc_orig.add_argument("--body-shape", type=int, choices=[0, 1], default=0, help="0=Standard, 1=Strong")
+    sc_orig.add_argument("--passives", nargs="*", help="Starting passive names")
+    sc_orig.add_argument("--uuid", help="Explicit UUID for this origin")
+    sc_orig.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
+
+    # 10. appearance
+    sc_app = subparsers_obj.add_parser("appearance", aliases=["appearance-visual", "appearance_visual"], help="Scaffold CharacterCreationAppearanceVisuals.lsx cosmetic assets", parents=[common_parser])
+    sc_app.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_app.add_argument("--name", required=True, help="Internal cosmetic name")
+    sc_app.add_argument("--visual-resource", required=True, help="VisualResource mesh/asset GUID")
+    sc_app.add_argument("--slot", choices=["Hair", "Head", "Horns", "Body", "Tail", "Beard", "Piercing", "EyeColor", "Tattoo", "Makeup"], default="Hair", help="Cosmetic slot")
+    sc_app.add_argument("--race", help="Target race name or UUID")
+    sc_app.add_argument("--body-type", type=int, choices=[0, 1], default=0, help="0=Male, 1=Female")
+    sc_app.add_argument("--body-shape", type=int, choices=[0, 1], default=0, help="0=Standard, 1=Strong")
+    sc_app.add_argument("--display-name", help="Display name in character creator")
+    sc_app.add_argument("--uuid", help="Explicit UUID for this visual entry")
+    sc_app.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
+
+    # 11. stat
+    sc_stat = subparsers_obj.add_parser("stat", help="Scaffold Larian stat entries with string handles", parents=[common_parser])
+    sc_stat.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_stat.add_argument("--type", required=True, help="Stat type: weapon, armor, interrupt, equipment, character, status_*, etc.")
+    sc_stat.add_argument("--name", required=True, help="Internal stat identifier")
+    sc_stat.add_argument("--display-name", help="In-game display name")
+    sc_stat.add_argument("--description", help="In-game description")
+    sc_stat.add_argument("--using", help="Base stat entry to inherit from")
+    sc_stat.add_argument("--props", nargs="*", help="Key-value property pairs")
+    sc_stat.add_argument("--dry-run", action="store_true", help="Preview generated stat entry")
+
+    # 12. progression
+    sc_prog = subparsers_obj.add_parser("progression", help="Scaffold Class/Subclass progression node", parents=[common_parser])
+    sc_prog.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_prog.add_argument("--class", dest="class_name", required=True, help="Target Class name")
+    sc_prog.add_argument("--level", type=int, required=True, help="Progression level (1-20)")
+    sc_prog.add_argument("--subclass", help="Subclass name if applicable")
+    sc_prog.add_argument("--multiclass", action="store_true", help="Mark progression node as multiclass entry (ProgressionType=2)")
+    sc_prog.add_argument("--table-uuid", help="Explicit ProgressionTableUUID")
+    sc_prog.add_argument("--passives", nargs="*", help="Passives to award")
+    sc_prog.add_argument("--boosts", nargs="*", help="Boosts to award")
+    sc_prog.add_argument("--spells", nargs="*", help="Spells/selectors to award")
+    sc_prog.add_argument("--spell-count", type=int, default=1, help="Spell selector count")
+    sc_prog.add_argument("--feat", action="store_true", help="Award feat at this level")
+    sc_prog.add_argument("--dry-run", action="store_true", help="Preview progression LSX node")
+
+    # 13. root-template
+    sc_root = subparsers_obj.add_parser("root-template", aliases=["root_template"], help="Scaffold physical item RootTemplate", parents=[common_parser])
+    sc_root.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_root.add_argument("--item", required=True, help="Item root template name")
+    sc_root.add_argument("--visual-preset", help="Visual preset archetype")
+    sc_root.add_argument("--parent-template", help="Parent template UUID")
+    sc_root.add_argument("--display-handle", help="Display name handle")
+    sc_root.add_argument("--description-handle", help="Description handle")
+    sc_root.add_argument("--icon", help="Icon name")
+    sc_root.add_argument("--no-link-stat", action="store_true", help="Do not link Stats property")
+    sc_root.add_argument("--list-presets", action="store_true", help="List available visual presets")
+    sc_root.add_argument("--dry-run", action="store_true", help="Preview root template XML")
+
+    # 14. icon-uvs
+    sc_icons = subparsers_obj.add_parser("icon-uvs", aliases=["icon_uvs"], help="Generate atlas icon coordinates and LSX definitions", parents=[common_parser])
+    sc_icons.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
+    sc_icons.add_argument("--icon-names", nargs="*", help="List of icon names")
+    sc_icons.add_argument("--icons-dir", help="Directory containing source icons")
+    sc_icons.add_argument("--atlas-name", help="Atlas texture name")
+    sc_icons.add_argument("--atlas-uuid", help="Atlas resource UUID")
+    sc_icons.add_argument("--icon-size", type=int, default=64, help="Icon dimension in pixels")
+    sc_icons.add_argument("--atlas-size", type=int, default=2048, help="Atlas texture dimension")
+    sc_icons.add_argument("--dry-run", action="store_true", help="Preview icon UV LSX definitions")
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the unified CLI argument parser with noun-verb subcommand tree."""
     common_parser = argparse.ArgumentParser(add_help=False)
@@ -208,63 +388,76 @@ def build_parser() -> argparse.ArgumentParser:
         help="Attempt automated remediation for missing UUIDs or sync issues.",
     )
 
-    # bg3 mod scaffold
-    scaffold_parser = mod_subparsers.add_parser(
-        "scaffold",
-        help="Scaffold a new mod workspace in my_mods/",
+    # bg3 mod create (Option A)
+    create_parser = mod_subparsers.add_parser(
+        "create",
+        help="Create a new mod workspace in my_mods/",
         parents=[common_parser],
     )
-    scaffold_parser.add_argument(
+    create_parser.add_argument(
         "name",
         help="Display name or slug for the new mod.",
     )
-    scaffold_parser.add_argument(
+    create_parser.add_argument(
         "--slug",
         help="Custom folder slug (default: derived from name).",
     )
-    scaffold_parser.add_argument(
+    create_parser.add_argument(
         "--uuid",
         help="Explicit ModuleUUID GUID.",
     )
-    scaffold_parser.add_argument(
+    create_parser.add_argument(
         "--author",
         help="Author name (defaults to configured environment author).",
     )
-    scaffold_parser.add_argument(
+    create_parser.add_argument(
         "--description",
         help="In-game and mod.io description.",
     )
-    scaffold_parser.add_argument(
+    create_parser.add_argument(
         "--version",
         default="1.0.0.0",
         help="Initial semantic Version64 (default: 1.0.0.0).",
     )
-    scaffold_parser.add_argument(
+    create_parser.add_argument(
         "--unlock-level-curve",
         action="store_true",
         help="Add UnlockLevelCurve compatibility and progression boost table.",
     )
-    scaffold_parser.add_argument(
+    create_parser.add_argument(
         "--dependency",
         action="append",
         default=[],
         help="Dependency mod slug or UUID to register in meta.lsx.",
     )
-    scaffold_parser.add_argument(
+    create_parser.add_argument(
         "--output-dir",
         help="Custom output directory (defaults to my_mods/<slug>).",
     )
-    scaffold_parser.add_argument(
+    create_parser.add_argument(
         "--type",
         default="Standard",
         choices=["Standard", "Class", "Subclass", "Item", "Spell", "Cosmetic"],
         help="Mod template archetype (default: Standard).",
     )
-    scaffold_parser.add_argument(
+    create_parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Preview generated files without writing to disk.",
     )
+
+    # bg3 mod scaffold (forwarding to asset scaffolders)
+    mod_scaffold_parser = mod_subparsers.add_parser(
+        "scaffold",
+        help="Scaffold mod assets, stat entries, progressions, and schemas (alias for bg3 scaffold)",
+        parents=[common_parser],
+    )
+    mod_scaffold_subparsers = mod_scaffold_parser.add_subparsers(
+        dest="mod_scaffold_subcommand",
+        metavar="<asset>",
+        parser_class=JsonCompliantArgumentParser,
+    )
+    setup_scaffold_subparsers(mod_scaffold_subparsers, common_parser)
 
     # bg3 mod add-dependency
     add_dep_parser = mod_subparsers.add_parser(
@@ -678,55 +871,7 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="<action>",
         parser_class=JsonCompliantArgumentParser,
     )
-
-    # bg3 scaffold stat
-    sc_stat = scaffold_grp_subparsers.add_parser("stat", help="Scaffold Larian stat entries with string handles", parents=[common_parser])
-    sc_stat.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
-    sc_stat.add_argument("--type", required=True, help="Stat type: Weapon, Armor, PassiveData, Spell_*, etc.")
-    sc_stat.add_argument("--name", required=True, help="Internal stat identifier")
-    sc_stat.add_argument("--display-name", help="In-game display name")
-    sc_stat.add_argument("--description", help="In-game description")
-    sc_stat.add_argument("--using", help="Base stat entry to inherit from")
-    sc_stat.add_argument("--props", nargs="*", help="Key-value property pairs (e.g. Damage=1d8)")
-    sc_stat.add_argument("--dry-run", action="store_true", help="Preview generated stat entry")
-
-    # bg3 scaffold progression
-    sc_prog = scaffold_grp_subparsers.add_parser("progression", help="Scaffold Class/Subclass progression node", parents=[common_parser])
-    sc_prog.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
-    sc_prog.add_argument("--class", dest="class_name", required=True, help="Target Class name (e.g. Paladin)")
-    sc_prog.add_argument("--level", type=int, required=True, help="Progression level (1-20)")
-    sc_prog.add_argument("--subclass", help="Subclass name if applicable")
-    sc_prog.add_argument("--table-uuid", help="Explicit ProgressionTableUUID")
-    sc_prog.add_argument("--passives", nargs="*", help="Passives to award")
-    sc_prog.add_argument("--boosts", nargs="*", help="Boosts to award")
-    sc_prog.add_argument("--spells", nargs="*", help="Spells/selectors to award")
-    sc_prog.add_argument("--spell-count", type=int, default=1, help="Spell selector count")
-    sc_prog.add_argument("--feat", action="store_true", help="Award feat at this level")
-    sc_prog.add_argument("--dry-run", action="store_true", help="Preview progression LSX node")
-
-    # bg3 scaffold root-template
-    sc_root = scaffold_grp_subparsers.add_parser("root-template", aliases=["root_template"], help="Scaffold physical item RootTemplate", parents=[common_parser])
-    sc_root.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
-    sc_root.add_argument("--item", required=True, help="Item root template name")
-    sc_root.add_argument("--visual-preset", help="Visual preset archetype")
-    sc_root.add_argument("--parent-template", help="Parent template UUID")
-    sc_root.add_argument("--display-handle", help="Display name handle")
-    sc_root.add_argument("--description-handle", help="Description handle")
-    sc_root.add_argument("--icon", help="Icon name")
-    sc_root.add_argument("--no-link-stat", action="store_true", help="Do not link Stats property")
-    sc_root.add_argument("--list-presets", action="store_true", help="List available visual presets")
-    sc_root.add_argument("--dry-run", action="store_true", help="Preview root template XML")
-
-    # bg3 scaffold icon-uvs
-    sc_icons = scaffold_grp_subparsers.add_parser("icon-uvs", aliases=["icon_uvs"], help="Generate atlas icon coordinates and LSX definitions", parents=[common_parser])
-    sc_icons.add_argument("--mod", required=True, help="Mod directory name in my_mods/")
-    sc_icons.add_argument("--icon-names", nargs="*", help="List of icon names")
-    sc_icons.add_argument("--icons-dir", help="Directory containing source icons")
-    sc_icons.add_argument("--atlas-name", help="Atlas texture name")
-    sc_icons.add_argument("--atlas-uuid", help="Atlas resource UUID")
-    sc_icons.add_argument("--icon-size", type=int, default=64, help="Icon dimension in pixels")
-    sc_icons.add_argument("--atlas-size", type=int, default=2048, help="Atlas texture dimension")
-    sc_icons.add_argument("--dry-run", action="store_true", help="Preview icon UV LSX definitions")
+    setup_scaffold_subparsers(scaffold_grp_subparsers, common_parser)
 
     # -------------------------------------------------------------------------
     # 'query' command group
@@ -886,6 +1031,261 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
         if getattr(args, "extra_args", None):
             target_args.extend(args.extra_args)
 
+    elif cmd == "scaffold" or (cmd == "mod" and sub == "scaffold"):
+        actual_sub = getattr(args, "mod_scaffold_subcommand", None) or getattr(args, "subcommand", None)
+        if actual_sub == "class":
+            script_target = AUTHORING_DIR / "scaffold_class_description.py"
+            target_args.extend(["--mod", args.mod, "--name", args.name])
+            if getattr(args, "display_name", None):
+                target_args.extend(["--display-name", args.display_name])
+            if getattr(args, "description", None):
+                target_args.extend(["--description", args.description])
+            if getattr(args, "parent_class", None):
+                target_args.extend(["--parent-class", args.parent_class])
+            if getattr(args, "parent_guid", None):
+                target_args.extend(["--parent-guid", args.parent_guid])
+            if getattr(args, "class_uuid", None):
+                target_args.extend(["--class-uuid", args.class_uuid])
+            if getattr(args, "table_uuid", None):
+                target_args.extend(["--table-uuid", args.table_uuid])
+            if getattr(args, "base_hp", None) is not None:
+                target_args.extend(["--base-hp", str(args.base_hp)])
+            if getattr(args, "hp_per_level", None) is not None:
+                target_args.extend(["--hp-per-level", str(args.hp_per_level)])
+            if getattr(args, "primary_ability", None) is not None:
+                target_args.extend(["--primary-ability", str(args.primary_ability)])
+            if getattr(args, "spell_ability", None) is not None:
+                target_args.extend(["--spell-ability", str(args.spell_ability)])
+            if getattr(args, "register_in_parent", True) is False:
+                target_args.append("--no-register-in-parent")
+            elif getattr(args, "register_in_parent", False):
+                target_args.append("--register-in-parent")
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub == "feat":
+            script_target = AUTHORING_DIR / "scaffold_feat.py"
+            target_args.extend(["--mod", args.mod, "--name", args.name])
+            if getattr(args, "display_name", None):
+                target_args.extend(["--display-name", args.display_name])
+            if getattr(args, "description", None):
+                target_args.extend(["--description", args.description])
+            if getattr(args, "passives", None):
+                target_args.extend(["--passives", ",".join(args.passives) if isinstance(args.passives, list) else args.passives])
+            if getattr(args, "selectors", None):
+                target_args.extend(["--selectors", ",".join(args.selectors) if isinstance(args.selectors, list) else args.selectors])
+            if getattr(args, "requirements", None):
+                target_args.extend(["--requirements", args.requirements])
+            if getattr(args, "can_be_picked_multiple_times", False):
+                target_args.append("--can-be-picked-multiple-times")
+            if getattr(args, "feat_uuid", None):
+                target_args.extend(["--feat-uuid", args.feat_uuid])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub in ("action-resource", "resource"):
+            script_target = AUTHORING_DIR / "scaffold_action_resource.py"
+            target_args.extend(["--mod", args.mod, "--name", args.name])
+            if getattr(args, "display_name", None):
+                target_args.extend(["--display-name", args.display_name])
+            if getattr(args, "description", None):
+                target_args.extend(["--description", args.description])
+            if getattr(args, "replenish_type", None):
+                target_args.extend(["--replenish-type", args.replenish_type])
+            if getattr(args, "max_level", None) is not None:
+                target_args.extend(["--max-level", str(args.max_level)])
+            if getattr(args, "dice_type", None) is not None:
+                target_args.extend(["--dice-type", str(args.dice_type)])
+            if getattr(args, "show_on_action_panel", True) is False:
+                target_args.append("--hide-from-action-panel")
+            elif getattr(args, "show_on_action_panel", False):
+                target_args.append("--show-on-action-panel")
+            if getattr(args, "is_spell_resource", False):
+                target_args.append("--is-spell-resource")
+            if getattr(args, "party_resource", False):
+                target_args.append("--party-resource")
+            if getattr(args, "resource_uuid", None):
+                target_args.extend(["--resource-uuid", args.resource_uuid])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub in ("spell-list", "spell_list"):
+            script_target = AUTHORING_DIR / "scaffold_spell_list.py"
+            target_args.extend(["--mod", args.mod])
+            if getattr(args, "comment", None):
+                target_args.extend(["--comment", args.comment])
+            if getattr(args, "spells", None):
+                target_args.extend(["--spells", ",".join(args.spells) if isinstance(args.spells, list) else args.spells])
+            if getattr(args, "passives", None):
+                target_args.extend(["--passives", ",".join(args.passives) if isinstance(args.passives, list) else args.passives])
+            if getattr(args, "uuid", None):
+                target_args.extend(["--uuid", args.uuid])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub in ("level-map", "level_map"):
+            script_target = AUTHORING_DIR / "scaffold_level_map.py"
+            target_args.extend(["--mod", args.mod, "--name", args.name, "--levels", args.levels])
+            if getattr(args, "dice_type", None) is not None:
+                target_args.extend(["--dice-type", str(args.dice_type)])
+            if getattr(args, "uuid", None):
+                target_args.extend(["--uuid", args.uuid])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub in ("default-values", "default_values"):
+            script_target = AUTHORING_DIR / "scaffold_default_values.py"
+            target_args.extend(["--mod", args.mod, "--class", args.class_name])
+            if getattr(args, "abilities", None):
+                target_args.extend(["--abilities", ",".join(args.abilities) if isinstance(args.abilities, list) else args.abilities])
+            if getattr(args, "skills", None):
+                target_args.extend(["--skills", ",".join(args.skills) if isinstance(args.skills, list) else args.skills])
+            if getattr(args, "spells", None):
+                target_args.extend(["--spells", ",".join(args.spells) if isinstance(args.spells, list) else args.spells])
+            if getattr(args, "table_uuid", None):
+                target_args.extend(["--table-uuid", args.table_uuid])
+            if getattr(args, "level", None) is not None:
+                target_args.extend(["--level", str(args.level)])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub == "tag":
+            script_target = AUTHORING_DIR / "scaffold_tag.py"
+            target_args.extend(["--mod", args.mod, "--name", args.name])
+            if getattr(args, "display_name", None):
+                target_args.extend(["--display-name", args.display_name])
+            if getattr(args, "description", None):
+                target_args.extend(["--description", args.description])
+            for cat in getattr(args, "category", []):
+                target_args.extend(["--category", cat])
+            if getattr(args, "uuid", None):
+                target_args.extend(["--uuid", args.uuid])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub == "race":
+            script_target = AUTHORING_DIR / "scaffold_race.py"
+            target_args.extend(["--mod", args.mod, "--name", args.name])
+            if getattr(args, "display_name", None):
+                target_args.extend(["--display-name", args.display_name])
+            if getattr(args, "description", None):
+                target_args.extend(["--description", args.description])
+            if getattr(args, "parent_race", None):
+                target_args.extend(["--parent-race", args.parent_race])
+            if getattr(args, "parent_guid", None):
+                target_args.extend(["--parent-guid", args.parent_guid])
+            if getattr(args, "race_uuid", None):
+                target_args.extend(["--race-uuid", args.race_uuid])
+            if getattr(args, "table_uuid", None):
+                target_args.extend(["--table-uuid", args.table_uuid])
+            if getattr(args, "equipment", None):
+                target_args.extend(["--equipment", args.equipment])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub == "origin":
+            script_target = AUTHORING_DIR / "scaffold_origin.py"
+            target_args.extend(["--mod", args.mod, "--name", args.name])
+            if getattr(args, "display_name", None):
+                target_args.extend(["--display-name", args.display_name])
+            if getattr(args, "description", None):
+                target_args.extend(["--description", args.description])
+            if getattr(args, "equipment", None):
+                target_args.extend(["--equipment", args.equipment])
+            if getattr(args, "class_uuid", None):
+                target_args.extend(["--class-uuid", args.class_uuid])
+            if getattr(args, "race_uuid", None):
+                target_args.extend(["--race-uuid", args.race_uuid])
+            if getattr(args, "body_type", None) is not None:
+                target_args.extend(["--body-type", str(args.body_type)])
+            if getattr(args, "body_shape", None) is not None:
+                target_args.extend(["--body-shape", str(args.body_shape)])
+            if getattr(args, "passives", None):
+                target_args.extend(["--passives", ",".join(args.passives) if isinstance(args.passives, list) else args.passives])
+            if getattr(args, "uuid", None):
+                target_args.extend(["--uuid", args.uuid])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub in ("appearance", "appearance-visual", "appearance_visual"):
+            script_target = AUTHORING_DIR / "scaffold_appearance_visual.py"
+            target_args.extend(["--mod", args.mod, "--name", args.name, "--visual-resource", args.visual_resource])
+            if getattr(args, "slot", None):
+                target_args.extend(["--slot", args.slot])
+            if getattr(args, "race", None):
+                target_args.extend(["--race", args.race])
+            if getattr(args, "body_type", None) is not None:
+                target_args.extend(["--body-type", str(args.body_type)])
+            if getattr(args, "body_shape", None) is not None:
+                target_args.extend(["--body-shape", str(args.body_shape)])
+            if getattr(args, "display_name", None):
+                target_args.extend(["--display-name", args.display_name])
+            if getattr(args, "uuid", None):
+                target_args.extend(["--uuid", args.uuid])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub == "stat":
+            script_target = AUTHORING_DIR / "scaffold_stat_entry.py"
+            target_args.extend(["--mod", args.mod, "--type", args.type, "--name", args.name])
+            if getattr(args, "display_name", None):
+                target_args.extend(["--display-name", args.display_name])
+            if getattr(args, "description", None):
+                target_args.extend(["--description", args.description])
+            if getattr(args, "using", None):
+                target_args.extend(["--using", args.using])
+            if getattr(args, "props", None):
+                target_args.extend(["--props", ",".join(args.props) if isinstance(args.props, list) else args.props])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub == "progression":
+            script_target = AUTHORING_DIR / "scaffold_progression_node.py"
+            target_args.extend(["--mod", args.mod, "--class", args.class_name, "--level", str(args.level)])
+            if getattr(args, "subclass", None):
+                target_args.extend(["--subclass", args.subclass])
+            if getattr(args, "multiclass", False):
+                target_args.append("--multiclass")
+            if getattr(args, "table_uuid", None):
+                target_args.extend(["--table-uuid", args.table_uuid])
+            if getattr(args, "passives", None):
+                target_args.extend(["--passives", ",".join(args.passives) if isinstance(args.passives, list) else args.passives])
+            if getattr(args, "boosts", None):
+                target_args.extend(["--boosts", ",".join(args.boosts) if isinstance(args.boosts, list) else args.boosts])
+            if getattr(args, "spells", None):
+                target_args.extend(["--spells", ",".join(args.spells) if isinstance(args.spells, list) else args.spells])
+            if getattr(args, "spell_count", None) is not None:
+                target_args.extend(["--spell-count", str(args.spell_count)])
+            if getattr(args, "feat", False):
+                target_args.append("--feat")
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub in ("root-template", "root_template"):
+            script_target = AUTHORING_DIR / "scaffold_root_template.py"
+            target_args.extend(["--mod", args.mod, "--item", args.item])
+            if getattr(args, "visual_preset", None):
+                target_args.extend(["--visual-preset", args.visual_preset])
+            if getattr(args, "parent_template", None):
+                target_args.extend(["--parent-template", args.parent_template])
+            if getattr(args, "display_handle", None):
+                target_args.extend(["--display-handle", args.display_handle])
+            if getattr(args, "description_handle", None):
+                target_args.extend(["--description-handle", args.description_handle])
+            if getattr(args, "icon", None):
+                target_args.extend(["--icon", args.icon])
+            if getattr(args, "no_link_stat", False):
+                target_args.append("--no-link-stat")
+            if getattr(args, "list_presets", False):
+                target_args.append("--list-presets")
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif actual_sub in ("icon-uvs", "icon_uvs"):
+            script_target = AUTHORING_DIR / "scaffold_icon_uvs.py"
+            target_args.extend(["--mod", args.mod])
+            if getattr(args, "icon_names", None):
+                target_args.extend(["--icon-names", ",".join(args.icon_names) if isinstance(args.icon_names, list) else args.icon_names])
+            if getattr(args, "icons_dir", None):
+                target_args.extend(["--icons-dir", args.icons_dir])
+            if getattr(args, "atlas_name", None):
+                target_args.extend(["--atlas-name", args.atlas_name])
+            if getattr(args, "atlas_uuid", None):
+                target_args.extend(["--atlas-uuid", args.atlas_uuid])
+            if getattr(args, "icon_size", None) is not None:
+                target_args.extend(["--icon-size", str(args.icon_size)])
+            if getattr(args, "atlas_size", None) is not None:
+                target_args.extend(["--atlas-size", str(args.atlas_size)])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+
     elif cmd == "mod":
         if sub == "conflict":
             script_target = DIAGNOSTICS_DIR / "check_mod_conflicts.py"
@@ -917,7 +1317,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             if getattr(args, "fix", False):
                 target_args.append("--fix")
 
-        elif sub == "scaffold":
+        elif sub == "create":
             script_target = AUTHORING_DIR / "create_mod_scaffold.py"
             target_args.extend(["--name", args.name])
             if getattr(args, "slug", None):
@@ -1300,76 +1700,6 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--check")
             if getattr(args, "stdout", False):
                 target_args.append("--stdout")
-
-    elif cmd == "scaffold":
-        if sub == "stat":
-            script_target = AUTHORING_DIR / "scaffold_stat_entry.py"
-            target_args.extend(["--mod", args.mod, "--type", args.type, "--name", args.name])
-            if getattr(args, "display_name", None):
-                target_args.extend(["--display-name", args.display_name])
-            if getattr(args, "description", None):
-                target_args.extend(["--description", args.description])
-            if getattr(args, "using", None):
-                target_args.extend(["--using", args.using])
-            if getattr(args, "props", None):
-                target_args.extend(["--props", ",".join(args.props) if isinstance(args.props, list) else args.props])
-            if getattr(args, "dry_run", False):
-                target_args.append("--dry-run")
-        elif sub == "progression":
-            script_target = AUTHORING_DIR / "scaffold_progression_node.py"
-            target_args.extend(["--mod", args.mod, "--class", args.class_name, "--level", str(args.level)])
-            if getattr(args, "subclass", None):
-                target_args.extend(["--subclass", args.subclass])
-            if getattr(args, "table_uuid", None):
-                target_args.extend(["--table-uuid", args.table_uuid])
-            if getattr(args, "passives", None):
-                target_args.extend(["--passives", ",".join(args.passives) if isinstance(args.passives, list) else args.passives])
-            if getattr(args, "boosts", None):
-                target_args.extend(["--boosts", ",".join(args.boosts) if isinstance(args.boosts, list) else args.boosts])
-            if getattr(args, "spells", None):
-                target_args.extend(["--spells", ",".join(args.spells) if isinstance(args.spells, list) else args.spells])
-            if getattr(args, "spell_count", None) is not None:
-                target_args.extend(["--spell-count", str(args.spell_count)])
-            if getattr(args, "feat", False):
-                target_args.append("--feat")
-            if getattr(args, "dry_run", False):
-                target_args.append("--dry-run")
-        elif sub in ("root-template", "root_template"):
-            script_target = AUTHORING_DIR / "scaffold_root_template.py"
-            target_args.extend(["--mod", args.mod, "--item", args.item])
-            if getattr(args, "visual_preset", None):
-                target_args.extend(["--visual-preset", args.visual_preset])
-            if getattr(args, "parent_template", None):
-                target_args.extend(["--parent-template", args.parent_template])
-            if getattr(args, "display_handle", None):
-                target_args.extend(["--display-handle", args.display_handle])
-            if getattr(args, "description_handle", None):
-                target_args.extend(["--description-handle", args.description_handle])
-            if getattr(args, "icon", None):
-                target_args.extend(["--icon", args.icon])
-            if getattr(args, "no_link_stat", False):
-                target_args.append("--no-link-stat")
-            if getattr(args, "list_presets", False):
-                target_args.append("--list-presets")
-            if getattr(args, "dry_run", False):
-                target_args.append("--dry-run")
-        elif sub in ("icon-uvs", "icon_uvs"):
-            script_target = AUTHORING_DIR / "scaffold_icon_uvs.py"
-            target_args.extend(["--mod", args.mod])
-            if getattr(args, "icon_names", None):
-                target_args.extend(["--icon-names", ",".join(args.icon_names) if isinstance(args.icon_names, list) else args.icon_names])
-            if getattr(args, "icons_dir", None):
-                target_args.extend(["--icons-dir", args.icons_dir])
-            if getattr(args, "atlas_name", None):
-                target_args.extend(["--atlas-name", args.atlas_name])
-            if getattr(args, "atlas_uuid", None):
-                target_args.extend(["--atlas-uuid", args.atlas_uuid])
-            if getattr(args, "icon_size", None) is not None:
-                target_args.extend(["--icon-size", str(args.icon_size)])
-            if getattr(args, "atlas_size", None) is not None:
-                target_args.extend(["--atlas-size", str(args.atlas_size)])
-            if getattr(args, "dry_run", False):
-                target_args.append("--dry-run")
 
     elif cmd == "query":
         script_target = LIBRARY_DIR / "query_mod_database.py"

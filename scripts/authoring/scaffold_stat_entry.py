@@ -19,7 +19,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.lib.cli_common import ConsoleColor, ExitCode
 from scripts.lib.env_paths import MY_MODS_DIR, resolve_mod_dir
-from scripts.lib.larian_parsers import split_larian_items
+from scripts.lib.larian_parsers import (
+    generate_larian_handle,
+    split_larian_items,
+    update_localization_xml,
+)
 
 # Mapping of entry types to their file and default schema
 TYPE_CONFIG = {
@@ -133,13 +137,115 @@ TYPE_CONFIG = {
             "SpellSchool": "Evocation",
         },
     },
+    "spell_teleport": {
+        "file": "Spell_Teleport.txt",
+        "type_header": 'type "SpellData"',
+        "default_using": None,
+        "defaults": {
+            "SpellType": "Teleport",
+            "Level": "2",
+            "SpellSchool": "Conjuration",
+            "TargetRadius": "18",
+        },
+    },
+    "spell_rush": {
+        "file": "Spell_Rush.txt",
+        "type_header": 'type "SpellData"',
+        "default_using": None,
+        "defaults": {
+            "SpellType": "Rush",
+            "Level": "1",
+            "SpellSchool": "Transmutation",
+            "TargetRadius": "9",
+        },
+    },
+    "spell_path": {
+        "file": "Spell_Path.txt",
+        "type_header": 'type "SpellData"',
+        "default_using": None,
+        "defaults": {
+            "SpellType": "Path",
+            "Level": "1",
+            "SpellSchool": "Conjuration",
+            "TargetRadius": "18",
+        },
+    },
+    "interrupt": {
+        "file": "Interrupt.txt",
+        "type_header": 'type "InterruptData"',
+        "default_using": None,
+        "defaults": {
+            "InterruptType": "Spell",
+            "Conditions": "Self()",
+        },
+    },
+    "equipment": {
+        "file": "Equipment.txt",
+        "type_header": 'type "Equipment"',
+        "default_using": None,
+        "defaults": {
+            "InitialLoadout": "Yes",
+        },
+    },
+    "character": {
+        "file": "Character.txt",
+        "type_header": 'type "Character"',
+        "default_using": "_Hero",
+        "defaults": {
+            "StrengthMax": "30",
+            "DexterityMax": "30",
+            "ConstitutionMax": "30",
+            "IntelligenceMax": "30",
+            "WisdomMax": "30",
+            "CharismaMax": "30",
+        },
+    },
+    "status_effect": {
+        "file": "Status_EFFECT.txt",
+        "type_header": 'type "StatusData"',
+        "default_using": None,
+        "defaults": {
+            "StatusType": "EFFECT",
+            "Icon": "Generic_Effect",
+        },
+    },
+    "status_polymorph": {
+        "file": "Status_POLYMORPH.txt",
+        "type_header": 'type "StatusData"',
+        "default_using": None,
+        "defaults": {
+            "StatusType": "POLYMORPH",
+            "Icon": "Generic_Polymorph",
+        },
+    },
+    "status_heal": {
+        "file": "Status_HEAL.txt",
+        "type_header": 'type "StatusData"',
+        "default_using": None,
+        "defaults": {
+            "StatusType": "HEAL",
+            "Icon": "Generic_Heal",
+        },
+    },
+    "status_downed": {
+        "file": "Status_DOWNED.txt",
+        "type_header": 'type "StatusData"',
+        "default_using": None,
+        "defaults": {
+            "StatusType": "DOWNED",
+            "Icon": "Generic_Downed",
+        },
+    },
+    "status_invisible": {
+        "file": "Status_INVISIBLE.txt",
+        "type_header": 'type "StatusData"',
+        "default_using": None,
+        "defaults": {
+            "StatusType": "INVISIBLE",
+            "Icon": "Generic_Invisible",
+        },
+    },
 }
-
-
-def generate_larian_handle() -> str:
-    """Generates a Larian compliant handle string: h...g...g...g..."""
-    u = uuid.uuid4().hex
-    return f"h{u[:8]}g{u[8:12]}g{u[12:16]}g{u[16:20]}g{u[20:32]}"
 
 
 def resolve_mod_directories(mod_name_or_path: str, workspace_root: Path) -> tuple[Path, Path, Path, str]:
@@ -175,42 +281,6 @@ def resolve_mod_directories(mod_name_or_path: str, workspace_root: Path) -> tupl
         loc_file = loc_dir / f"{candidate.name}.xml"
 
     return candidate, stats_dir, loc_file, candidate.name
-
-
-def update_localization_xml(loc_file: Path, entries: list[tuple[str, str]], dry_run: bool = False) -> None:
-    """Appends content tags for handles and text to the Localization XML file."""
-    if dry_run:
-        return
-
-    loc_file.parent.mkdir(parents=True, exist_ok=True)
-
-    if loc_file.exists():
-        content = loc_file.read_text(encoding="utf-8")
-    else:
-        content = '<?xml version="1.0" encoding="utf-8"?>\n<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n</contentList>\n'
-
-    # Build additions
-    addition_lines = []
-    for handle, text in entries:
-        # Escape XML entities
-        safe_text = (
-            text.replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace('"', "&quot;")
-        )
-        addition_lines.append(f'  <content contentuid="{handle}" version="1">{safe_text}</content>')
-
-    addition_block = "\n".join(addition_lines) + "\n"
-
-    # Insert before </contentList>
-    if "</contentList>" in content:
-        idx = content.rfind("</contentList>")
-        new_content = content[:idx] + addition_block + content[idx:]
-    else:
-        new_content = content + "\n" + addition_block + "</contentList>\n"
-
-    loc_file.write_text(new_content, encoding="utf-8")
 
 
 def scaffold_entry(

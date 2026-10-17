@@ -58,7 +58,7 @@ SUBCLASS_TABLE_UUIDS = {
 
 EMPTY_PROGRESSIONS_LSX = """<?xml version="1.0" encoding="UTF-8"?>
 <save>
-    <version major="4" minor="8" revision="0" build="500"/>
+    <version major="4" minor="8" revision="0" build="700"/>
     <region id="Progressions">
         <node id="root">
             <children>
@@ -70,7 +70,7 @@ EMPTY_PROGRESSIONS_LSX = """<?xml version="1.0" encoding="UTF-8"?>
 
 EMPTY_SPELLLISTS_LSX = """<?xml version="1.0" encoding="UTF-8"?>
 <save>
-    <version major="4" minor="8" revision="0" build="500"/>
+    <version major="4" minor="8" revision="0" build="700"/>
     <region id="SpellLists">
         <node id="root">
             <children>
@@ -249,6 +249,7 @@ def main():
     parser.add_argument("--class", dest="class_name", required=True, help="Target class or subclass name (e.g. Fighter, Wizard).")
     parser.add_argument("--level", type=int, required=True, help="Progression level (1 to 20).")
     parser.add_argument("--subclass", help="Optional subclass name (sets ProgressionType=1).")
+    parser.add_argument("--multiclass", action="store_true", help="Mark progression node as multiclass entry (sets ProgressionType=2).")
     parser.add_argument("--table-uuid", help="Override standard TableUUID for custom class/subclass.")
     parser.add_argument("--passives", help="Comma-separated or semicolon-separated passive names to add.")
     parser.add_argument("--boosts", help="Comma-separated or semicolon-separated boost expressions to add.")
@@ -287,7 +288,12 @@ def main():
         else:
             table_uuid = str(uuid.uuid4())
 
-        progression_type = 1 if args.subclass else 0
+        if args.multiclass:
+            progression_type = 2
+        elif args.subclass:
+            progression_type = 1
+        else:
+            progression_type = 0
         target_name = args.subclass if args.subclass else args.class_name
 
         # Parse lists using parenthesis-aware splitter

@@ -20,7 +20,7 @@ Stage 1 is strictly scoped to the repository workspace:
 Inspect tool arguments, flags, and schema definitions with:
 
 ```bash
-bg3 tools info create-scaffold
+bg3 tools info mod-create
 bg3 tools info scaffold-stat
 bg3 tools info scaffold-progression
 bg3 tools info scaffold-template
@@ -42,7 +42,7 @@ Scope, Class Progression, Spells, Stats, Dependencies"]
     D --> E{"Interactive User Approval Pause"}
     E -- "Changes Requested" --> C
     E -- "Approved" --> F["Step 3: Execute Workspace Scaffolding
-bg3 mod scaffold --json"]
+bg3 mod create &lt;ModName&gt; --json"]
     F --> G["Scaffolded: my_mods/&lt;ModSlug&gt;/
 - Projects/ & Mods/ meta.lsx
 - Directory trees & placeholder icons"]
@@ -125,8 +125,7 @@ Once the interview reaches shared understanding, the Orchestrator synthesizes th
 After user approval, run [`scripts/authoring/create_mod_scaffold.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/create_mod_scaffold.py) to establish the directory layout, metadata, and pre-allocated string handles:
 
 ```bash
-bg3 mod scaffold \
-  --name "<ModName>" \
+bg3 mod create "<ModName>" \
   [--slug "<mod-slug>"] \
   --author "MTGHillGiant" \
   --description "<Description>" \

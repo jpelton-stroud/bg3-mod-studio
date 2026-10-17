@@ -30,7 +30,7 @@ import zlib
 from pathlib import Path
 
 from scripts.lib.env_paths import load_env_file
-from scripts.lib.larian_parsers import calculate_version64
+from scripts.lib.larian_parsers import calculate_version64, generate_larian_handle
 from scripts.lib.mod_resolver import KNOWN_DEPENDENCIES, resolve_dependency_metadata
 
 
@@ -96,8 +96,7 @@ def generate_uuid() -> str:
 
 def generate_handle() -> str:
     """Generates a standard Larian localization handle (h...g...g...g...g...)."""
-    u_str = str(uuid.uuid4()).replace("-", "g")
-    return f"h{u_str}"
+    return generate_larian_handle()
 
 
 def calculate_version64(major: int = 1, minor: int = 0, revision: int = 0, build: int = 0) -> int:
@@ -195,7 +194,7 @@ def build_meta_lsx_content(
 
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <save>
-    <version major="4" minor="8" revision="0" build="500"/>
+    <version major="4" minor="8" revision="0" build="700"/>
     <region id="Config">
         <node id="root">
             <children>
@@ -459,6 +458,12 @@ def main():
         type=Path,
         default=Path(os.environ.get("BG3_MODS_DIR", "my_mods")),
         help="Base directory for mods (default: my_mods or $BG3_MODS_DIR)",
+    )
+    parser.add_argument(
+        "--type",
+        default="Standard",
+        choices=["Standard", "Class", "Subclass", "Item", "Spell", "Cosmetic"],
+        help="Mod template archetype (default: Standard)",
     )
     parser.add_argument("--dry-run", action="store_true", help="Preview without writing files to disk")
     parser.add_argument("--json", action="store_true", help="Output JSON result to stdout")
