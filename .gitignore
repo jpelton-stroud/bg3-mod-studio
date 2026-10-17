@@ -50,6 +50,7 @@ desktop.ini
 # Scratch / temporary experimental folders
 scratch/
 my_mods/notes.md
+docs/DESIGN.md
 
 # Build Guides (User sandbox for level 20 build crafting)
 build_guides/*
