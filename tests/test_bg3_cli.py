@@ -76,9 +76,9 @@ class TestBg3CliIntegration(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
         self.assertIn("add-dependency", proc.stdout)
 
-    def test_mod_add_dependency_alias(self):
+    def test_mod_add_dependency_rejects_underscore(self):
         proc = self.run_cli(["mod", "add_dependency", "--help"])
-        self.assertEqual(proc.returncode, 0)
+        self.assertEqual(proc.returncode, 2)
 
     def test_bg3_run_universal(self):
         proc = self.run_cli(["run", "query_mod_database", "--help"])

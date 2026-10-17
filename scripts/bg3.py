@@ -166,7 +166,6 @@ def build_parser() -> argparse.ArgumentParser:
     # bg3 mod add-dependency
     add_dep_parser = mod_subparsers.add_parser(
         "add-dependency",
-        aliases=["add_dependency"],
         help="Append dependencies or test dependencies to a custom mod",
         parents=[common_parser],
     )
@@ -493,7 +492,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             if getattr(args, "type", None):
                 target_args.extend(["--type", args.type])
 
-        elif sub in ("add-dependency", "add_dependency"):
+        elif sub == "add-dependency":
             script_target = SCRIPTS_DIR / "add_mod_dependency.py"
             target_args.append(args.mod)
             if getattr(args, "dependencies", None):
