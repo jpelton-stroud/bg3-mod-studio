@@ -17,7 +17,7 @@ When triggered via `/bg3_search_mods` or when requested to search for BG3 mods, 
 flowchart TD
     A["User triggers /bg3_search_mods with query"] --> B{"Target platform specified?"}
     B -->|"No"| C["Prompt user for target platform"]
-    C --> D["Execute scripts/modio_search.py"]
+    C --> D["Execute scripts/library/modio_search.py"]
     B -->|"Yes"| D
     D --> E["Automatically filter out mods tracked in mods/library.md"]
     E --> F["Present untracked candidates with full descriptions to user"]
@@ -51,10 +51,10 @@ Inspect the prompt for:
 
 ## Step 2: Natural Language Search Execution
 
-Execute [`scripts/modio_search.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_search.py) to query the mod.io REST API:
+Execute [`scripts/library/modio_search.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/library/modio_search.py) to query the mod.io REST API:
 
 ```bash
-python3 scripts/modio_search.py --query "<SEARCH_QUERY>" --platform "<PLATFORM>" --limit 15 --json
+bg3 modio search --query "<SEARCH_QUERY>" --platform "<PLATFORM>" --limit 15 --json
 ```
 
 The script automatically:
@@ -68,8 +68,8 @@ The script automatically:
 > **Tool Discovery & Schema Inspection**:
 > To inspect all search flags or discover related library tools:
 > ```bash
-> python3 scripts/tools.py --info modio-search --json
-> python3 scripts/tools.py --search "mod.io" --json
+> bg3 tools info modio-search --json
+> bg3 tools search "mod.io" --json
 > ```
 
 ---

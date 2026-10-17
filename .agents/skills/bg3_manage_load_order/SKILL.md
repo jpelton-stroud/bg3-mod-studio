@@ -5,7 +5,7 @@ description: Inspects, activates, disables, and reorders mods in the game's acti
 
 # BG3 Load Order Management Skill (`bg3_manage_load_order`)
 
-This skill enables users to inspect and manage their active *Baldur's Gate 3* load order directly through natural language chat, backed by `scripts/manage_load_order.py`.
+This skill enables users to inspect and manage their active *Baldur's Gate 3* load order directly through natural language chat, backed by `scripts/management/manage_load_order.py`.
 
 ---
 
@@ -27,7 +27,7 @@ Activate this skill when:
 flowchart TD
     Trigger["User Request"] --> Parse["Determine Action (View, Activate, Disable, Validate)"]
     Parse --> ResolveMod["If Mod Specified: Resolve UUID & Version from meta.lsx"]
-    ResolveMod --> Execute["Execute scripts/manage_load_order.py --json"]
+    ResolveMod --> Execute["Execute scripts/management/manage_load_order.py --json"]
     Execute --> Format["Format Response as Markdown Table"]
 ```
 
@@ -50,16 +50,16 @@ python3 scripts/bg3.py loadorder clean --yes --json
 ```
 
 ### 3. Detailed Mod Activation / Deactivation
-For fine-grained position or dependency control, `scripts/manage_load_order.py` provides advanced flags:
+For fine-grained position or dependency control, `scripts/management/manage_load_order.py` provides advanced flags:
 ```bash
 # Enable at end of load order with dependencies:
-python3 scripts/manage_load_order.py --enable "<mod_slug_or_UUID>" --with-deps --json
+bg3 loadorder --enable "<mod_slug_or_UUID>" --with-deps --json
 
 # Disable a mod safely:
-python3 scripts/manage_load_order.py --disable "<mod_slug_or_UUID>" --json
+bg3 loadorder --disable "<mod_slug_or_UUID>" --json
 
 # Validate profile rules:
-python3 scripts/manage_load_order.py --validate --json
+bg3 loadorder --validate --json
 ```
 
 > [!TIP]
@@ -67,8 +67,8 @@ python3 scripts/manage_load_order.py --validate --json
 > To inspect all load order management and save audit options:
 > ```bash
 > python3 scripts/bg3.py loadorder --help
-> python3 scripts/tools.py --info load-order --json
-> python3 scripts/tools.py --search "modsettings" --json
+> bg3 tools info load-order --json
+> bg3 tools search "modsettings" --json
 > ```
 
 

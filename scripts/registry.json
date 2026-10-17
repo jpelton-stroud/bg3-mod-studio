@@ -17,21 +17,53 @@
       "category": "management",
       "summary": "Unified 2026 CLI Suite and command runner for Baldur's Gate 3 Mod Studio.",
       "description": "Unified noun-verb command entrypoint providing stream discipline, structured JSON, exit codes, and safety checks across mod authoring, conflict detection, load order management, and modio syncing.",
-      "intents": ["bg3", "cli", "unified runner", "bg3 cli", "suite"],
+      "intents": [
+        "bg3",
+        "cli",
+        "unified runner",
+        "bg3 cli",
+        "suite"
+      ],
       "cli_usage": "python3 scripts/bg3.py <command> <subcommand> [options] [--json]",
       "flags": [
-        {"name": "<command>", "type": "str", "required": true, "description": "Command group: mod, loadorder, modio, env"},
-        {"name": "<subcommand>", "type": "str", "required": true, "description": "Subcommand action"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON payloads on stdout"},
-        {"name": "--no-color", "type": "bool", "required": false, "description": "Disable ANSI terminal styling"},
-        {"name": "-v, --verbose", "type": "bool", "required": false, "description": "Enable verbose diagnostic logs on stderr"}
+        {
+          "name": "<command>",
+          "type": "str",
+          "required": true,
+          "description": "Command group: mod, loadorder, modio, env"
+        },
+        {
+          "name": "<subcommand>",
+          "type": "str",
+          "required": true,
+          "description": "Subcommand action"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON payloads on stdout"
+        },
+        {
+          "name": "--no-color",
+          "type": "bool",
+          "required": false,
+          "description": "Disable ANSI terminal styling"
+        },
+        {
+          "name": "-v, --verbose",
+          "type": "bool",
+          "required": false,
+          "description": "Enable verbose diagnostic logs on stderr"
+        }
       ],
       "examples": [
         "python3 scripts/bg3.py mod conflict PaladinsCall --against-library --json",
         "python3 scripts/bg3.py mod validate PaladinsCall --json",
         "python3 scripts/bg3.py loadorder list --json",
         "python3 scripts/bg3.py env check --json"
-      ]
+      ],
+      "path": "bg3.py"
     },
     {
       "name": "create_mod_scaffold.py",
@@ -39,16 +71,38 @@
       "category": "authoring",
       "summary": "Scaffolds a complete Baldur's Gate 3 mod directory structure.",
       "description": "Generates a fully compliant mod directory tree under my_mods/<ModSlug> with Projects, Mods, Localization, and meta.lsx with proper GUIDs and Version64.",
-      "intents": ["create new mod", "scaffold mod", "new mod", "start mod", "mod template"],
+      "intents": [
+        "create new mod",
+        "scaffold mod",
+        "new mod",
+        "start mod",
+        "mod template"
+      ],
       "cli_usage": "python3 scripts/create_mod_scaffold.py <ModName> [--author <Author>] [--description <Desc>]",
       "flags": [
-        {"name": "mod_name", "type": "str", "required": true, "description": "Mod name in PascalCase or slug form"},
-        {"name": "--author", "type": "str", "required": false, "description": "Author name (defaults to current user)"},
-        {"name": "--description", "type": "str", "required": false, "description": "Short mod description for meta.lsx"}
+        {
+          "name": "mod_name",
+          "type": "str",
+          "required": true,
+          "description": "Mod name in PascalCase or slug form"
+        },
+        {
+          "name": "--author",
+          "type": "str",
+          "required": false,
+          "description": "Author name (defaults to current user)"
+        },
+        {
+          "name": "--description",
+          "type": "str",
+          "required": false,
+          "description": "Short mod description for meta.lsx"
+        }
       ],
       "examples": [
         "python3 scripts/create_mod_scaffold.py ArcaneWeapons --author \"CustomAuthor\" --description \"Adds custom arcane weapons\""
-      ]
+      ],
+      "path": "authoring/create_mod_scaffold.py"
     },
     {
       "name": "scaffold_stat_entry.py",
@@ -56,22 +110,78 @@
       "category": "authoring",
       "summary": "Scaffolds Larian stat entries with automatic localization handle allocation.",
       "description": "Generates 100% engine-compliant stat boilerplate for Weapon, Armor, Amulet, Ring, Object, PassiveData, Status_BOOST, and Spells, allocating Larian string handles and appending to Localization XML.",
-      "intents": ["create weapon", "create armor", "create item", "create spell", "create passive", "stat entry", "stat boilerplate", "string handle", "localization handle"],
+      "intents": [
+        "create weapon",
+        "create armor",
+        "create item",
+        "create spell",
+        "create passive",
+        "stat entry",
+        "stat boilerplate",
+        "string handle",
+        "localization handle"
+      ],
       "cli_usage": "python3 scripts/scaffold_stat_entry.py --mod <mod> --type <type> --name <name> [options]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": true, "description": "Mod directory name in my_mods/ or path"},
-        {"name": "--type", "type": "str", "required": true, "description": "Stat type: weapon, armor, amulet, ring, object, passivedata, status_boost, spell_target, spell_shout, spell_projectile, spell_zone"},
-        {"name": "--name", "type": "str", "required": true, "description": "Unique stat entry name (e.g. MAG_ThunderBlade)"},
-        {"name": "--display-name", "type": "str", "required": false, "description": "In-game display name for localization"},
-        {"name": "--description", "type": "str", "required": false, "description": "In-game description text for localization"},
-        {"name": "--props", "type": "str", "required": false, "description": "Comma-separated key=value pairs or flags"},
-        {"name": "--using", "type": "str", "required": false, "description": "Base stat entry to inherit from"},
-        {"name": "--dry-run", "type": "bool", "required": false, "description": "Simulate scaffolding without modifying files"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Mod directory name in my_mods/ or path"
+        },
+        {
+          "name": "--type",
+          "type": "str",
+          "required": true,
+          "description": "Stat type: weapon, armor, amulet, ring, object, passivedata, status_boost, spell_target, spell_shout, spell_projectile, spell_zone"
+        },
+        {
+          "name": "--name",
+          "type": "str",
+          "required": true,
+          "description": "Unique stat entry name (e.g. MAG_ThunderBlade)"
+        },
+        {
+          "name": "--display-name",
+          "type": "str",
+          "required": false,
+          "description": "In-game display name for localization"
+        },
+        {
+          "name": "--description",
+          "type": "str",
+          "required": false,
+          "description": "In-game description text for localization"
+        },
+        {
+          "name": "--props",
+          "type": "str",
+          "required": false,
+          "description": "Comma-separated key=value pairs or flags"
+        },
+        {
+          "name": "--using",
+          "type": "str",
+          "required": false,
+          "description": "Base stat entry to inherit from"
+        },
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "Simulate scaffolding without modifying files"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/scaffold_stat_entry.py --mod arcane-progression --type weapon --name WPN_ArcaneStaff --display-name \"Arcane Staff\" --description \"Empowered staff.\" --props \"Rarity=VeryRare,Damage=1d8,Damage Type=Bludgeoning\" --json"
-      ]
+      ],
+      "path": "authoring/scaffold_stat_entry.py"
     },
     {
       "name": "scaffold_progression_node.py",
@@ -79,23 +189,83 @@
       "category": "authoring",
       "summary": "Scaffolds and merges Larian XML Progression and SpellList nodes into BG3 mods.",
       "description": "Discovers and injects progression nodes into Progressions.lsx and companion SpellLists.lsx, automatically resolving vanilla TableUUIDs for all 12 classes without crashing the level-up screen.",
-      "intents": ["progression", "level up", "add spells to class", "add passive to class", "subclass progression", "spell list", "tableuuid", "level 20 progression"],
+      "intents": [
+        "progression",
+        "level up",
+        "add spells to class",
+        "add passive to class",
+        "subclass progression",
+        "spell list",
+        "tableuuid",
+        "level 20 progression"
+      ],
       "cli_usage": "python3 scripts/scaffold_progression_node.py --mod <mod> --class <Class> --level <Level> [options]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": true, "description": "Mod directory name in my_mods/ or path"},
-        {"name": "--class", "type": "str", "required": true, "description": "Base class name (Fighter, Wizard, Rogue, Paladin, etc.)"},
-        {"name": "--level", "type": "int", "required": true, "description": "Character level (1 to 20)"},
-        {"name": "--subclass", "type": "str", "required": false, "description": "Subclass name (sets ProgressionType=1)"},
-        {"name": "--passives", "type": "str", "required": false, "description": "Semicolon or comma separated list of passives"},
-        {"name": "--boosts", "type": "str", "required": false, "description": "Semicolon or comma separated list of boosts"},
-        {"name": "--spells", "type": "str", "required": false, "description": "Comma-separated spells (creates linked SpellList node)"},
-        {"name": "--feat", "type": "bool", "required": false, "description": "Sets AllowImprovement=true for feat selection"},
-        {"name": "--dry-run", "type": "bool", "required": false, "description": "Simulate node generation without writing"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Mod directory name in my_mods/ or path"
+        },
+        {
+          "name": "--class",
+          "type": "str",
+          "required": true,
+          "description": "Base class name (Fighter, Wizard, Rogue, Paladin, etc.)"
+        },
+        {
+          "name": "--level",
+          "type": "int",
+          "required": true,
+          "description": "Character level (1 to 20)"
+        },
+        {
+          "name": "--subclass",
+          "type": "str",
+          "required": false,
+          "description": "Subclass name (sets ProgressionType=1)"
+        },
+        {
+          "name": "--passives",
+          "type": "str",
+          "required": false,
+          "description": "Semicolon or comma separated list of passives"
+        },
+        {
+          "name": "--boosts",
+          "type": "str",
+          "required": false,
+          "description": "Semicolon or comma separated list of boosts"
+        },
+        {
+          "name": "--spells",
+          "type": "str",
+          "required": false,
+          "description": "Comma-separated spells (creates linked SpellList node)"
+        },
+        {
+          "name": "--feat",
+          "type": "bool",
+          "required": false,
+          "description": "Sets AllowImprovement=true for feat selection"
+        },
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "Simulate node generation without writing"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/scaffold_progression_node.py --mod arcane-progression --class Wizard --level 13 --spells \"Target_Disintegrate\" --feat --json"
-      ]
+      ],
+      "path": "authoring/scaffold_progression_node.py"
     },
     {
       "name": "scaffold_root_template.py",
@@ -103,21 +273,70 @@
       "category": "authoring",
       "summary": "Binds stat entries to in-game 3D RootTemplates in Public/<Mod>/RootTemplates/_merged.lsx.",
       "description": "Generates 3D visual item GameObjects linking visual mesh presets, collision physics, and string handles into _merged.lsx so items have visible models in-game.",
-      "intents": ["root template", "3d model", "mesh preset", "visual template", "item appearance", "_merged.lsx", "in-game model"],
+      "intents": [
+        "root template",
+        "3d model",
+        "mesh preset",
+        "visual template",
+        "item appearance",
+        "_merged.lsx",
+        "in-game model"
+      ],
       "cli_usage": "python3 scripts/scaffold_root_template.py --mod <mod> --item <ItemName> --visual-preset <preset> [options]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": true, "description": "Mod directory name in my_mods/ or path"},
-        {"name": "--item", "type": "str", "required": true, "description": "Stat entry name (e.g. WPN_ArcaneStaff)"},
-        {"name": "--visual-preset", "type": "str", "required": false, "description": "Visual preset: greatsword, longsword, dagger, shortbow, staff, plate, leather, robe, helmet, boots, gloves, cloak, amulet, ring, backpack"},
-        {"name": "--parent-template", "type": "str", "required": false, "description": "Custom ParentTemplateId GUID override"},
-        {"name": "--icon", "type": "str", "required": false, "description": "Icon asset name"},
-        {"name": "--list-presets", "type": "bool", "required": false, "description": "List all built-in visual mesh presets"},
-        {"name": "--dry-run", "type": "bool", "required": false, "description": "Simulate without modifying files"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Mod directory name in my_mods/ or path"
+        },
+        {
+          "name": "--item",
+          "type": "str",
+          "required": true,
+          "description": "Stat entry name (e.g. WPN_ArcaneStaff)"
+        },
+        {
+          "name": "--visual-preset",
+          "type": "str",
+          "required": false,
+          "description": "Visual preset: greatsword, longsword, dagger, shortbow, staff, plate, leather, robe, helmet, boots, gloves, cloak, amulet, ring, backpack"
+        },
+        {
+          "name": "--parent-template",
+          "type": "str",
+          "required": false,
+          "description": "Custom ParentTemplateId GUID override"
+        },
+        {
+          "name": "--icon",
+          "type": "str",
+          "required": false,
+          "description": "Icon asset name"
+        },
+        {
+          "name": "--list-presets",
+          "type": "bool",
+          "required": false,
+          "description": "List all built-in visual mesh presets"
+        },
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "Simulate without modifying files"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/scaffold_root_template.py --mod arcane-progression --item WPN_ArcaneStaff --visual-preset staff --json"
-      ]
+      ],
+      "path": "authoring/scaffold_root_template.py"
     },
     {
       "name": "inject_treasure_table.py",
@@ -125,22 +344,76 @@
       "category": "authoring",
       "summary": "Injects custom mod items into BG3 treasure tables and vendor inventories.",
       "description": "Appends item drops to standard game containers (Tutorial Chest, Camp Chest) or vendor inventories via TreasureTable.txt subtables with drop counts and drop chances.",
-      "intents": ["drop item", "tutorial chest", "camp chest", "vendor inventory", "add item to chest", "treasure table", "loot table"],
+      "intents": [
+        "drop item",
+        "tutorial chest",
+        "camp chest",
+        "vendor inventory",
+        "add item to chest",
+        "treasure table",
+        "loot table"
+      ],
       "cli_usage": "python3 scripts/inject_treasure_table.py --mod <mod> --item <ItemName> [options]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": true, "description": "Mod directory name in my_mods/ or path"},
-        {"name": "--item", "type": "str", "required": true, "description": "Item stat entry name to drop"},
-        {"name": "--container", "type": "str", "required": false, "description": "Target container alias: tutorial_chest, camp_chest, vendor_act1, vendor_grove, vendor_goblin"},
-        {"name": "--subtable", "type": "str", "required": false, "description": "Raw treasure subtable name"},
-        {"name": "--count", "type": "int", "required": false, "description": "Drop count (default: 1)"},
-        {"name": "--ratio", "type": "int", "required": false, "description": "Drop chance ratio weight"},
-        {"name": "--list-containers", "type": "bool", "required": false, "description": "List all supported container aliases"},
-        {"name": "--dry-run", "type": "bool", "required": false, "description": "Simulate injection without modifying files"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Mod directory name in my_mods/ or path"
+        },
+        {
+          "name": "--item",
+          "type": "str",
+          "required": true,
+          "description": "Item stat entry name to drop"
+        },
+        {
+          "name": "--container",
+          "type": "str",
+          "required": false,
+          "description": "Target container alias: tutorial_chest, camp_chest, vendor_act1, vendor_grove, vendor_goblin"
+        },
+        {
+          "name": "--subtable",
+          "type": "str",
+          "required": false,
+          "description": "Raw treasure subtable name"
+        },
+        {
+          "name": "--count",
+          "type": "int",
+          "required": false,
+          "description": "Drop count (default: 1)"
+        },
+        {
+          "name": "--ratio",
+          "type": "int",
+          "required": false,
+          "description": "Drop chance ratio weight"
+        },
+        {
+          "name": "--list-containers",
+          "type": "bool",
+          "required": false,
+          "description": "List all supported container aliases"
+        },
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "Simulate injection without modifying files"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/inject_treasure_table.py --mod arcane-progression --item WPN_ArcaneStaff --container tutorial_chest --json"
-      ]
+      ],
+      "path": "authoring/inject_treasure_table.py"
     },
     {
       "name": "scaffold_icon_uvs.py",
@@ -148,20 +421,64 @@
       "category": "authoring",
       "summary": "Calculates UV coordinates and generates GUI/Icons.lsx for custom BG3 icons.",
       "description": "Calculates exact normalized UV coordinates ([U1, V1, U2, V2]) and generates GUI/Icons.lsx texture atlas definitions for custom item and spell icons.",
-      "intents": ["icon atlas", "uv coordinates", "custom icons", "gui icons", "icons.lsx", "texture atlas", "scaffold icon uvs"],
+      "intents": [
+        "icon atlas",
+        "uv coordinates",
+        "custom icons",
+        "gui icons",
+        "icons.lsx",
+        "texture atlas",
+        "scaffold icon uvs"
+      ],
       "cli_usage": "python3 scripts/scaffold_icon_uvs.py --mod <mod> [options]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": false, "description": "Mod directory name in my_mods/ or path"},
-        {"name": "--icons", "type": "str", "required": false, "description": "Comma-separated list of icon names"},
-        {"name": "--icons-dir", "type": "str", "required": false, "description": "Directory containing icon PNG files"},
-        {"name": "--sheet-size", "type": "str", "required": false, "description": "Texture sheet dimensions (e.g. 1024x1024)"},
-        {"name": "--icon-size", "type": "str", "required": false, "description": "Individual icon dimensions (e.g. 64x64)"},
-        {"name": "--output-lsx", "type": "str", "required": false, "description": "Target LSX file path"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": false,
+          "description": "Mod directory name in my_mods/ or path"
+        },
+        {
+          "name": "--icons",
+          "type": "str",
+          "required": false,
+          "description": "Comma-separated list of icon names"
+        },
+        {
+          "name": "--icons-dir",
+          "type": "str",
+          "required": false,
+          "description": "Directory containing icon PNG files"
+        },
+        {
+          "name": "--sheet-size",
+          "type": "str",
+          "required": false,
+          "description": "Texture sheet dimensions (e.g. 1024x1024)"
+        },
+        {
+          "name": "--icon-size",
+          "type": "str",
+          "required": false,
+          "description": "Individual icon dimensions (e.g. 64x64)"
+        },
+        {
+          "name": "--output-lsx",
+          "type": "str",
+          "required": false,
+          "description": "Target LSX file path"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/scaffold_icon_uvs.py --icons \"Icon_Staff,Icon_Robe,Icon_Ring\" --sheet-size 1024x1024 --icon-size 64x64 --json"
-      ]
+      ],
+      "path": "authoring/scaffold_icon_uvs.py"
     },
     {
       "name": "generate_compat_patch.py",
@@ -169,20 +486,63 @@
       "category": "authoring",
       "summary": "Scaffolds compatibility patches or Compatibility Framework configs for colliding BG3 mods.",
       "description": "Compares conflicting mods and generates automated reconciliation patches as standalone merge mods or Compatibility Framework JSON payloads with configurable merge strategies.",
-      "intents": ["compatibility patch", "patch mod", "resolve conflict", "compatibility framework", "merge mods", "fix collision"],
+      "intents": [
+        "compatibility patch",
+        "patch mod",
+        "resolve conflict",
+        "compatibility framework",
+        "merge mods",
+        "fix collision"
+      ],
       "cli_usage": "python3 scripts/generate_compat_patch.py --mod1 <mod1> --mod2 <mod2> [options]",
       "flags": [
-        {"name": "--mod1", "type": "str", "required": true, "description": "First conflicting mod name or path"},
-        {"name": "--mod2", "type": "str", "required": true, "description": "Second conflicting mod name or path"},
-        {"name": "--strategy", "type": "str", "required": false, "description": "Resolution strategy: merge_all, override_mod1, override_mod2"},
-        {"name": "--mode", "type": "str", "required": false, "description": "Patch output format: standalone or cf (compatibility framework)"},
-        {"name": "--patch-name", "type": "str", "required": false, "description": "Custom name for generated patch mod"},
-        {"name": "--dry-run", "type": "bool", "required": false, "description": "Simulate patch generation without writing files"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--mod1",
+          "type": "str",
+          "required": true,
+          "description": "First conflicting mod name or path"
+        },
+        {
+          "name": "--mod2",
+          "type": "str",
+          "required": true,
+          "description": "Second conflicting mod name or path"
+        },
+        {
+          "name": "--strategy",
+          "type": "str",
+          "required": false,
+          "description": "Resolution strategy: merge_all, override_mod1, override_mod2"
+        },
+        {
+          "name": "--mode",
+          "type": "str",
+          "required": false,
+          "description": "Patch output format: standalone or cf (compatibility framework)"
+        },
+        {
+          "name": "--patch-name",
+          "type": "str",
+          "required": false,
+          "description": "Custom name for generated patch mod"
+        },
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "Simulate patch generation without writing files"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/generate_compat_patch.py --mod1 unlocklevelcurve --mod2 choose-your-stats --strategy merge_all --format standalone --json"
-      ]
+      ],
+      "path": "authoring/generate_compat_patch.py"
     },
     {
       "name": "add_mod_dependency.py",
@@ -190,21 +550,59 @@
       "category": "authoring",
       "summary": "Adds community or core mod dependencies and test dependencies to custom mods.",
       "description": "Resolves dependency metadata from mods/library.md or mod.io, injects ModuleShortDesc nodes into meta.lsx, updates README.md, and manages test dependencies in .test_deps.json.",
-      "intents": ["add dependency", "mod dependency", "test dependency", "inject dependency", "require mod", "companion mod"],
+      "intents": [
+        "add dependency",
+        "mod dependency",
+        "test dependency",
+        "inject dependency",
+        "require mod",
+        "companion mod"
+      ],
       "cli_usage": "python3 scripts/add_mod_dependency.py [--mod <mod>] [--dep <deps>] [--test-dep <test_deps>] [--test-only [test_deps]] [--dry-run] [--json]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": false, "description": "Custom mod name, slug, or directory in my_mods/ (optional if run inside mod directory)"},
-        {"name": "--dep", "type": "str", "required": false, "description": "Permanent dependency mod name(s), slug(s), or UUID(s) (comma-separated or repeated)"},
-        {"name": "--test-dep", "type": "str", "required": false, "description": "Test dependency mod name(s), slug(s), or UUID(s) (comma-separated or repeated)"},
-        {"name": "--test-only", "type": "str|bool", "required": false, "description": "Add as test dependency (.test_deps.json); can be a bare flag or take comma-separated mod slugs"},
-        {"name": "--dry-run", "type": "bool", "required": false, "description": "Preview changes without modifying files"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": false,
+          "description": "Custom mod name, slug, or directory in my_mods/ (optional if run inside mod directory)"
+        },
+        {
+          "name": "--dep",
+          "type": "str",
+          "required": false,
+          "description": "Permanent dependency mod name(s), slug(s), or UUID(s) (comma-separated or repeated)"
+        },
+        {
+          "name": "--test-dep",
+          "type": "str",
+          "required": false,
+          "description": "Test dependency mod name(s), slug(s), or UUID(s) (comma-separated or repeated)"
+        },
+        {
+          "name": "--test-only",
+          "type": "str|bool",
+          "required": false,
+          "description": "Add as test dependency (.test_deps.json); can be a bare flag or take comma-separated mod slugs"
+        },
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "Preview changes without modifying files"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/add_mod_dependency.py --mod arcane-progression --dep unlocklevelcurve --json",
         "python3 scripts/add_mod_dependency.py --mod arcane-progression --test-only unlocklevelcurve,unlocklevelcurve-instant-xp --json",
         "python3 scripts/add_mod_dependency.py --mod arcane-progression --dep unlocklevelcurve --test-only unlocklevelcurve-instant-xp --json"
-      ]
+      ],
+      "path": "authoring/add_mod_dependency.py"
     },
     {
       "name": "pack_mod_pak.py",
@@ -212,24 +610,83 @@
       "category": "packaging",
       "summary": "Pure-Python LSPK v18 .pak package builder for Baldur's Gate 3 mods.",
       "description": "Packages mod source directories into Larian Package v18 (.pak) archives with zlib compression, eliminating external C# LSLib binaries or Wine on Linux/WSL.",
-      "intents": ["build pak", "pack pak", "package mod", "create pak", "export pak", "lspk pack", "distribute mod"],
+      "intents": [
+        "build pak",
+        "pack pak",
+        "package mod",
+        "create pak",
+        "export pak",
+        "lspk pack",
+        "distribute mod"
+      ],
       "cli_usage": "python3 scripts/pack_mod_pak.py --mod <mod> [options]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": false, "description": "Mod directory name in my_mods/ or path"},
-        {"name": "--source-dir", "type": "str", "required": false, "description": "Explicit source directory to package"},
-        {"name": "--output-dir", "type": "str", "required": false, "description": "Output directory for .pak file"},
-        {"name": "--output-file", "type": "str", "required": false, "description": "Explicit output .pak file path"},
-        {"name": "--publish-local", "type": "bool", "required": false, "description": "Publish .pak directly to local BG3 AppData Mods directory"},
-        {"name": "--clean-local", "type": "bool", "required": false, "description": "Purge local test .pak file(s) from local BG3 AppData Mods directory"},
-        {"name": "--uncompressed", "type": "bool", "required": false, "description": "Store files without zlib compression"},
-        {"name": "--dry-run", "type": "bool", "required": false, "description": "Preview operations without modifying files on disk"},
-        {"name": "--verify", "type": "bool", "required": false, "description": "Verify archive integrity with LspkArchive after packing"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": false,
+          "description": "Mod directory name in my_mods/ or path"
+        },
+        {
+          "name": "--source-dir",
+          "type": "str",
+          "required": false,
+          "description": "Explicit source directory to package"
+        },
+        {
+          "name": "--output-dir",
+          "type": "str",
+          "required": false,
+          "description": "Output directory for .pak file"
+        },
+        {
+          "name": "--output-file",
+          "type": "str",
+          "required": false,
+          "description": "Explicit output .pak file path"
+        },
+        {
+          "name": "--publish-local",
+          "type": "bool",
+          "required": false,
+          "description": "Publish .pak directly to local BG3 AppData Mods directory"
+        },
+        {
+          "name": "--clean-local",
+          "type": "bool",
+          "required": false,
+          "description": "Purge local test .pak file(s) from local BG3 AppData Mods directory"
+        },
+        {
+          "name": "--uncompressed",
+          "type": "bool",
+          "required": false,
+          "description": "Store files without zlib compression"
+        },
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "Preview operations without modifying files on disk"
+        },
+        {
+          "name": "--verify",
+          "type": "bool",
+          "required": false,
+          "description": "Verify archive integrity with LspkArchive after packing"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/pack_mod_pak.py --mod arcane-progression --publish-local --json",
         "python3 scripts/pack_mod_pak.py --mod arcane-progression --clean-local --json"
-      ]
+      ],
+      "path": "packaging/pack_mod_pak.py"
     },
     {
       "name": "sync_game_data.py",
@@ -237,20 +694,60 @@
       "category": "packaging",
       "summary": "Syncs and cleans custom BG3 mods between my_mods/ and Steam Baldurs Gate 3/Data directory.",
       "description": "Deploys mod assets (Projects, Mods, Public, Localization) directly into the game's active Data directory for the Toolkit, and purges unpacked development files before testing.",
-      "intents": ["sync game data", "deploy mod", "install mod", "test in game", "copy to data", "bump build", "clean mod data", "clean game data"],
+      "intents": [
+        "sync game data",
+        "deploy mod",
+        "install mod",
+        "test in game",
+        "copy to data",
+        "bump build",
+        "clean mod data",
+        "clean game data"
+      ],
       "cli_usage": "python3 scripts/sync_game_data.py [--mod <mod>] [--clean-mod <mod>] [options]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": false, "description": "Specific mod to sync (defaults to all in my_mods/)"},
-        {"name": "--clean-mod", "type": "str", "required": false, "description": "Purge specific mod loose files from Data/ directory"},
-        {"name": "--data-dir", "type": "str", "required": false, "description": "Explicit Steam BG3 Data directory path"},
-        {"name": "--bump-build", "type": "bool", "required": false, "description": "Increment mod build version before syncing"},
-        {"name": "--dry-run", "type": "bool", "required": false, "description": "List files that would be copied or purged without disk modifications"},
-        {"name": "--clean-custom", "type": "bool", "required": false, "description": "Purge all custom studio mods from Data/ directory"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": false,
+          "description": "Specific mod to sync (defaults to all in my_mods/)"
+        },
+        {
+          "name": "--clean-mod",
+          "type": "str",
+          "required": false,
+          "description": "Purge specific mod loose files from Data/ directory"
+        },
+        {
+          "name": "--data-dir",
+          "type": "str",
+          "required": false,
+          "description": "Explicit Steam BG3 Data directory path"
+        },
+        {
+          "name": "--bump-build",
+          "type": "bool",
+          "required": false,
+          "description": "Increment mod build version before syncing"
+        },
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "List files that would be copied or purged without disk modifications"
+        },
+        {
+          "name": "--clean-custom",
+          "type": "bool",
+          "required": false,
+          "description": "Purge all custom studio mods from Data/ directory"
+        }
       ],
       "examples": [
         "python3 scripts/sync_game_data.py --mod arcane-progression --bump-build",
         "python3 scripts/sync_game_data.py --clean-mod arcane-progression --json"
-      ]
+      ],
+      "path": "packaging/sync_game_data.py"
     },
     {
       "name": "validate_mod.py",
@@ -258,16 +755,39 @@
       "category": "diagnostics",
       "summary": "Deterministic static validator and linter for BG3 mods.",
       "description": "Validates LSX XML syntax, verifies localization string handle integrity, checks asset dependencies, and audits mod structure for engine compliance.",
-      "intents": ["validate mod", "lint mod", "check errors", "verify handles", "xml syntax check", "mod health check"],
+      "intents": [
+        "validate mod",
+        "lint mod",
+        "check errors",
+        "verify handles",
+        "xml syntax check",
+        "mod health check"
+      ],
       "cli_usage": "python3 scripts/validate_mod.py --mod <mod> [options]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": true, "description": "Mod directory name in my_mods/ or path"},
-        {"name": "--strict", "type": "bool", "required": false, "description": "Treat warnings as validation errors"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON report"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Mod directory name in my_mods/ or path"
+        },
+        {
+          "name": "--strict",
+          "type": "bool",
+          "required": false,
+          "description": "Treat warnings as validation errors"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON report"
+        }
       ],
       "examples": [
         "python3 scripts/validate_mod.py --mod arcane-progression --strict --json"
-      ]
+      ],
+      "path": "diagnostics/validate_mod.py"
     },
     {
       "name": "check_mod_conflicts.py",
@@ -275,21 +795,63 @@
       "category": "diagnostics",
       "summary": "Static entry collision and compatibility analyzer for BG3 mods.",
       "description": "Detects stat entry collisions, progression level overlaps, and console-incompatible native DLLs between candidates and tracked library mods.",
-      "intents": ["check conflicts", "mod compatibility", "stat collisions", "console compatibility", "progression overlap", "incompatible mods"],
+      "intents": [
+        "check conflicts",
+        "mod compatibility",
+        "stat collisions",
+        "console compatibility",
+        "progression overlap",
+        "incompatible mods"
+      ],
       "cli_usage": "python3 scripts/check_mod_conflicts.py --candidate <slug> --against-library [options]",
       "flags": [
-        {"name": "--candidate", "type": "str", "required": false, "description": "Candidate mod slug or path"},
-        {"name": "--against-library", "type": "bool", "required": false, "description": "Compare candidate against all tracked mods in library.md"},
-        {"name": "--mod1", "type": "str", "required": false, "description": "First mod to compare"},
-        {"name": "--mod2", "type": "str", "required": false, "description": "Second mod to compare"},
-        {"name": "--all", "type": "bool", "required": false, "description": "Run pairwise collision matrix across all tracked mods"},
-        {"name": "--summary", "type": "bool", "required": false, "description": "Output high-level collision counts and mod pairs without dumping full raw entries"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON conflict report"}
+        {
+          "name": "--candidate",
+          "type": "str",
+          "required": false,
+          "description": "Candidate mod slug or path"
+        },
+        {
+          "name": "--against-library",
+          "type": "bool",
+          "required": false,
+          "description": "Compare candidate against all tracked mods in library.md"
+        },
+        {
+          "name": "--mod1",
+          "type": "str",
+          "required": false,
+          "description": "First mod to compare"
+        },
+        {
+          "name": "--mod2",
+          "type": "str",
+          "required": false,
+          "description": "Second mod to compare"
+        },
+        {
+          "name": "--all",
+          "type": "bool",
+          "required": false,
+          "description": "Run pairwise collision matrix across all tracked mods"
+        },
+        {
+          "name": "--summary",
+          "type": "bool",
+          "required": false,
+          "description": "Output high-level collision counts and mod pairs without dumping full raw entries"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON conflict report"
+        }
       ],
       "examples": [
         "python3 scripts/check_mod_conflicts.py --candidate unlocklevelcurve --against-library --summary --json"
-      ]
-
+      ],
+      "path": "diagnostics/check_mod_conflicts.py"
     },
     {
       "name": "sync_localization.py",
@@ -297,19 +859,58 @@
       "category": "diagnostics",
       "summary": "Audits, prunes orphaned string handles, and syncs multi-language localization XMLs.",
       "description": "Cross-references localization handles against all stat and LSX files, pruning unused orphans with .bak backups and synchronizing multi-language skeletons.",
-      "intents": ["localization check", "prune orphans", "unused handles", "missing handles", "sync languages", "translate mod", "clean xml"],
+      "intents": [
+        "localization check",
+        "prune orphans",
+        "unused handles",
+        "missing handles",
+        "sync languages",
+        "translate mod",
+        "clean xml"
+      ],
       "cli_usage": "python3 scripts/sync_localization.py --mod <mod> [options]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": true, "description": "Mod directory name in my_mods/ or path"},
-        {"name": "--prune-orphans", "type": "bool", "required": false, "description": "Safely prune unused localization handles"},
-        {"name": "--sync-languages", "type": "str", "required": false, "description": "Comma-separated target language codes (de,fr,es,it,pl,pt,ru,zh)"},
-        {"name": "--check", "type": "bool", "required": false, "description": "Audit check mode for missing handles and orphans"},
-        {"name": "--dry-run", "type": "bool", "required": false, "description": "Simulate actions without writing files"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON report"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Mod directory name in my_mods/ or path"
+        },
+        {
+          "name": "--prune-orphans",
+          "type": "bool",
+          "required": false,
+          "description": "Safely prune unused localization handles"
+        },
+        {
+          "name": "--sync-languages",
+          "type": "str",
+          "required": false,
+          "description": "Comma-separated target language codes (de,fr,es,it,pl,pt,ru,zh)"
+        },
+        {
+          "name": "--check",
+          "type": "bool",
+          "required": false,
+          "description": "Audit check mode for missing handles and orphans"
+        },
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "Simulate actions without writing files"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON report"
+        }
       ],
       "examples": [
         "python3 scripts/sync_localization.py --mod arcane-progression --prune-orphans --dry-run --json"
-      ]
+      ],
+      "path": "diagnostics/sync_localization.py"
     },
     {
       "name": "inspect_save_game.py",
@@ -317,17 +918,46 @@
       "category": "diagnostics",
       "summary": "Inspects BG3 .lsv save files and audits them against active mod load orders.",
       "description": "Extracts mod load order dependencies and character metadata from BG3 .lsv save archives and cross-references against modsettings.lsx to identify crash sources.",
-      "intents": ["inspect save", "save file audit", "save game mods", "missing save mods", "save crash", ".lsv inspector", "modsettings audit"],
+      "intents": [
+        "inspect save",
+        "save file audit",
+        "save game mods",
+        "missing save mods",
+        "save crash",
+        ".lsv inspector",
+        "modsettings audit"
+      ],
       "cli_usage": "python3 scripts/inspect_save_game.py [options]",
       "flags": [
-        {"name": "--save-file", "type": "str", "required": false, "description": "Path to .lsv save file (defaults to most recent save)"},
-        {"name": "--audit", "type": "bool", "required": false, "description": "Audit save mod dependencies against active profile modsettings.lsx"},
-        {"name": "--profile", "type": "str", "required": false, "description": "Game profile name (default: Public)"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--save-file",
+          "type": "str",
+          "required": false,
+          "description": "Path to .lsv save file (defaults to most recent save)"
+        },
+        {
+          "name": "--audit",
+          "type": "bool",
+          "required": false,
+          "description": "Audit save mod dependencies against active profile modsettings.lsx"
+        },
+        {
+          "name": "--profile",
+          "type": "str",
+          "required": false,
+          "description": "Game profile name (default: Public)"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/inspect_save_game.py --audit --json"
-      ]
+      ],
+      "path": "diagnostics/inspect_save_game.py"
     },
     {
       "name": "manage_load_order.py",
@@ -335,23 +965,76 @@
       "category": "management",
       "summary": "Inspects, activates, and validates Baldur's Gate 3 mod load order in modsettings.lsx.",
       "description": "Lists active mods in modsettings.lsx, activates or disables installed mods, and validates load order consistency and missing UUID dependencies.",
-      "intents": ["load order", "modsettings.lsx", "enable mod", "disable mod", "list active mods", "validate load order"],
+      "intents": [
+        "load order",
+        "modsettings.lsx",
+        "enable mod",
+        "disable mod",
+        "list active mods",
+        "validate load order"
+      ],
       "cli_usage": "python3 scripts/manage_load_order.py [options]",
       "flags": [
-        {"name": "--list", "type": "bool", "required": false, "description": "List all active mods in modsettings.lsx (default action)"},
-        {"name": "--enable", "type": "str", "required": false, "description": "Enable and append mod by name or UUID to load order"},
-        {"name": "--with-deps", "type": "bool", "required": false, "description": "Automatically enable declared dependencies from meta.lsx (default: true)"},
-        {"name": "--no-deps", "type": "bool", "required": false, "description": "Do not automatically enable dependencies"},
-        {"name": "--isolate", "type": "bool", "required": false, "description": "Clean-room isolation: disable all other mods except base game and dependencies"},
-        {"name": "--disable", "type": "str", "required": false, "description": "Disable and remove mod by name or UUID from load order"},
-        {"name": "--validate", "type": "bool", "required": false, "description": "Validate load order against installed mods and report inconsistencies"},
-        {"name": "--profile", "type": "str", "required": false, "description": "Target profile name (default: Public)"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--list",
+          "type": "bool",
+          "required": false,
+          "description": "List all active mods in modsettings.lsx (default action)"
+        },
+        {
+          "name": "--enable",
+          "type": "str",
+          "required": false,
+          "description": "Enable and append mod by name or UUID to load order"
+        },
+        {
+          "name": "--with-deps",
+          "type": "bool",
+          "required": false,
+          "description": "Automatically enable declared dependencies from meta.lsx (default: true)"
+        },
+        {
+          "name": "--no-deps",
+          "type": "bool",
+          "required": false,
+          "description": "Do not automatically enable dependencies"
+        },
+        {
+          "name": "--isolate",
+          "type": "bool",
+          "required": false,
+          "description": "Clean-room isolation: disable all other mods except base game and dependencies"
+        },
+        {
+          "name": "--disable",
+          "type": "str",
+          "required": false,
+          "description": "Disable and remove mod by name or UUID from load order"
+        },
+        {
+          "name": "--validate",
+          "type": "bool",
+          "required": false,
+          "description": "Validate load order against installed mods and report inconsistencies"
+        },
+        {
+          "name": "--profile",
+          "type": "str",
+          "required": false,
+          "description": "Target profile name (default: Public)"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/manage_load_order.py --enable \"ArcaneProgression\" --with-deps --json",
         "python3 scripts/manage_load_order.py --enable \"ArcaneProgression\" --isolate --dry-run"
-      ]
+      ],
+      "path": "management/manage_load_order.py"
     },
     {
       "name": "bump_mod_version.py",
@@ -359,20 +1042,63 @@
       "category": "management",
       "summary": "Auto-generates and bumps semantic versions and Larian Version64 integers in BG3 mods.",
       "description": "Calculates and encodes 64-bit uint Version64 integers across Projects/<UUID>/meta.lsx and Mods/<UUID>/meta.lsx atomically according to semantic versioning.",
-      "intents": ["bump version", "increment version", "semantic version", "version64", "release version", "patch version"],
+      "intents": [
+        "bump version",
+        "increment version",
+        "semantic version",
+        "version64",
+        "release version",
+        "patch version"
+      ],
       "cli_usage": "python3 scripts/bump_mod_version.py --mod <mod> [--patch | --minor | --major] [options]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": true, "description": "Mod directory name in my_mods/ or path"},
-        {"name": "--show", "type": "bool", "required": false, "description": "Display current version and encoded Version64 without bumping"},
-        {"name": "--patch", "type": "bool", "required": false, "description": "Increment patch version (e.g. 1.0.0.0 -> 1.0.0.1)"},
-        {"name": "--minor", "type": "bool", "required": false, "description": "Increment minor version (e.g. 1.0.0.0 -> 1.1.0.0)"},
-        {"name": "--major", "type": "bool", "required": false, "description": "Increment major version (e.g. 1.0.0.0 -> 2.0.0.0)"},
-        {"name": "--set", "type": "str", "required": false, "description": "Set explicit 4-part semantic version (e.g. 1.2.3.4)"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Mod directory name in my_mods/ or path"
+        },
+        {
+          "name": "--show",
+          "type": "bool",
+          "required": false,
+          "description": "Display current version and encoded Version64 without bumping"
+        },
+        {
+          "name": "--patch",
+          "type": "bool",
+          "required": false,
+          "description": "Increment patch version (e.g. 1.0.0.0 -> 1.0.0.1)"
+        },
+        {
+          "name": "--minor",
+          "type": "bool",
+          "required": false,
+          "description": "Increment minor version (e.g. 1.0.0.0 -> 1.1.0.0)"
+        },
+        {
+          "name": "--major",
+          "type": "bool",
+          "required": false,
+          "description": "Increment major version (e.g. 1.0.0.0 -> 2.0.0.0)"
+        },
+        {
+          "name": "--set",
+          "type": "str",
+          "required": false,
+          "description": "Set explicit 4-part semantic version (e.g. 1.2.3.4)"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/bump_mod_version.py --mod arcane-progression --patch --json"
-      ]
+      ],
+      "path": "management/bump_mod_version.py"
     },
     {
       "name": "render_modio_description.py",
@@ -380,16 +1106,40 @@
       "category": "management",
       "summary": "Exports a custom mod README as HTML for publication with GFM table support.",
       "description": "Reads a mod's root README.md and renders the full document as modio_description.html or stdout HTML.",
-      "intents": ["mod metadata", "README HTML export", "HTML description", "toolkit description", "publish description", "mod.io description", "render description"],
+      "intents": [
+        "mod metadata",
+        "README HTML export",
+        "HTML description",
+        "toolkit description",
+        "publish description",
+        "mod.io description",
+        "render description"
+      ],
       "cli_usage": "python3 scripts/render_modio_description.py --mod <mod> [options]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": true, "description": "Mod directory name in my_mods/ or path"},
-        {"name": "--write", "type": "bool", "required": false, "description": "Write modio_description.html beside README.md"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured output paths as JSON"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Mod directory name in my_mods/ or path"
+        },
+        {
+          "name": "--write",
+          "type": "bool",
+          "required": false,
+          "description": "Write modio_description.html beside README.md"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured output paths as JSON"
+        }
       ],
       "examples": [
         "python3 scripts/render_modio_description.py --mod paladins-call --write --json"
-      ]
+      ],
+      "path": "management/render_modio_description.py"
     },
     {
       "name": "modio_update_metadata.py",
@@ -397,18 +1147,46 @@
       "category": "management",
       "summary": "Previews and updates metadata and selected profile settings for a local BG3 mod on mod.io.",
       "description": "Uses MODIO_PAT to update a uniquely matched published mod's HTML description, approved additive tags, three Community options, non-commercial credit options, and public visibility. Preview is read-only; writes require --confirm.",
-      "intents": ["update mod.io metadata", "update mod profile", "set mod.io tags", "update mod description", "mod community settings", "reuse permissions"],
+      "intents": [
+        "update mod.io metadata",
+        "update mod profile",
+        "set mod.io tags",
+        "update mod description",
+        "mod community settings",
+        "reuse permissions"
+      ],
       "cli_usage": "python3 scripts/modio_update_metadata.py --mod <local_mod> [--tags <approved-tags>] [--confirm] [--json]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": true, "description": "Exact mod name or slug for a folder under my_mods/"},
-        {"name": "--tags", "type": "str", "required": false, "description": "Comma-separated user-approved tags; may be repeated"},
-        {"name": "--confirm", "type": "bool", "required": false, "description": "Perform writes after interactive user confirmation; without it, preview only"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Exact mod name or slug for a folder under my_mods/"
+        },
+        {
+          "name": "--tags",
+          "type": "str",
+          "required": false,
+          "description": "Comma-separated user-approved tags; may be repeated"
+        },
+        {
+          "name": "--confirm",
+          "type": "bool",
+          "required": false,
+          "description": "Perform writes after interactive user confirmation; without it, preview only"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/modio_update_metadata.py --mod paladins-call --json",
         "python3 scripts/modio_update_metadata.py --mod paladins-call --tags \"Class,Paladin\" --confirm --json"
-      ]
+      ],
+      "path": "management/modio_update_metadata.py"
     },
     {
       "name": "setup_environment.py",
@@ -416,15 +1194,33 @@
       "category": "management",
       "summary": "BG3 Mod Studio & Mod.io Toolkit Environment Setup Wizard.",
       "description": "Verifies Python version, inspects Steam BG3 and AppData directories, creates workspace directories, and checks mod.io API authentication.",
-      "intents": ["setup environment", "verify setup", "check python", "check steam bg3", "environment doctor", "init studio"],
+      "intents": [
+        "setup environment",
+        "verify setup",
+        "check python",
+        "check steam bg3",
+        "environment doctor",
+        "init studio"
+      ],
       "cli_usage": "python3 scripts/setup_environment.py [options]",
       "flags": [
-        {"name": "--check-only", "type": "bool", "required": false, "description": "Check environment and paths without interactive prompts"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON report"}
+        {
+          "name": "--check-only",
+          "type": "bool",
+          "required": false,
+          "description": "Check environment and paths without interactive prompts"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON report"
+        }
       ],
       "examples": [
         "python3 scripts/setup_environment.py --check-only"
-      ]
+      ],
+      "path": "management/setup_environment.py"
     },
     {
       "name": "query_mod_database.py",
@@ -432,25 +1228,85 @@
       "category": "library",
       "summary": "High-speed BiS gear, spell, and mechanics database query engine.",
       "description": "Indexes all cataloged community mods in mods/ into a sub-10ms cache (.cache/mod_database.json), allowing instant querying by slot, boost, passive, rarity, or keyword.",
-      "intents": ["query gear", "best in slot", "bis gear", "find spell", "find passive", "search items", "mod database", "gear boost", "spell save dc gear"],
+      "intents": [
+        "query gear",
+        "best in slot",
+        "bis gear",
+        "find spell",
+        "find passive",
+        "search items",
+        "mod database",
+        "gear boost",
+        "spell save dc gear"
+      ],
       "cli_usage": "python3 scripts/query_mod_database.py [options]",
       "flags": [
-        {"name": "--slot", "type": "str", "required": false, "description": "Filter by gear slot: Weapon, Armor, Helmet, Boots, Gloves, Cloak, Amulet, Ring, Shield"},
-        {"name": "--boost", "type": "str", "required": false, "description": "Search in stat Boosts (e.g. SpellSaveDC, AC, Ability)"},
-        {"name": "--passive", "type": "str", "required": false, "description": "Search in Passives / PassivesOnEquip"},
-        {"name": "--search", "type": "str", "required": false, "description": "Free text search across name, displayName, and description"},
-        {"name": "--rarity", "type": "str", "required": false, "description": "Filter by rarity: Common, Uncommon, Rare, VeryRare, Legendary"},
-        {"name": "--mod", "type": "str", "required": false, "description": "Filter items to a specific mod slug"},
-        {"name": "--limit", "type": "int", "required": false, "description": "Max results to return (default: 10)"},
-        {"name": "--compact", "type": "bool", "required": false, "description": "Output compact records omitting raw file paths and empty fields"},
-        {"name": "--reindex", "type": "bool", "required": false, "description": "Force rebuild cache index"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--slot",
+          "type": "str",
+          "required": false,
+          "description": "Filter by gear slot: Weapon, Armor, Helmet, Boots, Gloves, Cloak, Amulet, Ring, Shield"
+        },
+        {
+          "name": "--boost",
+          "type": "str",
+          "required": false,
+          "description": "Search in stat Boosts (e.g. SpellSaveDC, AC, Ability)"
+        },
+        {
+          "name": "--passive",
+          "type": "str",
+          "required": false,
+          "description": "Search in Passives / PassivesOnEquip"
+        },
+        {
+          "name": "--search",
+          "type": "str",
+          "required": false,
+          "description": "Free text search across name, displayName, and description"
+        },
+        {
+          "name": "--rarity",
+          "type": "str",
+          "required": false,
+          "description": "Filter by rarity: Common, Uncommon, Rare, VeryRare, Legendary"
+        },
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": false,
+          "description": "Filter items to a specific mod slug"
+        },
+        {
+          "name": "--limit",
+          "type": "int",
+          "required": false,
+          "description": "Max results to return (default: 10)"
+        },
+        {
+          "name": "--compact",
+          "type": "bool",
+          "required": false,
+          "description": "Output compact records omitting raw file paths and empty fields"
+        },
+        {
+          "name": "--reindex",
+          "type": "bool",
+          "required": false,
+          "description": "Force rebuild cache index"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/query_mod_database.py --slot Weapon --boost \"SpellSaveDC\" --compact --json",
         "python3 scripts/query_mod_database.py --search \"Charisma\" --rarity Legendary --json"
-      ]
-
+      ],
+      "path": "library/query_mod_database.py"
     },
     {
       "name": "update_library_catalog.py",
@@ -458,15 +1314,32 @@
       "category": "library",
       "summary": "Updates or checks six-column categorized catalog in mods/library.md from mods/*/README.md.",
       "description": "Parses verified mod.io IDs, titles, directory slugs, descriptions, and implemented-feature counts from README specs in mods/<slug>/ and compiles categorized six-column rows with relative spec links in mods/library.md. Unknown IDs stay blank.",
-      "intents": ["update library", "library catalog", "compile library.md", "library table", "tracked mods catalog"],
+      "intents": [
+        "update library",
+        "library catalog",
+        "compile library.md",
+        "library table",
+        "tracked mods catalog"
+      ],
       "cli_usage": "python3 scripts/update_library_catalog.py [options]",
       "flags": [
-        {"name": "--check", "type": "bool", "required": false, "description": "Check if library.md is up to date without writing"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON catalog summary"}
+        {
+          "name": "--check",
+          "type": "bool",
+          "required": false,
+          "description": "Check if library.md is up to date without writing"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON catalog summary"
+        }
       ],
       "examples": [
         "python3 scripts/update_library_catalog.py --check"
-      ]
+      ],
+      "path": "library/update_library_catalog.py"
     },
     {
       "name": "modio_search.py",
@@ -474,19 +1347,56 @@
       "category": "library",
       "summary": "Searches Baldur's Gate 3 mods on mod.io with platform and tag filtering.",
       "description": "Queries the mod.io REST API for Baldur's Gate 3 mods, supporting natural language queries, platform targeting, and pagination.",
-      "intents": ["search mod.io", "find mods", "browse mods", "search mods", "mod.io query"],
+      "intents": [
+        "search mod.io",
+        "find mods",
+        "browse mods",
+        "search mods",
+        "mod.io query"
+      ],
       "cli_usage": "python3 scripts/modio_search.py --query <query> [options]",
       "flags": [
-        {"name": "--query", "type": "str", "required": false, "description": "Search keyword or mod slug"},
-        {"name": "--platform", "type": "str", "required": false, "description": "Target platform: windows, mac, xboxseriesx, ps5, console"},
-        {"name": "--tags", "type": "str", "required": false, "description": "Comma-separated mod.io tag filters"},
-        {"name": "--limit", "type": "int", "required": false, "description": "Max mods to return (default: 10)"},
-        {"name": "--include-tracked", "type": "bool", "required": false, "description": "Include mods already cataloged in mods/library.md"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--query",
+          "type": "str",
+          "required": false,
+          "description": "Search keyword or mod slug"
+        },
+        {
+          "name": "--platform",
+          "type": "str",
+          "required": false,
+          "description": "Target platform: windows, mac, xboxseriesx, ps5, console"
+        },
+        {
+          "name": "--tags",
+          "type": "str",
+          "required": false,
+          "description": "Comma-separated mod.io tag filters"
+        },
+        {
+          "name": "--limit",
+          "type": "int",
+          "required": false,
+          "description": "Max mods to return (default: 10)"
+        },
+        {
+          "name": "--include-tracked",
+          "type": "bool",
+          "required": false,
+          "description": "Include mods already cataloged in mods/library.md"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/modio_search.py --query \"Level 20\" --platform windows --json"
-      ]
+      ],
+      "path": "library/modio_search.py"
     },
     {
       "name": "modio_sync.py",
@@ -494,16 +1404,37 @@
       "category": "library",
       "summary": "Syncs BG3 mods/library.md with your mod.io subscribed mods.",
       "description": "Downloads and unpacks subscribed or requested mods from mod.io into mods/<slug>/, generating documentation specifications.",
-      "intents": ["sync subscribed mods", "download mods", "sync mod.io", "fetch subscribed"],
+      "intents": [
+        "sync subscribed mods",
+        "download mods",
+        "sync mod.io",
+        "fetch subscribed"
+      ],
       "cli_usage": "python3 scripts/modio_sync.py [options]",
       "flags": [
-        {"name": "--limit", "type": "int", "required": false, "description": "Max mods to sync"},
-        {"name": "--filter", "type": "str", "required": false, "description": "Filter subscriptions by name pattern"},
-        {"name": "--skip-updates", "type": "bool", "required": false, "description": "Skip checking for mod version updates"}
+        {
+          "name": "--limit",
+          "type": "int",
+          "required": false,
+          "description": "Max mods to sync"
+        },
+        {
+          "name": "--filter",
+          "type": "str",
+          "required": false,
+          "description": "Filter subscriptions by name pattern"
+        },
+        {
+          "name": "--skip-updates",
+          "type": "bool",
+          "required": false,
+          "description": "Skip checking for mod version updates"
+        }
       ],
       "examples": [
         "python3 scripts/modio_sync.py --limit 5"
-      ]
+      ],
+      "path": "library/modio_sync.py"
     },
     {
       "name": "modio_update.py",
@@ -511,17 +1442,43 @@
       "category": "library",
       "summary": "BG3 Mod Documentation Update Checker & Pipeline.",
       "description": "Checks tracked mods in mods/ against remote mod.io releases to identify version updates and refreshes documentation.",
-      "intents": ["check mod updates", "update mod docs", "mod.io update check", "refresh tracked mod"],
+      "intents": [
+        "check mod updates",
+        "update mod docs",
+        "mod.io update check",
+        "refresh tracked mod"
+      ],
       "cli_usage": "python3 scripts/modio_update.py [options]",
       "flags": [
-        {"name": "--mod", "type": "str", "required": false, "description": "Specific mod slug to check"},
-        {"name": "--all", "type": "bool", "required": false, "description": "Check all tracked mods in library.md"},
-        {"name": "--list-tracked", "type": "bool", "required": false, "description": "List all tracked mods and current versions"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": false,
+          "description": "Specific mod slug to check"
+        },
+        {
+          "name": "--all",
+          "type": "bool",
+          "required": false,
+          "description": "Check all tracked mods in library.md"
+        },
+        {
+          "name": "--list-tracked",
+          "type": "bool",
+          "required": false,
+          "description": "List all tracked mods and current versions"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/modio_update.py --all --json"
-      ]
+      ],
+      "path": "library/modio_update.py"
     },
     {
       "name": "modio_extract.py",
@@ -529,20 +1486,57 @@
       "category": "library",
       "summary": "Fetches, unpacks, and parses BG3 mods from mod.io or local .pak archives.",
       "description": "Parses LSPK .pak archives, extracts internal files, generates rich documentation specs, and indexes mod capabilities.",
-      "intents": ["extract pak", "unpack mod", "inspect pak", "parse pak", "read pak headers"],
+      "intents": [
+        "extract pak",
+        "unpack mod",
+        "inspect pak",
+        "parse pak",
+        "read pak headers"
+      ],
       "cli_usage": "python3 scripts/modio_extract.py [--query <query>] [--pak <path>] [options]",
       "flags": [
-        {"name": "--query", "type": "str", "required": false, "description": "Mod name, slug, URL, or ID on mod.io"},
-        {"name": "--pak", "type": "str", "required": false, "description": "Path to local .pak archive"},
-        {"name": "--output-dir", "type": "str", "required": false, "description": "Destination directory (default: mods/<slug>/)"},
-        {"name": "--write-spec", "type": "bool", "required": false, "description": "Write markdown specification in mods/<slug>/README.md"},
-        {"name": "--update-library", "type": "bool", "required": false, "description": "Update mods/library.md with documented mod"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--query",
+          "type": "str",
+          "required": false,
+          "description": "Mod name, slug, URL, or ID on mod.io"
+        },
+        {
+          "name": "--pak",
+          "type": "str",
+          "required": false,
+          "description": "Path to local .pak archive"
+        },
+        {
+          "name": "--output-dir",
+          "type": "str",
+          "required": false,
+          "description": "Destination directory (default: mods/<slug>/)"
+        },
+        {
+          "name": "--write-spec",
+          "type": "bool",
+          "required": false,
+          "description": "Write markdown specification in mods/<slug>/README.md"
+        },
+        {
+          "name": "--update-library",
+          "type": "bool",
+          "required": false,
+          "description": "Update mods/library.md with documented mod"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/modio_extract.py --pak downloads/sample.pak --output-dir mods/sample/ --json",
         "python3 scripts/modio_extract.py --query \"Paladin's Call\" --write-spec --update-library --json"
-      ]
+      ],
+      "path": "library/modio_extract.py"
     },
     {
       "name": "modio_create_collection.py",
@@ -550,15 +1544,32 @@
       "category": "library",
       "summary": "Creates or updates a public Baldur's Gate 3 collection on mod.io from mods/library.md.",
       "description": "Reads documented mods from mods/library.md, prompts or previews changes against mod.io collections, and creates or updates collection items.",
-      "intents": ["mod.io collection", "create collection", "update collection", "publish collection", "community collection"],
+      "intents": [
+        "mod.io collection",
+        "create collection",
+        "update collection",
+        "publish collection",
+        "community collection"
+      ],
       "cli_usage": "python3 scripts/modio_create_collection.py [options]",
       "flags": [
-        {"name": "--library", "type": "str", "required": false, "description": "Path to library markdown catalog (default: mods/library.md)"},
-        {"name": "--dry-run", "type": "bool", "required": false, "description": "Preview collection changes without API writes"}
+        {
+          "name": "--library",
+          "type": "str",
+          "required": false,
+          "description": "Path to library markdown catalog (default: mods/library.md)"
+        },
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "Preview collection changes without API writes"
+        }
       ],
       "examples": [
         "python3 scripts/modio_create_collection.py --dry-run"
-      ]
+      ],
+      "path": "library/modio_create_collection.py"
     },
     {
       "name": "purge_library.py",
@@ -566,17 +1577,40 @@
       "category": "library",
       "summary": "Purges all documented mods from mods/ and resets mods/library.md.",
       "description": "Safely removes all mod child directories in mods/ and resets mods/library.md to its clean initial header.",
-      "intents": ["purge mods", "purge library", "clean mods directory", "reset library", "delete all mods", "clear library"],
+      "intents": [
+        "purge mods",
+        "purge library",
+        "clean mods directory",
+        "reset library",
+        "delete all mods",
+        "clear library"
+      ],
       "cli_usage": "python3 scripts/purge_library.py [options]",
       "flags": [
-        {"name": "--dry-run", "type": "bool", "required": false, "description": "Simulate deletion without modifying files"},
-        {"name": "--force", "type": "bool", "required": false, "description": "Skip interactive confirmation"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit output as JSON"}
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "Simulate deletion without modifying files"
+        },
+        {
+          "name": "--force",
+          "type": "bool",
+          "required": false,
+          "description": "Skip interactive confirmation"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit output as JSON"
+        }
       ],
       "examples": [
         "python3 scripts/purge_library.py --dry-run",
         "python3 scripts/purge_library.py --force"
-      ]
+      ],
+      "path": "library/purge_library.py"
     },
     {
       "name": "simulate_build_synergy.py",
@@ -584,20 +1618,64 @@
       "category": "theorycrafting",
       "summary": "Theorycrafting simulator for Level 20 BG3 character builds and mod gear synergies.",
       "description": "Simulates Turn 1 combat sequences (melee burst, eldritch blast) with advantage, critical chance, and damage riders, calculating Spell Save DC ceilings and multiclass slot matrices.",
-      "intents": ["simulate build", "dpr calculator", "turn 1 damage", "spell save dc ceiling", "multiclass spell slots", "build synergy", "level 20 build calculator"],
+      "intents": [
+        "simulate build",
+        "dpr calculator",
+        "turn 1 damage",
+        "spell save dc ceiling",
+        "multiclass spell slots",
+        "build synergy",
+        "level 20 build calculator"
+      ],
       "cli_usage": "python3 scripts/simulate_build_synergy.py --classes <Class=Level,...> [options]",
       "flags": [
-        {"name": "--classes", "type": "str", "required": true, "description": "Comma-separated class levels (e.g. Paladin=2,Sorcerer=18)"},
-        {"name": "--stats", "type": "str", "required": false, "description": "Base ability scores (Str=22,Dex=14,Con=16,Int=10,Wis=12,Cha=24)"},
-        {"name": "--gear", "type": "str", "required": false, "description": "Comma-separated item names to equip and analyze"},
-        {"name": "--dpr-sequence", "type": "str", "required": false, "description": "Turn 1 combat sequence: melee_burst or eldritch_blast"},
-        {"name": "--haste", "type": "bool", "required": false, "description": "Simulate under Haste condition"},
-        {"name": "--advantage", "type": "bool", "required": false, "description": "Simulate attacks made with Advantage"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--classes",
+          "type": "str",
+          "required": true,
+          "description": "Comma-separated class levels (e.g. Paladin=2,Sorcerer=18)"
+        },
+        {
+          "name": "--stats",
+          "type": "str",
+          "required": false,
+          "description": "Base ability scores (Str=22,Dex=14,Con=16,Int=10,Wis=12,Cha=24)"
+        },
+        {
+          "name": "--gear",
+          "type": "str",
+          "required": false,
+          "description": "Comma-separated item names to equip and analyze"
+        },
+        {
+          "name": "--dpr-sequence",
+          "type": "str",
+          "required": false,
+          "description": "Turn 1 combat sequence: melee_burst or eldritch_blast"
+        },
+        {
+          "name": "--haste",
+          "type": "bool",
+          "required": false,
+          "description": "Simulate under Haste condition"
+        },
+        {
+          "name": "--advantage",
+          "type": "bool",
+          "required": false,
+          "description": "Simulate attacks made with Advantage"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/simulate_build_synergy.py --classes \"Paladin=2,Sorcerer=18\" --stats \"Str=22,Dex=14,Con=16,Int=10,Wis=12,Cha=24\" --dpr-sequence melee_burst --json"
-      ]
+      ],
+      "path": "theorycrafting/simulate_build_synergy.py"
     },
     {
       "name": "diagnose_toolkit_logs.py",
@@ -605,24 +1683,141 @@
       "category": "diagnostics",
       "summary": "BG3 Toolkit runtime message log diagnostic, triage, and workspace correlation tool.",
       "description": "Auto-discovers and parses live and session logs from the BG3 Toolkit (Glasses.exe). Classifies engine asserts, design errors, and subsystem failures (Boosts, Stats, Thoth, Osiris, RootTemplates), correlating errors back to local mod files in my_mods/.",
-      "intents": ["toolkit logs", "glasses logs", "toolkit errors", "engine assert", "diagnose toolkit", "glasses crash", "thoth errors", "osiris errors", "boost errors"],
+      "intents": [
+        "toolkit logs",
+        "glasses logs",
+        "toolkit errors",
+        "engine assert",
+        "diagnose toolkit",
+        "glasses crash",
+        "thoth errors",
+        "osiris errors",
+        "boost errors"
+      ],
       "cli_usage": "python3 scripts/diagnose_toolkit_logs.py [options]",
       "flags": [
-        {"name": "--type", "type": "str", "required": false, "description": "Subsystem log type: engine, osiris, thoth, personal, network, all (default: engine)"},
-        {"name": "--severity", "type": "str", "required": false, "description": "Minimum severity: critical, error, warning, info, debug (default: warning)"},
-        {"name": "--subsystem", "type": "str", "required": false, "description": "Filter by subsystem: Boosts, Stats, Thoth, Osiris, RootTemplates, Localization, Assets"},
-        {"name": "--mod", "type": "str", "required": false, "description": "Filter and correlate errors to a specific mod slug in my_mods/"},
-        {"name": "--limit", "type": "int", "required": false, "description": "Max entries to display (default: 50)"},
-        {"name": "--follow", "type": "bool", "required": false, "description": "Live stream/tail active log file (-f)"},
-        {"name": "--list-logs", "type": "bool", "required": false, "description": "List all discovered session logs and exit"},
-        {"name": "--info", "type": "bool", "required": false, "description": "Show resolved toolkit directory status"},
-        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON output"}
+        {
+          "name": "--type",
+          "type": "str",
+          "required": false,
+          "description": "Subsystem log type: engine, osiris, thoth, personal, network, all (default: engine)"
+        },
+        {
+          "name": "--severity",
+          "type": "str",
+          "required": false,
+          "description": "Minimum severity: critical, error, warning, info, debug (default: warning)"
+        },
+        {
+          "name": "--subsystem",
+          "type": "str",
+          "required": false,
+          "description": "Filter by subsystem: Boosts, Stats, Thoth, Osiris, RootTemplates, Localization, Assets"
+        },
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": false,
+          "description": "Filter and correlate errors to a specific mod slug in my_mods/"
+        },
+        {
+          "name": "--limit",
+          "type": "int",
+          "required": false,
+          "description": "Max entries to display (default: 50)"
+        },
+        {
+          "name": "--follow",
+          "type": "bool",
+          "required": false,
+          "description": "Live stream/tail active log file (-f)"
+        },
+        {
+          "name": "--list-logs",
+          "type": "bool",
+          "required": false,
+          "description": "List all discovered session logs and exit"
+        },
+        {
+          "name": "--info",
+          "type": "bool",
+          "required": false,
+          "description": "Show resolved toolkit directory status"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
       ],
       "examples": [
         "python3 scripts/diagnose_toolkit_logs.py --json",
         "python3 scripts/diagnose_toolkit_logs.py --mod arcane-progression --severity error",
         "python3 scripts/diagnose_toolkit_logs.py --type thoth --limit 20",
         "python3 scripts/diagnose_toolkit_logs.py --follow"
+      ],
+      "path": "diagnostics/diagnose_toolkit_logs.py"
+    },
+    {
+      "name": "tools.py",
+      "command": "tools",
+      "category": "management",
+      "path": "management/tools.py",
+      "summary": "Unified Tooling Registry & CLI Discovery Hub.",
+      "description": "Provides machine-readable discovery, search, schema inspection, and execution dispatching for all studio automation scripts.",
+      "intents": [
+        "tools",
+        "discovery",
+        "registry",
+        "search tools",
+        "list tools",
+        "verify tools"
+      ],
+      "cli_usage": "bg3 tools [list|search|info|verify|audit-skills] [options]",
+      "flags": [
+        {
+          "name": "--list",
+          "type": "bool",
+          "required": false,
+          "description": "List all registered tools"
+        },
+        {
+          "name": "--search",
+          "type": "str",
+          "required": false,
+          "description": "Search tools by intent or keyword"
+        },
+        {
+          "name": "--info",
+          "type": "str",
+          "required": false,
+          "description": "Show schema and usage for a specific tool"
+        },
+        {
+          "name": "--verify",
+          "type": "bool",
+          "required": false,
+          "description": "Verify disk scripts and compilation"
+        },
+        {
+          "name": "--audit-skills",
+          "type": "bool",
+          "required": false,
+          "description": "Audit agent skills for tool discovery"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON"
+        }
+      ],
+      "examples": [
+        "bg3 tools list --json",
+        "bg3 tools search \"stat handles\" --json",
+        "bg3 tools info scaffold-stat --json",
+        "bg3 tools verify --json"
       ]
     }
   ]

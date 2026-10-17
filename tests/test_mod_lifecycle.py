@@ -89,7 +89,13 @@ class ModLifecycleTests(unittest.TestCase):
 
     def run_script(self, script_name: str, *args) -> tuple[int, str, dict | None]:
         """Helper to run a Python script from scripts/ and return code, stdout, and parsed JSON."""
-        cmd = [sys.executable, str(SCRIPTS_DIR / script_name)] + list(args)
+        target = SCRIPTS_DIR / script_name
+        if not target.is_file():
+            for cand in SCRIPTS_DIR.rglob(script_name):
+                if "/lib/" not in cand.as_posix() and "__pycache__" not in cand.as_posix():
+                    target = cand
+                    break
+        cmd = [sys.executable, str(target)] + list(args)
         proc = subprocess.run(
             cmd,
             cwd=str(REPO_ROOT),

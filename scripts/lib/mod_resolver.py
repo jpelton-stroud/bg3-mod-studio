@@ -228,7 +228,7 @@ def resolve_dependency_metadata(
 
                 if auto_document:
                     try:
-                        from scripts.modio_extract import process_mod
+                        from scripts.library.modio_extract import process_mod
 
                         res = process_mod(
                             query=slug or clean_id,

@@ -30,7 +30,7 @@ When triggered via `/bg3_update_mod_documentation` or when requested to update B
 flowchart TD
     A["User triggers /bg3_update_mod_documentation [optional mods]"] --> B{"Mods specified?"}
     B -->|"Yes"| C["Parse target mod list"]
-    B -->|"No"| D["Query scripts/modio_update.py --list-tracked for all tracked mods"]
+    B -->|"No"| D["Query scripts/library/modio_update.py --list-tracked for all tracked mods"]
     C --> E["Spawn concurrent subagent per mod via invoke_subagent"]
     D --> E
     E --> F["Subagent runs bg3_update_single_mod workflow"]
@@ -57,28 +57,28 @@ If the user passed arguments to `/bg3_update_mod_documentation` (e.g. `/bg3_upda
 If no mod list or arguments were provided, resolve all currently tracked mods by running:
 
 ```bash
-python3 scripts/modio_update.py --list-tracked --json
+bg3 modio update --list-tracked --json
 ```
 
 > [!TIP]
 > **Tool Discovery & Schema Inspection**:
 > To inspect all update checker options or discover related tools:
 > ```bash
-> python3 scripts/tools.py --info modio-update --json
-> python3 scripts/tools.py --search "update mod" --json
+> bg3 tools info modio-update --json
+> bg3 tools search "update mod" --json
 > ```
 
 Or by inspecting [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md) and extracting all slugs. Add every tracked mod to the target batch.
 
 ### Case C: Syncing Subscribed Mods & Pruning Orphans
-When synchronizing the community library directly against the authenticated user's mod.io subscriptions, use `scripts/modio_sync.py`:
+When synchronizing the community library directly against the authenticated user's mod.io subscriptions, use `scripts/library/modio_sync.py`:
 
 ```bash
 # 1. Preview newly subscribed, updated, or orphaned mods without modifications
-python3 scripts/modio_sync.py --dry-run --json
+bg3 modio sync --dry-run --json
 
 # 2. Synchronize subscriptions and safely prune unsubscribed rows and orphaned folders
-python3 scripts/modio_sync.py --prune --json
+bg3 modio sync --prune --json
 ```
 
 
@@ -109,7 +109,7 @@ Each spawned subagent receives a concise prompt directing it to follow the dedic
 > Check and update documentation for the Baldur's Gate 3 mod: `<MOD_QUERY>`.
 >
 > 1. Read and follow all instructions in the worker skill [`bg3_update_single_mod`](file:///home/jpstroud/projects/BaldursGate3/.agents/skills/bg3_update_single_mod/SKILL.md).
-> 2. Run `python3 scripts/modio_update.py --query "<MOD_QUERY>" --json` to inspect the mod.io REST API and apply any updates.
+> 2. Run `bg3 modio update --query "<MOD_QUERY>" --json` to inspect the mod.io REST API and apply any updates.
 > 3. When an update is applied, verify that the rewritten spec records its verified mod.io ID, slug, and implemented-feature count and that the catalog row uses the six-column schema.
 > 4. Return the standardized status message:
 >    - **Up-to-Date**: `<mod-slug>: No updates found (current version: v<version>)`

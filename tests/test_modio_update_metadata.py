@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.modio_update_metadata import (
+from scripts.management.modio_update_metadata import (
     BG3_GAME_ID,
     COMMUNITY_OPTIONS,
     CREDIT_OPTIONS_MASK,
