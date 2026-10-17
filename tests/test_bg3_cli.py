@@ -61,6 +61,8 @@ class TestBg3CliIntegration(unittest.TestCase):
         proc = self.run_cli(["env", "check", "--json"])
         self.assertIn(proc.returncode, [0, 1])
         parsed = json.loads(proc.stdout)
+        self.assertTrue("configured" in parsed or "status" in parsed)
+
     def test_modio_sync_prune_requires_yes(self):
         proc = self.run_cli(["modio", "sync", "--prune", "--json"])
         self.assertEqual(proc.returncode, 2)
@@ -68,6 +70,20 @@ class TestBg3CliIntegration(unittest.TestCase):
         self.assertEqual(parsed["status"], "error")
         self.assertEqual(parsed["error"]["code"], "CONFIRMATION_REQUIRED")
         self.assertIn("--yes", parsed["error"]["remediation"])
+
+    def test_mod_add_dependency_help(self):
+        proc = self.run_cli(["mod", "add-dependency", "--help"])
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("add-dependency", proc.stdout)
+
+    def test_mod_add_dependency_alias(self):
+        proc = self.run_cli(["mod", "add_dependency", "--help"])
+        self.assertEqual(proc.returncode, 0)
+
+    def test_bg3_run_universal(self):
+        proc = self.run_cli(["run", "query_mod_database", "--help"])
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("query_mod_database", proc.stdout)
 
 
 if __name__ == "__main__":

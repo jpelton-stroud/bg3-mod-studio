@@ -163,6 +163,77 @@ def build_parser() -> argparse.ArgumentParser:
         help="Mod template archetype (default: Standard).",
     )
 
+    # bg3 mod add-dependency
+    add_dep_parser = mod_subparsers.add_parser(
+        "add-dependency",
+        aliases=["add_dependency"],
+        help="Append dependencies or test dependencies to a custom mod",
+        parents=[common_parser],
+    )
+    add_dep_parser.add_argument("mod", help="Target mod name or slug")
+    add_dep_parser.add_argument("dependencies", nargs="*", help="Dependency mod slugs or names")
+    add_dep_parser.add_argument("--dep", action="append", default=[], help="Explicit dependency slug")
+    add_dep_parser.add_argument("--test-dep", action="append", default=[], help="Explicit test dependency slug")
+    add_dep_parser.add_argument("--test-only", action="store_true", help="Mark dependencies as test-only")
+    add_dep_parser.add_argument("--dry-run", action="store_true", help="Preview metadata changes without saving")
+
+    # bg3 mod bump-version
+    bump_parser = mod_subparsers.add_parser(
+        "bump-version",
+        aliases=["bump_version"],
+        help="Increment semantic Version64 across meta.lsx and README.md",
+        parents=[common_parser],
+    )
+    bump_parser.add_argument("mod", nargs="?", help="Mod slug or directory")
+    bump_group = bump_parser.add_mutually_exclusive_group()
+    bump_group.add_argument("--patch", action="store_true", help="Increment patch version")
+    bump_group.add_argument("--minor", action="store_true", help="Increment minor version")
+    bump_group.add_argument("--major", action="store_true", help="Increment major version")
+    bump_group.add_argument("--build", action="store_true", help="Increment build integer")
+    bump_group.add_argument("--set", help="Explicit version string (e.g. 1.2.0.0)")
+
+    # bg3 mod pack
+    pack_parser = mod_subparsers.add_parser(
+        "pack",
+        help="Build a game-ready LSPK .pak archive from my_mods/<slug>",
+        parents=[common_parser],
+    )
+    pack_parser.add_argument("mod", help="Mod slug or directory")
+    pack_parser.add_argument("--output", help="Custom output directory or .pak file path")
+
+    # bg3 mod sync-loca
+    loca_parser = mod_subparsers.add_parser(
+        "sync-loca",
+        aliases=["sync_loca"],
+        help="Audit, prune, or compile Localization XML handles",
+        parents=[common_parser],
+    )
+    loca_parser.add_argument("mod", help="Mod slug or directory")
+    loca_parser.add_argument("--check", action="store_true", help="Check for orphaned or missing handles")
+    loca_parser.add_argument("--prune", action="store_true", help="Prune orphaned localization handles")
+
+    # bg3 mod sync-game
+    sync_game_parser = mod_subparsers.add_parser(
+        "sync-game",
+        aliases=["sync_game"],
+        help="Synchronize unpacked mod assets and compiled .loca to BG3 Data directory",
+        parents=[common_parser],
+    )
+    sync_game_parser.add_argument("--mods", nargs="*", help="Specific mod slugs to synchronize")
+    sync_game_parser.add_argument("--clean", action="store_true", help="Clean stale assets in Data/ directory")
+    sync_game_parser.add_argument("--dry-run", action="store_true", help="Preview file sync operations")
+
+    # bg3 mod patch
+    patch_parser = mod_subparsers.add_parser(
+        "patch",
+        help="Generate compatibility override patch or Compatibility Framework config",
+        parents=[common_parser],
+    )
+    patch_parser.add_argument("--mod1", required=True, help="First mod slug or directory")
+    patch_parser.add_argument("--mod2", required=True, help="Second mod slug or directory")
+    patch_parser.add_argument("--name", help="Patch mod name")
+    patch_parser.add_argument("--mode", choices=["standalone", "cf"], default="standalone", help="Patch format")
+
     # -------------------------------------------------------------------------
     # 'loadorder' command group
     # -------------------------------------------------------------------------
@@ -320,15 +391,33 @@ def build_parser() -> argparse.ArgumentParser:
         help="Preview configuration changes without writing to disk.",
     )
 
+    # -------------------------------------------------------------------------
+    # 'run' universal runner for all scripts/ tools
+    # -------------------------------------------------------------------------
+    run_parser = subparsers.add_parser(
+        "run",
+        help="Execute any studio automation script from scripts/ with stream discipline",
+        parents=[common_parser],
+    )
+    run_parser.add_argument(
+        "tool",
+        help="Script name (e.g. add_mod_dependency.py or add_mod_dependency)",
+    )
+    run_parser.add_argument(
+        "extra_args",
+        nargs=argparse.REMAINDER,
+        help="Arguments forwarded directly to the tool",
+    )
+
     return parser
 
 
 def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
     """Route parsed CLI arguments to the target implementation script."""
     cmd = args.command
-    sub = args.subcommand
+    sub = getattr(args, "subcommand", None)
 
-    if not cmd or not sub:
+    if cmd != "run" and (not cmd or not sub):
         emitter.error(
             message="Missing required command and action. Run 'bg3 --help' for available commands.",
             code="MISSING_COMMAND",
@@ -341,7 +430,34 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
     script_target: Optional[Path] = None
     target_args: List[str] = []
 
-    if cmd == "mod":
+    if cmd == "run":
+        tool_name = args.tool
+        if not tool_name.endswith(".py"):
+            target = SCRIPTS_DIR / f"{tool_name}.py"
+        else:
+            target = SCRIPTS_DIR / tool_name
+
+        if not target.is_file():
+            reg_path = SCRIPTS_DIR / "registry.json"
+            if reg_path.is_file():
+                try:
+                    import json
+                    with open(reg_path, "r", encoding="utf-8") as f:
+                        reg_data = json.load(f)
+                    for t in reg_data.get("tools", []):
+                        t_name = t.get("name", "")
+                        t_cmd = t.get("command", "")
+                        if tool_name in (t_name, t_cmd, t_name.replace(".py", "")):
+                            target = SCRIPTS_DIR / t_name
+                            break
+                except Exception:
+                    pass
+
+        script_target = target
+        if getattr(args, "extra_args", None):
+            target_args.extend(args.extra_args)
+
+    elif cmd == "mod":
         if sub == "conflict":
             script_target = SCRIPTS_DIR / "check_mod_conflicts.py"
             if args.all:
@@ -376,6 +492,66 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.extend(["--author", args.author] if "--author" in sys.argv else [args.author])
             if getattr(args, "type", None):
                 target_args.extend(["--type", args.type])
+
+        elif sub in ("add-dependency", "add_dependency"):
+            script_target = SCRIPTS_DIR / "add_mod_dependency.py"
+            target_args.append(args.mod)
+            if getattr(args, "dependencies", None):
+                target_args.extend(args.dependencies)
+            for d in getattr(args, "dep", []):
+                target_args.extend(["--dep", d])
+            for td in getattr(args, "test_dep", []):
+                target_args.extend(["--test-dep", td])
+            if getattr(args, "test_only", False):
+                target_args.append("--test-only")
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+
+        elif sub in ("bump-version", "bump_version"):
+            script_target = SCRIPTS_DIR / "bump_mod_version.py"
+            if getattr(args, "mod", None):
+                target_args.append(args.mod)
+            if getattr(args, "patch", False):
+                target_args.append("--patch")
+            elif getattr(args, "minor", False):
+                target_args.append("--minor")
+            elif getattr(args, "major", False):
+                target_args.append("--major")
+            elif getattr(args, "build", False):
+                target_args.append("--build")
+            elif getattr(args, "set", None):
+                target_args.extend(["--set", args.set])
+
+        elif sub == "pack":
+            script_target = SCRIPTS_DIR / "pack_mod_pak.py"
+            target_args.append(args.mod)
+            if getattr(args, "output", None):
+                target_args.extend(["--output", args.output])
+
+        elif sub in ("sync-loca", "sync_loca"):
+            script_target = SCRIPTS_DIR / "sync_localization.py"
+            target_args.extend(["--mod", args.mod])
+            if getattr(args, "check", False):
+                target_args.append("--check")
+            if getattr(args, "prune", False):
+                target_args.append("--prune")
+
+        elif sub in ("sync-game", "sync_game"):
+            script_target = SCRIPTS_DIR / "sync_game_data.py"
+            if getattr(args, "mods", None):
+                target_args.extend(["--mods"] + args.mods)
+            if getattr(args, "clean", False):
+                target_args.append("--clean")
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+
+        elif sub == "patch":
+            script_target = SCRIPTS_DIR / "generate_compat_patch.py"
+            target_args.extend(["--mod1", args.mod1, "--mod2", args.mod2])
+            if getattr(args, "name", None):
+                target_args.extend(["--name", args.name])
+            if getattr(args, "mode", None):
+                target_args.extend(["--mode", args.mode])
 
     elif cmd == "loadorder":
         script_target = SCRIPTS_DIR / "manage_load_order.py"
