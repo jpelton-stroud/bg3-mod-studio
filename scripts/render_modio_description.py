@@ -18,6 +18,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from scripts.lib.cli_common import ConsoleColor, ExitCode
 from scripts.lib.env_paths import MY_MODS_DIR, REPO_ROOT, resolve_mod_dir
 
 WORKSPACE_ROOT = REPO_ROOT
@@ -233,16 +234,28 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Export a mod's README.md as a publishing-ready HTML document."
     )
-    parser.add_argument("--mod", required=True, help="Mod name, directory in my_mods/, or mod directory path")
+    parser.add_argument("mod_pos", nargs="?", help="Mod name or directory (positional)")
+    parser.add_argument("--mod", dest="mod_flag", help="Mod name, directory in my_mods/, or mod directory path")
     parser.add_argument("--write", action="store_true", help="Write modio_description.html beside README.md")
     parser.add_argument("--json", action="store_true", help="Emit structured output information as JSON")
     args = parser.parse_args()
 
+    mod_query = args.mod_flag or args.mod_pos
+    if not mod_query:
+        err_color = ConsoleColor(stream=sys.stderr)
+        print(f"{err_color.red('[ERROR]')} Mod name or slug is required (via positional argument or --mod).", file=sys.stderr)
+        sys.exit(ExitCode.USAGE)
+
     try:
-        render_mod_description(mod_query=args.mod, write_file=args.write, as_json=args.json)
+        render_mod_description(mod_query=mod_query, write_file=args.write, as_json=args.json)
+        sys.exit(ExitCode.OK)
     except (OSError, ValueError) as error:
-        print(f"Error: {error}", file=sys.stderr)
-        sys.exit(1)
+        if args.json:
+            print(json.dumps({"error": str(error), "success": False}, indent=2))
+        else:
+            err_color = ConsoleColor(stream=sys.stderr)
+            print(f"{err_color.red('[ERROR]')} {error}", file=sys.stderr)
+        sys.exit(ExitCode.GENERAL)
 
 
 if __name__ == "__main__":

@@ -16,6 +16,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.cli_common import ConsoleColor, ExitCode
 from scripts.lib.env_paths import detect_bg3_appdata_dirs
 from scripts.lib.lspk import LspkArchive
 
@@ -248,7 +249,8 @@ def main():
     parser = argparse.ArgumentParser(
         description="Inspect BG3 .lsv save files and audit them against active mod load orders."
     )
-    parser.add_argument("--save", help="Path to .lsv save file, or 'latest' to automatically discover.")
+    parser.add_argument("save_pos", nargs="?", help="Path to .lsv save file, or 'latest' (positional).")
+    parser.add_argument("--save", dest="save_flag", help="Path to .lsv save file, or 'latest' to automatically discover.")
     parser.add_argument("--save-dir", help="Custom directory containing .lsv save files.")
     parser.add_argument("--audit", action="store_true", help="Compare save mod list against active modsettings.lsx.")
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON.")
@@ -256,8 +258,12 @@ def main():
     args = parser.parse_args()
     workspace_root = Path(__file__).resolve().parent.parent
 
+    color = ConsoleColor(stream=sys.stdout)
+    err_color = ConsoleColor(stream=sys.stderr)
+    save_arg = args.save_flag or args.save_pos
+
     try:
-        save_file = find_save_file(args.save, args.save_dir)
+        save_file = find_save_file(save_arg, args.save_dir)
         meta = extract_save_metadata(save_file)
 
         audit_result = None
@@ -268,7 +274,7 @@ def main():
         if args.json:
             print(json.dumps(meta, indent=2))
         else:
-            print(f"BG3 Save Game Inspection: {save_file.name}")
+            print(f"{color.bold('BG3 Save Game Inspection:')} {save_file.name}")
             print("=" * 70)
             print(f"  Path:        {save_file}")
             print(f"  Size:        {meta['size_bytes'] / (1024*1024):.2f} MB")
@@ -285,25 +291,25 @@ def main():
                 print("\n" + "=" * 70)
                 print("Mod Load Order Audit:")
                 if audit_result["missing_mods"]:
-                    print("  [!] WARNING: Missing mods in current profile (Save may fail or crash):")
+                    print(f"  {err_color.red('[!] WARNING:')} Missing mods in current profile (Save may fail or crash):")
                     for m in audit_result["missing_mods"]:
-                        print(f"      ✗ {m['name']} ({m['uuid']})")
+                        print(f"      {err_color.red('✗')} {m['name']} ({m['uuid']})")
                 else:
-                    print("  [✓] All required mods are present and active in current profile.")
+                    print(f"  {color.green('[✓]')} All required mods are present and active in current profile.")
 
                 if audit_result["new_mods"]:
                     print("\n  [i] New mods enabled since save was created:")
                     for m in audit_result["new_mods"]:
                         print(f"      + {m['name']} ({m['uuid']})")
 
-        return 0
+        return ExitCode.OK
 
     except Exception as e:
         if args.json:
             print(json.dumps({"error": str(e), "success": False}, indent=2))
         else:
-            print(f"[ERROR] {e}", file=sys.stderr)
-        return 1
+            print(f"{err_color.red('[ERROR]')} {e}", file=sys.stderr)
+        return ExitCode.GENERAL
 
 
 if __name__ == "__main__":

@@ -16,12 +16,10 @@ import uuid
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-if __package__:
-    from .lib.env_paths import MY_MODS_DIR, resolve_mod_dir
-    from .lib.larian_parsers import split_larian_items
-else:
-    from lib.env_paths import MY_MODS_DIR, resolve_mod_dir
-    from lib.larian_parsers import split_larian_items
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.cli_common import ConsoleColor, ExitCode
+from scripts.lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+from scripts.lib.larian_parsers import split_larian_items
 
 # Mapping of entry types to their file and default schema
 TYPE_CONFIG = {
@@ -359,11 +357,14 @@ def main():
             dry_run=args.dry_run,
         )
 
+        color = ConsoleColor(stream=sys.stdout)
+        err_color = ConsoleColor(stream=sys.stderr)
         if args.json:
             print(json.dumps(result, indent=2))
         else:
-            dry_str = " [DRY-RUN]" if args.dry_run else ""
-            print(f"[✓] Successfully scaffolded '{args.name}' ({args.type}){dry_str}:")
+            dry_str = color.yellow(" [DRY-RUN]") if args.dry_run else ""
+            status_tag = color.green("[✓]")
+            print(f"{status_tag} Successfully scaffolded '{args.name}' ({args.type}){dry_str}:")
             print(f"    Stat file: {result['stat_file']}")
             if result["display_name_handle"]:
                 print(f"    DisplayName Handle: {result['display_name_handle']}")
@@ -371,14 +372,15 @@ def main():
                 print(f"    Description Handle: {result['description_handle']}")
             print("\nGenerated Entry:")
             print(result["raw_entry"])
-        return 0
+        return ExitCode.SUCCESS
 
     except Exception as e:
         if args.json:
             print(json.dumps({"error": str(e), "success": False}, indent=2))
         else:
-            print(f"[ERROR] {e}", file=sys.stderr)
-        return 1
+            err_color = ConsoleColor(stream=sys.stderr)
+            print(f"{err_color.red('[ERROR]')} {e}", file=sys.stderr)
+        return ExitCode.GENERAL
 
 
 if __name__ == "__main__":

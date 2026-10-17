@@ -21,6 +21,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from scripts.lib.cli_common import ConsoleColor, ExitCode
 from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
 from scripts.lib.library_catalog import get_tracked_mods as _get_tracked_mods, parse_library_rows
 from scripts.lib.modio_client import BG3_GAME_ID, MODIO_API_HOST, get_api_key, query_modio
@@ -338,7 +339,8 @@ def check_and_apply_update(query, api_key=None, check_only=False, force=False):
 
 def main():
     parser = argparse.ArgumentParser(description="BG3 Mod Documentation Update Checker & Pipeline.")
-    parser.add_argument("--query", "-q", help="Mod slug, name, ID, or URL to check/update")
+    parser.add_argument("query_pos", nargs="?", help="Mod slug, name, ID, or URL (positional)")
+    parser.add_argument("--query", "-q", dest="query_flag", help="Mod slug, name, ID, or URL to check/update")
     parser.add_argument("--all", action="store_true", help="Check/update all tracked mods in mods/library.md")
     parser.add_argument("--check-only", action="store_true", help="Only check for updates without downloading or modifying files")
     parser.add_argument("--force", action="store_true", help="Force re-extraction and documentation regeneration even if up-to-date")
@@ -347,27 +349,31 @@ def main():
 
     args = parser.parse_args()
 
+    color = ConsoleColor(stream=sys.stdout)
+    err_color = ConsoleColor(stream=sys.stderr)
+
     if args.list_tracked:
         tracked = get_tracked_mods()
         if args.json:
             print(json.dumps(list(tracked.values()), indent=2))
         else:
-            print(f"Tracked BG3 Mods ({len(tracked)}):")
+            print(f"{color.bold('Tracked BG3 Mods')} ({len(tracked)}):")
             for t in tracked.values():
                 print(f" - [{t['category']}] {t['name']} ({t['slug']})")
-        return
+        return ExitCode.OK
 
+    query_val = args.query_flag or args.query_pos
     targets = []
-    if args.query:
-        targets.append(args.query)
-    elif args.all or not args.query:
+    if query_val:
+        targets.append(query_val)
+    elif args.all or not query_val:
         # Default behavior: all tracked mods
         tracked = get_tracked_mods()
         targets = [t["slug"] for t in tracked.values()]
 
     if not targets:
-        print("No mods found to update.", file=sys.stderr)
-        sys.exit(1)
+        print(f"{err_color.red('[ERROR]')} No mods found to update.", file=sys.stderr)
+        sys.exit(ExitCode.USAGE)
 
     api_key = get_api_key()
     results = []
@@ -384,11 +390,14 @@ def main():
             print(res["message"])
 
     if args.json:
-        if len(results) == 1 and args.query:
+        if len(results) == 1 and query_val:
             print(json.dumps(results[0], indent=2))
         else:
             print(json.dumps(results, indent=2))
 
+    has_failures = any(r.get("status") == "failed" for r in results)
+    return ExitCode.GENERAL if has_failures else ExitCode.OK
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

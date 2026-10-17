@@ -16,10 +16,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.dom import minidom
 
-if __package__:
-    from .lib.env_paths import MY_MODS_DIR, resolve_mod_dir
-else:
-    from lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.cli_common import ConsoleColor, ExitCode
+from scripts.lib.env_paths import MY_MODS_DIR, resolve_mod_dir
 
 
 def resolve_mod_public_dir(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, str]:
@@ -208,11 +207,13 @@ def main():
             "icons": uv_mappings,
         }
 
+        color = ConsoleColor(stream=sys.stdout)
         if args.json:
             print(json.dumps(res, indent=2))
         else:
-            dry_str = " [DRY-RUN]" if args.dry_run else ""
-            print(f"[✓] Successfully generated icon atlas mapping for '{mod_slug}'{dry_str}:")
+            dry_str = color.yellow(" [DRY-RUN]") if args.dry_run else ""
+            status_tag = color.green("[✓]")
+            print(f"{status_tag} Successfully generated icon atlas mapping for '{mod_slug}'{dry_str}:")
             print(f"    Target File: {icons_lsx_file}")
             print(f"    Atlas Path: Assets/Textures/Icons/{atlas_name}.dds ({args.atlas_size}x{args.atlas_size})")
             print(f"    Mapped Icons: {len(uv_mappings)}")
@@ -221,14 +222,15 @@ def main():
             if len(uv_mappings) > 10:
                 print(f"      ... and {len(uv_mappings) - 10} more.")
 
-        return 0
+        return ExitCode.SUCCESS
 
     except Exception as e:
         if args.json:
             print(json.dumps({"error": str(e), "success": False}, indent=2))
         else:
-            print(f"[ERROR] {e}", file=sys.stderr)
-        return 1
+            err_color = ConsoleColor(stream=sys.stderr)
+            print(f"{err_color.red('[ERROR]')} {e}", file=sys.stderr)
+        return ExitCode.GENERAL
 
 
 if __name__ == "__main__":

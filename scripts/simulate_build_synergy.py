@@ -15,6 +15,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.cli_common import ConsoleColor, ExitCode
+
 # Caster classification for multiclass spell slot calculation
 CASTER_WEIGHTS = {
     "bard": 1.0,
@@ -368,8 +371,9 @@ def main():
         if args.json:
             print(json.dumps(res, indent=2))
         else:
+            color = ConsoleColor(stream=sys.stdout)
             class_str = " / ".join(f"{c.capitalize()} {lvl}" for c, lvl in classes.items())
-            print(f"Build Synergy Simulation: {class_str} (Level {total_level})")
+            print(f"{color.bold('Build Synergy Simulation:')} {class_str} (Level {total_level})")
             print("=" * 75)
             print(f"  Proficiency Bonus:   +{prof}")
             print(f"  Ability Scores:      STR {stats['Str']} | DEX {stats['Dex']} | CON {stats['Con']} | INT {stats['Int']} | WIS {stats['Wis']} | CHA {stats['Cha']}")
@@ -392,14 +396,15 @@ def main():
             print(f"  Expected DPR:        {dpr_sim['expected_dpr']} damage")
             print(f"  Max Crit Potential:  {dpr_sim['max_crit_burst']} damage")
 
-        return 0
+        return ExitCode.OK
 
     except Exception as e:
         if args.json:
             print(json.dumps({"error": str(e), "success": False}, indent=2))
         else:
-            print(f"[ERROR] {e}", file=sys.stderr)
-        return 1
+            err_color = ConsoleColor(stream=sys.stderr)
+            print(f"{err_color.red('[ERROR]')} {e}", file=sys.stderr)
+        return ExitCode.GENERAL
 
 
 if __name__ == "__main__":

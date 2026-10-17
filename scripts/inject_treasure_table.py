@@ -56,10 +56,9 @@ CONTAINER_ALIASES = {
 STANDARD_HEADER = 'treasure itemtypes "Common","Uncommon","Rare","Epic","Legendary","Divine","Unique"\n'
 
 
-if __package__:
-    from .lib.env_paths import MY_MODS_DIR, resolve_mod_dir
-else:
-    from lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.cli_common import ConsoleColor, ExitCode
+from scripts.lib.env_paths import MY_MODS_DIR, resolve_mod_dir
 
 
 def resolve_mod_stats_dir(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, str]:
@@ -208,18 +207,22 @@ def main():
 
     args = parser.parse_args()
 
+    color = ConsoleColor(stream=sys.stdout)
+    err_color = ConsoleColor(stream=sys.stderr)
+
     if args.list_containers:
         if args.json:
             print(json.dumps(CONTAINER_ALIASES, indent=2))
         else:
-            print("Available Container & Vendor Aliases:")
+            print(color.bold("Available Container & Vendor Aliases:"))
             print("-" * 65)
             for alias, info in CONTAINER_ALIASES.items():
                 print(f"  {alias:<26} -> {info['table']:<28} ({info['description']})")
-        return 0
+        return ExitCode.OK
 
     if not args.mod or not args.item:
-        parser.error("--mod and --item are required unless using --list-containers.")
+        print(f"{err_color.red('[ERROR]')} --mod and --item are required unless using --list-containers.", file=sys.stderr)
+        sys.exit(ExitCode.USAGE)
 
     container_key = (args.container or "tutorial_chest").lower()
     table_id = CONTAINER_ALIASES.get(container_key, {}).get("table", args.container or "TUT_Chest_Potions")
@@ -248,16 +251,17 @@ def main():
             if result["status"] == "already_present":
                 print(f"[-] Item '{result['item']}' is already present in table '{result['table']}' in {table_file}.")
             else:
-                dry_tag = " [DRY-RUN]" if args.dry_run else ""
-                print(f"[✓] Successfully injected item '{result['item']}' into '{result['table']}' ({table_file}){dry_tag}")
-        return 0
+                dry_tag = color.yellow(" [DRY-RUN]") if args.dry_run else ""
+                status_tag = color.green("[✓]")
+                print(f"{status_tag} Successfully injected item '{result['item']}' into '{result['table']}' ({table_file}){dry_tag}")
+        return ExitCode.OK
 
     except Exception as e:
         if args.json:
             print(json.dumps({"error": str(e), "success": False}, indent=2))
         else:
-            print(f"[ERROR] {e}", file=sys.stderr)
-        return 1
+            print(f"{err_color.red('[ERROR]')} {e}", file=sys.stderr)
+        return ExitCode.GENERAL
 
 
 if __name__ == "__main__":

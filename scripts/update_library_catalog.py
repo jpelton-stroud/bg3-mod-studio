@@ -28,6 +28,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from scripts.lib.cli_common import ConsoleColor, ExitCode
 from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
 from scripts.lib.library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
 
@@ -254,9 +255,12 @@ def main():
 
     args = parser.parse_args()
 
+    color = ConsoleColor(stream=sys.stdout)
+    err_color = ConsoleColor(stream=sys.stderr)
+
     if not MODS_DIR.exists():
-        print(f"Error: {MODS_DIR} does not exist.", file=sys.stderr)
-        sys.exit(1)
+        print(f"{err_color.red('[ERROR]')} {MODS_DIR} does not exist.", file=sys.stderr)
+        sys.exit(ExitCode.NOINPUT)
 
     current_content = ""
     if LIBRARY_FILE.is_file():
@@ -268,7 +272,7 @@ def main():
 
     if args.stdout:
         print(generated_md)
-        return
+        return ExitCode.OK
 
     if args.write:
         LIBRARY_FILE.write_text(generated_md, encoding="utf-8")
@@ -281,21 +285,22 @@ def main():
             "written": bool(args.write),
         }
         print(json.dumps(result, indent=2))
-        sys.exit(0 if (is_identical or args.write) else 1)
+        sys.exit(ExitCode.OK if (is_identical or args.write) else ExitCode.GENERAL)
 
     if args.check:
         if is_identical:
-            print(f"✓ mods/library.md is fully up to date ({len(mods_data)} mods cataloged).")
-            sys.exit(0)
+            print(f"{color.green('✓')} mods/library.md is fully up to date ({len(mods_data)} mods cataloged).")
+            sys.exit(ExitCode.OK)
         else:
-            print("✗ mods/library.md is out of date. Run with --write to regenerate.", file=sys.stderr)
-            sys.exit(1)
+            print(f"{err_color.red('✗')} mods/library.md is out of date. Run with --write to regenerate.", file=sys.stderr)
+            sys.exit(ExitCode.GENERAL)
 
     if args.write:
-        print(f"✓ Successfully regenerated {LIBRARY_FILE.relative_to(WORKSPACE_ROOT)} with {len(mods_data)} cataloged mods.")
+        print(f"{color.green('✓')} Successfully regenerated {LIBRARY_FILE.relative_to(WORKSPACE_ROOT)} with {len(mods_data)} cataloged mods.")
     else:
         print(f"Scanned {len(mods_data)} mods. Use --write to update mods/library.md or --stdout to inspect.")
+    return ExitCode.OK
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -24,19 +24,21 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.cli_common import ConsoleColor, ExitCode
 from scripts.lib.env_paths import MODS_DIR, MY_MODS_DIR, REPO_ROOT as WORKSPACE_ROOT, detect_data_dir, get_env_var, normalize_mod_key
 
 DEFAULT_TOOLKIT_DIR = Path("/mnt/c/Program Files (x86)/Steam/steamapps/common/Baldurs Gate 3 Toolkit")
 
-# ANSI Colors
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-RED = "\033[31m"
-CYAN = "\033[36m"
-MAGENTA = "\033[35m"
-BOLD = "\033[1m"
-DIM = "\033[2m"
-RESET = "\033[0m"
+# Zero-dependency ANSI Terminal Colors honoring NO_COLOR
+_color = ConsoleColor(stream=sys.stdout)
+GREEN = "\033[32m" if _color.enabled else ""
+YELLOW = "\033[33m" if _color.enabled else ""
+RED = "\033[31m" if _color.enabled else ""
+CYAN = "\033[36m" if _color.enabled else ""
+MAGENTA = "\033[35m" if _color.enabled else ""
+BOLD = "\033[1m" if _color.enabled else ""
+DIM = "\033[2m" if _color.enabled else ""
+RESET = "\033[0m" if _color.enabled else ""
 
 # Regex for Larian Toolkit log line format:
 # [13-10-2026 22:14:17:229][D:\Jenkins\...\BoostTypes.cpp 254 eoc::FixedStringToBoostType]: !ASSERT!Design: Unknown boost type 'AI_IGNORE:Tag'
@@ -538,7 +540,7 @@ def main():
                 print(f" - {r['file_name']}  ({r['size_bytes']} bytes, Modified: {r['modified']})")
             if len(log_records) > 20:
                 print(f" ... and {len(log_records) - 20} more.")
-        sys.exit(0)
+        sys.exit(ExitCode.OK)
 
     if not available_logs:
         msg = f"No log files found in {toolkit_dir} matching type '{args.type}'."
@@ -546,7 +548,7 @@ def main():
             print(json.dumps({"error": msg}, indent=2))
         else:
             print(f"{YELLOW}{msg}{RESET}")
-        sys.exit(0)
+        sys.exit(ExitCode.OK)
 
     target_log = available_logs[0]
 
@@ -564,7 +566,7 @@ def main():
                     print(f"{color}[{sev}]{RESET} [{item['subsystem']}] {item['message']}")
         except KeyboardInterrupt:
             print("\nStopped streaming.")
-            sys.exit(0)
+            sys.exit(130)
 
     # 5. One-shot triage / parse
     mod_index = index_mod_content(args.mod)
@@ -581,7 +583,8 @@ def main():
         print(json.dumps(report, indent=2))
     else:
         print_human_report(report)
+    return ExitCode.OK
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

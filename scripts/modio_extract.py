@@ -25,6 +25,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from scripts.lib.cli_common import ConsoleColor, ExitCode
 from scripts.lib.env_paths import MODS_DIR, REPO_ROOT, normalize_mod_key
 from scripts.lib.larian_parsers import (
     clean_loc_text,
@@ -901,7 +902,8 @@ def process_mod(query="", pak_path=None, output_dir=None, write_spec=False, upda
 
 def main():
     parser = argparse.ArgumentParser(description="Fetch, unpack, and parse BG3 mods from mod.io or local .pak archives.")
-    parser.add_argument("--query", "-q", help="Mod name, slug, URL, or ID on mod.io")
+    parser.add_argument("query_pos", nargs="?", help="Mod name, slug, URL, or ID on mod.io (positional)")
+    parser.add_argument("--query", "-q", dest="query_flag", help="Mod name, slug, URL, or ID on mod.io")
     parser.add_argument("--pak", help="Path to local .pak file to unpack and document")
     parser.add_argument("--output-dir", "-o", help="Directory where mod spec and data will be saved")
     parser.add_argument("--write-spec", action="store_true", help="Write README.md directly to output directory")
@@ -910,12 +912,15 @@ def main():
 
     args = parser.parse_args()
 
-    if not args.query and not args.pak:
-        parser.error("Either --query or --pak must be provided.")
+    query_val = args.query_flag or args.query_pos
+    if not query_val and not args.pak:
+        err_color = ConsoleColor(stream=sys.stderr)
+        print(f"{err_color.red('[ERROR]')} Either a mod query or --pak must be provided.", file=sys.stderr)
+        sys.exit(ExitCode.USAGE)
 
     try:
         res = process_mod(
-            query=args.query or "",
+            query=query_val or "",
             pak_path=args.pak,
             output_dir=args.output_dir,
             write_spec=args.write_spec,
@@ -924,14 +929,20 @@ def main():
         if args.json:
             print(json.dumps(res, indent=2))
         else:
-            print(f"Successfully processed mod '{res['mod_name']}' ({res['slug']})")
-            print(f"Category: {res['category']}")
-            print(f"Features documented: {res['features_count']}")
-            print(f"Directory: {res['output_dir']}")
+            color = ConsoleColor(stream=sys.stdout)
+            print(f"{color.green('[✓]')} Successfully processed mod '{res['mod_name']}' ({res['slug']})")
+            print(f"    Category: {res['category']}")
+            print(f"    Features documented: {res['features_count']}")
+            print(f"    Directory: {res['output_dir']}")
+        return ExitCode.OK
     except Exception as e:
-        print(f"Error processing mod '{args.query or args.pak}': {e}", file=sys.stderr)
-        sys.exit(1)
+        if args.json:
+            print(json.dumps({"error": str(e), "success": False}, indent=2))
+        else:
+            err_color = ConsoleColor(stream=sys.stderr)
+            print(f"{err_color.red('[ERROR]')} processing mod '{query_val or args.pak}': {e}", file=sys.stderr)
+        sys.exit(ExitCode.GENERAL)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

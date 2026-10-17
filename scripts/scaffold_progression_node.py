@@ -16,12 +16,10 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.dom import minidom
 
-if __package__:
-    from .lib.env_paths import MY_MODS_DIR, resolve_mod_dir
-    from .lib.larian_parsers import split_larian_items
-else:
-    from lib.env_paths import MY_MODS_DIR, resolve_mod_dir
-    from lib.larian_parsers import split_larian_items
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.cli_common import ConsoleColor, ExitCode
+from scripts.lib.env_paths import MY_MODS_DIR, resolve_mod_dir
+from scripts.lib.larian_parsers import split_larian_items
 
 # Standard Vanilla Class Table UUIDs
 CLASS_TABLE_UUIDS = {
@@ -328,25 +326,28 @@ def main():
             result["spell_list_uuid"] = spell_list_uuid
             result["spell_lists_file"] = str(spell_lists_file)
 
+        color = ConsoleColor(stream=sys.stdout)
         if args.json:
             print(json.dumps(result, indent=2))
         else:
-            tag = " [DRY-RUN]" if args.dry_run else ""
-            print(f"[✓] Successfully {result['action']} progression node for {target_name} Level {args.level}{tag}:")
+            tag = color.yellow(" [DRY-RUN]") if args.dry_run else ""
+            status_tag = color.green("[✓]")
+            print(f"{status_tag} Successfully {result['action']} progression node for {target_name} Level {args.level}{tag}:")
             print(f"    Progressions file: {result['file']}")
             print(f"    Progression UUID: {result['node_uuid']}")
             print(f"    Table UUID: {result['table_uuid']}")
             if spell_list_uuid:
                 print(f"    SpellList UUID: {spell_list_uuid} ({len(spells_list)} spells)")
 
-        return 0
+        return ExitCode.SUCCESS
 
     except Exception as e:
         if args.json:
             print(json.dumps({"error": str(e), "success": False}, indent=2))
         else:
-            print(f"[ERROR] {e}", file=sys.stderr)
-        return 1
+            err_color = ConsoleColor(stream=sys.stderr)
+            print(f"{err_color.red('[ERROR]')} {e}", file=sys.stderr)
+        return ExitCode.GENERAL
 
 
 if __name__ == "__main__":
