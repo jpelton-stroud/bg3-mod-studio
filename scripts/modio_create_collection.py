@@ -17,6 +17,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from scripts.lib.cli_common import ConsoleColor, ExitCode
 from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
 from scripts.lib.library_catalog import parse_library_rows
 from scripts.lib.modio_client import (
@@ -446,12 +447,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         action="store_true",
         help="Show the collection change preview without sending any API writes.",
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output results as JSON.",
+    )
     args = parser.parse_args(argv)
 
+    err_color = ConsoleColor(stream=sys.stderr)
     token = get_oauth_token()
     if not token:
-        print("MODIO_PAT environment variable or .env entry is required; token is never accepted as an argument.", file=sys.stderr)
-        return 2
+        msg = "MODIO_PAT environment variable or .env entry is required; token is never accepted as an argument."
+        if args.json:
+            print(json.dumps({"error": msg, "success": False}, indent=2))
+        else:
+            print(f"{err_color.red('[ERROR]')} {msg}", file=sys.stderr)
+        return ExitCode.NOPERM
 
     try:
         result = run_workflow(
@@ -459,13 +470,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             library_path=args.library,
             dry_run=args.dry_run,
         )
+        if args.json:
+            print(json.dumps(result, indent=2))
+        return ExitCode.GENERAL if result.get("status") == "partial_failure" else ExitCode.OK
     except ModioError as error:
-        print(f"Error: {error}", file=sys.stderr)
-        return 2
+        if args.json:
+            print(json.dumps({"error": str(error), "success": False}, indent=2))
+        else:
+            print(f"{err_color.red('[ERROR]')} {error}", file=sys.stderr)
+        return ExitCode.USAGE
     except (EOFError, KeyboardInterrupt):
-        print("\nCancelled before completing the collection workflow.", file=sys.stderr)
+        print(f"\n{err_color.yellow('Cancelled before completing the collection workflow.')}", file=sys.stderr)
         return 130
-    return 1 if result.get("status") == "partial_failure" else 0
 
 
 if __name__ == "__main__":

@@ -19,6 +19,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from scripts.lib.cli_common import ConsoleColor, ExitCode
 from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
 from scripts.lib.larian_parsers import parse_loca_bytes
 
@@ -404,10 +405,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="High-speed BiS gear, spell, and mechanics database query engine."
     )
+    parser.add_argument("search_pos", nargs="?", help="General search term across name, description, boosts, and passives (positional).")
+    parser.add_argument("--search", dest="search_flag", help="General search term across name, description, boosts, and passives.")
     parser.add_argument("--slot", help="Filter by equipment slot (e.g. Amulet, Ring, Boots, Weapon, Cloak).")
     parser.add_argument("--boost", help="Filter by boost effect (e.g. SpellSaveDC, AC, CriticalHit, Necrotic).")
     parser.add_argument("--passive", help="Filter by passive effect (e.g. ExtraAttack, Lifedrinker).")
-    parser.add_argument("--search", help="General search term across name, description, boosts, and passives.")
     parser.add_argument("--rarity", help="Filter by item rarity (e.g. Rare, VeryRare, Legendary).")
     parser.add_argument("--mod", help="Filter by mod slug/name in mods/.")
     parser.add_argument("--limit", type=int, default=10, help="Maximum number of results to display (default: 10).")
@@ -423,12 +425,13 @@ def main():
     entries = build_or_load_index(workspace_root, force_reindex=args.reindex)
     load_time_ms = (time.perf_counter() - t0) * 1000
 
+    search_query = args.search_flag or args.search_pos
     results = filter_entries(
         entries=entries,
         slot=args.slot,
         boost=args.boost,
         passive=args.passive,
-        search=args.search,
+        search=search_query,
         rarity=args.rarity,
         mod_filter=args.mod,
         limit=args.limit,
@@ -490,7 +493,7 @@ def main():
             print(f"   Description: {r['description']}")
         print()
 
-    return 0
+    return ExitCode.OK
 
 
 if __name__ == "__main__":

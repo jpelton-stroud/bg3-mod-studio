@@ -15,6 +15,7 @@ from typing import Any, Dict, Optional, TextIO
 class ExitCode(enum.IntEnum):
     """Standardized POSIX / BSD sysexits exit codes."""
     OK = 0
+    SUCCESS = 0
     GENERAL = 1
     USAGE = 2            # Command syntax or flag misuse
     DATAERR = 65          # Input data error or validation collision

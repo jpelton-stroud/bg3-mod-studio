@@ -22,14 +22,14 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from scripts.lib.cli_common import (
+    ConsoleColor,
+    ExitCode,
+    NonInteractiveConfirmationError,
+    confirm_action,
+)
 from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
 from scripts.lib.library_catalog import purge_library_mods
-
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-CYAN = "\033[36m"
-BOLD = "\033[1m"
-RESET = "\033[0m"
 
 
 def main():
@@ -54,6 +54,12 @@ def main():
         help="Execute purge without interactive confirmation",
     )
     parser.add_argument(
+        "--yes",
+        "-y",
+        action="store_true",
+        help="Confirm deletion non-interactively in automated pipelines",
+    )
+    parser.add_argument(
         "--mods-dir",
         type=Path,
         default=None,
@@ -75,12 +81,22 @@ def main():
         else (mods_dir / "library.md").resolve()
     )
 
-    if not args.force and not args.dry_run and sys.stdin.isatty():
-        print(f"{YELLOW}{BOLD}Warning:{RESET} This will delete all mod folders in '{mods_dir}' and reset '{lib_path}'.")
-        confirm = input("Are you sure you want to proceed? (y/N): ").strip().lower()
-        if confirm not in ("y", "yes"):
-            print("Purge operation aborted.")
-            sys.exit(0)
+    if not args.force and not args.dry_run:
+        try:
+            confirm_action(
+                f"Delete all mod folders in '{mods_dir}' and reset '{lib_path}'?",
+                default=False,
+                non_interactive_yes=args.yes,
+                force_non_interactive=args.json,
+            )
+        except NonInteractiveConfirmationError as exc:
+            if args.json:
+                print(json.dumps({"error": str(exc), "code": "CONFIRMATION_REQUIRED", "success": False}, indent=2))
+            else:
+                err_color = ConsoleColor(stream=sys.stderr)
+                print(f"{err_color.red('[ERROR]')} {exc}", file=sys.stderr)
+                print("Pass -y or --yes when running non-interactively.", file=sys.stderr)
+            sys.exit(ExitCode.USAGE)
 
     result = purge_library_mods(
         mods_dir=mods_dir,
@@ -90,25 +106,27 @@ def main():
 
     if args.json:
         print(json.dumps(result, indent=2))
-        return
+        return ExitCode.OK
 
-    mode_prefix = f"{CYAN}[DRY-RUN] {RESET}" if args.dry_run else ""
-    print(f"\n{mode_prefix}{BOLD}Library Purge Summary{RESET}")
+    color = ConsoleColor(stream=sys.stdout)
+    mode_prefix = f"{color.cyan('[DRY-RUN] ')}" if args.dry_run else ""
+    print(f"\n{mode_prefix}{color.bold('Library Purge Summary')}")
     print(f"Target Directory: {result['mods_dir']}")
     print(f"Purged Mod Folders: {result['purged_count']}")
     if result["library_reset"]:
-        print(f"Catalog Reset: {GREEN}✓{RESET} {result['library_path']}")
+        print(f"Catalog Reset: {color.green('✓')} {result['library_path']}")
 
     for del_item in result.get("deleted_folders", []):
         status_label = del_item.get("status")
         msg = del_item.get("message", "")
         if status_label in ("deleted", "dry_run_deleted"):
-            print(f"  {GREEN}✓{RESET} {msg}")
+            print(f"  {color.green('✓')} {msg}")
         else:
-            print(f"  {YELLOW}!{RESET} {msg}")
+            print(f"  {color.yellow('!')} {msg}")
 
     print("")
+    return ExitCode.OK
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

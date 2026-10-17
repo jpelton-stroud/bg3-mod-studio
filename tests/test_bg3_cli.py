@@ -85,6 +85,54 @@ class TestBg3CliIntegration(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
         self.assertIn("query_mod_database", proc.stdout)
 
+    def test_scaffold_stat_dry_run_json(self):
+        proc = self.run_cli([
+            "scaffold", "stat",
+            "--mod", "paladins-call",
+            "--type", "weapon",
+            "--name", "IntegrationTestBlade",
+            "--dry-run",
+            "--json",
+        ])
+        self.assertEqual(proc.returncode, 0)
+        data = json.loads(proc.stdout)
+        self.assertEqual(data["status"], "created")
+        self.assertEqual(data["entry_name"], "IntegrationTestBlade")
+        self.assertTrue(data["dry_run"])
+
+    def test_scaffold_progression_help(self):
+        proc = self.run_cli(["scaffold", "progression", "--help"])
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("--class", proc.stdout)
+        self.assertIn("--level", proc.stdout)
+
+    def test_modio_purge_requires_confirmation(self):
+        proc = self.run_cli(["modio", "purge", "--json"])
+        self.assertEqual(proc.returncode, 2)
+        data = json.loads(proc.stdout)
+        self.assertEqual(data["error"]["code"], "CONFIRMATION_REQUIRED")
+
+    def test_query_database_json(self):
+        proc = self.run_cli(["query", "--limit", "2", "--json"])
+        self.assertEqual(proc.returncode, 0)
+        data = json.loads(proc.stdout)
+        self.assertIn("results", data)
+        self.assertIn("count", data)
+
+    def test_build_simulate_json(self):
+        proc = self.run_cli(["build", "simulate", "--classes", "Wizard=20", "--json"])
+        self.assertEqual(proc.returncode, 0)
+        data = json.loads(proc.stdout)
+        self.assertEqual(data["total_level"], 20)
+        self.assertIn("spell_slots", data)
+
+    def test_tools_list_json(self):
+        proc = self.run_cli(["tools", "list", "--json"])
+        self.assertEqual(proc.returncode, 0)
+        tools = json.loads(proc.stdout)
+        self.assertIsInstance(tools, list)
+        self.assertTrue(len(tools) >= 20)
+
 
 if __name__ == "__main__":
     unittest.main()

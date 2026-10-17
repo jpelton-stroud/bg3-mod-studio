@@ -16,6 +16,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.dom import minidom
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.cli_common import ConsoleColor, ExitCode
+
 VISUAL_PRESETS = {
     "greatsword": {
         "uuid": "2798c9f8-b06b-44d4-9d6c-e6d98a66329a",
@@ -371,11 +374,13 @@ def main():
             )
         result["linked_stat_file"] = linked_stat_file
 
+        color = ConsoleColor(stream=sys.stdout)
         if args.json:
             print(json.dumps(result, indent=2))
         else:
-            dry_str = " [DRY-RUN]" if args.dry_run else ""
-            print(f"[✓] Successfully {result['action']} RootTemplate for '{args.item}'{dry_str}:")
+            dry_str = color.yellow(" [DRY-RUN]") if args.dry_run else ""
+            status_tag = color.green("[✓]")
+            print(f"{status_tag} Successfully {result['action']} RootTemplate for '{args.item}'{dry_str}:")
             print(f"    Target File: {result['file']}")
             print(f"    MapKey (UUID): {result['map_key']}")
             print(f"    RootTemplate Name: {result['root_template_name']}")
@@ -383,14 +388,15 @@ def main():
             if result["icon"]:
                 print(f"    Icon: {result['icon']}")
 
-        return 0
+        return ExitCode.SUCCESS
 
     except Exception as e:
         if args.json:
             print(json.dumps({"error": str(e), "success": False}, indent=2))
         else:
-            print(f"[ERROR] {e}", file=sys.stderr)
-        return 1
+            err_color = ConsoleColor(stream=sys.stderr)
+            print(f"{err_color.red('[ERROR]')} {e}", file=sys.stderr)
+        return ExitCode.GENERAL
 
 
 if __name__ == "__main__":

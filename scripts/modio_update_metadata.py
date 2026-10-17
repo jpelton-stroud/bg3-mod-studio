@@ -15,6 +15,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from scripts.lib.cli_common import ConsoleColor, ExitCode
 from scripts.lib.env_paths import MY_MODS_DIR, REPO_ROOT, normalize_mod_key, resolve_mod_dir
 from scripts.lib.modio_client import (
     API_ROOT,
@@ -371,13 +372,14 @@ def main() -> int:
     if args.json:
         print(json.dumps(result, indent=2, ensure_ascii=False))
     elif result["status"] == "preview":
-        print(f"Preview for {result['mod']['name']} ({result['mod']['slug']})")
+        color = ConsoleColor(stream=sys.stdout)
+        print(f"{color.bold('Preview for')} {result['mod']['name']} ({result['mod']['slug']})")
         print(f"Tags to add: {', '.join(result['tags_to_add']) or '(none)'}")
         print("Profile fields: description, community options, non-commercial reuse permissions, Public visibility")
-        print("No API writes made. Review the change list and pass --confirm only after user approval.")
+        print(color.yellow("No API writes made. Review the change list and pass --confirm only after user approval."))
     else:
         print(json.dumps(result, indent=2, ensure_ascii=False))
-    return 1 if result["status"] in ("failed", "partial_failure") else 0
+    return ExitCode.GENERAL if result["status"] in ("failed", "partial_failure") else ExitCode.OK
 
 
 if __name__ == "__main__":
