@@ -12,6 +12,28 @@
   },
   "tools": [
     {
+      "name": "bg3.py",
+      "command": "bg3",
+      "category": "management",
+      "summary": "Unified 2026 CLI Suite and command runner for Baldur's Gate 3 Mod Studio.",
+      "description": "Unified noun-verb command entrypoint providing stream discipline, structured JSON, exit codes, and safety checks across mod authoring, conflict detection, load order management, and modio syncing.",
+      "intents": ["bg3", "cli", "unified runner", "bg3 cli", "suite"],
+      "cli_usage": "python3 scripts/bg3.py <command> <subcommand> [options] [--json]",
+      "flags": [
+        {"name": "<command>", "type": "str", "required": true, "description": "Command group: mod, loadorder, modio, env"},
+        {"name": "<subcommand>", "type": "str", "required": true, "description": "Subcommand action"},
+        {"name": "--json", "type": "bool", "required": false, "description": "Emit structured JSON payloads on stdout"},
+        {"name": "--no-color", "type": "bool", "required": false, "description": "Disable ANSI terminal styling"},
+        {"name": "-v, --verbose", "type": "bool", "required": false, "description": "Enable verbose diagnostic logs on stderr"}
+      ],
+      "examples": [
+        "python3 scripts/bg3.py mod conflict PaladinsCall --against-library --json",
+        "python3 scripts/bg3.py mod validate PaladinsCall --json",
+        "python3 scripts/bg3.py loadorder list --json",
+        "python3 scripts/bg3.py env check --json"
+      ]
+    },
+    {
       "name": "create_mod_scaffold.py",
       "command": "scaffold-mod",
       "category": "authoring",
@@ -536,6 +558,24 @@
       ],
       "examples": [
         "python3 scripts/modio_create_collection.py --dry-run"
+      ]
+    },
+    {
+      "name": "purge_library.py",
+      "command": "purge-library",
+      "category": "library",
+      "summary": "Purges all documented mods from mods/ and resets mods/library.md.",
+      "description": "Safely removes all mod child directories in mods/ and resets mods/library.md to its clean initial header.",
+      "intents": ["purge mods", "purge library", "clean mods directory", "reset library", "delete all mods", "clear library"],
+      "cli_usage": "python3 scripts/purge_library.py [options]",
+      "flags": [
+        {"name": "--dry-run", "type": "bool", "required": false, "description": "Simulate deletion without modifying files"},
+        {"name": "--force", "type": "bool", "required": false, "description": "Skip interactive confirmation"},
+        {"name": "--json", "type": "bool", "required": false, "description": "Emit output as JSON"}
+      ],
+      "examples": [
+        "python3 scripts/purge_library.py --dry-run",
+        "python3 scripts/purge_library.py --force"
       ]
     },
     {

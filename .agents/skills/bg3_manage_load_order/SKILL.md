@@ -37,29 +37,28 @@ flowchart TD
 
 ### 1. View Current Load Order
 ```bash
-python3 scripts/manage_load_order.py --list --json
+python3 scripts/bg3.py loadorder list --json
 ```
 
-### 2. Enable / Activate a Mod
-Activate a mod by its folder slug, module folder name, or UUID:
+### 2. Synchronize & Clean Load Order
 ```bash
-# Enable at end of load order (automatically resolves & activates declared dependencies by default):
+# Sync local mods into active load order profile:
+python3 scripts/bg3.py loadorder sync --yes --json
+
+# Clean missing or invalid mods from active profile:
+python3 scripts/bg3.py loadorder clean --yes --json
+```
+
+### 3. Detailed Mod Activation / Deactivation
+For fine-grained position or dependency control, `scripts/manage_load_order.py` provides advanced flags:
+```bash
+# Enable at end of load order with dependencies:
 python3 scripts/manage_load_order.py --enable "<mod_slug_or_UUID>" --with-deps --json
 
-# Clean-room test isolation (disable all unrelated mods, keeping only GustavDev + dependencies + target mod):
-python3 scripts/manage_load_order.py --enable "<mod_slug_or_UUID>" --isolate --json
-
-# Or insert at specific load order position (1-indexed):
-python3 scripts/manage_load_order.py --enable "<mod_slug_or_UUID>" --order 3 --json
-```
-
-### 3. Disable a Mod
-```bash
+# Disable a mod safely:
 python3 scripts/manage_load_order.py --disable "<mod_slug_or_UUID>" --json
-```
 
-### 4. Validate Active Profile Integrity
-```bash
+# Validate profile rules:
 python3 scripts/manage_load_order.py --validate --json
 ```
 
@@ -67,8 +66,8 @@ python3 scripts/manage_load_order.py --validate --json
 > **Tool Discovery & Schema Inspection**:
 > To inspect all load order management and save audit options:
 > ```bash
+> python3 scripts/bg3.py loadorder --help
 > python3 scripts/tools.py --info load-order --json
-> python3 scripts/tools.py --info inspect-save --json
 > python3 scripts/tools.py --search "modsettings" --json
 > ```
 

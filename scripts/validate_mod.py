@@ -26,16 +26,18 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.cli_common import ConsoleColor, ExitCode
 from scripts.lib.env_paths import MY_MODS_DIR, REPO_ROOT as WORKSPACE_ROOT, resolve_mod_dir
 from scripts.lib.larian_parsers import HANDLE_PATTERN, has_balanced_parens
 
-# ANSI Colors
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-RED = "\033[31m"
-CYAN = "\033[36m"
-BOLD = "\033[1m"
-RESET = "\033[0m"
+# Zero-dependency ANSI Terminal Colors honoring NO_COLOR
+_color = ConsoleColor(stream=sys.stderr)
+GREEN = "\033[32m" if _color.enabled else ""
+YELLOW = "\033[33m" if _color.enabled else ""
+RED = "\033[31m" if _color.enabled else ""
+CYAN = "\033[36m" if _color.enabled else ""
+BOLD = "\033[1m" if _color.enabled else ""
+RESET = "\033[0m" if _color.enabled else ""
 
 
 class ModValidator:
@@ -417,6 +419,7 @@ def check_uuid_uniqueness(mod_dirs: list[Path]) -> list[str]:
 
 def main():
     parser = argparse.ArgumentParser(description="Deterministic static validator and linter for BG3 mods.")
+    parser.add_argument("mod_pos", nargs="?", help="Specific mod name, slug, or directory path to validate (positional)")
     parser.add_argument("--mod", help="Specific mod name, slug, or directory path to validate")
     parser.add_argument("--all", action="store_true", help="Validate all custom mods in my_mods/")
     parser.add_argument("--strict", action="store_true", help="Treat warnings as errors")
@@ -425,12 +428,13 @@ def main():
     args = parser.parse_args()
 
     targets = []
-    if args.mod:
+    selected_mod = args.mod or args.mod_pos
+    if selected_mod and not args.all:
         try:
-            targets.append(resolve_mod_dir(args.mod, prefer_my_mods=True))
+            targets.append(resolve_mod_dir(selected_mod, prefer_my_mods=True))
         except FileNotFoundError:
-            print(f"Error: No mod found matching '{args.mod}'.", file=sys.stderr)
-            sys.exit(1)
+            print(f"Error: No mod found matching '{selected_mod}'.", file=sys.stderr)
+            sys.exit(ExitCode.NOINPUT)
     else:
         if not MY_MODS_DIR.exists():
             print(f"Error: {MY_MODS_DIR} does not exist.", file=sys.stderr)
@@ -485,8 +489,8 @@ def main():
         print(f"{BOLD}Summary:{RESET} {len(targets)} mods checked, {total_errors} errors, {total_warnings} warnings.")
 
     if total_errors > 0 or (args.strict and total_warnings > 0):
-        sys.exit(1)
-    sys.exit(0)
+        sys.exit(ExitCode.DATAERR)
+    sys.exit(ExitCode.OK)
 
 
 if __name__ == "__main__":
