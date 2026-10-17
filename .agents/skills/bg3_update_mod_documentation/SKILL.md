@@ -70,6 +70,17 @@ python3 scripts/modio_update.py --list-tracked --json
 
 Or by inspecting [`mods/library.md`](file:///home/jpstroud/projects/BaldursGate3/mods/library.md) and extracting all slugs. Add every tracked mod to the target batch.
 
+### Case C: Syncing Subscribed Mods & Pruning Orphans
+When synchronizing the community library directly against the authenticated user's mod.io subscriptions, use `scripts/modio_sync.py`:
+
+```bash
+# 1. Preview newly subscribed, updated, or orphaned mods without modifications
+python3 scripts/modio_sync.py --dry-run --json
+
+# 2. Synchronize subscriptions and safely prune unsubscribed rows and orphaned folders
+python3 scripts/modio_sync.py --prune --json
+```
+
 
 ---
 

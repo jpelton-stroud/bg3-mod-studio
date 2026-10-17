@@ -6,7 +6,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
-from typing import Any, Dict, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from .env_paths import get_env_var
 
@@ -35,9 +35,13 @@ class ModioClient:
         fields: Optional[Sequence[Tuple[str, str]]] = None,
         multipart: bool = False,
     ) -> Dict[str, Any]:
-        url = f"{API_ROOT}{path}"
+        if path.startswith("http://") or path.startswith("https://"):
+            url = path
+        else:
+            url = f"{API_ROOT}{path}"
         if params:
-            url = f"{url}?{urllib.parse.urlencode(params)}"
+            sep = "&" if "?" in url else "?"
+            url = f"{url}{sep}{urllib.parse.urlencode(params)}"
         auth_header = "Auth" + "orization"
         headers = {
             "Accept": "application/json",
@@ -89,6 +93,36 @@ class ModioClient:
         if not isinstance(payload, dict):
             raise ModioError("mod.io returned an unexpected response shape.")
         return payload
+
+    def get_paged(
+        self,
+        path: str,
+        params: Optional[Dict[str, Any]] = None,
+        page_size: int = 100,
+    ) -> List[Dict[str, Any]]:
+        """Fetch all items from a paginated endpoint automatically."""
+        offset = 0
+        items: List[Dict[str, Any]] = []
+        base_params = dict(params or {})
+        while True:
+            page_params = {**base_params, "_limit": page_size, "_offset": offset}
+            payload = self.request("GET", path, params=page_params)
+            data = payload.get("data", [])
+            if not isinstance(data, list) or any(not isinstance(item, dict) for item in data):
+                raise ModioError("mod.io returned an unexpected list payload shape.")
+            items.extend(data)
+            total = payload.get("result_total")
+            if total is not None:
+                if not isinstance(total, int) or total < 0:
+                    raise ModioError("mod.io returned an invalid result_total.")
+                if offset + len(data) >= total:
+                    break
+            elif len(data) < page_size:
+                break
+            if not data:
+                break
+            offset += len(data)
+        return items
 
 
 def get_api_key() -> Optional[str]:

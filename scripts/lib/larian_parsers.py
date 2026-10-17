@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-HANDLE_PATTERN = re.compile(r"(h[0-9a-fA-F]{32}|h[a-zA-Z0-9_]{30,40})(?:;\d+)?")
+HANDLE_PATTERN = re.compile(r"(?<![a-zA-Z0-9_])(h[0-9a-fA-F]{32}|h[a-zA-Z0-9_]{30,40})(?:;\d+)?")
 
 
 # ----------------------------------------------------------------------

@@ -17,6 +17,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import sys
 import urllib.error
 import urllib.parse
@@ -28,115 +29,46 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
-from scripts.lib.library_catalog import parse_library_rows
+from scripts.lib.env_paths import MODS_DIR, REPO_ROOT, normalize_mod_key
+from scripts.lib.library_catalog import (
+    find_mod_folder,
+    find_orphaned_folders,
+    get_tracked_mods,
+    parse_library_rows,
+    prune_mod_from_library,
+    safe_batch_delete_folders,
+)
 from scripts.lib.modio_client import (
     BG3_GAME_ID,
     MODIO_API_HOST,
     USER_AGENT,
+    ModioClient,
+    ModioError,
     get_api_key,
     get_oauth_token,
 )
 from scripts.modio_extract import process_mod
-from scripts.modio_update import check_and_apply_update, get_tracked_mods
+from scripts.modio_update import check_and_apply_update
+from scripts.update_library_catalog import write_library_catalog
 
 WORKSPACE_ROOT = str(REPO_ROOT)
+get_tracked_mods_from_library = get_tracked_mods
 
 
 
 
 
-def fetch_subscribed_mods(oauth_token, game_id=BG3_GAME_ID):
+def fetch_subscribed_mods(oauth_token, game_id=BG3_GAME_ID, client=None):
     """
     Fetch all mods the authenticated user is subscribed to for the given game.
     Handles pagination automatically.
     """
-    base_url = "https://api.mod.io/v1/me/subscribed"
-    limit = 100
-    offset = 0
-    all_mods = []
-    headers = {
-        "Authorization": f"Bearer {oauth_token}",
-        "Accept": "application/json",
-        "User-Agent": "BG3ModDocPipeline/1.0",
-    }
-
-    while True:
-        params = {
-            "game_id": game_id,
-            "_limit": limit,
-            "_offset": offset,
-        }
-        url = f"{base_url}?{urllib.parse.urlencode(params)}"
-        req = urllib.request.Request(url, headers=headers)
-
-        try:
-            with urllib.request.urlopen(req) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-        except urllib.error.HTTPError as e:
-            err_body = e.read().decode("utf-8", errors="replace")
-            raise RuntimeError(f"mod.io API HTTP {e.code} error: {e.reason} - {err_body}")
-        except Exception as e:
-            raise RuntimeError(f"Failed to connect to mod.io: {e}")
-
-        items = data.get("data", [])
-        all_mods.extend(items)
-        total = data.get("result_total", 0)
-
-        if offset + len(items) >= total or not items:
-            break
-        offset += len(items)
-
-    return all_mods
+    if client is None:
+        client = ModioClient(oauth_token)
+    return client.get_paged("/me/subscribed", params={"game_id": game_id})
 
 
-def get_tracked_mods_from_library(library_path):
-    """
-    Parses mods/library.md directly to identify mods currently in the catalog.
-    Does not scan the filesystem directory to avoid detecting pruned/orphaned directories.
-    """
-    tracked = {}
-    if os.path.exists(library_path):
-        with open(library_path, "r", encoding="utf-8") as f:
-            rows = parse_library_rows(f.read())
-        for row in rows:
-            slug = row["slug"]
-            feature_match = re.match(r"(\d+)\s+implemented\b", row["features_documented"], re.IGNORECASE)
-            if feature_match is None:
-                raise ValueError(f"Invalid Features Documented value for library entry '{slug}'.")
-            tracked[slug.lower()] = {
-                "mod_id": row["mod_id"],
-                "name": row["name"],
-                "slug": slug,
-                "category": row["category"],
-                "description": row["description"],
-                "features_count": int(feature_match.group(1)),
-                "spec_path": os.path.join(WORKSPACE_ROOT, "mods", slug, "README.md"),
-            }
-    return tracked
 
-
-def prune_mod_from_library(library_path, slug):
-    """Remove a mod's row from mods/library.md by slug."""
-    if not os.path.exists(library_path):
-        return False
-
-    with open(library_path, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    pattern = rf"^\|[^|\n]*\|[^|\n]*\|\s*`?{re.escape(slug)}`?\s*\|[^\n]*\n?"
-    new_content, count = re.subn(pattern, "", content, flags=re.IGNORECASE | re.MULTILINE)
-    if count == 0:
-        legacy_pattern = rf"^\|[^\n]*\({re.escape(slug)}/README\.md\)[^\n]*\n?"
-        new_content, count = re.subn(
-            legacy_pattern, "", content, flags=re.IGNORECASE | re.MULTILINE
-        )
-
-    if count > 0:
-        with open(library_path, "w", encoding="utf-8") as f:
-            f.write(new_content)
-        return True
-    return False
 
 
 def sync_library(
@@ -147,16 +79,26 @@ def sync_library(
     limit=None,
     skip_updates=False,
     filter_query=None,
+    library_path=None,
+    mods_dir=None,
 ):
     """
     Core sync controller:
     1. Fetches remote subscriptions
-    2. Categorizes against mods/library.md
-    3. Handles pruning of unsubscribed mods (if prune=True)
+    2. Categorizes against mods/library.md and detects orphaned folders
+    3. Prunes unsubscribed mods from library.md and flags folders for deletion
     4. Updates existing mods with newer releases (unless skip_updates=True)
     5. Extracts and documents newly subscribed mods (up to limit)
+    6. Regenerates catalog once if extractions occurred
+    7. Executes batched deletion of all flagged mod folders (if prune=True)
     """
-    library_path = os.path.join(WORKSPACE_ROOT, "mods", "library.md")
+    if library_path is None:
+        library_path = os.path.join(WORKSPACE_ROOT, "mods", "library.md")
+    if mods_dir is None:
+        mods_dir = Path(MODS_DIR)
+    else:
+        mods_dir = Path(mods_dir)
+
     tracked_mods = get_tracked_mods_from_library(library_path)
 
     # 1. Fetch subscribed mods
@@ -187,14 +129,19 @@ def sync_library(
             if slug not in subscribed_slug_map:
                 unsubscribed_tracked.append((slug, info))
 
+    active_slugs = set(subscribed_slug_map.keys()) | set(tracked_mods.keys())
+    orphaned_folders = find_orphaned_folders(mods_dir, active_slugs) if not filter_query else []
+
     results = {
         "total_subscribed": len(subscribed_mods),
         "total_tracked": len(tracked_mods),
         "new_count": len(new_mods),
         "existing_count": len(existing_mods),
         "unsubscribed_count": len(unsubscribed_tracked),
+        "orphaned_count": len(orphaned_folders),
         "actions": {
             "pruned": [],
+            "deleted_folders": [],
             "updated": [],
             "up_to_date": [],
             "extracted": [],
@@ -203,40 +150,89 @@ def sync_library(
         },
     }
 
-    # 3. Handle Pruning
+    folders_to_delete = []
+
+    # 3. Handle Pruning & Folder Flagging
     if unsubscribed_tracked:
         for slug, info in unsubscribed_tracked:
             name = info.get("name", slug)
+            mod_folder = find_mod_folder(slug, mods_dir)
+            if mod_folder:
+                folders_to_delete.append(mod_folder)
+
             if prune:
                 if dry_run:
+                    msg = f"[DRY-RUN] Would prune '{name}' ({slug}) from library.md"
+                    if mod_folder:
+                        msg += f" and flag 'mods/{mod_folder.name}' for deletion"
                     results["actions"]["pruned"].append({
                         "slug": slug,
                         "name": name,
                         "status": "dry_run_prune",
-                        "message": f"[DRY-RUN] Would prune '{name}' ({slug}) from library.md",
+                        "folder": str(mod_folder) if mod_folder else None,
+                        "message": msg,
                     })
                 else:
                     success = prune_mod_from_library(library_path, slug)
                     if success:
+                        msg = f"Pruned '{name}' ({slug}) from library.md"
+                        if mod_folder:
+                            msg += f" and flagged 'mods/{mod_folder.name}' for deletion"
                         results["actions"]["pruned"].append({
                             "slug": slug,
                             "name": name,
                             "status": "pruned",
-                            "message": f"Pruned '{name}' ({slug}) from library.md",
+                            "folder": str(mod_folder) if mod_folder else None,
+                            "message": msg,
                         })
                     else:
                         results["actions"]["pruned"].append({
                             "slug": slug,
                             "name": name,
                             "status": "not_found",
+                            "folder": str(mod_folder) if mod_folder else None,
                             "message": f"Row for '{name}' ({slug}) was not found in library.md",
                         })
             else:
+                msg = f"Retained unsubscribed mod '{name}' ({slug})"
+                if mod_folder:
+                    msg += f" [folder: mods/{mod_folder.name}]"
+                msg += " (use --prune to remove)"
                 results["actions"]["pruned"].append({
                     "slug": slug,
                     "name": name,
                     "status": "retained",
-                    "message": f"Retained unsubscribed mod '{name}' ({slug}) (use --prune to remove)",
+                    "folder": str(mod_folder) if mod_folder else None,
+                    "message": msg,
+                })
+
+    if orphaned_folders:
+        for orphan in orphaned_folders:
+            folders_to_delete.append(orphan)
+            if prune:
+                if dry_run:
+                    results["actions"]["pruned"].append({
+                        "slug": orphan.name,
+                        "name": orphan.name,
+                        "status": "dry_run_orphan",
+                        "folder": str(orphan),
+                        "message": f"[DRY-RUN] Would flag orphaned mod data folder 'mods/{orphan.name}' for deletion",
+                    })
+                else:
+                    results["actions"]["pruned"].append({
+                        "slug": orphan.name,
+                        "name": orphan.name,
+                        "status": "orphan_flagged",
+                        "folder": str(orphan),
+                        "message": f"Flagged orphaned mod data folder 'mods/{orphan.name}' for deletion",
+                    })
+            else:
+                results["actions"]["pruned"].append({
+                    "slug": orphan.name,
+                    "name": orphan.name,
+                    "status": "orphan_retained",
+                    "folder": str(orphan),
+                    "message": f"Retained orphaned mod data folder 'mods/{orphan.name}' (use --prune to remove)",
                 })
 
     # 4. Check & Update Existing Subscribed Mods
@@ -267,7 +263,7 @@ def sync_library(
                     "message": f"Error updating {name}: {e}",
                 })
 
-    # 5. Extract and Document New Subscribed Mods
+    # 5. Extract and Document New Subscribed Mods (Sequential)
     new_to_process = new_mods
     if limit is not None and limit >= 0:
         new_to_process = new_mods[:limit]
@@ -293,7 +289,7 @@ def sync_library(
 
         try:
             print(f"--> [{idx}/{len(new_to_process)}] Extracting and documenting '{name}' ({slug})...", flush=True)
-            proc_res = process_mod(slug, write_spec=True, update_library=True)
+            proc_res = process_mod(slug, write_spec=True, update_library=False)
             results["actions"]["extracted"].append({
                 "slug": slug,
                 "name": name,
@@ -310,6 +306,29 @@ def sync_library(
                 "message": f"Failed to extract '{name}' ({slug}): {e}",
             })
 
+    # 6. Deferred Single-Pass Library Catalog Regeneration
+    extracted_any = any(item.get("status") == "extracted" for item in results["actions"]["extracted"])
+    if extracted_any and not dry_run:
+        try:
+            write_library_catalog(mods_dir, Path(library_path))
+        except Exception as e:
+            print(f"Warning: Failed to regenerate library catalog after extractions: {e}", file=sys.stderr)
+
+    # 7. Batched Folder Deletion
+    if folders_to_delete and prune:
+        del_results = safe_batch_delete_folders(folders_to_delete, mods_dir=mods_dir, dry_run=dry_run)
+        results["actions"]["deleted_folders"] = del_results
+    elif folders_to_delete and not prune:
+        results["actions"]["deleted_folders"] = [
+            {
+                "path": str(p),
+                "name": p.name,
+                "status": "retained",
+                "message": f"Retained candidate mod folder 'mods/{p.name}' (use --prune to remove)",
+            }
+            for p in folders_to_delete
+        ]
+
     return results
 
 
@@ -324,6 +343,8 @@ def print_summary(results, dry_run=False, prune=False):
     print(f"  - Active & Documented    : {results['existing_count']}")
     print(f"  - Newly Subscribed       : {results['new_count']}")
     print(f"  - Tracked but Unsubscribed: {results['unsubscribed_count']}")
+    if results.get("orphaned_count", 0) > 0:
+        print(f"  - Orphaned Mod Folders   : {results['orphaned_count']}")
     print(f"--------------------------------------------------------")
 
     actions = results["actions"]
@@ -350,10 +371,17 @@ def print_summary(results, dry_run=False, prune=False):
             print(f"  ✓ {item.get('mod_name', item.get('slug'))}: {item.get('message')}")
 
     if actions["pruned"]:
-        label = "Pruned Unsubscribed Mods" if prune else "Unsubscribed Mods Retained in Library"
+        label = "Pruned Unsubscribed & Orphaned Mods" if prune else "Unsubscribed & Orphaned Mods Retained"
         print(f"\n[{label} ({len(actions['pruned'])})]")
         for item in actions["pruned"]:
             print(f"  - {item.get('name')}: {item.get('message')}")
+
+    if actions.get("deleted_folders") and prune:
+        label = "Deleted Mod Data Folders" if not dry_run else "Mod Data Folders Flagged for Deletion"
+        print(f"\n[{label} ({len(actions['deleted_folders'])})]")
+        for item in actions["deleted_folders"]:
+            prefix_char = "x" if not dry_run else "~"
+            print(f"  {prefix_char} {item.get('name')}: {item.get('message')}")
 
     if actions["failed"]:
         print(f"\n[Errors / Failures ({len(actions['failed'])})]")
@@ -381,7 +409,7 @@ def main():
     parser.add_argument(
         "--prune",
         action="store_true",
-        help="Remove documented mods from mods/library.md that are no longer subscribed",
+        help="Remove unsubscribed mods from mods/library.md and batch-delete applicable mod data folders and orphaned directories in mods/",
     )
     parser.add_argument(
         "--limit",

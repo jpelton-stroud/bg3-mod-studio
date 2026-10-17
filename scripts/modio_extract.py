@@ -26,7 +26,14 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.lib.env_paths import MODS_DIR, REPO_ROOT, normalize_mod_key
-from scripts.lib.larian_parsers import parse_loca_bytes
+from scripts.lib.larian_parsers import (
+    clean_loc_text,
+    parse_loca_bytes,
+    parse_localization_xml,
+    parse_meta_lsx,
+    parse_progressions_lsx,
+    parse_stats_txt,
+)
 from scripts.lib.lspk import LspkArchive, decompress_pak_file_data, lz4_block_decompress
 from scripts.update_library_catalog import write_library_catalog
 from scripts.lib.mod_overrides import (
@@ -45,126 +52,7 @@ from scripts.lib.modio_client import (
 )
 
 
-# ----------------------------------------------------------------------
-# Game Data Parsers (Stats, Localization, Meta)
-# ----------------------------------------------------------------------
-def clean_loc_text(text):
-    """Strip Larian markup tags like <LSTag ...>text</LSTag> from localized text."""
-    if not text:
-        return ""
-    # Strip opening and closing LSTags
-    clean = re.sub(r"</?LSTag[^>]*>", "", text)
-    return clean.strip()
 
-
-def parse_localization_xml(xml_bytes):
-    """Parse english.xml into a handle -> text dictionary."""
-    loc_dict = {}
-    if not xml_bytes:
-        return loc_dict
-    try:
-        root = ET.fromstring(xml_bytes.decode("utf-8", errors="ignore"))
-        for elem in root.findall(".//content"):
-            handle = elem.get("contentuid")
-            text = elem.text
-            if handle and text:
-                loc_dict[handle] = clean_loc_text(text)
-    except Exception:
-        pass
-    return loc_dict
-
-
-def parse_stats_txt(txt_bytes, loc_dict=None):
-    """Parse Larian stats text (new entry / data lines)."""
-    loc_dict = loc_dict or {}
-    text = txt_bytes.decode("utf-8", errors="ignore")
-    entries = {}
-    current_entry = None
-
-    for raw_line in text.splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("//"):
-            continue
-
-        entry_match = re.match(r'^new\s+entry\s+"([^"]+)"', line, re.I)
-        if entry_match:
-            name = entry_match.group(1)
-            current_entry = {
-                "name": name,
-                "type": "",
-                "using": "",
-                "data": {},
-            }
-            entries[name] = current_entry
-            continue
-
-        if not current_entry:
-            continue
-
-        type_match = re.match(r'^type\s+"([^"]+)"', line, re.I)
-        if type_match:
-            current_entry["type"] = type_match.group(1)
-            continue
-
-        using_match = re.match(r'^using\s+"([^"]+)"', line, re.I)
-        if using_match:
-            current_entry["using"] = using_match.group(1)
-            continue
-
-        data_match = re.match(r'^data\s+"([^"]+)"\s+"([^"]*)"', line, re.I)
-        if data_match:
-            key, val = data_match.group(1), data_match.group(2)
-            current_entry["data"][key] = val
-
-    # Resolve display names and descriptions
-    for name, entry in entries.items():
-        data = entry["data"]
-        disp_handle = data.get("DisplayName", "").split(";")[0]
-        desc_handle = data.get("Description", "").split(";")[0]
-        entry["resolved_display_name"] = loc_dict.get(disp_handle, data.get("DisplayName", ""))
-        entry["resolved_description"] = loc_dict.get(desc_handle, data.get("Description", ""))
-
-    return entries
-
-
-def parse_meta_lsx(lsx_bytes):
-    """Parse meta.lsx for mod UUID, author, version, and description."""
-    meta = {}
-    if not lsx_bytes:
-        return meta
-    try:
-        text = lsx_bytes.decode("utf-8", errors="ignore")
-        root = ET.fromstring(text)
-        for node in root.findall(".//node[@id='ModuleInfo']//attribute"):
-            attr_id = node.get("id")
-            val = node.get("value")
-            if attr_id and val:
-                meta[attr_id] = val
-    except Exception:
-        pass
-    return meta
-
-
-def parse_progressions_lsx(lsx_bytes):
-    """Parse Progressions.lsx for progression nodes."""
-    progressions = []
-    if not lsx_bytes:
-        return progressions
-    try:
-        text = lsx_bytes.decode("utf-8", errors="ignore")
-        root = ET.fromstring(text)
-        for node in root.findall(".//node[@id='Progression']"):
-            p = {}
-            for attr in node.findall("./attribute"):
-                attr_id = attr.get("id")
-                val = attr.get("value")
-                if attr_id and val is not None:
-                    p[attr_id] = val
-            if p:
-                progressions.append(p)
-    except Exception:
-        pass
-    return progressions
 
 
 # ----------------------------------------------------------------------

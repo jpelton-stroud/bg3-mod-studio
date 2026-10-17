@@ -21,7 +21,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
-from scripts.lib.library_catalog import parse_library_rows
+from scripts.lib.library_catalog import get_tracked_mod_identifiers, parse_library_rows
 from scripts.lib.modio_client import BG3_GAME_ID, MODIO_API_HOST, USER_AGENT, get_api_key
 
 # Pre-mapped domain terms to mod.io tags
@@ -87,19 +87,7 @@ def get_tracked_mods(workspace_root=None):
     """
     Parse mods/library.md to collect names and slugs of already tracked mods.
     """
-    tracked_slugs = set()
-    tracked_names = set()
-    if workspace_root:
-        library_path = Path(workspace_root) / "mods" / "library.md"
-    else:
-        library_path = MODS_DIR / "library.md"
-    if library_path.is_file():
-        rows = parse_library_rows(library_path.read_text(encoding="utf-8"))
-        for row in rows:
-            tracked_names.add(row["name"].lower())
-            tracked_slugs.add(row["slug"].lower())
-
-    return tracked_slugs, tracked_names
+    return get_tracked_mod_identifiers(workspace_root=workspace_root)
 
 
 def normalize_platform(platform_str):
