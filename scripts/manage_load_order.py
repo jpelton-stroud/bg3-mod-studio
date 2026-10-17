@@ -40,13 +40,16 @@ from scripts.lib.larian_parsers import find_mod_meta_files
 from scripts.lib.lspk import LspkArchive
 from scripts.lib.mod_resolver import ensure_dependency_paks, resolve_dependency_metadata
 
-# ANSI Colors
-BOLD = "\033[1m"
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-RED = "\033[31m"
-CYAN = "\033[36m"
-RESET = "\033[0m"
+from scripts.lib.cli_common import ConsoleColor, ExitCode
+
+# Zero-dependency ANSI Terminal Colors honoring NO_COLOR
+_color = ConsoleColor(stream=sys.stderr)
+BOLD = "\033[1m" if _color.enabled else ""
+GREEN = "\033[32m" if _color.enabled else ""
+YELLOW = "\033[33m" if _color.enabled else ""
+RED = "\033[31m" if _color.enabled else ""
+CYAN = "\033[36m" if _color.enabled else ""
+RESET = "\033[0m" if _color.enabled else ""
 
 # Default GustavDev module entry
 GUSTAV_DEV = {

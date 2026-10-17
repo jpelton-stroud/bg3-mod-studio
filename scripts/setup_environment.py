@@ -34,6 +34,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.lib.env_paths import REPO_ROOT
+from scripts.lib.library_catalog import purge_library_mods
 from scripts.lib.modio_client import BG3_GAME_ID, MODIO_API_HOST, USER_AGENT
 
 WORKSPACE_ROOT = REPO_ROOT
@@ -250,8 +251,11 @@ def check_environment_status(as_json: bool = False):
     print("")
 
 
-def configure_github_remote():
+def configure_github_remote(non_interactive: bool = False):
     """Optionally configure a GitHub remote repository using GitHub CLI."""
+    if non_interactive:
+        return
+
     # Check if git is initialized
     if not (WORKSPACE_ROOT / ".git").is_dir():
         return
@@ -302,72 +306,184 @@ def configure_github_remote():
         print(f"{YELLOW}Remote creation skipped: {result.stderr.strip()}{RESET}")
 
 
-def run_wizard(dry_run: bool = False):
+def prompt_subscription_sync(non_interactive: bool = False) -> str:
+    """Prompt user for modio_sync subscription synchronization action.
+
+    Returns the selected choice: '1', '2', '3', or '4'.
+    """
+    if non_interactive:
+        return "3"
+
+    print(f"\n{BOLD}{CYAN}------------------------------------------------------------------------{RESET}")
+    print(f"{BOLD}5. mod.io Subscription Sync & Library Management{RESET}")
+    print("Would you like to run `modio_sync` now to sync your existing subscriptions?")
+    print("  1) Yes, sync my existing subscriptions and prune mods to which I'm not subscribed [Default]")
+    print("  2) Yes, sync my existing subscriptions, but *don't* prune")
+    print("  3) No, don't sync my subscriptions now")
+    print("  4) No, and purge any mods currently listed in `mods/library.md`")
+
+    while True:
+        try:
+            choice = input(f"{BOLD}Select an option [1-4, default: 1]{RESET}: ").strip()
+        except EOFError:
+            return "3" if non_interactive else "1"
+        if not choice:
+            return "1"
+        if choice in ("1", "2", "3", "4"):
+            return choice
+        print(f"{YELLOW}Please enter 1, 2, 3, or 4 (or press Enter for default 1).{RESET}")
+
+
+def handle_subscription_sync(choice: str, dry_run: bool = False) -> None:
+    """Execute the selected subscription sync or library purge action."""
+    modio_sync_script = WORKSPACE_ROOT / "scripts" / "modio_sync.py"
+
+    if choice == "1":
+        print(f"\n{CYAN}Running subscription sync with pruning (--prune)...{RESET}")
+        cmd = [sys.executable, str(modio_sync_script), "--prune"]
+        if dry_run:
+            print(f"{CYAN}[DRY-RUN] Would run: {' '.join(cmd)}{RESET}")
+        else:
+            subprocess.run(cmd, cwd=WORKSPACE_ROOT)
+
+    elif choice == "2":
+        print(f"\n{CYAN}Running subscription sync without pruning...{RESET}")
+        cmd = [sys.executable, str(modio_sync_script)]
+        if dry_run:
+            print(f"{CYAN}[DRY-RUN] Would run: {' '.join(cmd)}{RESET}")
+        else:
+            subprocess.run(cmd, cwd=WORKSPACE_ROOT)
+
+    elif choice == "3":
+        print("Continuing setup without subscription sync.")
+
+    elif choice == "4":
+        print(f"\n{YELLOW}Purging all mods currently found in mods/ and resetting mods/library.md...{RESET}")
+        result = purge_library_mods(dry_run=dry_run)
+        mode_prefix = f"{CYAN}[DRY-RUN] {RESET}" if dry_run else ""
+        print(f"{mode_prefix}{GREEN}✓ Purged {result['purged_count']} mod folder(s) and reset library.md.{RESET}")
+
+
+def prompt_custom_mods_purge(non_interactive: bool = False) -> str:
+    """Prompt user for purging custom mods currently residing in my_mods/.
+
+    Returns 'y' or 'n'.
+    """
+    if non_interactive:
+        return "n"
+
+    print(f"\n{BOLD}{CYAN}------------------------------------------------------------------------{RESET}")
+    print(f"{BOLD}6. Custom Mods Cleanup{RESET}")
+    while True:
+        try:
+            choice = input(
+                f"{BOLD}Would you like to purge custom mods currently residing in the `my_mods/` folder? (Y/n){RESET} [Y]: "
+            ).strip().lower()
+        except EOFError:
+            return "n" if non_interactive else "y"
+        if not choice or choice in ("y", "yes"):
+            return "y"
+        if choice in ("n", "no"):
+            return "n"
+        print(f"{YELLOW}Please enter 'y' or 'n' (or press Enter for default Y).{RESET}")
+
+
+def handle_custom_mods_purge(choice: str, dry_run: bool = False) -> None:
+    """Purge custom mods residing in my_mods/ folder."""
+    if choice != "y":
+        print("Continuing without purging custom mods.")
+        return
+
+    my_mods_dir = WORKSPACE_ROOT / "my_mods"
+    if dry_run:
+        print(f"{CYAN}[DRY-RUN] Would purge custom mods in {my_mods_dir} (rm -rf my_mods/*){RESET}")
+        return
+
+    print(f"Purging custom mods residing in {my_mods_dir}...")
+    if my_mods_dir.is_dir():
+        for child in sorted(my_mods_dir.iterdir()):
+            try:
+                if child.is_dir():
+                    shutil.rmtree(child)
+                else:
+                    child.unlink()
+            except Exception as e:
+                print(f"{YELLOW}Warning: Could not remove {child}: {e}{RESET}")
+    print(f"{GREEN}✓ Successfully purged custom mods in my_mods/.{RESET}")
+
+
+def run_wizard(dry_run: bool = False, non_interactive: bool = False):
     print_banner()
 
     existing_env = parse_env_file(ENV_PATH)
     default_data_dir = detect_default_data_dir()
 
-    # 1. MODIO_API_KEY
-    print(f"{BOLD}1. mod.io API Key{RESET}")
-    print("Required for searching, downloading, and cataloging BG3 mods from mod.io.")
-    print("Get your API key at: https://mod.io/me/access")
-    current_key = existing_env.get("MODIO_API_KEY", "")
-    api_key = prompt_secret("Enter MODIO_API_KEY (input hidden)", current_key)
-
-    if api_key:
-        test_now = prompt_input("Test this API key live against mod.io? (Y/n)", "y").lower()
-        if test_now in ("y", "yes", ""):
-            print("Connecting to mod.io API...")
-            success, msg = test_modio_api_key(api_key)
-            if success:
-                print(f"{GREEN}✓ {msg}{RESET}")
-            else:
-                print(f"{RED}✗ Verification issue: {msg}{RESET}")
-                keep = prompt_input("Do you want to keep this key anyway? (y/n)", "y").lower()
-                if keep not in ("y", "yes"):
-                    api_key = prompt_secret("Re-enter MODIO_API_KEY (input hidden)")
-
-    # 2. MODIO_PAT
-    print(f"\n{BOLD}2. mod.io Personal Access Token (PAT) [Optional]{RESET}")
-    print("Optional token required for account actions such as subscribing/syncing mods.")
-    print("Generate a PAT at: https://mod.io/me/access")
-    current_pat = existing_env.get("MODIO_PAT", existing_env.get("MODIO_OAUTH_TOKEN", ""))
-    pat = prompt_secret("Enter MODIO_PAT (input hidden, press Enter to skip)", current_pat)
-
-    if pat:
-        test_pat_choice = prompt_input("Test this PAT live against mod.io? (Y/n)", "y").lower()
-        if test_pat_choice in ("y", "yes", ""):
-            print("Verifying PAT credentials...")
-            success, msg = test_modio_pat(api_key, pat)
-            if success:
-                print(f"{GREEN}✓ {msg}{RESET}")
-            else:
-                print(f"{YELLOW}✗ PAT issue: {msg}{RESET}")
-
-    # 3. BG3_DATA_DIR
-    print(f"\n{BOLD}3. Baldur's Gate 3 Data Directory{RESET}")
-    print("Path to the game's Data directory (used to live-sync your custom mods into BG3).")
-    current_data_dir = existing_env.get("BG3_DATA_DIR", default_data_dir)
-    data_dir = prompt_input("Enter BG3_DATA_DIR", current_data_dir)
-
-    target_path = Path(data_dir)
-    if not target_path.exists():
-        print(f"{YELLOW}Notice: Path does not exist currently: {target_path}{RESET}")
-        print("This is normal if the game is installed in a custom library or not currently mounted.")
-        confirm = prompt_input("Keep this path? (Y/n)", "y").lower()
-        if confirm not in ("y", "yes", ""):
-            data_dir = prompt_input("Re-enter BG3_DATA_DIR", default_data_dir)
+    if non_interactive:
+        api_key = existing_env.get("MODIO_API_KEY", "")
+        pat = existing_env.get("MODIO_PAT", existing_env.get("MODIO_OAUTH_TOKEN", ""))
+        data_dir = existing_env.get("BG3_DATA_DIR", default_data_dir)
+        author = existing_env.get("BG3_MOD_AUTHOR", "default")
     else:
-        print(f"{GREEN}✓ Found directory on disk: {target_path}{RESET}")
+        # 1. MODIO_API_KEY
+        print(f"{BOLD}1. mod.io API Key{RESET}")
+        print("Required for searching, downloading, and cataloging BG3 mods from mod.io.")
+        print("Get your API key at: https://mod.io/me/access")
+        current_key = existing_env.get("MODIO_API_KEY", "")
+        api_key = prompt_secret("Enter MODIO_API_KEY (input hidden)", current_key)
 
-    # 4. BG3_MOD_AUTHOR
-    print(f"\n{BOLD}4. Default Mod Author Identity{RESET}")
-    print("Default author name stamped into meta.lsx when generating new mod scaffolds.")
-    current_author = existing_env.get("BG3_MOD_AUTHOR", "default")
-    author = prompt_input("Enter default BG3_MOD_AUTHOR (leave blank or 'default')", current_author)
-    if not author:
-        author = "default"
+        if api_key:
+            test_now = prompt_input("Test this API key live against mod.io? (Y/n)", "y").lower()
+            if test_now in ("y", "yes", ""):
+                print("Connecting to mod.io API...")
+                success, msg = test_modio_api_key(api_key)
+                if success:
+                    print(f"{GREEN}✓ {msg}{RESET}")
+                else:
+                    print(f"{RED}✗ Verification issue: {msg}{RESET}")
+                    keep = prompt_input("Do you want to keep this key anyway? (y/n)", "y").lower()
+                    if keep not in ("y", "yes"):
+                        api_key = prompt_secret("Re-enter MODIO_API_KEY (input hidden)")
+
+        # 2. MODIO_PAT
+        print(f"\n{BOLD}2. mod.io Personal Access Token (PAT) [Optional]{RESET}")
+        print("Optional token required for account actions such as subscribing/syncing mods.")
+        print("Generate a PAT at: https://mod.io/me/access")
+        current_pat = existing_env.get("MODIO_PAT", existing_env.get("MODIO_OAUTH_TOKEN", ""))
+        pat = prompt_secret("Enter MODIO_PAT (input hidden, press Enter to skip)", current_pat)
+
+        if pat:
+            test_pat_choice = prompt_input("Test this PAT live against mod.io? (Y/n)", "y").lower()
+            if test_pat_choice in ("y", "yes", ""):
+                print("Verifying PAT credentials...")
+                success, msg = test_modio_pat(api_key, pat)
+                if success:
+                    print(f"{GREEN}✓ {msg}{RESET}")
+                else:
+                    print(f"{YELLOW}✗ PAT issue: {msg}{RESET}")
+
+        # 3. BG3_DATA_DIR
+        print(f"\n{BOLD}3. Baldur's Gate 3 Data Directory{RESET}")
+        print("Path to the game's Data directory (used to live-sync your custom mods into BG3).")
+        current_data_dir = existing_env.get("BG3_DATA_DIR", default_data_dir)
+        data_dir = prompt_input("Enter BG3_DATA_DIR", current_data_dir)
+
+        target_path = Path(data_dir)
+        if not target_path.exists():
+            print(f"{YELLOW}Notice: Path does not exist currently: {target_path}{RESET}")
+            print("This is normal if the game is installed in a custom library or not currently mounted.")
+            confirm = prompt_input("Keep this path? (Y/n)", "y").lower()
+            if confirm not in ("y", "yes", ""):
+                data_dir = prompt_input("Re-enter BG3_DATA_DIR", default_data_dir)
+        else:
+            print(f"{GREEN}✓ Found directory on disk: {target_path}{RESET}")
+
+        # 4. BG3_MOD_AUTHOR
+        print(f"\n{BOLD}4. Default Mod Author Identity{RESET}")
+        print("Default author name stamped into meta.lsx when generating new mod scaffolds.")
+        current_author = existing_env.get("BG3_MOD_AUTHOR", "default")
+        author = prompt_input("Enter default BG3_MOD_AUTHOR (leave blank or 'default')", current_author)
+        if not author:
+            author = "default"
 
     # Assemble output
     output_lines = [
@@ -400,6 +516,14 @@ def run_wizard(dry_run: bool = False):
     # GitHub Remote Setup
     configure_github_remote()
 
+    # 5. mod.io Subscription Sync & Library Management
+    sync_choice = prompt_subscription_sync(non_interactive=non_interactive)
+    handle_subscription_sync(sync_choice, dry_run=dry_run)
+
+    # 6. Custom Mods Cleanup
+    purge_choice = prompt_custom_mods_purge(non_interactive=non_interactive)
+    handle_custom_mods_purge(purge_choice, dry_run=dry_run)
+
     print(f"\n{BOLD}{GREEN}Setup completed successfully!{RESET}")
     print("You can run `./setup.sh --check` anytime to review your configuration.")
     print("Run `python3 scripts/create_mod_scaffold.py --help` or `python3 scripts/modio_search.py --help` to get started.\n")
@@ -426,13 +550,19 @@ def main():
         action="store_true",
         help="Run setup wizard in preview mode without writing .env to disk",
     )
+    parser.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help="Run wizard non-interactively with safe default answers (no-sync, no-purge)",
+    )
     args = parser.parse_args()
 
     if args.check:
         check_environment_status(as_json=args.json)
     else:
-        run_wizard(dry_run=args.dry_run)
+        run_wizard(dry_run=args.dry_run, non_interactive=args.non_interactive)
 
 
 if __name__ == "__main__":
     main()
+

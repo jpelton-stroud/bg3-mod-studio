@@ -32,11 +32,11 @@ flowchart TD
     
     subgraph Phase 2A Static Triage & Sync
         Phase2A --> Val["1. Structural & Handle Integrity
-python3 scripts/validate_mod.py --mod &lt;slug&gt; --json"]
+python3 scripts/bg3.py mod validate &lt;slug&gt; --json"]
         Val --> Loc["2. Localization Handle Audit
 python3 scripts/sync_localization.py --mod &lt;slug&gt; --check --json"]
         Loc --> Conf["3. Library Collision Check
-python3 scripts/check_mod_conflicts.py --candidate &lt;slug&gt; --against-library --json"]
+python3 scripts/bg3.py mod conflict &lt;slug&gt; --against-library --json"]
         Conf --> Fix2A{"Static Issues Found?"}
         Fix2A -- "Yes (≤3 retries)" --> Patch2A["Propose & Apply Fixes
 sync_localization --prune, patch files"]
@@ -84,13 +84,13 @@ Run deterministic static checks on `my_mods/<slug>/` before touching game files:
 
 ```bash
 # 1. Structural, LSX, and XML Integrity Check
-python3 scripts/validate_mod.py --mod <mod-slug> --json
+python3 scripts/bg3.py mod validate <mod-slug> --json
 
 # 2. Localization Handle Audit (check for orphaned or missing handles)
 python3 scripts/sync_localization.py --mod <mod-slug> --check --json
 
 # 3. Community Conflict & Collision Check
-python3 scripts/check_mod_conflicts.py --candidate <mod-slug> --against-library --json
+python3 scripts/bg3.py mod conflict <mod-slug> --against-library --json
 ```
 
 #### Remediation & Loop Guardrails for Phase 2A:

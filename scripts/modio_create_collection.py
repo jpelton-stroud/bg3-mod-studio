@@ -94,6 +94,8 @@ def parse_catalog(library_path: Path) -> Tuple[List[ModEntry], List[str], int]:
 
 
 def _paged_items(client: ModioClient, path: str, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+    if hasattr(client, "get_paged"):
+        return client.get_paged(path, params=params, page_size=PAGE_SIZE)
     offset = 0
     items: List[Dict[str, Any]] = []
     while True:

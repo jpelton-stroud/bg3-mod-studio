@@ -12,6 +12,9 @@ from scripts.lib.larian_parsers import (
     has_balanced_parens,
     parse_loca_bytes,
     parse_localization_bytes,
+    parse_meta_lsx,
+    parse_progressions_lsx,
+    parse_stats_txt,
     parse_version_str,
     split_larian_items,
 )
@@ -95,6 +98,67 @@ class LarianParsersTests(unittest.TestCase):
         if (MY_MODS_DIR / "paladins-call").is_dir():
             self.assertEqual(resolved_slug, (MY_MODS_DIR / "paladins-call").resolve())
             self.assertEqual(resolved_uuid, (MY_MODS_DIR / "paladins-call").resolve())
+
+    def test_parse_meta_lsx(self):
+        meta_xml = b"""<?xml version="1.0" encoding="utf-8"?>
+<save>
+    <region id="Config">
+        <node id="root">
+            <children>
+                <node id="ModuleInfo">
+                    <attribute id="UUID" type="FixedString" value="11111111-2222-3333-4444-555555555555"/>
+                    <attribute id="Name" type="LSString" value="TestMod"/>
+                    <attribute id="Author" type="LSString" value="AuthorName"/>
+                    <attribute id="Version64" type="int64" value="36028797018963968"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>"""
+        meta = parse_meta_lsx(meta_xml)
+        self.assertEqual(meta["UUID"], "11111111-2222-3333-4444-555555555555")
+        self.assertEqual(meta["Name"], "TestMod")
+        self.assertEqual(meta["Author"], "AuthorName")
+
+    def test_parse_stats_txt(self):
+        stats_txt = b"""
+new entry "ARM_Magic_Robe"
+type "Armor"
+using "_Body"
+data "ArmorClass" "12"
+data "DisplayName" "h1234;1"
+data "Description" "h5678;2"
+"""
+        loc_dict = {"h1234": "Magic Robe", "h5678": "A shimmering robe."}
+        stats = parse_stats_txt(stats_txt, loc_dict=loc_dict)
+        self.assertIn("ARM_Magic_Robe", stats)
+        entry = stats["ARM_Magic_Robe"]
+        self.assertEqual(entry["type"], "Armor")
+        self.assertEqual(entry["data"]["ArmorClass"], "12")
+        self.assertEqual(entry["resolved_display_name"], "Magic Robe")
+        self.assertEqual(entry["resolved_description"], "A shimmering robe.")
+
+    def test_parse_progressions_lsx(self):
+        prog_xml = b"""<?xml version="1.0" encoding="utf-8"?>
+<save>
+    <region id="Progressions">
+        <node id="root">
+            <children>
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="1"/>
+                    <attribute id="Name" type="LSString" value="Paladin"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="aaaa-bbbb-cccc-dddd"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>"""
+        progressions = parse_progressions_lsx(prog_xml)
+        self.assertEqual(len(progressions), 1)
+        self.assertEqual(progressions[0]["Name"], "Paladin")
+        self.assertEqual(progressions[0]["Level"], "1")
+        self.assertEqual(progressions[0]["TableUUID"], "aaaa-bbbb-cccc-dddd")
 
 
 if __name__ == "__main__":

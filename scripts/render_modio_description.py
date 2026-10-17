@@ -25,22 +25,14 @@ WORKSPACE_ROOT = REPO_ROOT
 
 def find_mod_dir(mod_query: str) -> Path:
     """Locate mod directory by path, name, or slug."""
-    try:
-        return resolve_mod_dir(mod_query)
-    except Exception:
-        pass
+    resolved = resolve_mod_dir(mod_query, prefer_my_mods=True, allow_substring=True)
+    if resolved and resolved.is_dir():
+        return resolved
 
-    query_path = Path(mod_query).expanduser()
-    if query_path.is_dir():
-        return query_path
+    my_mods_dir = Path(os.environ.get("BG3_MODS_DIR", MY_MODS_DIR))
+    if not my_mods_dir.exists():
+        raise FileNotFoundError(f"my_mods directory does not exist at {my_mods_dir}")
 
-    if not MY_MODS_DIR.exists():
-        raise FileNotFoundError(f"my_mods directory does not exist at {MY_MODS_DIR}")
-
-    query_norm = mod_query.strip().lower().replace("-", "").replace("_", "")
-    for candidate in MY_MODS_DIR.iterdir():
-        if candidate.is_dir() and query_norm in candidate.name.lower().replace("-", "").replace("_", ""):
-            return candidate
     raise ValueError(f"No mod found in my_mods/ matching query '{mod_query}'.")
 
 

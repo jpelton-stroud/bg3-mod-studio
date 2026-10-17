@@ -22,7 +22,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
-from scripts.lib.library_catalog import parse_library_rows
+from scripts.lib.library_catalog import get_tracked_mods as _get_tracked_mods, parse_library_rows
 from scripts.lib.modio_client import BG3_GAME_ID, MODIO_API_HOST, get_api_key, query_modio
 from scripts.modio_extract import process_mod
 
@@ -34,47 +34,11 @@ def get_tracked_mods(library_path=None):
     Parses mods/library.md and existing mod directories to identify tracked mods.
     Returns a dict mapping lowercase slug to mod details.
     """
-    if library_path is None:
-        library_path = os.path.join(WORKSPACE_ROOT, "mods", "library.md")
-
-    tracked = {}
-
-    if os.path.exists(library_path):
-        with open(library_path, "r", encoding="utf-8") as f:
-            rows = parse_library_rows(f.read())
-        for row in rows:
-            slug = row["slug"]
-            feature_match = re.match(r"(\d+)\s+implemented\b", row["features_documented"], re.IGNORECASE)
-            if feature_match is None:
-                raise ValueError(f"Invalid Features Documented value for library entry '{slug}'.")
-            tracked[slug.lower()] = {
-                "mod_id": row["mod_id"],
-                "name": row["name"],
-                "slug": slug,
-                "category": row["category"],
-                "description": row["description"],
-                "features_count": int(feature_match.group(1)),
-                "spec_path": os.path.join(WORKSPACE_ROOT, "mods", slug, "README.md"),
-            }
-
-    # Also detect directories in mods/ that have README.md
-    mods_dir = os.path.join(WORKSPACE_ROOT, "mods")
-    if os.path.isdir(mods_dir):
-        for entry in os.listdir(mods_dir):
-            entry_path = os.path.join(mods_dir, entry)
-            if os.path.isdir(entry_path) and entry.lower() not in tracked:
-                readme_path = os.path.join(entry_path, "README.md")
-                if os.path.exists(readme_path):
-                    tracked[entry.lower()] = {
-                        "name": entry,
-                        "slug": entry,
-                        "category": "General",
-                        "description": "",
-                        "features_count": 0,
-                        "spec_path": readme_path,
-                    }
-
-    return tracked
+    return _get_tracked_mods(
+        library_path=library_path,
+        include_filesystem=True,
+        workspace_root=WORKSPACE_ROOT,
+    )
 
 
 def get_local_mod_state(slug, mods_dir=None):

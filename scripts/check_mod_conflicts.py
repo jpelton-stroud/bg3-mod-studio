@@ -25,15 +25,17 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.lib.cli_common import ConsoleColor, ExitCode
 from scripts.lib.env_paths import MODS_DIR, MY_MODS_DIR, REPO_ROOT as WORKSPACE_ROOT, normalize_mod_key, resolve_mod_dir
 
-# ANSI Terminal Colors
-BOLD = "\033[1m"
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-RED = "\033[31m"
-CYAN = "\033[36m"
-RESET = "\033[0m"
+# Zero-dependency ANSI Terminal Colors honoring NO_COLOR
+_color = ConsoleColor(stream=sys.stderr)
+BOLD = "\033[1m" if _color.enabled else ""
+GREEN = "\033[32m" if _color.enabled else ""
+YELLOW = "\033[33m" if _color.enabled else ""
+RED = "\033[31m" if _color.enabled else ""
+CYAN = "\033[36m" if _color.enabled else ""
+RESET = "\033[0m" if _color.enabled else ""
 
 BUILTIN_MODULES = {
     "gustav",
@@ -413,7 +415,7 @@ def main():
 
             if not results:
                 print(f"{GREEN}✓ No conflicts found with any tracked mods in catalog ({len(catalog)} checked).{RESET}\n")
-                sys.exit(0)
+                sys.exit(ExitCode.OK)
             else:
                 print(f"{YELLOW}⚠ Potential collisions found with {len(results)} cataloged mods:{RESET}")
                 for r in results:
@@ -425,7 +427,7 @@ def main():
                     for rc in r.get("root_template_collisions", []):
                         print(f"    • RootTemplate MapKey collision: {rc['map_key']} ({rc['name']})")
                 print("")
-                sys.exit(1)
+                sys.exit(ExitCode.DATAERR)
 
     elif args.all:
         all_mods = []
@@ -448,13 +450,13 @@ def main():
             print(f"Scanned {len(all_mods)} total mods across my_mods/ and mods/.")
             if not pair_conflicts:
                 print(f"{GREEN}✓ No inter-mod stat or progression collisions detected.{RESET}\n")
-                sys.exit(0)
+                sys.exit(ExitCode.OK)
             else:
                 print(f"{YELLOW}Found {len(pair_conflicts)} conflicting mod pairs.{RESET}")
                 for pc in pair_conflicts:
                     print(f"  • {pc['mod1']} ↔ {pc['mod2']}: {len(pc['stat_collisions'])} stat overrides, {len(pc['progression_collisions'])} progression collisions")
                 print("")
-                sys.exit(1)
+                sys.exit(ExitCode.DATAERR)
 
 
 if __name__ == "__main__":

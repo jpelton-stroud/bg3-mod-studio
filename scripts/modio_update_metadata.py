@@ -50,22 +50,21 @@ COMMUNITY_OPTIONS_MASK = sum(COMMUNITY_OPTIONS.values())
 CREDIT_OPTIONS_MASK = sum(NONCOMMERCIAL_CREDIT_OPTIONS.values())
 
 
-def resolve_local_mod(query: str, mods_dir: Path = MY_MODS_DIR) -> Path:
+def resolve_local_mod(query: str, mods_dir: Optional[Path] = None) -> Path:
     query_key = normalize_name(query.strip())
     if not query_key:
         raise ModioError("Provide a mod name or slug from my_mods/.")
-    try:
-        target = resolve_mod_dir(query)
-        if target.is_dir():
-            return target
-    except Exception:
-        pass
+    target_dir = Path(mods_dir) if mods_dir is not None else Path(os.environ.get("BG3_MODS_DIR", MY_MODS_DIR))
+    if not target_dir.is_dir():
+        raise ModioError(f"Mod directory does not exist: {target_dir}")
 
-    if not mods_dir.is_dir():
-        raise ModioError(f"Mod directory does not exist: {mods_dir}")
+    resolved = resolve_mod_dir(query, roots=(target_dir,))
+    if resolved and resolved.is_dir():
+        return resolved
+
     matches = [
         path
-        for path in mods_dir.iterdir()
+        for path in target_dir.iterdir()
         if path.is_dir() and normalize_name(path.name) == query_key
     ]
     if not matches:
