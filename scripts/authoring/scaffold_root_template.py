@@ -99,7 +99,7 @@ VISUAL_PRESETS = {
 
 EMPTY_ROOT_TEMPLATES_LSX = """<?xml version="1.0" encoding="utf-8"?>
 <save>
-    <version major="4" minor="0" revision="6" build="5"/>
+    <version major="4" minor="8" revision="0" build="700"/>
     <region id="Templates">
         <node id="Templates">
             <children>

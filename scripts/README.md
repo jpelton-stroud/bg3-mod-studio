@@ -76,12 +76,22 @@ Tools for generating game content, mechanics, items, and progressions.
 
 | Command Alias | Script | Description |
 | :--- | :--- | :--- |
-| `scaffold-mod` | [`create_mod_scaffold.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/create_mod_scaffold.py) | Scaffolds complete BG3 mod directory trees (`Mods/`, `Projects/`, `Localization/`, `meta.lsx`). |
-| `scaffold-stat` | [`scaffold_stat_entry.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_stat_entry.py) | Scaffolds Larian stat entries with automatic string handle allocation in `Localization/English/*.xml`. |
-| `scaffold-progression` | [`scaffold_progression_node.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_progression_node.py) | Scaffolds and merges Larian v4.8 Progression and companion `SpellLists.lsx` nodes with automatic `TableUUID` resolution. |
-| `scaffold-template` | [`scaffold_root_template.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_root_template.py) | Binds stat entries to 3D visual GameObjects in `_merged.lsx` linking meshes, collision, and handles. |
+| `mod create` / `scaffold-mod` | [`create_mod_scaffold.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/create_mod_scaffold.py) | Scaffolds complete BG3 mod directory trees (`Mods/`, `Projects/`, `Localization/`, `meta.lsx`). |
+| `scaffold stat` | [`scaffold_stat_entry.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_stat_entry.py) | Scaffolds Larian stat entries across 17+ types with automatic string handle allocation. |
+| `scaffold progression` | [`scaffold_progression_node.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_progression_node.py) | Scaffolds and merges Larian v4.8 Progression and companion `SpellLists.lsx` nodes with multiclass support. |
+| `scaffold class` | [`scaffold_class_description.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_class_description.py) | Scaffolds `ClassDescriptions.lsx` and companion `ProgressionDescriptions.lsx` for classes and subclasses. |
+| `scaffold feat` | [`scaffold_feat.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_feat.py) | Scaffolds `Feats.lsx` and companion `FeatDescriptions.lsx` with prerequisite and passive bindings. |
+| `scaffold action-resource` | [`scaffold_action_resource.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_action_resource.py) | Scaffolds `ActionResourceDefinitions.lsx` for custom class and spell resource pools. |
+| `scaffold spell-list` | [`scaffold_spell_list.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_spell_list.py) | Scaffolds standalone or modular `SpellLists.lsx` and `PassiveLists.lsx`. |
+| `scaffold level-map` | [`scaffold_level_map.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_level_map.py) | Scaffolds `LevelMapValues.lsx` with forward-filled level scaling 1-20. |
+| `scaffold default-values` | [`scaffold_default_values.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_default_values.py) | Scaffolds character creation `DefaultValues/` (Abilities, Skills, Spells). |
+| `scaffold tag` | [`scaffold_tag.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_tag.py) | Scaffolds dialogue and reactivity `Tags/<UUID>.lsx` files. |
+| `scaffold race` | [`scaffold_race.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_race.py) | Scaffolds `Races.lsx` and companion `RaceDescriptions.lsx` for playable races and subraces. |
+| `scaffold origin` | [`scaffold_origin.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_origin.py) | Scaffolds `Origins.lsx` for playable origin characters and companions. |
+| `scaffold appearance-visual`| [`scaffold_appearance_visual.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_appearance_visual.py) | Scaffolds `CharacterCreationAppearanceVisuals.lsx` for cosmetics and race appearances. |
+| `scaffold template` | [`scaffold_root_template.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_root_template.py) | Binds stat entries to 3D visual GameObjects in `_merged.lsx` linking meshes, collision, and handles. |
 | `inject-drop` | [`inject_treasure_table.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/inject_treasure_table.py) | Injects custom mod items into Tutorial Chest, Camp Chest, or early vendors via `TreasureTable.txt`. |
-| `scaffold-icons` | [`scaffold_icon_uvs.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_icon_uvs.py) | Calculates normalized UV coordinates and generates `GUI/Icons.lsx` definitions for custom icon grids. |
+| `scaffold icons` | [`scaffold_icon_uvs.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/scaffold_icon_uvs.py) | Calculates normalized UV coordinates and generates `GUI/Icons.lsx` definitions for custom icon grids. |
 | `compat-patch` | [`generate_compat_patch.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/generate_compat_patch.py) | Auto-generates compatibility patches (standalone or Compatibility Framework) between colliding mods. |
 | `add-dependency` | [`add_mod_dependency.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/authoring/add_mod_dependency.py) | Injects permanent and test dependencies into `meta.lsx`, `.test_deps.json`, and `README.md`. |
 

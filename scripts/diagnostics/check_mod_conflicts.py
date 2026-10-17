@@ -217,6 +217,52 @@ def find_missing_local_dependencies(mod_dir: Path) -> list[str]:
     return missing
 
 
+def extract_lsx_named_nodes(mod_dir: Path, file_pattern: str, node_id: str, exclude_pattern: str = None) -> dict[str, dict]:
+    """Extracts named nodes from specific LSX files."""
+    results = {}
+    for f in mod_dir.rglob("*.lsx"):
+        rel = str(f.relative_to(mod_dir)).lower()
+        if file_pattern.lower() not in rel:
+            continue
+        if exclude_pattern and exclude_pattern.lower() in rel:
+            continue
+        try:
+            tree = ET.parse(f)
+            for node in tree.findall(f".//node[@id='{node_id}']"):
+                name = ""
+                uuid_val = ""
+                for attr in node.findall("attribute"):
+                    aid = attr.get("id")
+                    val = attr.get("value", "").strip()
+                    if aid in ("Name", "LevelMapSeries"):
+                        name = val
+                    elif aid == "UUID":
+                        uuid_val = val
+                key = name or uuid_val
+                if key:
+                    results[key] = {
+                        "name": name,
+                        "uuid": uuid_val,
+                        "file": f.name,
+                    }
+        except Exception:
+            pass
+    return results
+
+
+def find_node_overlaps(nodes1: dict, nodes2: dict) -> list[dict]:
+    overlaps = []
+    common = set(nodes1.keys()) & set(nodes2.keys())
+    for k in sorted(common):
+        overlaps.append({
+            "name": nodes1[k].get("name") or k,
+            "uuid": nodes1[k].get("uuid") or nodes2[k].get("uuid", ""),
+            "mod1_file": nodes1[k]["file"],
+            "mod2_file": nodes2[k]["file"],
+        })
+    return overlaps
+
+
 def compare_two_mods(mod1_dir: Path, mod2_dir: Path) -> dict:
     mod1_name = mod1_dir.name
     mod2_name = mod2_dir.name
@@ -229,6 +275,28 @@ def compare_two_mods(mod1_dir: Path, mod2_dir: Path) -> dict:
 
     rt1 = extract_root_templates(mod1_dir)
     rt2 = extract_root_templates(mod2_dir)
+
+    # New Patch 8 schema extractions
+    classes1 = extract_lsx_named_nodes(mod1_dir, "ClassDescription", "ClassDescription")
+    classes2 = extract_lsx_named_nodes(mod2_dir, "ClassDescription", "ClassDescription")
+
+    feats1 = extract_lsx_named_nodes(mod1_dir, "Feat", "Feat", exclude_pattern="FeatDescription")
+    feats2 = extract_lsx_named_nodes(mod2_dir, "Feat", "Feat", exclude_pattern="FeatDescription")
+
+    res1 = extract_lsx_named_nodes(mod1_dir, "ActionResource", "ActionResourceDefinition")
+    res2 = extract_lsx_named_nodes(mod2_dir, "ActionResource", "ActionResourceDefinition")
+
+    lmaps1 = extract_lsx_named_nodes(mod1_dir, "LevelMap", "LevelMapSeries")
+    lmaps2 = extract_lsx_named_nodes(mod2_dir, "LevelMap", "LevelMapSeries")
+
+    tags1 = extract_lsx_named_nodes(mod1_dir, "Tags", "Tag")
+    tags2 = extract_lsx_named_nodes(mod2_dir, "Tags", "Tag")
+
+    races1 = extract_lsx_named_nodes(mod1_dir, "Race", "Race", exclude_pattern="RaceDescription")
+    races2 = extract_lsx_named_nodes(mod2_dir, "Race", "Race", exclude_pattern="RaceDescription")
+
+    origins1 = extract_lsx_named_nodes(mod1_dir, "Origin", "Origin")
+    origins2 = extract_lsx_named_nodes(mod2_dir, "Origin", "Origin")
 
     dlls1 = check_native_dlls(mod1_dir)
     dlls2 = check_native_dlls(mod2_dir)
@@ -265,7 +333,27 @@ def compare_two_mods(mod1_dir: Path, mod2_dir: Path) -> dict:
             "mod2_file": rt2[rk]["file"],
         })
 
-    has_conflict = bool(stat_collisions or prog_collisions or rt_collisions)
+    # 4. Patch 8 Schema Collisions
+    class_collisions = find_node_overlaps(classes1, classes2)
+    feat_collisions = find_node_overlaps(feats1, feats2)
+    resource_collisions = find_node_overlaps(res1, res2)
+    level_map_collisions = find_node_overlaps(lmaps1, lmaps2)
+    tag_collisions = find_node_overlaps(tags1, tags2)
+    race_collisions = find_node_overlaps(races1, races2)
+    origin_collisions = find_node_overlaps(origins1, origins2)
+
+    has_conflict = bool(
+        stat_collisions
+        or prog_collisions
+        or rt_collisions
+        or class_collisions
+        or feat_collisions
+        or resource_collisions
+        or level_map_collisions
+        or tag_collisions
+        or race_collisions
+        or origin_collisions
+    )
 
     return {
         "mod1": mod1_name,
@@ -274,6 +362,13 @@ def compare_two_mods(mod1_dir: Path, mod2_dir: Path) -> dict:
         "stat_collisions": stat_collisions,
         "progression_collisions": prog_collisions,
         "root_template_collisions": rt_collisions,
+        "class_collisions": class_collisions,
+        "feat_collisions": feat_collisions,
+        "resource_collisions": resource_collisions,
+        "level_map_collisions": level_map_collisions,
+        "tag_collisions": tag_collisions,
+        "race_collisions": race_collisions,
+        "origin_collisions": origin_collisions,
         "missing_dependencies": {
             mod1_name: find_missing_local_dependencies(mod1_dir),
             mod2_name: find_missing_local_dependencies(mod2_dir),
@@ -329,6 +424,13 @@ def main():
                     "stat_collision_count": len(res.get("stat_collisions", [])),
                     "progression_collision_count": len(res.get("progression_collisions", [])),
                     "root_template_collision_count": len(res.get("root_template_collisions", [])),
+                    "class_collision_count": len(res.get("class_collisions", [])),
+                    "feat_collision_count": len(res.get("feat_collisions", [])),
+                    "resource_collision_count": len(res.get("resource_collisions", [])),
+                    "level_map_collision_count": len(res.get("level_map_collisions", [])),
+                    "tag_collision_count": len(res.get("tag_collisions", [])),
+                    "race_collision_count": len(res.get("race_collisions", [])),
+                    "origin_collision_count": len(res.get("origin_collisions", [])),
                     "missing_dependencies": res.get("missing_dependencies", {}),
                 }
                 print(json.dumps(res_out, indent=2))
@@ -352,6 +454,34 @@ def main():
                     print(f"{RED}✗ RootTemplate MapKey Collisions ({len(res['root_template_collisions'])}):{RESET}")
                     for rc in res["root_template_collisions"]:
                         print(f"  • MapKey '{rc['map_key']}' ({rc['name']}) defined in both mods")
+                if res.get("class_collisions"):
+                    print(f"{RED}✗ Class Description Collisions ({len(res['class_collisions'])}):{RESET}")
+                    for cc in res["class_collisions"]:
+                        print(f"  • Class '{cc['name']}' ({cc['uuid']}) defined in both mods")
+                if res.get("feat_collisions"):
+                    print(f"{RED}✗ Feat Collisions ({len(res['feat_collisions'])}):{RESET}")
+                    for fc in res["feat_collisions"]:
+                        print(f"  • Feat '{fc['name']}' ({fc['uuid']}) defined in both mods")
+                if res.get("resource_collisions"):
+                    print(f"{RED}✗ Action Resource Collisions ({len(res['resource_collisions'])}):{RESET}")
+                    for rc in res["resource_collisions"]:
+                        print(f"  • Resource '{rc['name']}' ({rc['uuid']}) defined in both mods")
+                if res.get("level_map_collisions"):
+                    print(f"{RED}✗ Level Map Collisions ({len(res['level_map_collisions'])}):{RESET}")
+                    for lmc in res["level_map_collisions"]:
+                        print(f"  • LevelMap '{lmc['name']}' defined in both mods")
+                if res.get("tag_collisions"):
+                    print(f"{RED}✗ Tag Collisions ({len(res['tag_collisions'])}):{RESET}")
+                    for tc in res["tag_collisions"]:
+                        print(f"  • Tag '{tc['name']}' ({tc['uuid']}) defined in both mods")
+                if res.get("race_collisions"):
+                    print(f"{RED}✗ Race Collisions ({len(res['race_collisions'])}):{RESET}")
+                    for rc in res["race_collisions"]:
+                        print(f"  • Race '{rc['name']}' ({rc['uuid']}) defined in both mods")
+                if res.get("origin_collisions"):
+                    print(f"{RED}✗ Origin Collisions ({len(res['origin_collisions'])}):{RESET}")
+                    for oc in res["origin_collisions"]:
+                        print(f"  • Origin '{oc['name']}' ({oc['uuid']}) defined in both mods")
 
             for mname, mdeps in res.get("missing_dependencies", {}).items():
                 if mdeps:
@@ -385,6 +515,13 @@ def main():
                         "stat_collision_count": len(r.get("stat_collisions", [])),
                         "progression_collision_count": len(r.get("progression_collisions", [])),
                         "root_template_collision_count": len(r.get("root_template_collisions", [])),
+                        "class_collision_count": len(r.get("class_collisions", [])),
+                        "feat_collision_count": len(r.get("feat_collisions", [])),
+                        "resource_collision_count": len(r.get("resource_collisions", [])),
+                        "level_map_collision_count": len(r.get("level_map_collisions", [])),
+                        "tag_collision_count": len(r.get("tag_collisions", [])),
+                        "race_collision_count": len(r.get("race_collisions", [])),
+                        "origin_collision_count": len(r.get("origin_collisions", [])),
                     }
                     for r in results
                 ]
@@ -426,6 +563,20 @@ def main():
                         print(f"    • Progression collision: {pc['class']} Lvl {pc['level']}")
                     for rc in r.get("root_template_collisions", []):
                         print(f"    • RootTemplate MapKey collision: {rc['map_key']} ({rc['name']})")
+                    for cc in r.get("class_collisions", []):
+                        print(f"    • Class collision: {cc['name']} ({cc['uuid']})")
+                    for fc in r.get("feat_collisions", []):
+                        print(f"    • Feat collision: {fc['name']} ({fc['uuid']})")
+                    for rc in r.get("resource_collisions", []):
+                        print(f"    • Resource collision: {rc['name']} ({rc['uuid']})")
+                    for lmc in r.get("level_map_collisions", []):
+                        print(f"    • LevelMap collision: {lmc['name']}")
+                    for tc in r.get("tag_collisions", []):
+                        print(f"    • Tag collision: {tc['name']} ({tc['uuid']})")
+                    for rc in r.get("race_collisions", []):
+                        print(f"    • Race collision: {rc['name']} ({rc['uuid']})")
+                    for oc in r.get("origin_collisions", []):
+                        print(f"    • Origin collision: {oc['name']} ({oc['uuid']})")
                 print("")
                 sys.exit(ExitCode.DATAERR)
 
@@ -454,7 +605,19 @@ def main():
             else:
                 print(f"{YELLOW}Found {len(pair_conflicts)} conflicting mod pairs.{RESET}")
                 for pc in pair_conflicts:
-                    print(f"  • {pc['mod1']} ↔ {pc['mod2']}: {len(pc['stat_collisions'])} stat overrides, {len(pc['progression_collisions'])} progression collisions")
+                    total_c = (
+                        len(pc["stat_collisions"])
+                        + len(pc["progression_collisions"])
+                        + len(pc.get("root_template_collisions", []))
+                        + len(pc.get("class_collisions", []))
+                        + len(pc.get("feat_collisions", []))
+                        + len(pc.get("resource_collisions", []))
+                        + len(pc.get("level_map_collisions", []))
+                        + len(pc.get("tag_collisions", []))
+                        + len(pc.get("race_collisions", []))
+                        + len(pc.get("origin_collisions", []))
+                    )
+                    print(f"  • {pc['mod1']} ↔ {pc['mod2']}: {total_c} total collision(s)")
                 print("")
                 sys.exit(ExitCode.DATAERR)
 

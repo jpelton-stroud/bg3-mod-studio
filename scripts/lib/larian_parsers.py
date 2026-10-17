@@ -2,11 +2,25 @@
 
 import re
 import struct
+import uuid
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 HANDLE_PATTERN = re.compile(r"(?<![a-zA-Z0-9_])(h[0-9a-fA-F]{32}|h[a-zA-Z0-9_]{30,40})(?:;\d+)?")
+
+PATCH_8_VERSION = {"major": "4", "minor": "8", "revision": "0", "build": "700"}
+
+
+def generate_larian_handle() -> str:
+    """Generates a standard Larian localization handle (h...g...g...g...g...)."""
+    u_str = str(uuid.uuid4()).replace("-", "g")
+    return f"h{u_str}"
+
+
+def format_patch8_lsx_header() -> str:
+    """Returns the standardized Patch 8 XML version header element."""
+    return f'<version major="{PATCH_8_VERSION["major"]}" minor="{PATCH_8_VERSION["minor"]}" revision="{PATCH_8_VERSION["revision"]}" build="{PATCH_8_VERSION["build"]}"/>'
 
 
 # ----------------------------------------------------------------------
@@ -215,6 +229,38 @@ def compile_xml_to_loca(xml_path: Path, loca_path: Optional[Path] = None) -> Pat
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(loca_bytes)
     return target
+
+
+def update_localization_xml(loc_file: Path, entries: List[Tuple[str, str]], dry_run: bool = False) -> None:
+    """Appends content tags for handles and text to the Localization XML file."""
+    if dry_run or not entries:
+        return
+
+    loc_file.parent.mkdir(parents=True, exist_ok=True)
+    if loc_file.exists():
+        content = loc_file.read_text(encoding="utf-8")
+    else:
+        content = '<?xml version="1.0" encoding="utf-8"?>\n<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n</contentList>\n'
+
+    addition_lines = []
+    for handle, text in entries:
+        safe_text = (
+            text.replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
+            .replace("'", "&apos;")
+        )
+        addition_lines.append(f'  <content contentuid="{handle}" version="1">{safe_text}</content>')
+
+    addition_block = "\n".join(addition_lines) + "\n"
+    if "</contentList>" in content:
+        idx = content.rfind("</contentList>")
+        new_content = content[:idx] + addition_block + content[idx:]
+    else:
+        new_content = content + "\n" + addition_block + "</contentList>\n"
+
+    loc_file.write_text(new_content, encoding="utf-8")
 
 
 # ----------------------------------------------------------------------

@@ -86,7 +86,7 @@ def build_icons_lsx(
 ) -> str:
     """Generates Larian Icons.lsx XML document."""
     root = ET.Element("save")
-    ET.SubElement(root, "version", major="4", minor="0", revision="9", build="328")
+    ET.SubElement(root, "version", major="4", minor="8", revision="0", build="700")
 
     # Region 1: TextureAtlasInfo
     reg_info = ET.SubElement(root, "region", id="TextureAtlasInfo")

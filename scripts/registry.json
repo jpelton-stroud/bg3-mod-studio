@@ -67,7 +67,7 @@
     },
     {
       "name": "create_mod_scaffold.py",
-      "command": "scaffold-mod",
+      "command": "mod create",
       "category": "authoring",
       "summary": "Scaffolds a complete Baldur's Gate 3 mod directory structure.",
       "description": "Generates a fully compliant mod directory tree under my_mods/<ModSlug> with Projects, Mods, Localization, and meta.lsx with proper GUIDs and Version64.",
@@ -78,7 +78,7 @@
         "start mod",
         "mod template"
       ],
-      "cli_usage": "python3 scripts/create_mod_scaffold.py <ModName> [--author <Author>] [--description <Desc>]",
+      "cli_usage": "python3 scripts/bg3.py mod create <ModName> [--author <Author>] [--description <Desc>]",
       "flags": [
         {
           "name": "mod_name",
@@ -1819,6 +1819,654 @@
         "bg3 tools info scaffold-stat --json",
         "bg3 tools verify --json"
       ]
+    },
+    {
+      "name": "scaffold_class_description.py",
+      "command": "scaffold class",
+      "category": "authoring",
+      "summary": "Scaffolds ClassDescriptions.lsx and ProgressionDescriptions.lsx for classes and subclasses.",
+      "description": "Generates engine-compliant ClassDescriptions.lsx and ProgressionDescriptions.lsx, registers subclass GUIDs into parent Progressions.lsx, and allocates localization display and description handles.",
+      "intents": [
+        "scaffold class",
+        "create class",
+        "scaffold subclass",
+        "create subclass",
+        "class description"
+      ],
+      "cli_usage": "python3 scripts/bg3.py scaffold class --mod <mod> --name <name> [options]",
+      "flags": [
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Target mod name or path"
+        },
+        {
+          "name": "--name",
+          "type": "str",
+          "required": true,
+          "description": "Class or Subclass technical name"
+        },
+        {
+          "name": "--display-name",
+          "type": "str",
+          "required": false,
+          "description": "In-game localized display name"
+        },
+        {
+          "name": "--description",
+          "type": "str",
+          "required": false,
+          "description": "In-game localized description"
+        },
+        {
+          "name": "--parent-class",
+          "type": "str",
+          "required": false,
+          "description": "Parent class name or GUID if this is a subclass"
+        },
+        {
+          "name": "--parent-guid",
+          "type": "str",
+          "required": false,
+          "description": "Explicit parent class GUID if not using preset"
+        },
+        {
+          "name": "--primary-ability",
+          "type": "str",
+          "required": false,
+          "description": "Primary ability (e.g. Strength, Charisma)"
+        },
+        {
+          "name": "--spell-caster",
+          "type": "bool",
+          "required": false,
+          "description": "Mark class as spellcaster"
+        },
+        {
+          "name": "--spell-ability",
+          "type": "str",
+          "required": false,
+          "description": "Spellcasting ability"
+        },
+        {
+          "name": "--hp-per-level",
+          "type": "int",
+          "required": false,
+          "description": "HP gained per level"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
+      ],
+      "examples": [
+        "python3 scripts/bg3.py scaffold class --mod ArcaneKnight --name ArcaneKnight --parent-class fighter --display-name \"Arcane Knight\" --json"
+      ],
+      "path": "authoring/scaffold_class_description.py"
+    },
+    {
+      "name": "scaffold_feat.py",
+      "command": "scaffold feat",
+      "category": "authoring",
+      "summary": "Scaffolds Feats.lsx and FeatDescriptions.lsx with prerequisite and passive bindings.",
+      "description": "Generates Patch 8 compliant Feats.lsx entries and companion FeatDescriptions.lsx with localized display name and tooltip descriptions.",
+      "intents": [
+        "scaffold feat",
+        "create feat",
+        "feat description",
+        "add feat"
+      ],
+      "cli_usage": "python3 scripts/bg3.py scaffold feat --mod <mod> --name <name> [options]",
+      "flags": [
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Target mod name or path"
+        },
+        {
+          "name": "--name",
+          "type": "str",
+          "required": true,
+          "description": "Technical feat name"
+        },
+        {
+          "name": "--display-name",
+          "type": "str",
+          "required": false,
+          "description": "Localized feat title"
+        },
+        {
+          "name": "--description",
+          "type": "str",
+          "required": false,
+          "description": "Localized tooltip description"
+        },
+        {
+          "name": "--passives",
+          "type": "str",
+          "required": false,
+          "description": "Semicolon-separated passive technical names"
+        },
+        {
+          "name": "--requirements",
+          "type": "str",
+          "required": false,
+          "description": "Prerequisite requirement string"
+        },
+        {
+          "name": "--can-be-reselected",
+          "type": "bool",
+          "required": false,
+          "description": "Allow selecting multiple times"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
+      ],
+      "examples": [
+        "python3 scripts/bg3.py scaffold feat --mod ArcaneKnight --name ArcaneMastery --passives \"Arcane_Mastery_Passive\" --display-name \"Arcane Mastery\" --json"
+      ],
+      "path": "authoring/scaffold_feat.py"
+    },
+    {
+      "name": "scaffold_action_resource.py",
+      "command": "scaffold action-resource",
+      "category": "authoring",
+      "summary": "Scaffolds ActionResourceDefinitions.lsx for custom class and spell resource pools.",
+      "description": "Generates Patch 8 compliant ActionResourceDefinitions.lsx with custom replenish types, dice-based resources, and localized resource names.",
+      "intents": [
+        "scaffold action resource",
+        "create resource",
+        "action resource definition",
+        "add resource pool"
+      ],
+      "cli_usage": "python3 scripts/bg3.py scaffold action-resource --mod <mod> --name <name> [options]",
+      "flags": [
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Target mod name or path"
+        },
+        {
+          "name": "--name",
+          "type": "str",
+          "required": true,
+          "description": "Technical resource name"
+        },
+        {
+          "name": "--display-name",
+          "type": "str",
+          "required": false,
+          "description": "Localized resource title"
+        },
+        {
+          "name": "--description",
+          "type": "str",
+          "required": false,
+          "description": "Localized description"
+        },
+        {
+          "name": "--replenish-type",
+          "type": "str",
+          "required": false,
+          "description": "Rest, ShortRest, or Never"
+        },
+        {
+          "name": "--max-level",
+          "type": "int",
+          "required": false,
+          "description": "Maximum resource level"
+        },
+        {
+          "name": "--dice-type",
+          "type": "int",
+          "required": false,
+          "description": "Die face value for dice-based pools"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
+      ],
+      "examples": [
+        "python3 scripts/bg3.py scaffold action-resource --mod ArcaneKnight --name ArcaneSurge --display-name \"Arcane Surge\" --replenish-type ShortRest --max-level 5 --json"
+      ],
+      "path": "authoring/scaffold_action_resource.py"
+    },
+    {
+      "name": "scaffold_spell_list.py",
+      "command": "scaffold spell-list",
+      "category": "authoring",
+      "summary": "Scaffolds SpellLists.lsx and PassiveLists.lsx for progression selectors.",
+      "description": "Generates standalone or modular SpellLists.lsx and PassiveLists.lsx with unique GUIDs and item lists for class and feat progressions.",
+      "intents": [
+        "scaffold spell list",
+        "create spell list",
+        "scaffold passive list",
+        "spell list",
+        "passive list"
+      ],
+      "cli_usage": "python3 scripts/bg3.py scaffold spell-list --mod <mod> --type <spells|passives> [options]",
+      "flags": [
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Target mod name or path"
+        },
+        {
+          "name": "--type",
+          "type": "str",
+          "required": false,
+          "description": "spells or passives (default: spells)"
+        },
+        {
+          "name": "--name",
+          "type": "str",
+          "required": false,
+          "description": "Optional comment or reference name"
+        },
+        {
+          "name": "--items",
+          "type": "str",
+          "required": false,
+          "description": "Semicolon or comma-separated list of technical names"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
+      ],
+      "examples": [
+        "python3 scripts/bg3.py scaffold spell-list --mod ArcaneKnight --type spells --items \"Target_ShockingGrasp;Target_TrueStrike\" --json"
+      ],
+      "path": "authoring/scaffold_spell_list.py"
+    },
+    {
+      "name": "scaffold_level_map.py",
+      "command": "scaffold level-map",
+      "category": "authoring",
+      "summary": "Scaffolds LevelMapValues.lsx with forward-filled level scaling 1-20.",
+      "description": "Generates Patch 8 compliant LevelMapValues.lsx entries supporting scalar and dice scaling with auto-fill across levels 1 through 20.",
+      "intents": [
+        "scaffold level map",
+        "create level map",
+        "level map values",
+        "damage scaling"
+      ],
+      "cli_usage": "python3 scripts/bg3.py scaffold level-map --mod <mod> --name <name> [options]",
+      "flags": [
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Target mod name or path"
+        },
+        {
+          "name": "--name",
+          "type": "str",
+          "required": true,
+          "description": "Unique LevelMapSeries name"
+        },
+        {
+          "name": "--values",
+          "type": "str",
+          "required": false,
+          "description": "Comma-separated level=value pairs (e.g. 1=1d6,5=2d6)"
+        },
+        {
+          "name": "--fallback",
+          "type": "str",
+          "required": false,
+          "description": "Fallback value for level 1"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
+      ],
+      "examples": [
+        "python3 scripts/bg3.py scaffold level-map --mod ArcaneKnight --name ArcaneDamageMap --values \"1=1d6,5=2d6,11=3d6\" --json"
+      ],
+      "path": "authoring/scaffold_level_map.py"
+    },
+    {
+      "name": "scaffold_default_values.py",
+      "command": "scaffold default-values",
+      "category": "authoring",
+      "summary": "Scaffolds DefaultValues (Abilities.lsx, Skills.lsx, Spells.lsx) for character creation.",
+      "description": "Generates DefaultValues files for classes, races, and origins during character creation and level-up.",
+      "intents": [
+        "scaffold default values",
+        "default abilities",
+        "default skills",
+        "default spells"
+      ],
+      "cli_usage": "python3 scripts/bg3.py scaffold default-values --mod <mod> --type <abilities|skills|spells> [options]",
+      "flags": [
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Target mod name or path"
+        },
+        {
+          "name": "--type",
+          "type": "str",
+          "required": true,
+          "description": "abilities, skills, or spells"
+        },
+        {
+          "name": "--table-uuid",
+          "type": "str",
+          "required": true,
+          "description": "Target ProgressionTableUUID or Class UUID"
+        },
+        {
+          "name": "--values",
+          "type": "str",
+          "required": true,
+          "description": "Semicolon or comma-separated default values"
+        },
+        {
+          "name": "--level",
+          "type": "int",
+          "required": false,
+          "description": "Character level (for spells)"
+        },
+        {
+          "name": "--origin-uuid",
+          "type": "str",
+          "required": false,
+          "description": "Optional Origin UUID"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
+      ],
+      "examples": [
+        "python3 scripts/bg3.py scaffold default-values --mod ArcaneKnight --type abilities --table-uuid <uuid> --values \"15,14,13,12,10,8\" --json"
+      ],
+      "path": "authoring/scaffold_default_values.py"
+    },
+    {
+      "name": "scaffold_tag.py",
+      "command": "scaffold tag",
+      "category": "authoring",
+      "summary": "Scaffolds dialogue and reactivity Tags/<UUID>.lsx files.",
+      "description": "Generates Patch 8 compliant dialogue reactivity and category tags with localized display names and category registrations.",
+      "intents": [
+        "scaffold tag",
+        "create tag",
+        "reactivity tag",
+        "dialogue tag"
+      ],
+      "cli_usage": "python3 scripts/bg3.py scaffold tag --mod <mod> --name <name> [options]",
+      "flags": [
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Target mod name or path"
+        },
+        {
+          "name": "--name",
+          "type": "str",
+          "required": true,
+          "description": "Tag name (e.g. ARCANE_KNIGHT)"
+        },
+        {
+          "name": "--display-name",
+          "type": "str",
+          "required": false,
+          "description": "Localized tag name"
+        },
+        {
+          "name": "--description",
+          "type": "str",
+          "required": false,
+          "description": "Localized description"
+        },
+        {
+          "name": "--category",
+          "type": "str",
+          "required": false,
+          "description": "Dialog, Character, or Status"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
+      ],
+      "examples": [
+        "python3 scripts/bg3.py scaffold tag --mod ArcaneKnight --name ARCANE_KNIGHT --display-name \"Arcane Knight\" --category Dialog --json"
+      ],
+      "path": "authoring/scaffold_tag.py"
+    },
+    {
+      "name": "scaffold_race.py",
+      "command": "scaffold race",
+      "category": "authoring",
+      "summary": "Scaffolds Races.lsx and companion RaceDescriptions.lsx for playable races and subraces.",
+      "description": "Generates Patch 8 compliant Races.lsx and RaceDescriptions.lsx entries, linking parent race progression tables and allocating localization handles.",
+      "intents": [
+        "scaffold race",
+        "create race",
+        "scaffold subrace",
+        "create subrace",
+        "race description"
+      ],
+      "cli_usage": "python3 scripts/bg3.py scaffold race --mod <mod> --name <name> [options]",
+      "flags": [
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Target mod name or path"
+        },
+        {
+          "name": "--name",
+          "type": "str",
+          "required": true,
+          "description": "Technical race or subrace name"
+        },
+        {
+          "name": "--display-name",
+          "type": "str",
+          "required": false,
+          "description": "In-game localized display name"
+        },
+        {
+          "name": "--description",
+          "type": "str",
+          "required": false,
+          "description": "In-game localized description"
+        },
+        {
+          "name": "--parent-race",
+          "type": "str",
+          "required": false,
+          "description": "Parent race name or GUID if subrace"
+        },
+        {
+          "name": "--parent-guid",
+          "type": "str",
+          "required": false,
+          "description": "Explicit parent race GUID"
+        },
+        {
+          "name": "--progression-table",
+          "type": "str",
+          "required": false,
+          "description": "ProgressionTableUUID for racial traits"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
+      ],
+      "examples": [
+        "python3 scripts/bg3.py scaffold race --mod AstralElves --name AstralElf --parent-race elf --display-name \"Astral Elf\" --json"
+      ],
+      "path": "authoring/scaffold_race.py"
+    },
+    {
+      "name": "scaffold_origin.py",
+      "command": "scaffold origin",
+      "category": "authoring",
+      "summary": "Scaffolds Origins.lsx for playable origin characters and companions.",
+      "description": "Generates Patch 8 compliant Origins.lsx character definitions with background, race, class, body type, and localized bio bindings.",
+      "intents": [
+        "scaffold origin",
+        "create origin",
+        "origin character",
+        "custom companion origin"
+      ],
+      "cli_usage": "python3 scripts/bg3.py scaffold origin --mod <mod> --name <name> [options]",
+      "flags": [
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Target mod name or path"
+        },
+        {
+          "name": "--name",
+          "type": "str",
+          "required": true,
+          "description": "Technical origin name"
+        },
+        {
+          "name": "--display-name",
+          "type": "str",
+          "required": false,
+          "description": "Localized character name"
+        },
+        {
+          "name": "--description",
+          "type": "str",
+          "required": false,
+          "description": "Localized backstory or bio"
+        },
+        {
+          "name": "--class-guid",
+          "type": "str",
+          "required": false,
+          "description": "Class UUID or vanilla class name"
+        },
+        {
+          "name": "--race-guid",
+          "type": "str",
+          "required": false,
+          "description": "Race UUID or vanilla race name"
+        },
+        {
+          "name": "--background-guid",
+          "type": "str",
+          "required": false,
+          "description": "Background GUID"
+        },
+        {
+          "name": "--body-type",
+          "type": "int",
+          "required": false,
+          "description": "Body type index (0=Standard, 1=Slim/Female, etc.)"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
+      ],
+      "examples": [
+        "python3 scripts/bg3.py scaffold origin --mod ArcaneKnight --name Valen --display-name \"Valen the Spellblade\" --class-guid ArcaneKnight --json"
+      ],
+      "path": "authoring/scaffold_origin.py"
+    },
+    {
+      "name": "scaffold_appearance_visual.py",
+      "command": "scaffold appearance-visual",
+      "category": "authoring",
+      "summary": "Scaffolds CharacterCreationAppearanceVisuals.lsx for cosmetics and race appearances.",
+      "description": "Generates CharacterCreationAppearanceVisuals.lsx entries binding VisualResource GUIDs to body types, races, and slots for character creation.",
+      "intents": [
+        "scaffold appearance",
+        "create appearance visual",
+        "character creation visual",
+        "hair visual",
+        "head visual"
+      ],
+      "cli_usage": "python3 scripts/bg3.py scaffold appearance-visual --mod <mod> --visual-resource <uuid> [options]",
+      "flags": [
+        {
+          "name": "--mod",
+          "type": "str",
+          "required": true,
+          "description": "Target mod name or path"
+        },
+        {
+          "name": "--visual-resource",
+          "type": "str",
+          "required": true,
+          "description": "GUID of VisualBank RootTemplate or resource"
+        },
+        {
+          "name": "--race-guid",
+          "type": "str",
+          "required": false,
+          "description": "Race GUID or vanilla race name"
+        },
+        {
+          "name": "--slot-name",
+          "type": "str",
+          "required": false,
+          "description": "Cosmetic slot name (Hair, Head, Horns, Beard)"
+        },
+        {
+          "name": "--body-type",
+          "type": "int",
+          "required": false,
+          "description": "Body type index (default: 0)"
+        },
+        {
+          "name": "--body-shape",
+          "type": "int",
+          "required": false,
+          "description": "Body shape index (default: 0)"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
+      ],
+      "examples": [
+        "python3 scripts/bg3.py scaffold appearance-visual --mod AstralElves --visual-resource <uuid> --race-guid elf --slot-name Hair --json"
+      ],
+      "path": "authoring/scaffold_appearance_visual.py"
     }
   ]
 }

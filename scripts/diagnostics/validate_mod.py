@@ -226,11 +226,8 @@ class ModValidator:
                 except Exception as e:
                     self.add_warning(f"Could not read {txt_file.name}: {e}")
 
-        # Scan RootTemplates and Progressions LSX files for TranslatedString handles
-        lsx_targets = (
-            list(self.mod_dir.glob("Public/*/RootTemplates/*.lsx"))
-            + list(self.mod_dir.glob("Public/*/Progressions/*.lsx"))
-        )
+        # Scan all LSX files under Public/ for TranslatedString handles
+        lsx_targets = list(self.mod_dir.glob("Public/**/*.lsx"))
         for lsx_file in lsx_targets:
             try:
                 content = lsx_file.read_text(encoding="utf-8", errors="replace")
@@ -371,6 +368,79 @@ class ModValidator:
             if d.is_dir():
                 self.validate_image_asset(d / "mod_publish_logo.png", "Mods publish logo")
 
+    def validate_companion_schemas(self):
+        # 1. Feats.lsx vs Feats/FeatDescriptions.lsx
+        feat_files = list(self.mod_dir.glob("Public/*/Feats/Feats.lsx"))
+        feat_desc_files = list(self.mod_dir.glob("Public/*/Feats/FeatDescriptions.lsx"))
+        if feat_files:
+            feat_uuids = set()
+            for ff in feat_files:
+                try:
+                    tree = ET.parse(ff)
+                    for node in tree.findall(".//node[@id='Feat']"):
+                        for attr in node.findall("attribute[@id='UUID']"):
+                            val = attr.get("value", "").strip()
+                            if val:
+                                feat_uuids.add(val)
+                except Exception as e:
+                    self.add_error(f"Error parsing Feats.lsx: {e}")
+
+            if feat_uuids and not feat_desc_files:
+                self.add_warning("Feats.lsx defines feats but companion FeatDescriptions.lsx is missing.")
+            elif feat_desc_files:
+                desc_feat_ids = set()
+                for fdf in feat_desc_files:
+                    try:
+                        tree = ET.parse(fdf)
+                        for node in tree.findall(".//node[@id='FeatDescription']"):
+                            for attr in node.findall("attribute[@id='FeatId']"):
+                                val = attr.get("value", "").strip()
+                                if val:
+                                    desc_feat_ids.add(val)
+                    except Exception as e:
+                        self.add_error(f"Error parsing FeatDescriptions.lsx: {e}")
+                missing_descs = feat_uuids - desc_feat_ids
+                if missing_descs:
+                    self.add_warning(
+                        f"{len(missing_descs)} feat(s) defined in Feats.lsx lack companion FeatDescriptions."
+                    )
+
+        # 2. Races.lsx vs Races/RaceDescriptions.lsx
+        race_files = list(self.mod_dir.glob("Public/*/Races/Races.lsx"))
+        race_desc_files = list(self.mod_dir.glob("Public/*/Races/RaceDescriptions.lsx"))
+        if race_files:
+            race_uuids = set()
+            for rf in race_files:
+                try:
+                    tree = ET.parse(rf)
+                    for node in tree.findall(".//node[@id='Race']"):
+                        for attr in node.findall("attribute[@id='UUID']"):
+                            val = attr.get("value", "").strip()
+                            if val:
+                                race_uuids.add(val)
+                except Exception as e:
+                    self.add_error(f"Error parsing Races.lsx: {e}")
+
+            if race_uuids and not race_desc_files:
+                self.add_warning("Races.lsx defines races but companion RaceDescriptions.lsx is missing.")
+            elif race_desc_files:
+                desc_race_ids = set()
+                for rdf in race_desc_files:
+                    try:
+                        tree = ET.parse(rdf)
+                        for node in tree.findall(".//node[@id='RaceDescription']"):
+                            for attr in node.findall("attribute[@id='RaceId']"):
+                                val = attr.get("value", "").strip()
+                                if val:
+                                    desc_race_ids.add(val)
+                    except Exception as e:
+                        self.add_error(f"Error parsing RaceDescriptions.lsx: {e}")
+                missing_descs = race_uuids - desc_race_ids
+                if missing_descs:
+                    self.add_warning(
+                        f"{len(missing_descs)} race(s) defined in Races.lsx lack companion RaceDescriptions."
+                    )
+
     def run(self) -> dict:
         self.validate_directory_structure()
         self.validate_xml_syntax()
@@ -378,6 +448,7 @@ class ModValidator:
         self.validate_localization_handles()
         self.validate_stats_and_templates()
         self.validate_spell_references()
+        self.validate_companion_schemas()
         self.validate_assets()
 
         status = "PASSED"
