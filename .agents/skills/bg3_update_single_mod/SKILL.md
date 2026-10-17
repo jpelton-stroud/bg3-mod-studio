@@ -41,10 +41,10 @@ flowchart TD
 
 ## Step 2: Execute Update Pipeline
 
-Execute [`scripts/modio_update.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_update.py) with the mod query:
+Execute [`scripts/library/modio_update.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/library/modio_update.py) with the mod query:
 
 ```bash
-python3 scripts/modio_update.py --query "<MOD_QUERY>" --json
+bg3 modio update --query "<MOD_QUERY>" --json
 ```
 
 The script will:
@@ -62,8 +62,8 @@ The script will:
 > **Tool Discovery & Schema Inspection**:
 > To inspect all update flags or discover related mod.io tools:
 > ```bash
-> python3 scripts/tools.py --info modio-update --json
-> python3 scripts/tools.py --search "update" --json
+> bg3 tools info modio-update --json
+> bg3 tools search "update" --json
 > ```
 
 ---

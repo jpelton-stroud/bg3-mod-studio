@@ -15,11 +15,11 @@ This skill acts as the autonomous "AI Doctor" and **Stage 2** verification gate 
 Inspect tool arguments, flags, and schema definitions with:
 
 ```bash
-python3 scripts/tools.py --info validate
-python3 scripts/tools.py --info sync-loca
-python3 scripts/tools.py --info check-conflicts
-python3 scripts/tools.py --info sync-game
-python3 scripts/tools.py --info toolkit-logs
+bg3 tools info validate
+bg3 tools info sync-loca
+bg3 tools info check-conflicts
+bg3 tools info sync-game
+bg3 tools info toolkit-logs
 ```
 
 ---
@@ -34,7 +34,7 @@ flowchart TD
         Phase2A --> Val["1. Structural & Handle Integrity
 python3 scripts/bg3.py mod validate &lt;slug&gt; --json"]
         Val --> Loc["2. Localization Handle Audit
-python3 scripts/sync_localization.py --mod &lt;slug&gt; --check --json"]
+bg3 mod sync-localization --mod &lt;slug&gt; --check --json"]
         Loc --> Conf["3. Library Collision Check
 python3 scripts/bg3.py mod conflict &lt;slug&gt; --against-library --json"]
         Conf --> Fix2A{"Static Issues Found?"}
@@ -43,7 +43,7 @@ sync_localization --prune, patch files"]
         Patch2A --> Val
         Fix2A -- "Circuit Breaker / Override" --> Sync
         Fix2A -- "No" --> Sync["4. Sync Assets & Binary .loca to Data/
-python3 scripts/sync_game_data.py --mods &lt;slug&gt; --json"]
+bg3 mod sync-data --mods &lt;slug&gt; --json"]
         Sync --> PromptUser["5. Direct User to Load Mod in Toolkit (Glasses.exe)
 Prompt: Logs generated?"]
     end
@@ -54,7 +54,7 @@ Prompt: Logs generated?"]
     
     subgraph Phase 2B Runtime Log Triage & Fixes
         Phase2B --> Logs["1. Triage Glasses Runtime Logs
-python3 scripts/diagnose_toolkit_logs.py --mod &lt;slug&gt; --severity warning --json"]
+bg3 mod diagnose-logs --mod &lt;slug&gt; --severity warning --json"]
         Logs --> LogFix{"Toolkit Errors Found?"}
         LogFix -- "Yes (≤3 cycles)" --> Patch2B["Fix in my_mods/ and Loop to 2A"]
         LogFix -- "Circuit Breaker / Override" --> Gate
@@ -87,7 +87,7 @@ Run deterministic static checks on `my_mods/<slug>/` before touching game files:
 python3 scripts/bg3.py mod validate <mod-slug> --json
 
 # 2. Localization Handle Audit (check for orphaned or missing handles)
-python3 scripts/sync_localization.py --mod <mod-slug> --check --json
+bg3 mod sync-localization --mod <mod-slug> --check --json
 
 # 3. Community Conflict & Collision Check
 python3 scripts/bg3.py mod conflict <mod-slug> --against-library --json
@@ -95,8 +95,8 @@ python3 scripts/bg3.py mod conflict <mod-slug> --against-library --json
 
 #### Remediation & Loop Guardrails for Phase 2A:
 - **Missing Localization Handles**: Add missing `<content contentuid="h..." version="1">Text</content>` to `Localization/English/<ModName>.xml`.
-- **Orphaned Localization Handles**: Run `python3 scripts/sync_localization.py --mod <mod-slug> --prune --json` after user confirmation.
-- **Stat Entry Collisions**: When colliding with a tracked mod in `mods/library.md`, rename the stat prefix or generate a compatibility patch via `python3 scripts/generate_compat_patch.py`.
+- **Orphaned Localization Handles**: Run `bg3 mod sync-localization --mod <mod-slug> --prune --json` after user confirmation.
+- **Stat Entry Collisions**: When colliding with a tracked mod in `mods/library.md`, rename the stat prefix or generate a compatibility patch via `bg3 mod compat-patch`.
 - **Loop Prevention**:
   - Maximum **3 automated remediation attempts** for static errors.
   - If identical errors persist across attempts (error signature circuit breaker), halt automated fixes and use `ask_question` to prompt the user (inspect failing file manually, override and proceed, or revert changes).
@@ -106,7 +106,7 @@ python3 scripts/bg3.py mod conflict <mod-slug> --against-library --json
 Once static checks pass cleanly (or after explicit user override):
 
 ```bash
-python3 scripts/sync_game_data.py --mods <mod-slug> --json
+bg3 mod sync-data --mods <mod-slug> --json
 ```
 
 > [!NOTE]
@@ -133,13 +133,13 @@ Run deterministic log triage to catch any engine warnings or script exceptions:
 
 ```bash
 # Inspect latest Toolkit session with workspace mod correlation
-python3 scripts/diagnose_toolkit_logs.py --mod <mod-slug> --severity warning --json
+bg3 mod diagnose-logs --mod <mod-slug> --severity warning --json
 
 # Or filter by specific subsystem (e.g. Boosts, Stats, Thoth, Osiris)
-python3 scripts/diagnose_toolkit_logs.py --subsystem Boosts --mod <mod-slug> --json
+bg3 mod diagnose-logs --subsystem Boosts --mod <mod-slug> --json
 
 # Or stream active session logs live during user inspection
-python3 scripts/diagnose_toolkit_logs.py --follow
+bg3 mod diagnose-logs --follow
 ```
 
 #### 2. Remediate & Loop to Phase 2A

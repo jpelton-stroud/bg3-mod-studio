@@ -11,6 +11,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -30,6 +31,65 @@ from scripts.lib.cli_common import (
 )
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
+AUTHORING_DIR = SCRIPTS_DIR / "authoring"
+DIAGNOSTICS_DIR = SCRIPTS_DIR / "diagnostics"
+LIBRARY_DIR = SCRIPTS_DIR / "library"
+MANAGEMENT_DIR = SCRIPTS_DIR / "management"
+PACKAGING_DIR = SCRIPTS_DIR / "packaging"
+THEORYCRAFTING_DIR = SCRIPTS_DIR / "theorycrafting"
+DOMAIN_DIRS = [
+    AUTHORING_DIR,
+    DIAGNOSTICS_DIR,
+    LIBRARY_DIR,
+    MANAGEMENT_DIR,
+    PACKAGING_DIR,
+    THEORYCRAFTING_DIR,
+]
+
+
+def resolve_script_target(name: str) -> Optional[Path]:
+    """Resolve script path across domain subdirectories, registry.json, and scripts root."""
+    clean_name = name if name.endswith(".py") else f"{name}.py"
+    # Direct relative path check
+    direct = SCRIPTS_DIR / name
+    if direct.is_file():
+        return direct
+    direct_py = SCRIPTS_DIR / clean_name
+    if direct_py.is_file():
+        return direct_py
+
+    # Domain directory search
+    for d in DOMAIN_DIRS:
+        cand = d / clean_name
+        if cand.is_file():
+            return cand
+        cand_raw = d / name
+        if cand_raw.is_file():
+            return cand_raw
+
+    # Registry lookup
+    reg_path = SCRIPTS_DIR / "registry.json"
+    if reg_path.is_file():
+        try:
+            with open(reg_path, "r", encoding="utf-8") as f:
+                reg_data = json.load(f)
+            stem = name[:-3] if name.endswith(".py") else name
+            for t in reg_data.get("tools", []):
+                t_name = t.get("name", "")
+                t_cmd = t.get("command", "")
+                t_path = t.get("path", "")
+                t_cat = t.get("category", "")
+                if name in (t_name, t_cmd, t_path, stem) or stem in (t_name, t_cmd, t_name.replace(".py", "")):
+                    if t_path and (SCRIPTS_DIR / t_path).is_file():
+                        return SCRIPTS_DIR / t_path
+                    if t_cat and (SCRIPTS_DIR / t_cat / t_name).is_file():
+                        return SCRIPTS_DIR / t_cat / t_name
+                    cand = SCRIPTS_DIR / t_name
+                    if cand.is_file():
+                        return cand
+        except Exception:
+            pass
+    return None
 
 
 class JsonCompliantArgumentParser(argparse.ArgumentParser):
@@ -65,6 +125,12 @@ def build_parser() -> argparse.ArgumentParser:
         "-v", "--verbose",
         action="store_true",
         help="Enable detailed diagnostic messages on stderr.",
+    )
+    common_parser.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help="Path to custom environment configuration file.",
     )
 
     parser = JsonCompliantArgumentParser(
@@ -751,7 +817,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     env_subparsers.add_parser(
         "check",
-        help="Perform non-interactive path, tool, and .env health check",
+        help="Perform non-interactive path, tool, and environment health check",
+        parents=[common_parser],
+    )
+
+    env_subparsers.add_parser(
+        "paths",
+        help="Display canonical XDG Base Directory specification paths and status",
         parents=[common_parser],
     )
 
@@ -807,34 +879,16 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
 
     if cmd == "run":
         tool_name = args.tool
-        if not tool_name.endswith(".py"):
-            target = SCRIPTS_DIR / f"{tool_name}.py"
-        else:
+        target = resolve_script_target(tool_name)
+        if not target:
             target = SCRIPTS_DIR / tool_name
-
-        if not target.is_file():
-            reg_path = SCRIPTS_DIR / "registry.json"
-            if reg_path.is_file():
-                try:
-                    import json
-                    with open(reg_path, "r", encoding="utf-8") as f:
-                        reg_data = json.load(f)
-                    for t in reg_data.get("tools", []):
-                        t_name = t.get("name", "")
-                        t_cmd = t.get("command", "")
-                        if tool_name in (t_name, t_cmd, t_name.replace(".py", "")):
-                            target = SCRIPTS_DIR / t_name
-                            break
-                except Exception:
-                    pass
-
         script_target = target
         if getattr(args, "extra_args", None):
             target_args.extend(args.extra_args)
 
     elif cmd == "mod":
         if sub == "conflict":
-            script_target = SCRIPTS_DIR / "check_mod_conflicts.py"
+            script_target = DIAGNOSTICS_DIR / "check_mod_conflicts.py"
             if args.all:
                 target_args.append("--all")
             elif args.mod2 and args.candidate:
@@ -853,7 +907,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 return ExitCode.USAGE
 
         elif sub == "validate":
-            script_target = SCRIPTS_DIR / "validate_mod.py"
+            script_target = DIAGNOSTICS_DIR / "validate_mod.py"
             if getattr(args, "mod_identifier", None):
                 target_args.append(args.mod_identifier)
             if getattr(args, "all", False):
@@ -864,7 +918,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--fix")
 
         elif sub == "scaffold":
-            script_target = SCRIPTS_DIR / "create_mod_scaffold.py"
+            script_target = AUTHORING_DIR / "create_mod_scaffold.py"
             target_args.extend(["--name", args.name])
             if getattr(args, "slug", None):
                 target_args.extend(["--slug", args.slug])
@@ -888,7 +942,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--dry-run")
 
         elif sub == "add-dependency":
-            script_target = SCRIPTS_DIR / "add_mod_dependency.py"
+            script_target = AUTHORING_DIR / "add_mod_dependency.py"
             target_args.extend(["--mod", args.mod])
             if getattr(args, "dependencies", None):
                 target_args.extend(args.dependencies)
@@ -902,7 +956,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--dry-run")
 
         elif sub in ("bump-version", "bump_version"):
-            script_target = SCRIPTS_DIR / "bump_mod_version.py"
+            script_target = MANAGEMENT_DIR / "bump_mod_version.py"
             if getattr(args, "mod", None):
                 target_args.extend(["--mod", args.mod])
             if getattr(args, "patch", False):
@@ -921,7 +975,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--dry-run")
 
         elif sub == "pack":
-            script_target = SCRIPTS_DIR / "pack_mod_pak.py"
+            script_target = PACKAGING_DIR / "pack_mod_pak.py"
             target_args.extend(["--mod", args.mod])
             if getattr(args, "output", None):
                 target_args.extend(["--out", args.output])
@@ -939,7 +993,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--dry-run")
 
         elif sub in ("sync-loca", "sync_loca"):
-            script_target = SCRIPTS_DIR / "sync_localization.py"
+            script_target = DIAGNOSTICS_DIR / "sync_localization.py"
             target_args.extend(["--mod", args.mod])
             if getattr(args, "check", False):
                 target_args.append("--check")
@@ -955,7 +1009,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--dry-run")
 
         elif sub in ("sync-game", "sync_game"):
-            script_target = SCRIPTS_DIR / "sync_game_data.py"
+            script_target = PACKAGING_DIR / "sync_game_data.py"
             if getattr(args, "mods", None):
                 target_args.extend(["--mods"] + args.mods)
             if getattr(args, "source_dir", None):
@@ -980,7 +1034,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--dry-run")
 
         elif sub == "patch":
-            script_target = SCRIPTS_DIR / "generate_compat_patch.py"
+            script_target = AUTHORING_DIR / "generate_compat_patch.py"
             target_args.extend(["--mod1", args.mod1, "--mod2", args.mod2])
             if getattr(args, "name", None):
                 target_args.extend(["--name", args.name])
@@ -990,7 +1044,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--dry-run")
 
         elif sub in ("diagnose-logs", "diagnose_logs"):
-            script_target = SCRIPTS_DIR / "diagnose_toolkit_logs.py"
+            script_target = DIAGNOSTICS_DIR / "diagnose_toolkit_logs.py"
             if getattr(args, "mod", None):
                 target_args.extend(["--mod", args.mod])
             if getattr(args, "toolkit_dir", None):
@@ -1011,7 +1065,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--info")
 
         elif sub in ("inspect-save", "inspect_save"):
-            script_target = SCRIPTS_DIR / "inspect_save_game.py"
+            script_target = DIAGNOSTICS_DIR / "inspect_save_game.py"
             if getattr(args, "save", None):
                 target_args.extend(["--save", args.save])
             if getattr(args, "save_dir", None):
@@ -1020,7 +1074,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--audit")
 
         elif sub in ("inject-treasure", "inject_treasure"):
-            script_target = SCRIPTS_DIR / "inject_treasure_table.py"
+            script_target = AUTHORING_DIR / "inject_treasure_table.py"
             target_args.extend(["--mod", args.mod, "--item", args.item])
             if getattr(args, "container", None):
                 target_args.extend(["--container", args.container])
@@ -1038,13 +1092,13 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--dry-run")
 
         elif sub in ("render-desc", "render_desc"):
-            script_target = SCRIPTS_DIR / "render_modio_description.py"
+            script_target = MANAGEMENT_DIR / "render_modio_description.py"
             target_args.extend(["--mod", args.mod])
             if getattr(args, "write", False):
                 target_args.append("--write")
 
     elif cmd == "loadorder":
-        script_target = SCRIPTS_DIR / "manage_load_order.py"
+        script_target = MANAGEMENT_DIR / "manage_load_order.py"
         if sub == "list":
             target_args.append("--list")
             if getattr(args, "profile", None):
@@ -1138,14 +1192,14 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
 
     elif cmd == "modio":
         if sub == "search":
-            script_target = SCRIPTS_DIR / "modio_search.py"
+            script_target = LIBRARY_DIR / "modio_search.py"
             target_args.extend(["--query", args.query, "--limit", str(args.limit)])
             if getattr(args, "platform", None):
                 target_args.extend(["--platform", args.platform])
             if getattr(args, "include_tracked", False):
                 target_args.append("--include-tracked")
         elif sub == "sync":
-            script_target = SCRIPTS_DIR / "modio_sync.py"
+            script_target = LIBRARY_DIR / "modio_sync.py"
             if getattr(args, "prune", False) and not getattr(args, "dry_run", False):
                 try:
                     confirm_action(
@@ -1176,7 +1230,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             if getattr(args, "token", None):
                 target_args.extend(["--token", args.token])
         elif sub == "extract":
-            script_target = SCRIPTS_DIR / "modio_extract.py"
+            script_target = LIBRARY_DIR / "modio_extract.py"
             if getattr(args, "query", None):
                 target_args.extend(["--query", args.query])
             if getattr(args, "pak", None):
@@ -1188,7 +1242,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             if getattr(args, "update_library", False):
                 target_args.append("--update-library")
         elif sub == "update":
-            script_target = SCRIPTS_DIR / "modio_update.py"
+            script_target = LIBRARY_DIR / "modio_update.py"
             if getattr(args, "query", None):
                 target_args.extend(["--query", args.query])
             if getattr(args, "all", False):
@@ -1200,20 +1254,20 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             if getattr(args, "list_tracked", False):
                 target_args.append("--list-tracked")
         elif sub in ("update-metadata", "update_metadata"):
-            script_target = SCRIPTS_DIR / "modio_update_metadata.py"
+            script_target = MANAGEMENT_DIR / "modio_update_metadata.py"
             target_args.extend(["--mod", args.mod])
             if getattr(args, "tags", None):
                 target_args.extend(["--tags", ",".join(args.tags) if isinstance(args.tags, list) else args.tags])
             if getattr(args, "confirm", False):
                 target_args.append("--confirm")
         elif sub in ("create-collection", "create_collection"):
-            script_target = SCRIPTS_DIR / "modio_create_collection.py"
+            script_target = LIBRARY_DIR / "modio_create_collection.py"
             if getattr(args, "library", None):
                 target_args.extend(["--library", args.library])
             if getattr(args, "dry_run", False):
                 target_args.append("--dry-run")
         elif sub == "purge":
-            script_target = SCRIPTS_DIR / "purge_library.py"
+            script_target = LIBRARY_DIR / "purge_library.py"
             if not getattr(args, "dry_run", False):
                 try:
                     confirm_action(
@@ -1239,7 +1293,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             if getattr(args, "library_path", None):
                 target_args.extend(["--library-path", args.library_path])
         elif sub in ("update-catalog", "update_catalog"):
-            script_target = SCRIPTS_DIR / "update_library_catalog.py"
+            script_target = LIBRARY_DIR / "update_library_catalog.py"
             if getattr(args, "write", False):
                 target_args.append("--write")
             if getattr(args, "check", False):
@@ -1249,7 +1303,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
 
     elif cmd == "scaffold":
         if sub == "stat":
-            script_target = SCRIPTS_DIR / "scaffold_stat_entry.py"
+            script_target = AUTHORING_DIR / "scaffold_stat_entry.py"
             target_args.extend(["--mod", args.mod, "--type", args.type, "--name", args.name])
             if getattr(args, "display_name", None):
                 target_args.extend(["--display-name", args.display_name])
@@ -1262,7 +1316,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             if getattr(args, "dry_run", False):
                 target_args.append("--dry-run")
         elif sub == "progression":
-            script_target = SCRIPTS_DIR / "scaffold_progression_node.py"
+            script_target = AUTHORING_DIR / "scaffold_progression_node.py"
             target_args.extend(["--mod", args.mod, "--class", args.class_name, "--level", str(args.level)])
             if getattr(args, "subclass", None):
                 target_args.extend(["--subclass", args.subclass])
@@ -1281,7 +1335,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             if getattr(args, "dry_run", False):
                 target_args.append("--dry-run")
         elif sub in ("root-template", "root_template"):
-            script_target = SCRIPTS_DIR / "scaffold_root_template.py"
+            script_target = AUTHORING_DIR / "scaffold_root_template.py"
             target_args.extend(["--mod", args.mod, "--item", args.item])
             if getattr(args, "visual_preset", None):
                 target_args.extend(["--visual-preset", args.visual_preset])
@@ -1300,7 +1354,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             if getattr(args, "dry_run", False):
                 target_args.append("--dry-run")
         elif sub in ("icon-uvs", "icon_uvs"):
-            script_target = SCRIPTS_DIR / "scaffold_icon_uvs.py"
+            script_target = AUTHORING_DIR / "scaffold_icon_uvs.py"
             target_args.extend(["--mod", args.mod])
             if getattr(args, "icon_names", None):
                 target_args.extend(["--icon-names", ",".join(args.icon_names) if isinstance(args.icon_names, list) else args.icon_names])
@@ -1318,7 +1372,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--dry-run")
 
     elif cmd == "query":
-        script_target = SCRIPTS_DIR / "query_mod_database.py"
+        script_target = LIBRARY_DIR / "query_mod_database.py"
         if getattr(args, "search", None):
             target_args.extend(["--search", args.search])
         if getattr(args, "slot", None):
@@ -1339,7 +1393,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             target_args.append("--reindex")
 
     elif cmd in ("build", "sim"):
-        script_target = SCRIPTS_DIR / "simulate_build_synergy.py"
+        script_target = THEORYCRAFTING_DIR / "simulate_build_synergy.py"
         if getattr(args, "classes", None):
             target_args.extend(["--classes", args.classes])
         if getattr(args, "stats", None):
@@ -1352,7 +1406,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             target_args.extend(["--target-ac", str(args.target_ac)])
 
     elif cmd == "tools":
-        script_target = SCRIPTS_DIR / "tools.py"
+        script_target = MANAGEMENT_DIR / "tools.py"
         if sub == "list":
             target_args.append("--list")
             if getattr(args, "category", None):
@@ -1371,7 +1425,35 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--audit-skills")
 
     elif cmd == "env":
-        script_target = SCRIPTS_DIR / "setup_environment.py"
+        if sub == "paths":
+            from scripts.lib.env_paths import (
+                get_xdg_cache_home,
+                get_xdg_config_home,
+                get_xdg_data_home,
+                get_xdg_state_home,
+            )
+            cfg = get_xdg_config_home()
+            cache = get_xdg_cache_home()
+            data = get_xdg_data_home()
+            state = get_xdg_state_home()
+            paths_data = {
+                "XDG_CONFIG_HOME": {"path": str(cfg), "exists": cfg.exists()},
+                "XDG_CACHE_HOME": {"path": str(cache), "exists": cache.exists()},
+                "XDG_DATA_HOME": {"path": str(data), "exists": data.exists()},
+                "XDG_STATE_HOME": {"path": str(state), "exists": state.exists()},
+            }
+            if args.json:
+                print(json.dumps(paths_data, indent=2))
+            else:
+                color = emitter.color
+                print(f"\n{color.bold('=== XDG Base Directory Paths ===')}")
+                for var, info in paths_data.items():
+                    status = color.green("[exists]") if info["exists"] else color.yellow("[not created]")
+                    print(f"{color.bold(f'{var:17}')}: {info['path']} {status}")
+                print("")
+            return ExitCode.OK
+
+        script_target = MANAGEMENT_DIR / "setup_environment.py"
         if sub == "check":
             target_args.append("--check")
         elif sub == "setup":
@@ -1386,6 +1468,10 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             exit_process=False,
         )
         return ExitCode.UNAVAILABLE
+
+    # Propagate global --config flag if specified
+    if getattr(args, "config", None):
+        target_args.extend(["--config", str(args.config)])
 
     # Propagate global --json flag if requested
     if args.json:

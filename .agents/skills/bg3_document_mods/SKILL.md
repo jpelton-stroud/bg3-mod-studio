@@ -28,7 +28,7 @@ When triggered via `/bg3_document_mods` or when requested to document one or mor
 flowchart TD
     A["User triggers /bg3_document_mods with mod list"] --> B["Orchestrator resolves mod inputs"]
     B --> C["Spawn concurrent subagent per mod via invoke_subagent"]
-    C --> D["Subagent executes scripts/modio_extract.py"]
+    C --> D["Subagent executes scripts/library/modio_extract.py"]
     D --> E["Extract .pak and unpack data to mods/<mod_name>/data/"]
     E --> F["Verify in-game implementation (exclude stubs)"]
     F --> G["Write mods/<mod_name>/README.md with rich schema"]
@@ -80,7 +80,7 @@ Each spawned subagent receives a concise prompt directing it to follow the dedic
 > Document the Baldur's Gate 3 mod: `<MOD_QUERY>`.
 >
 > 1. Read and follow all instructions in the worker skill [`bg3_document_single_mod`](file:///home/jpstroud/projects/BaldursGate3/.agents/skills/bg3_document_single_mod/SKILL.md).
-> 2. Run `scripts/modio_extract.py --query "<MOD_QUERY>" --write-spec --json` to download, unpack, and validate in-game features.
+> 2. Run `scripts/library/modio_extract.py --query "<MOD_QUERY>" --write-spec --json` to download, unpack, and validate in-game features.
 > 3. Confirm that `mods/<mod_slug>/README.md` adheres to the Rich Features Schema (including detailed descriptions of what granted abilities/spells/passives actually do).
 > 4. Return the standardized status message:
 >    - **On Success**: `mod '<Mod Name>' successfully added to library — <Brief 1-2 sentence description of what the mod does>`
@@ -96,14 +96,14 @@ After launching the subagents, the Orchestrator stops calling tools and waits fo
 
 ## Step 4: Cataloging in `mods/library.md`
 
-Once all subagents have reported back, the Orchestrator executes [`scripts/update_library_catalog.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/update_library_catalog.py):
+Once all subagents have reported back, the Orchestrator executes [`scripts/library/update_library_catalog.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/library/update_library_catalog.py):
 
 ```bash
 # 1. Update markdown catalog
-python3 scripts/update_library_catalog.py --write
+bg3 library update-catalog --write
 
 # 2. Warm the mechanics & gear database cache
-python3 scripts/query_mod_database.py --reindex
+bg3 query --reindex
 ```
 
 This automatically scans all specifications under `mods/`, extracts verified mod.io IDs, titles, slugs, descriptions, and implemented-feature counts, categorizes them into standard tables (**Gear**, **Spells**, **Classes & Subclasses**, **Progression & Rules**, **Utilities & Cheats**), and writes six-column rows with relative README spec links. Existing verified IDs are preserved during migration; unknown IDs remain blank until verified. It then rebuilds the high-speed query cache in `.cache/mod_database.json` for [`bg3_query_gear`](file:///home/jpstroud/projects/BaldursGate3/.agents/skills/bg3_query_gear/SKILL.md).
@@ -112,9 +112,9 @@ This automatically scans all specifications under `mods/`, extracts verified mod
 > **Tool Discovery & Schema Inspection**:
 > To inspect catalog updater or database indexing flags dynamically:
 > ```bash
-> python3 scripts/tools.py --info update-catalog --json
-> python3 scripts/tools.py --info query-db --json
-> python3 scripts/tools.py --search "catalog" --json
+> bg3 tools info update-catalog --json
+> bg3 tools info query-db --json
+> bg3 tools search "catalog" --json
 > ```
 
 ---

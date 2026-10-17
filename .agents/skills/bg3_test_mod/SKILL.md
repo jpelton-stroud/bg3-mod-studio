@@ -14,10 +14,10 @@ This skill defines the **Stage 3 (In-Game Testing)** workflow of the custom mod 
 Inspect tool arguments, flags, and schema definitions with:
 
 ```bash
-python3 scripts/tools.py --info sync-game
-python3 scripts/tools.py --info pack-pak
-python3 scripts/tools.py --info load-order
-python3 scripts/tools.py --info inspect-save
+bg3 tools info sync-game
+bg3 tools info pack-pak
+bg3 tools info load-order
+bg3 tools info inspect-save
 ```
 
 ---
@@ -27,12 +27,12 @@ python3 scripts/tools.py --info inspect-save
 ```mermaid
 flowchart TD
     Trigger["Trigger: /bg3_test_mod &lt;slug&gt;"] --> Pack["Step 1: Clean Loose Data & Deploy Local .pak
-python3 scripts/sync_game_data.py --clean-mod &lt;slug&gt; --json
-python3 scripts/pack_mod_pak.py --mod &lt;slug&gt; --publish-local --json"]
+bg3 mod sync-data --clean-mod &lt;slug&gt; --json
+bg3 mod pack --mod &lt;slug&gt; --publish-local --json"]
     
     subgraph P3A["Phase 3A: Clean-Room / Smoke Testing (Default Fast Path)"]
         Pack --> DepEnable["Step 2: Enable Mod with Dependencies (Clean-Room Isolation)
-python3 scripts/manage_load_order.py --enable &lt;slug&gt; --with-deps --isolate --json"]
+bg3 loadorder --enable &lt;slug&gt; --with-deps --isolate --json"]
         DepEnable --> InGameSmoke["Step 3: In-Game Smoke Test in BG3
 Test mechanics, drops, tooltips on clean save"]
         InGameSmoke --> Gate3A{"Phase 3A Verification Result?"}
@@ -48,12 +48,12 @@ Test mechanics, drops, tooltips on clean save"]
 
     subgraph P3B["Phase 3B: Multi-Mod Integration & Campaign Save Audit (Optional)"]
         P3BStart --> FullLO["Step 4: Full Load Order Validation & Reordering
-python3 scripts/manage_load_order.py --enable &lt;slug&gt; --validate --json"]
+bg3 loadorder --enable &lt;slug&gt; --validate --json"]
         FullLO --> SaveAudit["Step 5: Pre-Flight Campaign Save Audit
-python3 scripts/inspect_save_game.py --audit --json"]
+bg3 mod inspect-save --audit --json"]
         SaveAudit --> InGameCampaign["Step 6: Campaign Save In-Game Test"]
         InGameCampaign --> PostSave["Step 7: Post-Test Save Game Verification
-python3 scripts/inspect_save_game.py --json"]
+bg3 mod inspect-save --json"]
     end
 
     PostSave --> ReleaseGate
@@ -69,10 +69,10 @@ Before packing and testing in-game, purge any unpacked development files from th
 
 ```bash
 # 1. Purge loose Toolkit development files from Data/
-python3 scripts/sync_game_data.py --clean-mod <mod-slug> --json
+bg3 mod sync-data --clean-mod <mod-slug> --json
 
 # 2. Build clean .pak archive and deploy directly to AppData Mods/
-python3 scripts/pack_mod_pak.py --mod <mod-slug> --publish-local --json
+bg3 mod pack --mod <mod-slug> --publish-local --json
 ```
 
 Verify in the JSON output:
@@ -90,14 +90,14 @@ Verify in the JSON output:
 Phase 3A is clean-room smoke testing: activate the mod while strictly isolating the load order so that **ONLY the target mod, its declared prerequisites (e.g. `UnlockLevelCurve`), and test companions are enabled**:
 
 ```bash
-python3 scripts/manage_load_order.py --enable <mod-slug> --with-deps --isolate --json
+bg3 loadorder --enable <mod-slug> --with-deps --isolate --json
 ```
 
 To include temporary testing companions, cheat patches (e.g. `UnlockLevelCurve - Instant XP`), or fast-progression helpers on the CLI:
 ```bash
-python3 scripts/manage_load_order.py --enable <mod-slug> --with-deps --isolate --test-dep "UnlockLevelCurve - Instant XP" --json
+bg3 loadorder --enable <mod-slug> --with-deps --isolate --test-dep "UnlockLevelCurve - Instant XP" --json
 ```
-*(Or record them permanently for testing in `my_mods/<mod-slug>/.test_deps.json` via `python3 scripts/add_mod_dependency.py --mod <mod-slug> --dep "UnlockLevelCurve - Instant XP" --test-only`, which are automatically picked up by `--with-deps`)*
+*(Or record them permanently for testing in `my_mods/<mod-slug>/.test_deps.json` via `bg3 mod add-dependency --mod <mod-slug> --dep "UnlockLevelCurve - Instant XP" --test-only`, which are automatically picked up by `--with-deps`)*
 
 Verify in JSON output:
 - `isolated_count`: confirms number of unrelated mods disabled to maintain clean test isolation.
@@ -139,12 +139,12 @@ Present the smoke test summary and ask the user for their in-game verification o
 Validate load order integrity across the entire active player profile:
 
 ```bash
-python3 scripts/manage_load_order.py --enable <mod-slug> --validate --json
+bg3 loadorder --enable <mod-slug> --validate --json
 ```
 
 If the mod requires specific positioning relative to other community mods (e.g., after framework mods):
 ```bash
-python3 scripts/manage_load_order.py --enable <mod-slug> --order <index> --validate --json
+bg3 loadorder --enable <mod-slug> --order <index> --validate --json
 ```
 
 ---
@@ -154,12 +154,12 @@ python3 scripts/manage_load_order.py --enable <mod-slug> --order <index> --valid
 Inspect the player's target campaign save to ensure compatibility across all installed mods before launching:
 
 ```bash
-python3 scripts/inspect_save_game.py --audit --json
+bg3 mod inspect-save --audit --json
 ```
 
 Optionally, run a build synergy simulation if the mod alters combat stats or spell progressions:
 ```bash
-python3 scripts/simulate_build_synergy.py --class <Class> --level 12
+bg3 build simulate --class <Class> --level 12
 ```
 
 ---
@@ -169,7 +169,7 @@ python3 scripts/simulate_build_synergy.py --class <Class> --level 12
 After the user tests in their campaign save and exits (or minimizes), inspect the save file to verify module persistence:
 
 ```bash
-python3 scripts/inspect_save_game.py --json
+bg3 mod inspect-save --json
 ```
 
 Confirm that the mod's UUID is recorded in the save file's module list without corruption, then hand off to **Stage 4: Release Preparation** (`/bg3_release_prep <mod-slug>`).

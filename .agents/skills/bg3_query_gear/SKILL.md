@@ -5,7 +5,7 @@ description: Conversational equipment and mechanics advisor for Baldur's Gate 3 
 
 # BG3 Mod Equipment & Mechanics Advisor (`bg3_query_gear`)
 
-This skill acts as an intelligent gear and build advisor, translating natural language requests into high-speed queries against the cataloged community mod database (`mods/`), powered by `scripts/query_mod_database.py`.
+This skill acts as an intelligent gear and build advisor, translating natural language requests into high-speed queries against the cataloged community mod database (`mods/`), powered by `scripts/library/query_mod_database.py`.
 
 ---
 
@@ -26,7 +26,7 @@ Activate this skill when:
 ```mermaid
 flowchart TD
     UserQuery["User Query (e.g. 'Rings boosting spell DC')"] --> Translate["Translate to CLI Arguments"]
-    Translate --> Query["Run scripts/query_mod_database.py --json"]
+    Translate --> Query["Run scripts/library/query_mod_database.py --json"]
     Query --> Synthesize["Synthesize Recommendations & Synergies"]
     Synthesize --> Respond["Render Advice with Mod Names & Acquisition"]
 ```
@@ -37,11 +37,11 @@ flowchart TD
 
 | User Intent | CLI Command |
 | :--- | :--- |
-| Any items boosting a specific stat (e.g., Spell DC) | `python3 scripts/query_mod_database.py --boost "SpellSaveDC" --json` |
-| Items for a specific slot (e.g., Amulet, Ring) | `python3 scripts/query_mod_database.py --slot "Amulet" --json` |
-| Items with specific passives (e.g., Extra Attack) | `python3 scripts/query_mod_database.py --passive "ExtraAttack" --json` |
-| Combined search (e.g., Legendary Boots) | `python3 scripts/query_mod_database.py --slot "Boots" --rarity "Legendary" --json` |
-| General thematic search (e.g., Necrotic) | `python3 scripts/query_mod_database.py --search "necrotic" --json` |
+| Any items boosting a specific stat (e.g., Spell DC) | `bg3 query --boost "SpellSaveDC" --json` |
+| Items for a specific slot (e.g., Amulet, Ring) | `bg3 query --slot "Amulet" --json` |
+| Items with specific passives (e.g., Extra Attack) | `bg3 query --passive "ExtraAttack" --json` |
+| Combined search (e.g., Legendary Boots) | `bg3 query --slot "Boots" --rarity "Legendary" --json` |
+| General thematic search (e.g., Necrotic) | `bg3 query --search "necrotic" --json` |
 
 ---
 
@@ -67,13 +67,13 @@ Here are the top options from your cataloged community mods:
 
 ---
 
-💡 *To add any of these items to early-game containers, use `python3 scripts/inject_treasure_table.py --mod <your_mod> --item <ItemID> --container tutorial_chest`.*
+💡 *To add any of these items to early-game containers, use `bg3 mod inject-treasure --mod <your_mod> --item <ItemID> --container tutorial_chest`.*
 
 > [!TIP]
 > **Tool Discovery & Schema Inspection**:
 > To inspect all query filters or discover companion authoring tools, query the studio registry:
 > ```bash
-> python3 scripts/tools.py --info query-db --json
-> python3 scripts/tools.py --search "<intent>" --json
+> bg3 tools info query-db --json
+> bg3 tools search "<intent>" --json
 > ```
 ```

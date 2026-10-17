@@ -5,14 +5,14 @@ description: Creates or updates a public Baldur's Gate 3 mod.io collection from 
 
 # Create a BG3 mod.io Collection
 
-Use `scripts/modio_create_collection.py` to create a public BG3 collection or update one of the authenticated user's collections using numeric Mod Id values in the six-column categorized rows of `mods/library.md`.
+Use `scripts/library/modio_create_collection.py` to create a public BG3 collection or update one of the authenticated user's collections using numeric Mod Id values in the six-column categorized rows of `mods/library.md`.
 
 ## Discovery & Tooling
 
 Inspect tool arguments and schema details with:
 
 ```bash
-python3 scripts/tools.py --info modio-collection
+bg3 tools info modio-collection
 ```
 
 ## Safety and credentials
@@ -31,7 +31,7 @@ python3 scripts/tools.py --info modio-collection
 2. Run a dry-run and let the user choose documented mods with valid numeric Mod Id values, then create a new collection or select one of their existing BG3 collections:
 
    ```bash
-   python3 scripts/modio_create_collection.py --dry-run
+   bg3 modio create-collection --dry-run
    ```
 
    For a new collection, the script asks for its name and description. For an existing collection, it asks whether to add missing selected mods only or replace its contents with the selected set. Library entries without valid numeric IDs are warned about and excluded.
@@ -46,5 +46,5 @@ python3 scripts/tools.py --info modio-collection
 - For command options:
 
   ```bash
-  python3 scripts/modio_create_collection.py --help
+  bg3 modio create-collection --help
   ```

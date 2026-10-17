@@ -12,11 +12,11 @@ Use this skill as **Stage 5** of the custom mod lifecycle to update a published 
 Inspect tool arguments, flags, and schema definitions with:
 
 ```bash
-python3 scripts/tools.py --info post-release
-python3 scripts/tools.py --info sync-game
-python3 scripts/tools.py --info pack-pak
-python3 scripts/tools.py --info load-order
-python3 scripts/tools.py --info render-description
+bg3 tools info post-release
+bg3 tools info sync-game
+bg3 tools info pack-pak
+bg3 tools info load-order
+bg3 tools info render-description
 ```
 
 ## Required Interaction
@@ -44,10 +44,10 @@ Require `MODIO_PAT` in the environment. Never ask the user to paste it, pass it 
 Run an initial no-write preview to fetch the game-approved tags, resolve the matching mod.io profile, and ensure the publishing description exists:
 
 ```bash
-python3 scripts/modio_update_metadata.py --mod "<local-folder>" --json
+bg3 modio update-metadata --mod "<local-folder>" --json
 ```
 
-If `modio_description.html` is missing, the CLI generates it from the local README using `scripts/render_modio_description.py`. If the README, generated description, token, API lookup, or preflight is invalid, report the error and stop without API writes.
+If `modio_description.html` is missing, the CLI generates it from the local README using `scripts/management/render_modio_description.py`. If the README, generated description, token, API lookup, or preflight is invalid, report the error and stop without API writes.
 
 Use the preview's `allowed_tags` and the README's content to prepare concise, relevant tag suggestions. Suggest only names present in `allowed_tags`. Present the suggestions and let the user add, remove, or edit individual choices; validate the final choices against `allowed_tags`. If the remote profile does not resolve uniquely to the local mod, stop without writes.
 
@@ -56,7 +56,7 @@ Use the preview's `allowed_tags` and the README's content to prepare concise, re
 After the user approves the tag list, run a second no-write preview with only those approved tags:
 
 ```bash
-python3 scripts/modio_update_metadata.py --mod "<local-folder>" --tags "<approved-tag-1>,<approved-tag-2>" --json
+bg3 modio update-metadata --mod "<local-folder>" --tags "<approved-tag-1>,<approved-tag-2>" --json
 ```
 
 Show the resolved mod name, profile URL, description file, tags to add, and settings to be sent. State explicitly:
@@ -74,7 +74,7 @@ Ask for a separate explicit confirmation to perform these API writes. If the use
 Only after the final confirmation, run the same CLI call with `--confirm`:
 
 ```bash
-python3 scripts/modio_update_metadata.py --mod "<local-folder>" --tags "<approved-tag-1>,<approved-tag-2>" --confirm --json
+bg3 modio update-metadata --mod "<local-folder>" --tags "<approved-tag-1>,<approved-tag-2>" --confirm --json
 ```
 
 The CLI re-runs preflight before writing. It makes one Edit Mod request for the description, community and credit flags, and public visibility, and a separate Add Mod Tags request for approved tags not already present. It attempts both independent write operations and returns per-operation outcomes; do not describe the result as all-or-nothing.
@@ -95,13 +95,13 @@ Once the mod is confirmed published and live on mod.io, switch from developer au
 
 ```bash
 # 1. Purge loose files synced to <Game>/Data/ for Toolkit publishing
-python3 scripts/sync_game_data.py --clean-mod <mod-slug> --json
+bg3 mod sync-data --clean-mod <mod-slug> --json
 
 # 2. Delete local test .pak from AppData/Mods/
-python3 scripts/pack_mod_pak.py --mod <mod-slug> --clean-local --json
+bg3 mod pack --mod <mod-slug> --clean-local --json
 
 # 3. Remove local test entry from modsettings.lsx
-python3 scripts/manage_load_order.py --disable <mod-slug> --json
+bg3 loadorder --disable <mod-slug> --json
 ```
 
 Instruct the user:

@@ -27,7 +27,7 @@ flowchart TD
     Step4 -->|"No"| Step6["Check Script Extender & PC compatibility"]
     Step5 --> Step7{"Ambiguous system overlap?"}
     Step6 --> Step7
-    Step7 -->|"Yes (Deep Check)"| Step8["Unpack .pak via scripts/modio_extract.py & check LSPK records"]
+    Step7 -->|"Yes (Deep Check)"| Step8["Unpack .pak via scripts/library/modio_extract.py & check LSPK records"]
     Step7 -->|"No"| Step9["Formulate Standardized Return Message"]
     Step8 --> Step9
 ```
@@ -44,7 +44,7 @@ flowchart TD
    `Mod '<Mod Name>' is already tracked in mods/library.md.`
 
 ### Step 2: Inspection of Candidate & Library Specs
-1. Fetch candidate metadata and description using `scripts/modio_search.py --query "<MOD_SLUG>" --platform "<PLATFORM>" --json --include-tracked`.
+1. Fetch candidate metadata and description using `scripts/library/modio_search.py --query "<MOD_SLUG>" --platform "<PLATFORM>" --json --include-tracked`.
 2. Inspect tracked mod specifications in [`mods/<slug>/README.md`](file:///home/jpstroud/projects/BaldursGate3/mods) to understand what systems tracked mods alter:
    - **Progressions & Rules**: Level curves (e.g. UnlockLevelCurve), spell slots, feat intervals.
    - **Classes & Subclasses**: Class progression overrides (e.g. Warlock pact boons, spell lists).
@@ -121,16 +121,16 @@ When assigned to evaluate conflicts *between* the set of candidate mods returned
 
 ---
 
-## Step 6: Automated Remediation & Patch Generation (`scripts/generate_compat_patch.py`)
+## Step 6: Automated Remediation & Patch Generation (`scripts/authoring/generate_compat_patch.py`)
 
 When actionable conflicts or stat collisions are detected between two mods (or when requested by the user), offer automated patch generation:
 
 ```bash
 # Generate a standalone compatibility override patch mod
-python3 scripts/generate_compat_patch.py --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json
+bg3 mod compat-patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json
 
 # Or generate a Compatibility Framework config payload
-python3 scripts/generate_compat_patch.py --mod1 <mod1> --mod2 <mod2> --mode cf --json
+bg3 mod compat-patch --mod1 <mod1> --mod2 <mod2> --mode cf --json
 ```
 
 Supported modes:
@@ -141,8 +141,8 @@ Supported modes:
 > **Tool Discovery & Schema Inspection**:
 > To inspect all conflict analyzer and patch generation flags dynamically:
 > ```bash
-> python3 scripts/tools.py --info check-conflicts --json
-> python3 scripts/tools.py --info compat-patch --json
-> python3 scripts/tools.py --search "conflict" --json
+> bg3 tools info check-conflicts --json
+> bg3 tools info compat-patch --json
+> bg3 tools search "conflict" --json
 > ```
 

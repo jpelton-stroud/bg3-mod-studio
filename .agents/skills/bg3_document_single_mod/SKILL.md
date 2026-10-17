@@ -14,7 +14,7 @@ It can be triggered directly via `/bg3_document_single_mod <mod>` or invoked ins
 ## Workflow Overview
 
 1. **Intake Mod Query**: Extract mod name, slug, numerical ID, or mod.io URL from the prompt.
-2. **Execute Extractor Engine**: Run [`scripts/modio_extract.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/modio_extract.py) to download the `.pak` and decompress Larian LSPK v18 assets into `mods/<slug>/data/`.
+2. **Execute Extractor Engine**: Run [`scripts/library/modio_extract.py`](file:///home/jpstroud/projects/BaldursGate3/scripts/library/modio_extract.py) to download the `.pak` and decompress Larian LSPK v18 assets into `mods/<slug>/data/`.
 3. **Validate In-Game Implementation**: Cross-check extracted definitions to ensure every logged feature is actually implemented in-game (discarding stubs, draft entries, and orphaned assets).
 4. **Verify Rich Feature Spec**: Confirm [`mods/<slug>/README.md`](file:///home/jpstroud/projects/BaldursGate3/mods) contains full details on base stats and detailed mechanics for what granted spells/abilities/passives actually do.
 5. **Report Status**: Return the standardized success or failure message to the caller/orchestrator.
@@ -38,7 +38,7 @@ Before running extraction:
 Execute the extraction engine with the mod query:
 
 ```bash
-python3 scripts/modio_extract.py --query "<MOD_QUERY>" --write-spec --json
+bg3 modio extract --query "<MOD_QUERY>" --write-spec --json
 ```
 
 The script will:
@@ -55,8 +55,8 @@ If the command fails (e.g., mod not found on mod.io or network failure), formula
 > **Tool Discovery & Schema Inspection**:
 > To inspect extraction flags or discover related cataloging tools:
 > ```bash
-> python3 scripts/tools.py --info modio-extract --json
-> python3 scripts/tools.py --search "extract" --json
+> bg3 tools info modio-extract --json
+> bg3 tools search "extract" --json
 > ```
 
 ---

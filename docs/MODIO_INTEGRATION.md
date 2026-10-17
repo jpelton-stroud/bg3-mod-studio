@@ -8,13 +8,13 @@ This guide outlines how the **Baldur's Gate 3 Mod Studio** integrates with [mod.
 
 Autonomous skills in [`.agents/skills/`](../.agents/skills/) allow developers and players to discover, inspect, catalog, and curate community mods through conversational instructions and slash commands.
 
-| Category | Intent / Slash Command | Description | Primary Script Involved |
+| Category | Intent / Slash Command | Description | Primary Script & CLI Command |
 | :--- | :--- | :--- | :--- |
-| Discovery | [`/bg3_search_mods`](../.agents/skills/bg3_search_mods/SKILL.md) | Discovers community mods on mod.io with natural language and platform filters, pre-filtering tracked mods. | `scripts/modio_search.py` |
-| Documentation | [`/bg3_document_mods`](../.agents/skills/bg3_document_mods/SKILL.md) | Concurrently extracts, validates, and generates markdown specifications for community mods. | `scripts/modio_extract.py` |
-| Maintenance | [`/bg3_update_mod_documentation`](../.agents/skills/bg3_update_mod_documentation/SKILL.md) | Checks tracked mods for upstream mod.io releases and updates local specs and catalogs. | `scripts/modio_update.py` |
-| Compatibility | [`/bg3_check_mod_conflicts`](../.agents/skills/bg3_check_mod_conflicts/SKILL.md) | Analyzes mod overrides and stat collisions against cataloged library mods. | `scripts/check_mod_conflicts.py` |
-| Collections | [`/bg3_create_modio_collection`](../.agents/skills/bg3_create_modio_collection/SKILL.md) | Curates and syncs public mod.io collections directly from `mods/library.md`. | `scripts/modio_create_collection.py` |
+| Discovery | [`/bg3_search_mods`](../.agents/skills/bg3_search_mods/SKILL.md) | Discovers community mods on mod.io with natural language and platform filters, pre-filtering tracked mods. | `scripts/library/modio_search.py`<br>`bg3 modio search` |
+| Documentation | [`/bg3_document_mods`](../.agents/skills/bg3_document_mods/SKILL.md) | Concurrently extracts, validates, and generates markdown specifications for community mods. | `scripts/library/modio_extract.py`<br>`bg3 modio extract` |
+| Maintenance | [`/bg3_update_mod_documentation`](../.agents/skills/bg3_update_mod_documentation/SKILL.md) | Checks tracked mods for upstream mod.io releases and updates local specs and catalogs. | `scripts/library/modio_update.py`<br>`bg3 modio update` |
+| Compatibility | [`/bg3_check_mod_conflicts`](../.agents/skills/bg3_check_mod_conflicts/SKILL.md) | Analyzes mod overrides and stat collisions against cataloged library mods. | `scripts/diagnostics/check_mod_conflicts.py`<br>`bg3 mod conflict` |
+| Collections | [`/bg3_create_modio_collection`](../.agents/skills/bg3_create_modio_collection/SKILL.md) | Curates and syncs public mod.io collections directly from `mods/library.md`. | `scripts/library/modio_create_collection.py`<br>`bg3 modio create-collection` |
 
 > [!NOTE]
 > For complete CLI parameters, technical flag descriptions, and binary architecture details, see the [Features & Functionality Guide](FEATURES.md).
@@ -27,15 +27,17 @@ To enable mod.io discovery and download capabilities, configure your credentials
    - Visit [mod.io/me/access](https://mod.io/me/access).
    - Generate an **API Key** (for public search and downloads).
    - Generate a **Personal Access Token (PAT)** with Read/Write permissions (for profile subscriptions and collection management).
-2. **Configure Credentials**:
+2. **Configure Credentials (XDG Standard)**:
    - Run the interactive setup launcher:
      ```bash
      ./setup.sh
      ```
-   - Or populate `.env`:
+     *(or run `bg3 env setup`)*
+   - The setup wizard stores credentials securely in `$XDG_CONFIG_HOME/bg3/env` (default: `~/.config/bg3/env`) with strict POSIX mode `0600` permissions. Repository-level `.env` files are eliminated to prevent leaking secrets.
+   - Verify path and environment configuration anytime:
      ```bash
-     MODIO_API_KEY=your_key_here
-     MODIO_PAT=your_pat_here
+     bg3 env paths
+     bg3 env check
      ```
 
 ---
@@ -55,12 +57,16 @@ Finding mods on mod.io can be handled directly through natural language. The `/b
 When invoked, the skill translates conversational parameters into a structured search call:
 
 ```bash
-python3 scripts/modio_search.py "<query>" --platform <platform> --json
+# Primary CLI command
+bg3 modio search "<query>" --platform <platform> --json
+
+# Direct script execution
+python3 scripts/library/modio_search.py "<query>" --platform <platform> --json
 ```
 
 - **Candidate Pre-Filtering**: The skill inspects the JSON payload, filters out mods already tracked in [`mods/library.md`](../mods/library.md), and presents concise descriptions and download stats in chat.
 - **Conflict Assessment**: Optionally coordinates with subagents to assess potential conflicts before you download.
-- *Detailed script reference*: See [scripts/modio_search.py in FEATURES.md](FEATURES.md#2-autonomous-agent-skills-slash-commands).
+- *Detailed script reference*: See [scripts/library/modio_search.py in FEATURES.md](FEATURES.md#36-library--modio-search-tools-scriptslibrary).
 
 ---
 
@@ -79,12 +85,16 @@ Once candidate mods are selected, the studio automatically downloads, decompress
 The orchestrator skill coordinates background subagents running pure-Python extraction:
 
 ```bash
-python3 scripts/modio_extract.py --mod-id <id-or-slug> --output-dir mods/<slug>
+# Primary CLI command
+bg3 modio extract --mod-id <id-or-slug> --output-dir mods/<slug>
+
+# Direct script execution
+python3 scripts/library/modio_extract.py --mod-id <id-or-slug> --output-dir mods/<slug>
 ```
 
-- **Deconstruction**: Downloads the archive and unpackages Larian XML/LSX and TXT data without external tools.
+- **Deconstruction**: Downloads the archive and unpackages Larian XML/LSX and TXT data without external tools (`scripts/lib/lspk.py`).
 - **Cataloging**: Extracts spells, statuses, progression nodes, and passives into a standardized `README.md` and appends an entry to [`mods/library.md`](../mods/library.md).
-- *Detailed script reference*: See [scripts/modio_extract.py in FEATURES.md](FEATURES.md#2-autonomous-agent-skills-slash-commands).
+- *Detailed script reference*: See [scripts/library/modio_extract.py in FEATURES.md](FEATURES.md#36-library--modio-search-tools-scriptslibrary).
 
 ---
 
@@ -100,21 +110,28 @@ Keep local documentation and subscribed mods synchronized with upstream authors 
 
 ### Under the Hood: Tool Execution
 
-The update skills and synchronization workflows leverage two core scripts:
+The update skills and synchronization workflows leverage two core tools:
 
 1. **Tracking Upstream Mod Updates**:
    ```bash
-   python3 scripts/modio_update.py --list-tracked --json
+   # Check tracked mods against upstream releases
+   bg3 modio update --check-only --json
+   
+   # Or run specific mod update
+   bg3 modio update --mod <slug>
    ```
    The skill checks tracked mods against mod.io release timestamps. When an update is detected, it delegates to subagents to download the newest `.pak` and update the local specification.
 
 2. **Syncing Profile Subscriptions**:
    ```bash
-   # List subscribed mods or download and update all
-   python3 scripts/modio_sync.py --download-all
+   # Synchronize subscriptions and refresh catalog
+   bg3 modio sync --download-all --sync-library
+   
+   # Sync with safe pruning guard
+   bg3 modio sync --prune
    ```
-   Uses your `MODIO_PAT` to fetch your account subscriptions and ensure your local library reflects your subscribed community content.
-- *Detailed script reference*: See [scripts/modio_update.py in FEATURES.md](FEATURES.md#2-autonomous-agent-skills-slash-commands).
+   Uses your `MODIO_PAT` to fetch your account subscriptions and ensure your local library reflects your subscribed community content. Includes confirmation guards to prevent unintentional local folder deletions.
+- *Detailed script reference*: See [scripts/library/modio_update.py and modio_sync.py in FEATURES.md](FEATURES.md#36-library--modio-search-tools-scriptslibrary).
 
 ---
 
@@ -133,12 +150,16 @@ Before deploying new community mods or when authoring custom creations, the `/bg
 The skill runs static conflict analysis against cataloged definitions:
 
 ```bash
-python3 scripts/check_mod_conflicts.py --json
+# Primary CLI command
+bg3 mod conflict <ModSlug> --against-library --json
+
+# Direct script execution
+python3 scripts/diagnostics/check_mod_conflicts.py --candidate <ModSlug> --against-library --json
 ```
 
 - **Collision Detection**: Compares unpacked stat records, RootTemplate overrides, and prerequisite frameworks (such as `CompatibilityFramework` or `CommunityLibrary`).
 - **Console Validation**: Flags non-compliant assets like native DLL dependencies or Script Extender requirements for console targets.
-- *Detailed script reference*: See [scripts/check_mod_conflicts.py in FEATURES.md](FEATURES.md#2-autonomous-agent-skills-slash-commands).
+- *Detailed script reference*: See [scripts/diagnostics/check_mod_conflicts.py in FEATURES.md](FEATURES.md#33-diagnostics--auditing-tools-scriptsdiagnostics).
 
 ---
 
@@ -158,12 +179,12 @@ The collection curation skill automates collection updates through mod.io REST e
 
 ```bash
 # Preview proposed collection additions
-python3 scripts/modio_create_collection.py --dry-run
+bg3 modio create-collection --dry-run
 
 # Commit additions to the active collection
-python3 scripts/modio_create_collection.py
+bg3 modio create-collection --title "My Curated BG3 Collection"
 ```
 
 - **Library Reflection**: Pulls verified mod IDs and slugs directly from [`mods/library.md`](../mods/library.md).
 - **Safe Staging**: Supports `--dry-run` to preview remote modifications before mutating live collection data.
-- *Detailed script reference*: See [scripts/modio_create_collection.py in FEATURES.md](FEATURES.md#2-autonomous-agent-skills-slash-commands).
+- *Detailed script reference*: See [scripts/library/modio_create_collection.py in FEATURES.md](FEATURES.md#36-library--modio-search-tools-scriptslibrary).

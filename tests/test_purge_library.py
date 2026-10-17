@@ -80,7 +80,7 @@ class PurgeLibraryTests(unittest.TestCase):
         self.assertEqual(self.library_file.read_text(encoding="utf-8"), EMPTY_LIBRARY_HEADER)
 
     def test_purge_library_cli(self):
-        script_path = Path(__file__).resolve().parent.parent / "scripts" / "purge_library.py"
+        script_path = Path(__file__).resolve().parent.parent / "scripts" / "library" / "purge_library.py"
         cmd = [
             sys.executable,
             str(script_path),

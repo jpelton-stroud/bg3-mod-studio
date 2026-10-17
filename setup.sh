@@ -17,4 +17,4 @@ fi
 mkdir -p "${HOME}/.local/bin"
 ln -srf "${SCRIPT_DIR}/scripts/bg3.py" "${HOME}/.local/bin/bg3"
 
-exec python3 "${SCRIPT_DIR}/scripts/setup_environment.py" "$@"
+exec python3 "${SCRIPT_DIR}/scripts/management/setup_environment.py" "$@"

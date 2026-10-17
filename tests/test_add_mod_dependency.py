@@ -18,7 +18,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.add_mod_dependency import (
+from scripts.authoring.add_mod_dependency import (
     add_permanent_dependencies,
     add_permanent_dependency,
     add_test_dependencies,
@@ -207,7 +207,7 @@ class TestAddModDependency(unittest.TestCase):
         self.assertEqual(res_again[0]["status"], "already_present")
 
     def test_cli_integration_simultaneous_and_comma_separated(self):
-        script_path = REPO_ROOT / "scripts" / "add_mod_dependency.py"
+        script_path = REPO_ROOT / "scripts" / "authoring" / "add_mod_dependency.py"
 
         # 1. Test comma-separated test-only invocation on mock mod
         cmd1 = [
