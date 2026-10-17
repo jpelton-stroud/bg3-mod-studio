@@ -260,6 +260,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="Preview updates without downloading or extracting.",
     )
     modio_sync_parser.add_argument(
+        "--prune",
+        action="store_true",
+        help="Remove unsubscribed mods from library.md and delete applicable mod folders.",
+    )
+    modio_sync_parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Maximum number of new subscribed mods to extract and document.",
+    )
+    modio_sync_parser.add_argument(
+        "--filter",
+        help="Filter subscribed mods by name or slug substring.",
+    )
+    modio_sync_parser.add_argument(
+        "--skip-updates",
+        action="store_true",
+        help="Skip checking/updating existing documented mods.",
+    )
+    modio_sync_parser.add_argument(
+        "--token", "-t",
+        help="mod.io OAuth 2.0 Personal Access Token.",
+    )
+    modio_sync_parser.add_argument(
         "-y", "--yes",
         action="store_true",
         help="Bypass interactive confirmation in non-interactive sessions.",
@@ -406,8 +430,35 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             target_args.extend(["--search", args.query, "--limit", str(args.limit)])
         elif sub == "sync":
             script_target = SCRIPTS_DIR / "modio_sync.py"
+            if getattr(args, "prune", False) and not getattr(args, "dry_run", False):
+                try:
+                    confirm_action(
+                        "Prune unsubscribed mods from library and disk?",
+                        non_interactive_yes=getattr(args, "yes", False),
+                        force_non_interactive=args.json,
+                    )
+                except NonInteractiveConfirmationError as exc:
+                    emitter.error(
+                        message=str(exc),
+                        code="CONFIRMATION_REQUIRED",
+                        remediation="Pass -y or --yes when running in automated scripts or agent skills.",
+                        exit_code=ExitCode.USAGE,
+                        exit_process=False,
+                    )
+                    return ExitCode.USAGE
+
             if getattr(args, "dry_run", False):
                 target_args.append("--dry-run")
+            if getattr(args, "prune", False):
+                target_args.append("--prune")
+            if getattr(args, "limit", None) is not None:
+                target_args.extend(["--limit", str(args.limit)])
+            if getattr(args, "filter", None):
+                target_args.extend(["--filter", args.filter])
+            if getattr(args, "skip_updates", False):
+                target_args.append("--skip-updates")
+            if getattr(args, "token", None):
+                target_args.extend(["--token", args.token])
 
     elif cmd == "env":
         script_target = SCRIPTS_DIR / "setup_environment.py"

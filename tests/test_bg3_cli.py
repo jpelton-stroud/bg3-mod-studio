@@ -61,7 +61,13 @@ class TestBg3CliIntegration(unittest.TestCase):
         proc = self.run_cli(["env", "check", "--json"])
         self.assertIn(proc.returncode, [0, 1])
         parsed = json.loads(proc.stdout)
-        self.assertTrue("configured" in parsed or "status" in parsed)
+    def test_modio_sync_prune_requires_yes(self):
+        proc = self.run_cli(["modio", "sync", "--prune", "--json"])
+        self.assertEqual(proc.returncode, 2)
+        parsed = json.loads(proc.stdout)
+        self.assertEqual(parsed["status"], "error")
+        self.assertEqual(parsed["error"]["code"], "CONFIRMATION_REQUIRED")
+        self.assertIn("--yes", parsed["error"]["remediation"])
 
 
 if __name__ == "__main__":
