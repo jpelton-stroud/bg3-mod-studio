@@ -118,6 +118,8 @@ class SetupEnvironmentQATests(unittest.TestCase):
             check=True,
         )
         self.assertIn('"configured": true', proc_json.stdout)
+        self.assertIn('"xdg"', proc_json.stdout)
+        self.assertIn('"config_home"', proc_json.stdout)
 
         # 3. python3 scripts/setup_environment.py --dry-run --non-interactive
         proc_dry = subprocess.run(
@@ -129,6 +131,23 @@ class SetupEnvironmentQATests(unittest.TestCase):
         )
         self.assertIn("Continuing setup without subscription sync.", proc_dry.stdout)
         self.assertIn("Continuing without purging custom mods.", proc_dry.stdout)
+
+    def test_auto_migration_from_legacy_env(self):
+        """Verify that a legacy repo-level .env is safely migrated and unlinked."""
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            legacy_file = tmp_root / ".env"
+            legacy_file.write_text("MODIO_API_KEY=migrated_key_999\n", encoding="utf-8")
+            target_config = tmp_root / "xdg" / "bg3" / "env"
+
+            from scripts.setup_environment import check_environment_status
+
+            with patch("scripts.setup_environment.WORKSPACE_ROOT", tmp_root), \
+                 patch("scripts.setup_environment.ENV_PATH", target_config):
+                check_environment_status(as_json=True)
+                self.assertTrue(target_config.is_file())
+                self.assertIn("MODIO_API_KEY=migrated_key_999", target_config.read_text(encoding="utf-8"))
+                self.assertFalse(legacy_file.exists())
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -65,6 +66,12 @@ def build_parser() -> argparse.ArgumentParser:
         "-v", "--verbose",
         action="store_true",
         help="Enable detailed diagnostic messages on stderr.",
+    )
+    common_parser.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help="Path to custom environment configuration file.",
     )
 
     parser = JsonCompliantArgumentParser(
@@ -751,7 +758,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     env_subparsers.add_parser(
         "check",
-        help="Perform non-interactive path, tool, and .env health check",
+        help="Perform non-interactive path, tool, and environment health check",
+        parents=[common_parser],
+    )
+
+    env_subparsers.add_parser(
+        "paths",
+        help="Display canonical XDG Base Directory specification paths and status",
         parents=[common_parser],
     )
 
@@ -816,7 +829,6 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             reg_path = SCRIPTS_DIR / "registry.json"
             if reg_path.is_file():
                 try:
-                    import json
                     with open(reg_path, "r", encoding="utf-8") as f:
                         reg_data = json.load(f)
                     for t in reg_data.get("tools", []):
@@ -1371,6 +1383,34 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--audit-skills")
 
     elif cmd == "env":
+        if sub == "paths":
+            from scripts.lib.env_paths import (
+                get_xdg_cache_home,
+                get_xdg_config_home,
+                get_xdg_data_home,
+                get_xdg_state_home,
+            )
+            cfg = get_xdg_config_home()
+            cache = get_xdg_cache_home()
+            data = get_xdg_data_home()
+            state = get_xdg_state_home()
+            paths_data = {
+                "XDG_CONFIG_HOME": {"path": str(cfg), "exists": cfg.exists()},
+                "XDG_CACHE_HOME": {"path": str(cache), "exists": cache.exists()},
+                "XDG_DATA_HOME": {"path": str(data), "exists": data.exists()},
+                "XDG_STATE_HOME": {"path": str(state), "exists": state.exists()},
+            }
+            if args.json:
+                print(json.dumps(paths_data, indent=2))
+            else:
+                color = emitter.color
+                print(f"\n{color.bold('=== XDG Base Directory Paths ===')}")
+                for var, info in paths_data.items():
+                    status = color.green("[exists]") if info["exists"] else color.yellow("[not created]")
+                    print(f"{color.bold(f'{var:17}')}: {info['path']} {status}")
+                print("")
+            return ExitCode.OK
+
         script_target = SCRIPTS_DIR / "setup_environment.py"
         if sub == "check":
             target_args.append("--check")
@@ -1386,6 +1426,10 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             exit_process=False,
         )
         return ExitCode.UNAVAILABLE
+
+    # Propagate global --config flag if specified
+    if getattr(args, "config", None):
+        target_args.extend(["--config", str(args.config)])
 
     # Propagate global --json flag if requested
     if args.json:

@@ -33,12 +33,21 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from scripts.lib.env_paths import REPO_ROOT
+from typing import Optional
+
+from scripts.lib.env_paths import (
+    REPO_ROOT,
+    get_env_source,
+    get_xdg_cache_home,
+    get_xdg_config_home,
+    get_xdg_data_home,
+    get_xdg_state_home,
+)
 from scripts.lib.library_catalog import purge_library_mods
 from scripts.lib.modio_client import BG3_GAME_ID, MODIO_API_HOST, USER_AGENT
 
 WORKSPACE_ROOT = REPO_ROOT
-ENV_PATH = WORKSPACE_ROOT / ".env"
+ENV_PATH = get_xdg_config_home() / "env"
 ENV_EXAMPLE_PATH = WORKSPACE_ROOT / ".env.example"
 
 # ANSI Terminal Colors
@@ -198,51 +207,97 @@ def prompt_secret(prompt_text: str, current_val: str = "") -> str:
 
 
 def write_env_file(path: Path, content: str) -> None:
-    """Write the .env file readable/writable by the owner only (0600)."""
+    """Write the environment configuration file readable/writable by the owner only (0600)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         f.write(content)
     os.chmod(path, 0o600)  # O_CREAT mode is ignored for pre-existing files
 
 
-def check_environment_status(as_json: bool = False):
-    """Non-interactive check of project environment configuration."""
-    if not ENV_PATH.is_file():
+def check_environment_status(as_json: bool = False, config_path: Optional[Path] = None):
+    """Non-interactive check of project environment configuration and XDG paths."""
+    target_env = config_path or ENV_PATH
+    cfg_home = get_xdg_config_home()
+    cache_home = get_xdg_cache_home()
+    data_home = get_xdg_data_home()
+    state_home = get_xdg_state_home()
+    legacy_env = WORKSPACE_ROOT / ".env"
+
+    # Auto-migrate legacy repository .env if target doesn't exist
+    if not target_env.is_file() and legacy_env.is_file():
+        try:
+            write_env_file(target_env, legacy_env.read_text(encoding="utf-8"))
+            legacy_env.unlink()
+        except OSError:
+            pass
+
+    if not target_env.is_file():
+        xdg_info = {
+            "config_home": str(cfg_home),
+            "cache_home": str(cache_home),
+            "data_home": str(data_home),
+            "state_home": str(state_home),
+            "config_file": str(target_env),
+            "config_exists": False,
+        }
         if as_json:
             print(json.dumps({
-                "env_path": str(ENV_PATH),
+                "env_path": str(target_env),
                 "configured": False,
-                "error": f"No .env file found at {ENV_PATH}."
+                "error": f"No environment configuration found at {target_env}.",
+                "xdg": xdg_info,
             }, indent=2))
         else:
             print(f"\n{BOLD}=== Environment Configuration Status ==={RESET}")
-            print(f"{YELLOW}[!] No .env file found at {ENV_PATH}. Run './setup.sh' to configure.{RESET}\n")
+            print(f"{YELLOW}[!] No configuration found at {target_env}. Run './setup.sh' to configure.{RESET}")
+            print(f"XDG_CONFIG_HOME:  {cfg_home}")
+            print(f"XDG_CACHE_HOME:   {cache_home}")
+            print(f"XDG_DATA_HOME:    {data_home}")
+            print(f"XDG_STATE_HOME:   {state_home}\n")
         return
 
-    env = parse_env_file(ENV_PATH)
+    env = parse_env_file(target_env)
     api_key = env.get("MODIO_API_KEY", "")
     pat = env.get("MODIO_PAT", env.get("MODIO_OAUTH_TOKEN", ""))
     data_dir = env.get("BG3_DATA_DIR", "")
     author = env.get("BG3_MOD_AUTHOR", "")
     data_dir_exists = Path(data_dir).exists() if data_dir else False
 
+    _, key_source = get_env_source("MODIO_API_KEY", target_env)
+    _, pat_source = get_env_source("MODIO_PAT", target_env)
+
+    xdg_info = {
+        "config_home": str(cfg_home),
+        "cache_home": str(cache_home),
+        "data_home": str(data_home),
+        "state_home": str(state_home),
+        "config_file": str(target_env),
+        "config_exists": True,
+    }
+
     if as_json:
         result = {
-            "env_path": str(ENV_PATH),
+            "env_path": str(target_env),
             "configured": True,
             "modio_api_key_configured": bool(api_key),
             "modio_pat_configured": bool(pat),
             "bg3_data_dir": data_dir,
             "bg3_data_dir_exists": data_dir_exists,
             "bg3_mod_author": author or "default",
+            "xdg": xdg_info,
         }
         print(json.dumps(result, indent=2))
         return
 
     print(f"\n{BOLD}=== Environment Configuration Status ==={RESET}")
-    print(f"File location:    {ENV_PATH}")
-    print(f"MODIO_API_KEY:    {'Configured (' + api_key[:4] + '***)' if api_key else RED + 'Missing' + RESET}")
-    print(f"MODIO_PAT:        {'Configured (***)' if pat else YELLOW + 'Not set (Optional)' + RESET}")
+    print(f"Config file:      {target_env}")
+    print(f"XDG_CONFIG_HOME:  {cfg_home}")
+    print(f"XDG_CACHE_HOME:   {cache_home}")
+    print(f"XDG_DATA_HOME:    {data_home}")
+    print(f"XDG_STATE_HOME:   {state_home}")
+    print(f"MODIO_API_KEY:    {'Configured (' + api_key[:4] + '***) [' + key_source + ']' if api_key else RED + 'Missing' + RESET}")
+    print(f"MODIO_PAT:        {'Configured (***) [' + pat_source + ']' if pat else YELLOW + 'Not set (Optional)' + RESET}")
     print(f"BG3_DATA_DIR:     {data_dir if data_dir else RED + 'Missing' + RESET}")
     if data_dir:
         status_text = f"{GREEN}Exists{RESET}" if data_dir_exists else f"{YELLOW}Not found on disk{RESET}"
@@ -412,10 +467,15 @@ def handle_custom_mods_purge(choice: str, dry_run: bool = False) -> None:
     print(f"{GREEN}✓ Successfully purged custom mods in my_mods/.{RESET}")
 
 
-def run_wizard(dry_run: bool = False, non_interactive: bool = False):
+def run_wizard(dry_run: bool = False, non_interactive: bool = False, config_path: Optional[Path] = None):
     print_banner()
 
-    existing_env = parse_env_file(ENV_PATH)
+    target_env = config_path or ENV_PATH
+    existing_env = parse_env_file(target_env)
+    if not existing_env and (WORKSPACE_ROOT / ".env").is_file():
+        existing_env = parse_env_file(WORKSPACE_ROOT / ".env")
+        print(f"{YELLOW}[!] Detected legacy repository-level .env. Migrating values to {target_env}.{RESET}")
+
     default_data_dir = detect_default_data_dir()
 
     if non_interactive:
@@ -489,7 +549,7 @@ def run_wizard(dry_run: bool = False, non_interactive: bool = False):
     output_lines = [
         "# ==============================================================================",
         "# Baldur's Gate 3 Mod Studio & Mod.io Toolkit - Environment Variables",
-        "# Generated by ./setup.sh",
+        f"# Generated by setup_environment.py at {target_env}",
         "# ==============================================================================",
         "",
         "# mod.io API Credentials",
@@ -506,12 +566,19 @@ def run_wizard(dry_run: bool = False, non_interactive: bool = False):
     content = "\n".join(output_lines)
 
     if dry_run:
-        print(f"\n{CYAN}[DRY-RUN] Would write to {ENV_PATH} (secrets masked):{RESET}")
+        print(f"\n{CYAN}[DRY-RUN] Would write to {target_env} (secrets masked):{RESET}")
         print(content.replace(f"MODIO_API_KEY={api_key}", f"MODIO_API_KEY={mask_secret(api_key)}")
                      .replace(f"MODIO_PAT={pat}", f"MODIO_PAT={mask_secret(pat)}"))
     else:
-        write_env_file(ENV_PATH, content)
-        print(f"\n{GREEN}✓ Environment configuration saved successfully to {ENV_PATH} (mode 600)!{RESET}")
+        write_env_file(target_env, content)
+        print(f"\n{GREEN}✓ Environment configuration saved successfully to {target_env} (mode 600)!{RESET}")
+        legacy_file = WORKSPACE_ROOT / ".env"
+        if legacy_file.is_file():
+            try:
+                legacy_file.unlink()
+                print(f"{GREEN}✓ Removed deprecated repository-level .env file.{RESET}")
+            except OSError:
+                pass
 
     # GitHub Remote Setup
     configure_github_remote()
@@ -526,7 +593,7 @@ def run_wizard(dry_run: bool = False, non_interactive: bool = False):
 
     print(f"\n{BOLD}{GREEN}Setup completed successfully!{RESET}")
     print("You can run `./setup.sh --check` anytime to review your configuration.")
-    print("Run `python3 scripts/create_mod_scaffold.py --help` or `python3 scripts/modio_search.py --help` to get started.\n")
+    print("Run `bg3 --help` to get started.\n")
 
 
 def main():
@@ -541,6 +608,12 @@ def main():
         help="Check and display current environment configuration without prompting",
     )
     parser.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help="Custom configuration file path (defaults to $XDG_CONFIG_HOME/bg3/env)",
+    )
+    parser.add_argument(
         "--json",
         action="store_true",
         help="Output check results as JSON",
@@ -548,7 +621,7 @@ def main():
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Run setup wizard in preview mode without writing .env to disk",
+        help="Run setup wizard in preview mode without writing to disk",
     )
     parser.add_argument(
         "--non-interactive",
@@ -558,9 +631,9 @@ def main():
     args = parser.parse_args()
 
     if args.check:
-        check_environment_status(as_json=args.json)
+        check_environment_status(as_json=args.json, config_path=args.config)
     else:
-        run_wizard(dry_run=args.dry_run, non_interactive=args.non_interactive)
+        run_wizard(dry_run=args.dry_run, non_interactive=args.non_interactive, config_path=args.config)
 
 
 if __name__ == "__main__":

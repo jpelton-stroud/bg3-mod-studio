@@ -315,7 +315,7 @@ def main():
 
     api_key = get_api_key()
     if not api_key:
-        sys.stderr.write("Error: MODIO_API_KEY could not be found in environment, .env, or ~/.config/modio/env\n")
+        sys.stderr.write("Error: MODIO_API_KEY could not be found in environment or $XDG_CONFIG_HOME/bg3/env (~/.config/bg3/env)\n")
         sys.exit(1)
 
     norm_platform = normalize_platform(args.platform)

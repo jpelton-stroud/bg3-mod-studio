@@ -4,24 +4,89 @@ import glob
 import os
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SCRIPTS_DIR = REPO_ROOT / "scripts"
 MY_MODS_DIR = REPO_ROOT / "my_mods"
 MODS_DIR = REPO_ROOT / "mods"
 DIST_DIR = REPO_ROOT / "dist"
-CACHE_DIR = REPO_ROOT / ".cache"
 
 DEFAULT_WSL_DATA_DIR = Path("/mnt/c/Program Files (x86)/Steam/steamapps/common/Baldurs Gate 3/Data")
 DEFAULT_WIN_DATA_DIR = Path(r"C:\Program Files (x86)\Steam\steamapps\common\Baldurs Gate 3\Data")
 
 
+def get_xdg_config_home(app: str = "bg3") -> Path:
+    """Return configuration directory adhering to XDG Base Directory Specification."""
+    val = os.environ.get("XDG_CONFIG_HOME")
+    if val and val.strip():
+        base = Path(val.strip())
+    elif os.name == "nt":
+        appdata = os.environ.get("APPDATA")
+        base = Path(appdata) if appdata and appdata.strip() else Path.home() / "AppData" / "Roaming"
+    else:
+        base = Path.home() / ".config"
+    return base / app
+
+
+def get_xdg_cache_home(app: str = "bg3") -> Path:
+    """Return cache directory adhering to XDG Base Directory Specification."""
+    val = os.environ.get("XDG_CACHE_HOME")
+    if val and val.strip():
+        base = Path(val.strip())
+    elif os.name == "nt":
+        localapp = os.environ.get("LOCALAPPDATA")
+        base = Path(localapp) if localapp and localapp.strip() else Path.home() / "AppData" / "Local"
+        return base / app / "cache"
+    else:
+        base = Path.home() / ".cache"
+    return base / app
+
+
+def get_xdg_data_home(app: str = "bg3") -> Path:
+    """Return application data directory adhering to XDG Base Directory Specification."""
+    val = os.environ.get("XDG_DATA_HOME")
+    if val and val.strip():
+        base = Path(val.strip())
+    elif os.name == "nt":
+        localapp = os.environ.get("LOCALAPPDATA")
+        base = Path(localapp) if localapp and localapp.strip() else Path.home() / "AppData" / "Local"
+        return base / app / "data"
+    else:
+        base = Path.home() / ".local" / "share"
+    return base / app
+
+
+def get_xdg_state_home(app: str = "bg3") -> Path:
+    """Return state/session directory adhering to XDG Base Directory Specification."""
+    val = os.environ.get("XDG_STATE_HOME")
+    if val and val.strip():
+        base = Path(val.strip())
+    elif os.name == "nt":
+        localapp = os.environ.get("LOCALAPPDATA")
+        base = Path(localapp) if localapp and localapp.strip() else Path.home() / "AppData" / "Local"
+        return base / app / "state"
+    else:
+        base = Path.home() / ".local" / "state"
+    return base / app
+
+
+def get_cache_dir() -> Path:
+    """Resolve active cache directory, honoring BG3_CACHE_DIR or XDG_CACHE_HOME."""
+    custom = os.environ.get("BG3_CACHE_DIR")
+    if custom and custom.strip():
+        return Path(custom.strip())
+    return get_xdg_cache_home()
+
+
+CACHE_DIR = get_xdg_cache_home()
+
+
 def load_env_file(env_path: Optional[Path] = None) -> Dict[str, str]:
-    """Load key-value pairs from a .env file if present."""
+    """Load key-value pairs from XDG config or explicit env_path. In-repo .env is strictly ignored."""
     env: Dict[str, str] = {}
     candidates = [env_path] if env_path else [
-        REPO_ROOT / ".env",
+        get_xdg_config_home() / "env",
         Path.home() / ".config" / "modio" / "env",
     ]
     for path in candidates:
@@ -41,12 +106,28 @@ def load_env_file(env_path: Optional[Path] = None) -> Dict[str, str]:
 
 
 def get_env_var(key: str, default: Optional[str] = None, env_path: Optional[Path] = None) -> Optional[str]:
-    """Retrieve a configuration value from os.environ or .env files."""
+    """Retrieve a configuration value from os.environ or XDG config files."""
     val = os.environ.get(key)
     if val is not None and val.strip():
         return val.strip()
     file_vars = load_env_file(env_path)
     return file_vars.get(key, default)
+
+
+def get_env_source(key: str, env_path: Optional[Path] = None) -> Tuple[Optional[str], str]:
+    """Retrieve key value and the origin source where it was resolved."""
+    val = os.environ.get(key)
+    if val is not None and val.strip():
+        return val.strip(), "environment"
+    file_vars = load_env_file(env_path)
+    if key in file_vars:
+        if env_path and env_path.is_file():
+            return file_vars[key], str(env_path)
+        primary = get_xdg_config_home() / "env"
+        if primary.is_file() and key in load_env_file(primary):
+            return file_vars[key], str(primary)
+        return file_vars[key], "xdg config"
+    return None, "unset"
 
 
 def normalize_mod_key(value: str) -> str:

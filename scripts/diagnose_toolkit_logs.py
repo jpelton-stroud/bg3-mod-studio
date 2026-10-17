@@ -50,7 +50,7 @@ LOG_LINE_REGEX = re.compile(
 
 
 def load_env_toolkit_dir() -> Optional[Path]:
-    """Inspect .env or environment for BG3_TOOLKIT_DIR."""
+    """Inspect environment or XDG configuration for BG3_TOOLKIT_DIR."""
     val = get_env_var("BG3_TOOLKIT_DIR")
     if val:
         p = Path(val)
@@ -493,7 +493,7 @@ def main():
     if not toolkit_dir or not toolkit_dir.is_dir():
         err_msg = (
             f"BG3 Toolkit directory not found. Checked default: {DEFAULT_TOOLKIT_DIR}\n"
-            "Set BG3_TOOLKIT_DIR in .env or pass --toolkit-dir <path>."
+            "Set BG3_TOOLKIT_DIR in ~/.config/bg3/env or pass --toolkit-dir <path>."
         )
         if args.json:
             print(json.dumps({"error": err_msg, "status": "not_found"}, indent=2))

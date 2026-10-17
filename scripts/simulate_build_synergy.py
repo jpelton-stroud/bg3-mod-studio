@@ -17,6 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.lib.cli_common import ConsoleColor, ExitCode
+from scripts.lib.env_paths import get_cache_dir
 
 # Caster classification for multiclass spell slot calculation
 CASTER_WEIGHTS = {
@@ -150,8 +151,8 @@ def parse_boost_effects(boost_str: str) -> dict:
     return effects
 
 
-def load_gear_boosts(gear_items: list[str], workspace_root: Path) -> tuple[dict, list[dict]]:
-    cache_file = workspace_root / ".cache" / "mod_database.json"
+def load_gear_boosts(gear_items: list[str], _workspace_root: Path) -> tuple[dict, list[dict]]:
+    cache_file = get_cache_dir() / "mod_database.json"
     gear_data = []
     combined_effects = {
         "dc": 0,

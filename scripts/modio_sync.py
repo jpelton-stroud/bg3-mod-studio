@@ -440,7 +440,7 @@ def main():
     if not oauth_token:
         print(
             "Error: No mod.io Personal Access Token (PAT) found.\n"
-            "Please provide --token <TOKEN>, export MODIO_PAT, or set MODIO_PAT in .env.",
+            "Please provide --token <TOKEN>, export MODIO_PAT, or set MODIO_PAT in ~/.config/bg3/env.",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -449,7 +449,7 @@ def main():
     if not api_key:
         print(
             "Error: MODIO_API_KEY is not set.\n"
-            "Please export MODIO_API_KEY or set MODIO_API_KEY in .env.",
+            "Please export MODIO_API_KEY or set MODIO_API_KEY in ~/.config/bg3/env.",
             file=sys.stderr,
         )
         sys.exit(1)

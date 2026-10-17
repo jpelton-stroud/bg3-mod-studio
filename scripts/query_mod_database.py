@@ -4,7 +4,7 @@ query_mod_database.py - High-speed BiS gear, spell, and mechanics query engine.
 
 Indexes Weapon.txt, Armor.txt, Object.txt, Passive.txt, and Status_BOOST.txt
 across all cataloged community mods in mods/ (ignoring my_mods/).
-Uses directory mtime caching (.cache/mod_database.json) for sub-10ms response times.
+Uses directory mtime caching ($XDG_CACHE_HOME/bg3/mod_database.json) for sub-10ms response times.
 """
 
 import argparse
@@ -14,13 +14,14 @@ import re
 import sys
 import time
 from pathlib import Path
+from typing import Optional
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.lib.cli_common import ConsoleColor, ExitCode
-from scripts.lib.env_paths import MODS_DIR, REPO_ROOT
+from scripts.lib.env_paths import MODS_DIR, REPO_ROOT, get_cache_dir
 from scripts.lib.larian_parsers import parse_loca_bytes
 
 # Files to scan within mod directories
@@ -269,8 +270,8 @@ def get_mods_directory(workspace_root: Path) -> Path:
     return workspace_root / "mods"
 
 
-def get_cache_path(workspace_root: Path) -> Path:
-    cache_dir = workspace_root / ".cache"
+def get_cache_path(_workspace_root: Optional[Path] = None) -> Path:
+    cache_dir = get_cache_dir()
     cache_dir.mkdir(parents=True, exist_ok=True)
     return cache_dir / "mod_database.json"
 
@@ -414,7 +415,7 @@ def main():
     parser.add_argument("--mod", help="Filter by mod slug/name in mods/.")
     parser.add_argument("--limit", type=int, default=10, help="Maximum number of results to display (default: 10).")
     parser.add_argument("--compact", action="store_true", help="Output compact records omitting raw file paths and empty fields.")
-    parser.add_argument("--reindex", action="store_true", help="Force a complete rebuild of the .cache/ index.")
+    parser.add_argument("--reindex", action="store_true", help="Force a complete rebuild of the mod database cache index.")
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON.")
 
     args = parser.parse_args()
