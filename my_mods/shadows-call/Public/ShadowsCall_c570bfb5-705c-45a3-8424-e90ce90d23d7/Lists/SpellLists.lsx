@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="8" revision="0" build="700"/>
+    <region id="SpellLists">
+        <node id="root">
+            <children>
+                <!-- Arcane Trickster: Unbound Wizard Cantrips -->
+                <node id="SpellList">
+                    <attribute id="Comment" type="LSString" value="ShadowsCall Arcane Trickster Cantrips"/>
+                    <attribute id="Spells" type="LSString" value="Projectile_AcidSplash;Target_ChillTouch;Target_DancingLights;Projectile_FireBolt;Target_Friends;Target_Light;Target_MageHand;Target_MinorIllusion;Projectile_PoisonSpray;Projectile_RayOfFrost;Target_ShockingGrasp;Target_TrueStrike;Shout_BladeWard"/>
+                    <attribute id="UUID" type="guid" value="2f281e01-d70c-43f1-bdfc-bc0e0c1f6c01"/>
+                </node>
+
+                <!-- Arcane Trickster: Unbound Wizard Level 1 Spells -->
+                <node id="SpellList">
+                    <attribute id="Comment" type="LSString" value="ShadowsCall Arcane Trickster Level 1 Spells"/>
+                    <attribute id="Spells" type="LSString" value="Target_MageArmor;Projectile_MagicMissile;Shout_Shield;Target_Longstrider;Target_FogCloud;Target_Grease;Shout_FeatherFall;Zone_Thunderwave;Zone_BurningHands;Projectile_ChromaticOrb;Projectile_RayOfSickness;Shout_FalseLife;Target_Sleep;Target_CharmPerson;Zone_ColorSpray;Target_TashasHideousLaughter;Target_ProtectionFromEvilAndGood;Projectile_IceKnife;Projectile_WitchBolt;Shout_DisguiseSelf;Shout_ExpeditiousRetreat;Target_FindFamiliar;Target_Jump"/>
+                    <attribute id="UUID" type="guid" value="c0326e02-4bb3-41c3-a55e-a50d249f6c02"/>
+                </node>
+
+                <!-- Arcane Trickster: Unbound Wizard Level 2 Spells -->
+                <node id="SpellList">
+                    <attribute id="Comment" type="LSString" value="ShadowsCall Arcane Trickster Level 2 Spells"/>
+                    <attribute id="Spells" type="LSString" value="Target_MistyStep;Shout_MirrorImage;Shout_Blur;Target_Web;Target_Darkness;Projectile_ScorchingRay;Target_HoldPerson;Target_Invisibility;Target_CloudOfDaggers;Target_Shatter;Target_Blindness;Target_PhantasmalForce;Target_CrownOfMadness;Target_EnlargeReduce;Target_Knock;Target_ArcaneLock;Projectile_AcidArrow;Projectile_RayOfEnfeeblement;Zone_GustOfWind;Shout_SeeInvisibility;Shout_DetectThoughts;Target_FlamingSphere"/>
+                    <attribute id="UUID" type="guid" value="3a245e03-7a91-4c28-98ae-36b0068f6c03"/>
+                </node>
+
+                <!-- Arcane Trickster: Unbound Wizard Level 1 and 2 Combined Spells -->
+                <node id="SpellList">
+                    <attribute id="Comment" type="LSString" value="ShadowsCall Arcane Trickster Level 1 and 2 Spells"/>
+                    <attribute id="Spells" type="LSString" value="Target_MageArmor;Projectile_MagicMissile;Shout_Shield;Target_Longstrider;Target_FogCloud;Target_Grease;Shout_FeatherFall;Zone_Thunderwave;Zone_BurningHands;Projectile_ChromaticOrb;Projectile_RayOfSickness;Shout_FalseLife;Target_Sleep;Target_CharmPerson;Zone_ColorSpray;Target_TashasHideousLaughter;Target_ProtectionFromEvilAndGood;Projectile_IceKnife;Projectile_WitchBolt;Shout_DisguiseSelf;Shout_ExpeditiousRetreat;Target_FindFamiliar;Target_Jump;Target_MistyStep;Shout_MirrorImage;Shout_Blur;Target_Web;Target_Darkness;Projectile_ScorchingRay;Target_HoldPerson;Target_Invisibility;Target_CloudOfDaggers;Target_Shatter;Target_Blindness;Target_PhantasmalForce;Target_CrownOfMadness;Target_EnlargeReduce;Target_Knock;Target_ArcaneLock;Projectile_AcidArrow;Projectile_RayOfEnfeeblement;Zone_GustOfWind;Shout_SeeInvisibility;Shout_DetectThoughts;Target_FlamingSphere"/>
+                    <attribute id="UUID" type="guid" value="4b356e04-8b12-4d39-a9bf-47c1179f6c04"/>
+                </node>
+
+                <!-- Arcane Trickster: Unbound Wizard Level 3 Spells -->
+                <node id="SpellList">
+                    <attribute id="Comment" type="LSString" value="ShadowsCall Arcane Trickster Level 3 Spells"/>
+                    <attribute id="Spells" type="LSString" value="Projectile_Fireball;Zone_LightningBolt;Target_Counterspell;Target_Haste;Target_Slow;Target_Fly;Target_GaseousForm;Target_HypnoticPattern;Target_Fear;Target_SleetStorm;Target_StinkingCloud;Target_VampiricTouch;Target_BestowCurse;Target_RemoveCurse;Target_AnimateDead;Shout_Blink;Shout_FeignDeath"/>
+                    <attribute id="UUID" type="guid" value="5c467e05-9c23-4e4a-b0cf-58d228af6c05"/>
+                </node>
+
+                <!-- Arcane Trickster: Unbound Wizard Level 1, 2, and 3 Combined Spells -->
+                <node id="SpellList">
+                    <attribute id="Comment" type="LSString" value="ShadowsCall Arcane Trickster Level 1, 2, and 3 Spells"/>
+                    <attribute id="Spells" type="LSString" value="Target_MageArmor;Projectile_MagicMissile;Shout_Shield;Target_Longstrider;Target_FogCloud;Target_Grease;Shout_FeatherFall;Zone_Thunderwave;Zone_BurningHands;Projectile_ChromaticOrb;Projectile_RayOfSickness;Shout_FalseLife;Target_Sleep;Target_CharmPerson;Zone_ColorSpray;Target_TashasHideousLaughter;Target_ProtectionFromEvilAndGood;Projectile_IceKnife;Projectile_WitchBolt;Shout_DisguiseSelf;Shout_ExpeditiousRetreat;Target_FindFamiliar;Target_Jump;Target_MistyStep;Shout_MirrorImage;Shout_Blur;Target_Web;Target_Darkness;Projectile_ScorchingRay;Target_HoldPerson;Target_Invisibility;Target_CloudOfDaggers;Target_Shatter;Target_Blindness;Target_PhantasmalForce;Target_CrownOfMadness;Target_EnlargeReduce;Target_Knock;Target_ArcaneLock;Projectile_AcidArrow;Projectile_RayOfEnfeeblement;Zone_GustOfWind;Shout_SeeInvisibility;Shout_DetectThoughts;Target_FlamingSphere;Projectile_Fireball;Zone_LightningBolt;Target_Counterspell;Target_Haste;Target_Slow;Target_Fly;Target_GaseousForm;Target_HypnoticPattern;Target_Fear;Target_SleetStorm;Target_StinkingCloud;Target_VampiricTouch;Target_BestowCurse;Target_RemoveCurse;Target_AnimateDead;Shout_Blink;Shout_FeignDeath"/>
+                    <attribute id="UUID" type="guid" value="6d578e06-ad34-4f5b-c1df-69e339bf6c06"/>
+                </node>
+
+                <!-- Arcane Trickster: Unbound Wizard Level 4 Spells -->
+                <node id="SpellList">
+                    <attribute id="Comment" type="LSString" value="ShadowsCall Arcane Trickster Level 4 Spells"/>
+                    <attribute id="Spells" type="LSString" value="Projectile_IceStorm;Target_Banishment;Target_Blight;Target_DimensionDoor;Target_Polymorph;Target_Confusion;Target_OtilukesResilientSphere;Target_EvardsBlackTentacles;Target_PhantasmalKiller;Shout_FireShield;Shout_GreaterInvisibility;Shout_Stoneskin;Wall_WallOfFire;Target_ConjureMinorElementals"/>
+                    <attribute id="UUID" type="guid" value="7e689e07-be45-4a6c-d2ef-7af44acf6c07"/>
+                </node>
+
+                <!-- Arcane Trickster: Unbound Wizard Level 1 through 4 Combined Spells -->
+                <node id="SpellList">
+                    <attribute id="Comment" type="LSString" value="ShadowsCall Arcane Trickster Level 1 through 4 Spells"/>
+                    <attribute id="Spells" type="LSString" value="Target_MageArmor;Projectile_MagicMissile;Shout_Shield;Target_Longstrider;Target_FogCloud;Target_Grease;Shout_FeatherFall;Zone_Thunderwave;Zone_BurningHands;Projectile_ChromaticOrb;Projectile_RayOfSickness;Shout_FalseLife;Target_Sleep;Target_CharmPerson;Zone_ColorSpray;Target_TashasHideousLaughter;Target_ProtectionFromEvilAndGood;Projectile_IceKnife;Projectile_WitchBolt;Shout_DisguiseSelf;Shout_ExpeditiousRetreat;Target_FindFamiliar;Target_Jump;Target_MistyStep;Shout_MirrorImage;Shout_Blur;Target_Web;Target_Darkness;Projectile_ScorchingRay;Target_HoldPerson;Target_Invisibility;Target_CloudOfDaggers;Target_Shatter;Target_Blindness;Target_PhantasmalForce;Target_CrownOfMadness;Target_EnlargeReduce;Target_Knock;Target_ArcaneLock;Projectile_AcidArrow;Projectile_RayOfEnfeeblement;Zone_GustOfWind;Shout_SeeInvisibility;Shout_DetectThoughts;Target_FlamingSphere;Projectile_Fireball;Zone_LightningBolt;Target_Counterspell;Target_Haste;Target_Slow;Target_Fly;Target_GaseousForm;Target_HypnoticPattern;Target_Fear;Target_SleetStorm;Target_StinkingCloud;Target_VampiricTouch;Target_BestowCurse;Target_RemoveCurse;Target_AnimateDead;Shout_Blink;Shout_FeignDeath;Projectile_IceStorm;Target_Banishment;Target_Blight;Target_DimensionDoor;Target_Polymorph;Target_Confusion;Target_OtilukesResilientSphere;Target_EvardsBlackTentacles;Target_PhantasmalKiller;Shout_FireShield;Shout_GreaterInvisibility;Shout_Stoneskin;Wall_WallOfFire;Target_ConjureMinorElementals"/>
+                    <attribute id="UUID" type="guid" value="8f79af08-cf56-4b7d-e3fa-8b055bdf6c08"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>

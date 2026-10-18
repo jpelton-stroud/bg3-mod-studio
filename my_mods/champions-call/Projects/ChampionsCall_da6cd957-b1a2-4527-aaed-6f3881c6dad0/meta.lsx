@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="8" revision="0" build="500"/>
+    <region id="MetaData">
+        <node id="root">
+            <attribute id="GameProject" type="LSString" value="Gustav"/>
+            <attribute id="Module" type="LSString" value="da6cd957-b1a2-4527-aaed-6f3881c6dad0"/>
+            <attribute id="Name" type="LSString" value="ChampionsCall"/>
+            <attribute id="Type" type="LSString" value="Add-on"/>
+            <attribute id="UUID" type="LSString" value="e30792e2-c189-4e63-b390-524d02a745b2"/>
+            <children>
+                <node id="Categories"/>
+            </children>
+        </node>
+    </region>
+</save>

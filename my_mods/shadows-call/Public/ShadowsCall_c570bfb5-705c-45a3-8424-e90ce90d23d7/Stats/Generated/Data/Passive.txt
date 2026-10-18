@@ -1,0 +1,224 @@
+// ==============================================================================
+// ShadowsCall - Passive.txt
+// Passive features for Core Rogue (2024 PHB), Arcane Trickster, and Assassin
+// ==============================================================================
+
+// ------------------------------------------------------------------------------
+// Shared Rogue Core (2024 PHB Standards)
+// ------------------------------------------------------------------------------
+
+// Level 5: Cunning Strike (Base container unlocking tactical strike options)
+new entry "ShadowsCall_CunningStrike"
+type "PassiveData"
+data "DisplayName" "h3a66913cg939ag5b3eg870cgad20daef5479;1"
+data "Description" "hc9b7542ag3ed8g524fgba3dgaa6e8ab9ed69;1"
+data "Icon" "PassiveFeature_Generic_Tactical"
+data "Properties" "Highlighted"
+data "Boosts" "UnlockPassive(ShadowsCall_CunningStrike_Trip);UnlockPassive(ShadowsCall_CunningStrike_Withdraw);UnlockPassive(ShadowsCall_CunningStrike_Poison)"
+
+// Cunning Strike: Trip (Costs 1d6: Knock prone on failed Dex save)
+new entry "ShadowsCall_CunningStrike_Trip"
+type "PassiveData"
+data "DisplayName" "h4820522ag2a62g5a1ega54cgdbdd5f2a5994;1"
+data "Description" "h7b53fae7g6731g5e1fg98bag57bd2c7b632f;1"
+data "Icon" "Action_KnockOut_MainHand"
+data "Properties" "IsToggled;Highlighted"
+data "StatsFunctorContext" "OnDamage"
+data "Conditions" "IsWeaponAttack() and HasDamageEffectFlag(DamageFlags.Hit) and not Dead()"
+data "StatsFunctors" "IF(not SavingThrow(Ability.Dexterity, ManeuverSaveDC())):ApplyStatus(PRONE,100,1)"
+
+// Cunning Strike: Withdraw (Costs 1d6: Disengage and +3m movement speed)
+new entry "ShadowsCall_CunningStrike_Withdraw"
+type "PassiveData"
+data "DisplayName" "h2747dbf8g3eebg5154ga931gfa26cbd77737;1"
+data "Description" "he184f156ga59bg5f2bgb210g4761e0d077e8;1"
+data "Icon" "Action_Disengage"
+data "Properties" "IsToggled;Highlighted"
+data "StatsFunctorContext" "OnDamage"
+data "Conditions" "IsWeaponAttack() and HasDamageEffectFlag(DamageFlags.Hit)"
+data "StatsFunctors" "ApplyStatus(SELF,SHADOWSCALL_WITHDRAW,100,1)"
+
+// Cunning Strike: Poison (Costs 1d6: Poisoned on failed Con save)
+new entry "ShadowsCall_CunningStrike_Poison"
+type "PassiveData"
+data "DisplayName" "hf9551310g1806g5631gae7agdac8b6ba4fd9;1"
+data "Description" "hdba801e7g3017g5392g8d85g3b5f48e511d3;1"
+data "Icon" "Surface_Poison"
+data "Properties" "IsToggled;Highlighted"
+data "StatsFunctorContext" "OnDamage"
+data "Conditions" "IsWeaponAttack() and HasDamageEffectFlag(DamageFlags.Hit) and not Dead()"
+data "StatsFunctors" "IF(not SavingThrow(Ability.Constitution, ManeuverSaveDC(), AdvantageOnPoisoned())):ApplyStatus(SHADOWSCALL_POISON,100,2)"
+
+// Level 11: Improved Cunning Strike
+new entry "ShadowsCall_ImprovedCunningStrike"
+type "PassiveData"
+data "DisplayName" "h2f30459dgc231g5372ga166g237c5dbff200;1"
+data "Description" "h5dccec4dg6701g52d7gaf6eg5836ded91073;1"
+data "Icon" "PassiveFeature_Generic_Tactical"
+data "Properties" "Highlighted"
+data "Boosts" "UnlockPassive(ShadowsCall_CunningStrike_Daze)"
+
+// Cunning Strike: Daze (Costs 2d6: Con save or Dazed)
+new entry "ShadowsCall_CunningStrike_Daze"
+type "PassiveData"
+data "DisplayName" "h1e8ba8f6g49f9g5a71gbe93ga219c54e72dc;1"
+data "Description" "h204d7febg454fg5068g9618g7985104a6620;1"
+data "Icon" "Target_Daze"
+data "Properties" "IsToggled;Highlighted"
+data "StatsFunctorContext" "OnDamage"
+data "Conditions" "IsWeaponAttack() and HasDamageEffectFlag(DamageFlags.Hit) and not Dead()"
+data "StatsFunctors" "IF(not SavingThrow(Ability.Constitution, ManeuverSaveDC())):ApplyStatus(SHADOWSCALL_DAZED,100,1)"
+
+// Level 7: Reliable Talent (2024 Shift from Level 11 to Level 7)
+new entry "ShadowsCall_ReliableTalent"
+type "PassiveData"
+using "ReliableTalent"
+data "DisplayName" "hd27a973dg7e7eg53e6ga7e2gf0a815233f37;1"
+data "Description" "hf68b32e1gd222g53cegb421g92050a44408f;1"
+data "Icon" "PassiveFeature_ReliableTalent"
+data "Properties" "Highlighted"
+
+// ------------------------------------------------------------------------------
+// Arcane Trickster Subclass Features
+// ------------------------------------------------------------------------------
+
+// Level 3: Unbound Spellbook (Full Wizard spell list unrestricted)
+new entry "ShadowsCall_UnboundSpellbook"
+type "PassiveData"
+data "DisplayName" "hdf43dfccgad23g5e34g9b4ag3103cde0704b;1"
+data "Description" "h1849860cg0b7bg5d50g806agd3d374b6a6b9;1"
+data "Icon" "Spell_Evocation_MagicMissile"
+data "Properties" "Highlighted"
+
+// Level 3: Permanent Invisible Mage Hand
+new entry "ShadowsCall_MageHand_Permanent"
+type "PassiveData"
+data "DisplayName" "h39875924ge5f3g5795ga676gbaff6312e57e;1"
+data "Description" "ha53a233dgd22bg5b9dg9c25g6822a00967a3;1"
+data "Icon" "Spell_Conjuration_MageHand"
+data "Properties" "Highlighted"
+data "Boosts" "UnlockSpell(Target_ShadowsCall_MageHand)"
+
+// Level 3: Arcane Distraction (Enemies within 3m grant Advantage on attacks)
+new entry "ShadowsCall_MageHand_Distraction"
+type "PassiveData"
+data "DisplayName" "h55713248g876dg5145gb777gd7d0e63ddba2;1"
+data "Description" "h5bb8cd85g3b03g5c11g84b7g885d471439ec;1"
+data "Icon" "Spell_Illusion_PhantasmalForce"
+data "Properties" "Highlighted"
+data "Boosts" "IF(HasStatus('SHADOWSCALL_DISTRACTED', context.Target)):Advantage(AttackRoll)"
+data "StatsFunctorContext" "OnTurn"
+data "StatsFunctors" "ApplyStatus(SELF, SHADOWSCALL_MAGEHAND_AURA, 100, -1)"
+
+// Level 9: Magical Ambush Enhanced (Spells from stealth or invisible force disadvantage)
+new entry "ShadowsCall_MagicalAmbush_Enhanced"
+type "PassiveData"
+using "MagicalAmbush"
+data "DisplayName" "hcdcda039g93ebg5461g9e38gd669a29235d1;1"
+data "Description" "h43fc7d55g9689g5eeag8982geb6c47a79ed8;1"
+data "Icon" "PassiveFeature_MagicalAmbush"
+data "Properties" "Highlighted"
+data "Boosts" "IF(HasStatus('SG_Invisible', context.Source) or HasStatus('SNEAKING', context.Source) or HasStatus('SNEAKING_LOCKED', context.Source)):Disadvantage(AllSavingThrows)"
+
+// Level 13 (ULC): Versatile Trickster (Target Cunning Strike riders via Mage Hand)
+new entry "ShadowsCall_VersatileTrickster"
+type "PassiveData"
+data "DisplayName" "hb4d02033g70e4g5b13gb357gd8e6f404f269;1"
+data "Description" "hb2fdd39bg02aag577bg85dbg7cbf6bed8c58;1"
+data "Icon" "Spell_Conjuration_MageHand"
+data "Properties" "Highlighted"
+data "Boosts" "UnlockSpell(Target_ShadowsCall_VersatileTrickster_Trip);UnlockSpell(Target_ShadowsCall_VersatileTrickster_Daze)"
+
+// Level 17 (ULC): Spell Thief (Reaction to negate spell and steal it)
+new entry "ShadowsCall_SpellThief"
+type "PassiveData"
+data "DisplayName" "h1319de0bg2498g51b5gbf9fgf544cb3164f7;1"
+data "Description" "h207fb4b1g7acbg5c6dgb0cfg542cb342eee4;1"
+data "Icon" "Spell_Abjuration_Counterspell"
+data "Properties" "Highlighted"
+data "Boosts" "UnlockSpell(Target_ShadowsCall_SpellThief);UnlockInterrupt(Interrupt_Counterspell)"
+
+// ------------------------------------------------------------------------------
+// Assassin Subclass Features
+// ------------------------------------------------------------------------------
+
+// Level 3: Assassinate (Base container)
+new entry "ShadowsCall_Assassinate"
+type "PassiveData"
+data "DisplayName" "h4db196f8ga054g5c28g9baag2e805b7074d3;1"
+data "Description" "h0e38c90dg3cebg5abfgbeaag0b3e5a03099b;1"
+data "Icon" "PassiveFeature_Assassinate_Ambush"
+data "Properties" "Highlighted"
+data "Boosts" "UnlockPassive(ShadowsCall_Assassinate_CombatReadiness);UnlockPassive(ShadowsCall_Assassinate_OpeningGambit);UnlockPassive(ShadowsCall_Assassinate_ExecutionerStrike)"
+
+// Level 3: Combat Readiness (+2 Initiative)
+new entry "ShadowsCall_Assassinate_CombatReadiness"
+type "PassiveData"
+data "DisplayName" "he574b679g46d1g57cbg9113g687d7ed55999;1"
+data "Description" "h1d2c3065g731bg50b4g867bg8c292263120a;1"
+data "Icon" "PassiveFeature_RemarkableAthlete_Proficiency"
+data "Properties" "Highlighted"
+data "Boosts" "Initiative(2)"
+
+// Level 3: Opening Gambit (Advantage against creatures that haven't acted)
+new entry "ShadowsCall_Assassinate_OpeningGambit"
+type "PassiveData"
+using "Assassinate_Initiative"
+data "DisplayName" "h56a114f5gcd90g5dbfg958fg440ac7b39748;1"
+data "Description" "h8f3e21f9g229fg5cc4gb052ga84693869a84;1"
+data "Icon" "PassiveFeature_Assassinate_Initiative"
+data "Properties" "Highlighted"
+
+// Level 3: Executioner's Strike (Round 1 bonus damage equal to Rogue level against creatures that haven't acted)
+new entry "ShadowsCall_Assassinate_ExecutionerStrike"
+type "PassiveData"
+data "DisplayName" "h1bcddf78ge894g5099gaffeg541365ecbb62;1"
+data "Description" "h6d03c3b3g0d43g5949gb61fg39f67ee8b31d;1"
+data "Icon" "PassiveFeature_Assassinate_Ambush"
+data "Properties" "Highlighted"
+data "StatsFunctorContext" "OnDamage"
+data "Conditions" "IsWeaponAttack() and HasDamageEffectFlag(DamageFlags.Hit) and RoundEqual(1) and not TurnPassed(context.Target)"
+data "StatsFunctors" "DealDamage(ClassLevel(Rogue), MainMeleeWeaponDamageType)"
+
+// Level 9: Shadow Dance (Vanish into Invisibility for 1 turn on kill/crit + restore Reaction)
+new entry "ShadowsCall_ShadowDance_VanishOnKill"
+type "PassiveData"
+data "DisplayName" "h4abefd23g5c1cg5396gbe83gf07ce12047d4;1"
+data "Description" "h336a759bg956bg5496g944cgf1f66fa0e135;1"
+data "Icon" "Spell_Illusion_Invisibility"
+data "Properties" "Highlighted"
+data "StatsFunctorContext" "OnDamage"
+data "Conditions" "IsWeaponAttack() and (IsCriticalHit() or Dead(context.Target) or HasHPPercentageEqualOrLessThan(0, context.Target))"
+data "StatsFunctors" "ApplyStatus(SELF, SHADOWSCALL_SHADOW_DANCE, 100, 1)"
+
+// Level 9: Penetrating Toxins (Bypass poison resistance, treat immunity as resistance)
+new entry "ShadowsCall_PenetratingToxins"
+type "PassiveData"
+data "DisplayName" "hf79dd4e6ge23fg56eag8ccfg74b6bad29d60;1"
+data "Description" "h33ea5152g49d3g5467g8e13g68662cd10176;1"
+data "Icon" "PassiveFeature_PoisonResistance"
+data "Properties" "Highlighted"
+data "Boosts" "IgnoreResistance(Poison, Resistant);IgnoreResistance(Poison, Immune)"
+
+// Level 13 (ULC): Envenomed Strike (+2d6 unresistable Necrotic damage on Cunning Strike Poison)
+new entry "ShadowsCall_EnvenomedStrike"
+type "PassiveData"
+data "DisplayName" "h69ccbe0ag8248g578aga4a1gebaa3a5d384e;1"
+data "Description" "h8070d2e6g2533g5145ga5c6ga02408f6551f;1"
+data "Icon" "PassiveFeature_InfiltrationExpertise"
+data "Properties" "Highlighted"
+data "Boosts" "IgnoreResistance(Necrotic, Resistant);IgnoreResistance(Necrotic, Immune)"
+data "StatsFunctorContext" "OnDamage"
+data "Conditions" "IsWeaponAttack() and HasDamageEffectFlag(DamageFlags.Hit) and (HasStatus('POISONED', context.Target) or HasStatus('SHADOWSCALL_POISON', context.Target))"
+data "StatsFunctors" "DealDamage(2d6, Necrotic)"
+
+// Level 17 (ULC): Death Strike (Round 1 stealth opener / surprised forces Con save or double damage)
+new entry "ShadowsCall_DeathStrike"
+type "PassiveData"
+data "DisplayName" "h9adc74f0ga5ceg5a32gb5a3g105b754a5195;1"
+data "Description" "hf52d966eg5299g51cega05cg1952b635792c;1"
+data "Icon" "PassiveFeature_Assassinate_Ambush"
+data "Properties" "Highlighted"
+data "StatsFunctorContext" "OnDamage"
+data "Conditions" "IsWeaponAttack() and HasDamageEffectFlag(DamageFlags.Hit) and (HasStatus('SURPRISED', context.Target) or (RoundEqual(1) and (HasStatus('SNEAKING', context.Source) or HasStatus('SG_Invisible', context.Source))))"
+data "StatsFunctors" "IF(not SavingThrow(Ability.Constitution, ManeuverSaveDC())):DealDamage(DamageDone, MainMeleeWeaponDamageType)"
