@@ -220,7 +220,7 @@ def check_and_apply_update(query, api_key=None, check_only=False, force=False):
             "query": query,
             "slug": target_slug,
             "status": "not_tracked",
-            "message": f"Mod '{query}' is not tracked in mods/library.md (use /bg3_document_mods to add)",
+            "message": f"Mod '{query}' is not tracked in mods/library.md (use /bg3-document-mods to add)",
         }
 
     # 2. Fetch remote metadata from mod.io

@@ -14,7 +14,7 @@ The studio operates across four architectural layers: the **Agent & Orchestratio
 ```mermaid
 flowchart TD
     subgraph Tier1["1. Agent & Orchestration Tier (.agents/skills/)"]
-        Agents["15 Autonomous Subagent Skills\n(/bg3_create_mod, /bg3_diagnose_mod, /bg3_test_mod, etc.)"]
+        Agents["15 Autonomous Subagent Skills\n(/bg3-create-mod, /bg3-diagnose-mod, /bg3-test-mod, etc.)"]
         GrillMe["Clarification Engine\n(/grill-me Interactive Trees)"]
     end
 
@@ -76,27 +76,27 @@ Custom mod authoring follows a strict 5-stage pipeline with Progressive Gate Han
 
 ```mermaid
 flowchart TD
-    S1["Stage 1: Creation (/bg3_create_mod)
+    S1["Stage 1: Creation (/bg3-create-mod)
 - /grill-me interview & specification plan
 - Scaffolding & parallel subagents (stats, progressions, loca, docs)
 - Read-only smoke check on my_mods/<slug>/"]
     
-    S2["Stage 2: Diagnostics (/bg3_diagnose_mod)
+    S2["Stage 2: Diagnostics (/bg3-diagnose-mod)
 - Phase 2A: Static pre-flight, Data/ sync & Glasses.exe log launch
 - Phase 2B: Runtime log triage, auto-fixes & verification loop"]
     
-    S3["Stage 3: In-Game Testing (/bg3_test_mod)
+    S3["Stage 3: In-Game Testing (/bg3-test-mod)
 - Phase 3A: Clean smoke test with dependency closure (--with-deps / --isolate)
 - Phase 3B: Multi-mod campaign integration & save audit (optional gate)
 - User in-game verification & loopback/release gate"]
     
-    S4["Stage 4: Release Preparation (/bg3_release_prep)
+    S4["Stage 4: Release Preparation (/bg3-release-prep)
 - bump_mod_version (atomic meta.lsx & README sync)
 - validate_mod --strict & localization prune/compile
 - render_modio_description (GFM HTML table generation)
 - Final Data/ sync & dist/<slug>.pak packaging"]
     
-    S5["Stage 5: Post-Release (/bg3_post_release)
+    S5["Stage 5: Post-Release (/bg3-post-release)
 - modio_update_metadata (2-stage tag/setting preview + confirmation)
 - Optional: modio_create_collection"]
     
