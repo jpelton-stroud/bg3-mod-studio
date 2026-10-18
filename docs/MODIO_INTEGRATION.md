@@ -10,11 +10,11 @@ Autonomous skills in [`.agents/skills/`](../.agents/skills/) allow developers an
 
 | Category | Intent / Slash Command | Description | Primary Script & CLI Command |
 | :--- | :--- | :--- | :--- |
-| Discovery | [`/bg3_search_mods`](../.agents/skills/bg3_search_mods/SKILL.md) | Discovers community mods on mod.io with natural language and platform filters, pre-filtering tracked mods. | `scripts/library/modio_search.py`<br>`bg3 modio search` |
-| Documentation | [`/bg3_document_mods`](../.agents/skills/bg3_document_mods/SKILL.md) | Concurrently extracts, validates, and generates markdown specifications for community mods. | `scripts/library/modio_extract.py`<br>`bg3 modio extract` |
-| Maintenance | [`/bg3_update_mod_documentation`](../.agents/skills/bg3_update_mod_documentation/SKILL.md) | Checks tracked mods for upstream mod.io releases and updates local specs and catalogs. | `scripts/library/modio_update.py`<br>`bg3 modio update` |
-| Compatibility | [`/bg3_check_mod_conflicts`](../.agents/skills/bg3_check_mod_conflicts/SKILL.md) | Analyzes mod overrides and stat collisions against cataloged library mods. | `scripts/diagnostics/check_mod_conflicts.py`<br>`bg3 mod conflict` |
-| Collections | [`/bg3_create_modio_collection`](../.agents/skills/bg3_create_modio_collection/SKILL.md) | Curates and syncs public mod.io collections directly from `mods/library.md`. | `scripts/library/modio_create_collection.py`<br>`bg3 modio create-collection` |
+| Discovery | [`/bg3-search-mods`](../.agents/skills/bg3-search-mods/SKILL.md) | Discovers community mods on mod.io with natural language and platform filters, pre-filtering tracked mods. | `scripts/library/modio_search.py`<br>`bg3 modio search` |
+| Documentation | [`/bg3-document-mods`](../.agents/skills/bg3-document-mods/SKILL.md) | Concurrently extracts, validates, and generates markdown specifications for community mods. | `scripts/library/modio_extract.py`<br>`bg3 modio extract` |
+| Maintenance | [`/bg3-update-mod-documentation`](../.agents/skills/bg3-update-mod-documentation/SKILL.md) | Checks tracked mods for upstream mod.io releases and updates local specs and catalogs. | `scripts/library/modio_update.py`<br>`bg3 modio update` |
+| Compatibility | [`/bg3-check-mod-conflicts`](../.agents/skills/bg3-check-mod-conflicts/SKILL.md) | Analyzes mod overrides and stat collisions against cataloged library mods. | `scripts/diagnostics/check_mod_conflicts.py`<br>`bg3 mod conflict` |
+| Collections | [`/bg3-create-modio-collection`](../.agents/skills/bg3-create-modio-collection/SKILL.md) | Curates and syncs public mod.io collections directly from `mods/library.md`. | `scripts/library/modio_create_collection.py`<br>`bg3 modio create-collection` |
 
 > [!NOTE]
 > For complete CLI parameters, technical flag descriptions, and binary architecture details, see the [Features & Functionality Guide](FEATURES.md).
@@ -42,15 +42,15 @@ To enable mod.io discovery and download capabilities, configure your credentials
 
 ---
 
-## 2. Discovering Community Mods (`/bg3_search_mods`)
+## 2. Discovering Community Mods (`/bg3-search-mods`)
 
-Finding mods on mod.io can be handled directly through natural language. The `/bg3_search_mods` skill translates your search queries, applies console or platform constraints, and automatically cross-checks results against already tracked mods in your [`mods/library.md`](../mods/library.md).
+Finding mods on mod.io can be handled directly through natural language. The `/bg3-search-mods` skill translates your search queries, applies console or platform constraints, and automatically cross-checks results against already tracked mods in your [`mods/library.md`](../mods/library.md).
 
 ### Conversational Examples
 
 - *"Search mod.io for Warlock subclasses compatible with PS5."*
 - *"Find popular gear mods with custom armor sets."*
-- `"/bg3_search_mods level curve mods for xboxseries"`
+- `"/bg3-search-mods level curve mods for xboxseries"`
 
 ### Under the Hood: Tool Execution
 
@@ -70,15 +70,15 @@ python3 scripts/library/modio_search.py "<query>" --platform <platform> --json
 
 ---
 
-## 3. Extracting & Cataloging Mod Specifications (`/bg3_document_mods`)
+## 3. Extracting & Cataloging Mod Specifications (`/bg3-document-mods`)
 
 Once candidate mods are selected, the studio automatically downloads, decompresses, and deconstructs community `.pak` files into structured markdown specifications within [`mods/`](../mods/).
 
 ### Conversational Examples
 
 - *"Document the mod at https://mod.io/g/baldursgate3/m/unlocklevelcurve."*
-- `"/bg3_document_single_mod 4166963"`
-- `"/bg3_document_mods 5e-spells unlocklevelcurve extra-gear"`
+- `"/bg3-document-single-mod 4166963"`
+- `"/bg3-document-mods 5e-spells unlocklevelcurve extra-gear"`
 
 ### Under the Hood: Tool Execution
 
@@ -104,7 +104,7 @@ Keep local documentation and subscribed mods synchronized with upstream authors 
 
 ### Conversational Examples
 
-- `"/bg3_update_mod_documentation"` *(checks all cataloged mods for upstream updates)*
+- `"/bg3-update-mod-documentation"` *(checks all cataloged mods for upstream updates)*
 - *"Check if 5e-spells or unlocklevelcurve have new versions on mod.io."*
 - *"Synchronize all mods subscribed on my mod.io profile."*
 
@@ -135,13 +135,13 @@ The update skills and synchronization workflows leverage two core tools:
 
 ---
 
-## 5. Verifying Compatibility & Mod Conflicts (`/bg3_check_mod_conflicts`)
+## 5. Verifying Compatibility & Mod Conflicts (`/bg3-check-mod-conflicts`)
 
-Before deploying new community mods or when authoring custom creations, the `/bg3_check_mod_conflicts` skill verifies whether two or more mods overwrite identical game assets or require missing prerequisite frameworks.
+Before deploying new community mods or when authoring custom creations, the `/bg3-check-mod-conflicts` skill verifies whether two or more mods overwrite identical game assets or require missing prerequisite frameworks.
 
 ### Conversational Examples
 
-- `"/bg3_check_mod_conflicts unlocklevelcurve custom-subclass"`
+- `"/bg3-check-mod-conflicts unlocklevelcurve custom-subclass"`
 - *"Will this new mod conflict with any mods already in my library?"*
 - *"Check if my load order has any conflicting RootTemplates or duplicate stat IDs."*
 
@@ -163,13 +163,13 @@ python3 scripts/diagnostics/check_mod_conflicts.py --candidate <ModSlug> --again
 
 ---
 
-## 6. Curating mod.io Collections (`/bg3_create_modio_collection`)
+## 6. Curating mod.io Collections (`/bg3-create-modio-collection`)
 
 Easily publish and manage curated collections of community mods on mod.io, derived directly from your documented library.
 
 ### Conversational Examples
 
-- `"/bg3_create_modio_collection"`
+- `"/bg3-create-modio-collection"`
 - *"Create a mod.io collection titled 'Tactician Essentials' with the mods in my library."*
 - *"Preview which mods will be added to my mod.io collection."*
 

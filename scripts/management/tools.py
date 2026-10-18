@@ -201,7 +201,7 @@ def verify_registry(registry: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) -> Dict[str, Any]:
-    """Audit agent skills in .agents/skills/ for registry compliance and tool discovery."""
+    """Audit agent skills in .agents/skills/ for registry compliance, portability, and best practices."""
     if skills_dir is None:
         workspace_dir = SCRIPTS_DIR.parent
         skills_dir = workspace_dir / ".agents" / "skills"
@@ -220,6 +220,11 @@ def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) ->
     total_refs = 0
     skills_with_discovery = 0
     all_unregistered = set()
+    all_user_paths = []
+    all_broken_links = []
+    all_invalid_models = []
+    non_kebab_skills = []
+    kebab_pattern = r"^[a-z0-9]+(-[a-z0-9]+)*$"
 
     for skill_path in sorted(skills_dir.glob("*/SKILL.md")):
         skill_name = skill_path.parent.name
@@ -229,39 +234,108 @@ def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) ->
             results.append({"skill": skill_name, "error": str(e), "status": "read_error"})
             continue
 
+        # 1. Script references
         script_refs = sorted(list(set(re.findall(r"scripts/(?:[a-zA-Z0-9_\-]+/)?([a-zA-Z0-9_\-]+\.py)", content))))
         total_refs += len(script_refs)
 
-        has_discovery_tip = "bg3 tools" in content or "tools.py" in content or "registry" in content.lower()
+        has_discovery_tip = (
+            "bg3 tools" in content
+            or "scripts/bg3.py tools" in content
+            or "tools.py" in content
+            or "registry" in content.lower()
+        )
         if has_discovery_tip:
             skills_with_discovery += 1
 
         unregistered = [s for s in script_refs if s not in registered_names and s != "tools.py"]
         all_unregistered.update(unregistered)
 
+        # 2. Kebab-case naming check
+        is_kebab = bool(re.match(kebab_pattern, skill_name))
+        if not is_kebab:
+            non_kebab_skills.append(skill_name)
+
+        # 3. Path portability check (no /home/ or C:\Users\)
+        user_paths = sorted(list(set(re.findall(r"(?:/home/|C:[/\\]Users[/\\])[a-zA-Z0-9_\-\.]+", content))))
+        if user_paths:
+            all_user_paths.extend([f"{skill_name}: {p}" for p in user_paths])
+
+        # 4. Link integrity check
+        broken_links = []
+        links = re.findall(r"\[([^\]]+)\]\(([^)]+)\)", content)
+        for text, target in links:
+            if target.startswith("http://") or target.startswith("https://") or target.startswith("mailto:"):
+                continue
+            if target in ("profile_url", "..."):
+                broken_links.append(f"[{text}]({target}) [placeholder]")
+                continue
+            clean = target[7:] if target.startswith("file://") else target
+            clean = clean.split("#")[0]
+            if not clean:
+                continue
+            resolved = Path(clean) if os.path.isabs(clean) else (skill_path.parent / clean).resolve()
+            if not resolved.exists():
+                broken_links.append(f"[{text}]({target})")
+        if broken_links:
+            all_broken_links.extend([f"{skill_name}: {lnk}" for lnk in broken_links])
+
+        # 5. Subagent model inheritance check
+        model_matches = re.findall(r'["\']Model["\']\s*:\s*["\']([^"\']+)["\']', content)
+        invalid_models = [m for m in model_matches if m != "inherit"]
+        if invalid_models:
+            all_invalid_models.extend([f"{skill_name}: {m}" for m in invalid_models])
+
+        defects = []
         if unregistered:
-            status = "unregistered_references"
-        elif has_discovery_tip:
-            status = "fully_integrated"
-        else:
-            status = "missing_discovery"
+            defects.append(f"unregistered: {unregistered}")
+        if not has_discovery_tip:
+            defects.append("missing_discovery")
+        if not is_kebab:
+            defects.append("non_kebab_case")
+        if user_paths:
+            defects.append(f"user_paths: {user_paths}")
+        if broken_links:
+            defects.append(f"broken_links: {len(broken_links)}")
+        if invalid_models:
+            defects.append(f"invalid_models: {invalid_models}")
+
+        status = "fully_integrated" if not defects else "defects_detected"
 
         results.append({
             "skill": skill_name,
+            "is_kebab_case": is_kebab,
             "script_references": script_refs,
             "has_discovery_guidance": has_discovery_tip,
             "unregistered_references": unregistered,
+            "user_paths": user_paths,
+            "broken_links": broken_links,
+            "invalid_models": invalid_models,
+            "defects": defects,
             "status": status
         })
 
-    is_valid = len(all_unregistered) == 0
+    is_valid = (
+        len(all_unregistered) == 0
+        and len(non_kebab_skills) == 0
+        and len(all_user_paths) == 0
+        and len(all_broken_links) == 0
+        and len(all_invalid_models) == 0
+    )
+
+    fully_compliant = sum(1 for r in results if r["status"] == "fully_integrated")
 
     return {
         "valid": is_valid,
         "total_skills": len(results),
+        "fully_compliant_skills": fully_compliant,
+        "compliance_rate_pct": round(fully_compliant / len(results) * 100, 1) if results else 0,
         "skills_with_discovery": skills_with_discovery,
         "discovery_coverage_pct": round(skills_with_discovery / len(results) * 100, 1) if results else 0,
+        "non_kebab_skills": non_kebab_skills,
         "unregistered_scripts": sorted(list(all_unregistered)),
+        "user_path_violations": all_user_paths,
+        "broken_link_violations": all_broken_links,
+        "invalid_subagent_models": all_invalid_models,
         "skills": results
     }
 
