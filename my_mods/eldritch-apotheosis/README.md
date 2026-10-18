@@ -146,13 +146,13 @@ Sync mod files directly into your Baldur's Gate 3 `Data/` directory using the wo
 
 ```bash
 # Standard sync
-python3 scripts/sync_to_game_data.py --mods eldritch-apotheosis
+python3 scripts/sync_game_data.py --mods eldritch-apotheosis
 
 # Preview changes without modifying files
-python3 scripts/sync_to_game_data.py --mods eldritch-apotheosis --dry-run
+python3 scripts/sync_game_data.py --mods eldritch-apotheosis --dry-run
 
 # Live watcher mode for real-time development
-python3 scripts/sync_to_game_data.py --mods eldritch-apotheosis --watch
+python3 scripts/sync_game_data.py --mods eldritch-apotheosis --watch
 ```
 
 ### Method 2: Manual Toolkit Workspace Import
@@ -179,7 +179,7 @@ my_mods/eldritch-apotheosis/
 │   ├── meta.lsx                                # Engine module definition & UUID
 │   └── mod_publish_logo.png                    # mod.io / in-game mod manager logo (2.6 MB)
 ├── Public/EldritchApotheosis_e1d817c0-a907-4e05-9b24-7f83a005e0ab/
-│   ├── Levelmaps/
+│   ├── LevelMapValues/
 │   │   └── LevelMapValues.lsx                  # 2-10 Beams & d4-d12 damage dice LevelMaps
 │   └── Stats/Generated/Data/
 │       └── Spell_Projectile.txt                # Eldritch Blast projectile override & CHA scaling

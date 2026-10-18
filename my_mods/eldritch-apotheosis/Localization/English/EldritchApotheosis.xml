@@ -1,47 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <!-- Mod Metadata -->
-  <content contentuid="hc4b2f57agb432g4d61g9747gcfe7e9c6c1bf" version="1">Eldritch Apotheosis</content>
-  <content contentuid="h2d9af936g4a94g4c58gbb70g01e238863820" version="1">Ascend beyond mortal spellcasting. Scales Eldritch Blast from 2 to 10 beams, attaches scaling force damage dice (d4 to d12), and adds up to 2x Charisma modifier per beam across levels 1-20.</content>
-
-  <!-- Core Spell Overrides -->
-  <content contentuid="h3a090ed4g543cg5812g9800gfe2beddbdeca" version="1">Eldritch Blast</content>
-  <content contentuid="h276bd707g3c1ag5410g814dgb97a4a8b42ef" version="1">Conjure beams of crackling planar force. Scales from 2 to 10 beams, infuses additional force damage dice (1d4 to 1d12), and channels your Charisma modifier as devastating magical power.</content>
-
-  <!-- Progression Tiers -->
-  <!-- Tier 1 (Levels 1–4) -->
-  <content contentuid="h565a623dg8a9fg5380g9b0dg10b4d7abd519" version="1">Eldritch Awakening (Tier 1)</content>
-  <content contentuid="h159bb887gac27g550dgb789g6a81c34f9a54" version="1">Awaken your patron's gift. Eldritch Blast begins with 2 beams, each dealing 1d10 Force damage.</content>
-
-  <!-- Tier 2 (Levels 5–9) -->
-  <content contentuid="hb2c6dab3g2644g5804g96f0gc6b49bf663be" version="1">Eldritch Resonance (Tier 2)</content>
-  <content contentuid="h1e71dc38gc577g5ea2g8eacg98835ec983e0" version="1">Your eldritch power surges. Eldritch Blast fires 3 beams and deals an additional 1d4 Force damage per beam.</content>
-
-  <!-- Tier 3 (Levels 10–12) -->
-  <content contentuid="hf806dda6g4510g52c5g9717g6d944cbbc350" version="1">Eldritch Convergence (Tier 3)</content>
-  <content contentuid="h7cddc911g9b9cg542bg9823gfc2d845e3cdb" version="1">Mastery coalesces into focused ruin. Eldritch Blast fires 4 beams and deals an additional 1d6 Force damage per beam.</content>
-
-  <!-- Epic Tier (Levels 13–16) -->
-  <content contentuid="hd752396fgc6b4g5111g8a43g7e79aae9725f" version="1">Eldritch Transcendence (Epic Tier)</content>
-  <content contentuid="h45959b59gaeecg506egb5e4g307c259bcf7c" version="1">Transcend mortal spellcasting limits. Eldritch Blast scales to 5–6 beams, adds an additional 1d8 Force damage, and adds your Charisma modifier as extra Force damage on hit.</content>
-
-  <!-- God Tier (Levels 17–19) -->
-  <content contentuid="h151336e5ga492g584fgaf61g1f73bac20517" version="1">Eldritch Sovereignty (God Tier)</content>
-  <content contentuid="ha42a6618g7119g5c4bg85a7g7a4f87148c0f" version="1">Wield catastrophic otherworldly might. Eldritch Blast scales to 7–9 beams, adds an additional 1d10 Force damage, and retains your Charisma modifier damage bonus per beam.</content>
-
-  <!-- Capstone (Level 20) -->
-  <content contentuid="h10251273g3bbbg5959g854eg7424d1ab9489" version="1">Eldritch Apotheosis (Capstone)</content>
-  <content contentuid="hac4d4c2bga272g5a41ga78cg77256419e3a3" version="1">Ascend to absolute planar mastery. Eldritch Blast unleashes a devastating 10 beams, infuses an additional 1d12 Force damage, and adds up to twice your Charisma modifier as Force damage on hit.</content>
-
-  <!-- Mechanics & Riders -->
-  <!-- Scaling Force Rider -->
-  <content contentuid="h7ed42757gf44cg50aeg8051geab2d9512812" version="1">Eldritch Blast: Scaling Force Rider</content>
-  <content contentuid="h84ca9db8gfa16g558ag96ebg35e67c1ecf3f" version="1">Eldritch Blast inflicts bonus Force damage scaling with character level (+1d4 at Level 5, +1d6 at Level 10, +1d8 at Level 13, +1d10 at Level 17, +1d12 at Level 20).</content>
-
-  <!-- Charisma Scaling Mechanics -->
-  <content contentuid="hba4e3fe9gc672g559cg9614g033fda6d12f5" version="1">Eldritch Charisma Infusion</content>
-  <content contentuid="h2514c8e6g0dfdg5dacg8c76gbd418983464b" version="1">Upon reaching Level 13, your sheer force of personality augments your Eldritch Blast, adding your Charisma Modifier as bonus Force damage to each beam.</content>
-
-  <content contentuid="hcb509d37gdaa4g5044g8ce7gce9c7c58def4" version="1">Eldritch Charisma Apotheosis</content>
-  <content contentuid="ha607679agac7ag56afg934cg26359bcce577" version="1">At Level 20, your connection to the arcane reaches its peak, adding a second instance of your Charisma Modifier as bonus Force damage to each beam (2x Charisma Modifier total).</content>
+<contentList>
+    <content contentuid="h3a090ed4g543cg5812g9800gfe2beddbdeca" version="1">Eldritch Blast</content>
+    <content contentuid="h276bd707g3c1ag5410g814dgb97a4a8b42ef" version="1">Conjure beams of crackling planar force. Scales from 2 to 10 beams, infuses additional force damage dice (1d4 to 1d12), and channels your Charisma modifier as devastating magical power.</content>
 </contentList>

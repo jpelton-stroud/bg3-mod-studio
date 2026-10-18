@@ -97,13 +97,13 @@
 <h3>Method 1: Automatic Game Data Sync (Recommended)</h3>
 <p>Sync mod files directly into your Baldur&#x27;s Gate 3 <code>Data/</code> directory using the workspace synchronization script:</p>
 <pre><code># Standard sync
-python3 scripts/sync_to_game_data.py --mods eldritch-apotheosis
+python3 scripts/sync_game_data.py --mods eldritch-apotheosis
 
 # Preview changes without modifying files
-python3 scripts/sync_to_game_data.py --mods eldritch-apotheosis --dry-run
+python3 scripts/sync_game_data.py --mods eldritch-apotheosis --dry-run
 
 # Live watcher mode for real-time development
-python3 scripts/sync_to_game_data.py --mods eldritch-apotheosis --watch</code></pre>
+python3 scripts/sync_game_data.py --mods eldritch-apotheosis --watch</code></pre>
 <h3>Method 2: Manual Toolkit Workspace Import</h3>
 <ol>
 <li>Locate your game&#x27;s <strong>Data</strong> folder (e.g., <code>C:\Program Files (x86)\Steam\steamapps\common\Baldurs Gate 3\Data\</code>).</li>
