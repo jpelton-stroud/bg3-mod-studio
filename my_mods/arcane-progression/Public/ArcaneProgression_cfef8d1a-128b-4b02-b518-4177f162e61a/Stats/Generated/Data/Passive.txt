@@ -216,4 +216,25 @@ data "DisplayName" "h26e1f186gd87dg469fg9537g21f4087e4f6b;1"
 data "Description" "h8feb912agacecg42f4ga0bfge1a2bf395cef;1"
 data "Icon" "Spell_Illusion_DisguiseSelf"
 data "Properties" "Highlighted"
-data "Boosts" "UnlockSpell(Shout_DisguiseSelf)"
+data "Boosts" "UnlockSpell(Shout_DisguiseSelf_Free)"
+
+// Fighter Indomitable Upgrades (Levels 13 & 17)
+new entry "Indomitable_2"
+type "PassiveData"
+using "Indomitable"
+data "DisplayName" "hadaf0fbag57e4g44c0g992bg4c30ac43febc;1"
+data "Description" "hc1514199gd229g4c81g896cg4080f0d29a9d;1"
+data "Icon" "PassiveFeature_Indomitable"
+data "Properties" "Highlighted"
+data "Boosts" "UnlockInterrupt(Interrupt_Indomitable);ActionResource(Interrupt_Indomitable,2,0)"
+
+new entry "Indomitable_3"
+type "PassiveData"
+using "Indomitable"
+data "DisplayName" "h70dcc50ag9a91g4046gbdddg01504a5a937d;1"
+data "Description" "h6f2ea1c8g18c9g439bgb8bcgc29989d6247a;1"
+data "Icon" "PassiveFeature_Indomitable"
+data "Properties" "Highlighted"
+data "Boosts" "UnlockInterrupt(Interrupt_Indomitable);ActionResource(Interrupt_Indomitable,3,0)"
+
+

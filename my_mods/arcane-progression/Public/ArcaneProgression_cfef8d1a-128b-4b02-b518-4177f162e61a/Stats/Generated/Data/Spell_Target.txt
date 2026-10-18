@@ -17,6 +17,7 @@ data "SpellProperties" "RemoveStatus(SG_Charmed);RemoveStatus(SG_Frightened);Rem
 
 new entry "Target_Invisibility_Free"
 type "SpellData"
+data "SpellType" "Target"
 using "Target_Invisibility"
 data "DisplayName" "h0f5dd8edg6459g490egb60dg3d50956860d2;1"
 data "Description" "h6f2084ceg8418g41dfg8d5eg3e2c1ff6a322;1"

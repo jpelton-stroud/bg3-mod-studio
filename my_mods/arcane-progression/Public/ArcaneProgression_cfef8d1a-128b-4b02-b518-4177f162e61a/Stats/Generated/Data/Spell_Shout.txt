@@ -49,3 +49,16 @@ type "SpellData"
 data "SpellType" "Shout"
 using "Shout_Blur"
 data "UseCosts" "ActionPoint:1"
+
+// ------------------------------------------------------------------------------
+// Warlock Eldritch Invocations - Shout Variants (At-Will, No Spell Slot)
+// ------------------------------------------------------------------------------
+
+new entry "Shout_DisguiseSelf_Free"
+type "SpellData"
+data "SpellType" "Shout"
+using "Shout_DisguiseSelf"
+data "DisplayName" "h26e1f186gd87dg469fg9537g21f4087e4f6b;1"
+data "Description" "h8feb912agacecg42f4ga0bfge1a2bf395cef;1"
+data "UseCosts" "ActionPoint:1"
+

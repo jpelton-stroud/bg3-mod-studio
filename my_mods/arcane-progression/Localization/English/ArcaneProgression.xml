@@ -74,15 +74,35 @@
 
   <!-- Warlock: Shroud of Shadows -->
   <content contentuid="h0f5dd8edg6459g490egb60dg3d50956860d2" version="1">Shroud of Shadows</content>
-  <content contentuid="h6f2084ceg8418g41dfg8d5eg3e2c1ff6a322" version="1">You can cast Invisibility at will, without expending a spell slot.</content>
+  <content contentuid="h6f2084ceg8418g41dfg8d5eg3e2c1ff6a322" version="1">You can cast Invisibility on yourself at will, without expending a spell slot.</content>
 
   <!-- Warlock: Master of Myriad Forms -->
   <content contentuid="h26e1f186gd87dg469fg9537g21f4087e4f6b" version="1">Master of Myriad Forms</content>
   <content contentuid="h8feb912agacecg42f4ga0bfge1a2bf395cef" version="1">You can cast Disguise Self at will, without expending a spell slot.</content>
 
   <!-- Wizard: Spell Mastery -->
-  <content contentuid="h259014ccgada0g4157gab58g5f52b029f712" version="1">Spell Mastery (Level 1)</content>
-  <content contentuid="h7430cf11g670bg487fgbc0cg4b602cad6fd5" version="1">Select a 1st-level wizard spell from your broad repertoire to cast at will without expending a spell slot.</content>
-  <content contentuid="h4a29aa68g355ag4933g8c94g285d922c7c6b" version="1">Spell Mastery (Level 2)</content>
-  <content contentuid="hba50bcf8gde78g48f7ga5dcg2fcc38597c92" version="1">Select a 2nd-level wizard spell from your broad repertoire to cast at will without expending a spell slot.</content>
+  <content contentuid="h259014ccgada0g4157gab58g5f52b029f712" version="1">Spell Mastery</content>
+  <content contentuid="h7430cf11g670bg487fgbc0cg4b602cad6fd5" version="1">Choose a level 1 spell from the list below</content>
+  <content contentuid="h4a29aa68g355ag4933g8c94g285d922c7c6b" version="1">Spell Mastery</content>
+  <content contentuid="hba50bcf8gde78g48f7ga5dcg2fcc38597c92" version="1">Choose a level 2 spell from the list below</content>
+
+  <!-- Fighter: Action Surge (2 Uses) -->
+  <content contentuid="h63e716f1g099dg4e06g8807g4ef7cbb285ee" version="1">Action Surge (2 Uses)</content>
+  <content contentuid="h7395ab31g3785g4daagbeafg2a4c6d802eb6" version="1">You can push yourself beyond your normal limits for a moment. You gain an additional action point.</content>
+
+  <!-- Hunter Ranger: Evasion -->
+  <content contentuid="h29712999g79d8g4194g8224g558efc310d83" version="1">Evasion</content>
+  <content contentuid="hd7eaee4dg9f83g4cfagaebfge256559a8029" version="1">When a spell or effect would deal half damage on a successful Dexterity saving throw, it deals no damage if you succeed, and only half damage if you fail.</content>
+
+  <!-- Battle Master: Level 15 Superiority Dice -->
+  <content contentuid="h7967e450gfea7g48a3gbbdbg7200f102e2db" version="1">Superiority Dice</content>
+  <content contentuid="hffafa7bcg79d0g4392ga4a2gb48160834fd7" version="1">You gain an additional superiority die (d10), bringing your total to 6 superiority dice. Expended superiority dice are restored on a Short or Long Rest.</content>
+
+  <!-- Fighter: Indomitable (2) -->
+  <content contentuid="hadaf0fbag57e4g44c0g992bg4c30ac43febc" version="1">Indomitable (2)</content>
+  <content contentuid="hc1514199gd229g4c81g896cg4080f0d29a9d" version="1">Whenever you fail a saving throw, you can use your reaction to reroll it. You can use this feature twice between Long Rests.</content>
+
+  <!-- Fighter: Indomitable (3) -->
+  <content contentuid="h70dcc50ag9a91g4046gbdddg01504a5a937d" version="1">Indomitable (3)</content>
+  <content contentuid="h6f2ea1c8g18c9g439bgb8bcgc29989d6247a" version="1">Whenever you fail a saving throw, you can use your reaction to reroll it. You can use this feature three times between Long Rests.</content>
 </contentList>
