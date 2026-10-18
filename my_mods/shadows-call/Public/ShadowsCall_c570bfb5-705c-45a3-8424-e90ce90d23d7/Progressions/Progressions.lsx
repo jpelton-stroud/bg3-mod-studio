@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="8" revision="0" build="700"/>
+    <region id="Progressions">
+        <node id="root">
+            <children>
+                <!-- ========================================================================= -->
+                <!-- 1. CORE ROGUE (Vanilla TableUUID: 9a44e887-44da-4246-aab4-6e6017ec6acc)   -->
+                <!-- ========================================================================= -->
+
+                <!-- Core Rogue Level 5: Cunning Strike (Trip, Withdraw, Poison) + Uncanny Dodge -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="5"/>
+                    <attribute id="Name" type="LSString" value="Rogue"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_CunningStrike_Trip;ShadowsCall_CunningStrike_Withdraw;ShadowsCall_CunningStrike_Poison;UncannyDodge"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="9a44e887-44da-4246-aab4-6e6017ec6acc"/>
+                    <attribute id="UUID" type="guid" value="55263152-7b1f-440f-90ea-bb3a436e2f11"/>
+                </node>
+
+                <!-- Core Rogue Level 7: Reliable Talent (2024 Shift) + Evasion -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="7"/>
+                    <attribute id="Name" type="LSString" value="Rogue"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_ReliableTalent;Evasion"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="9a44e887-44da-4246-aab4-6e6017ec6acc"/>
+                    <attribute id="UUID" type="guid" value="77385273-9d31-4621-b20c-dd5c65804133"/>
+                </node>
+
+                <!-- Core Rogue Level 11: Improved Cunning Strike (Daze) -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="11"/>
+                    <attribute id="Name" type="LSString" value="Rogue"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_CunningStrike_Daze"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="9a44e887-44da-4246-aab4-6e6017ec6acc"/>
+                    <attribute id="UUID" type="guid" value="bba07495-bf53-4843-d42e-ff7e87026355"/>
+                </node>
+
+                <!-- ========================================================================= -->
+                <!-- 2. CORE ROGUE - ULC EXTENSION (TableUUID: 9a44e828-92db-4d6c-acbc-a4f8ef340415) -->
+                <!-- ========================================================================= -->
+
+                <!-- Core Rogue Level 5 (ULC Table): Cunning Strike + Uncanny Dodge -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="5"/>
+                    <attribute id="Name" type="LSString" value="Rogue"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_CunningStrike_Trip;ShadowsCall_CunningStrike_Withdraw;ShadowsCall_CunningStrike_Poison;UncannyDodge"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="9a44e828-92db-4d6c-acbc-a4f8ef340415"/>
+                    <attribute id="UUID" type="guid" value="15374263-8c20-4510-a1fb-cc4b547f3022"/>
+                </node>
+
+                <!-- Core Rogue Level 7 (ULC Table): Reliable Talent + Evasion -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="7"/>
+                    <attribute id="Name" type="LSString" value="Rogue"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_ReliableTalent;Evasion"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="9a44e828-92db-4d6c-acbc-a4f8ef340415"/>
+                    <attribute id="UUID" type="guid" value="37496384-ae42-4732-c31d-ee6d76915244"/>
+                </node>
+
+                <!-- Core Rogue Level 11 (ULC Table): Improved Cunning Strike (Daze) -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="11"/>
+                    <attribute id="Name" type="LSString" value="Rogue"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_CunningStrike_Daze"/>
+                    <attribute id="ProgressionType" type="uint8" value="0"/>
+                    <attribute id="TableUUID" type="guid" value="9a44e828-92db-4d6c-acbc-a4f8ef340415"/>
+                    <attribute id="UUID" type="guid" value="596185a6-d064-4954-f53f-119098137466"/>
+                </node>
+
+                <!-- ========================================================================= -->
+                <!-- 3. ARCANE TRICKSTER (TableUUID: 7205dbe2-5eef-4cd6-ad7f-45b3dc254f78)     -->
+                <!-- ========================================================================= -->
+
+                <!-- Arcane Trickster Level 3: Unbound Spellbook + Permanent Distraction Mage Hand -->
+                <node id="Progression">
+                    <attribute id="Boosts" type="LSString" value="ActionResource(SpellSlot,2,1);UnlockSpell(Target_ShadowsCall_MageHand)"/>
+                    <attribute id="Level" type="uint8" value="3"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_MageHand_Distraction;ShadowsCall_MageHand_Permanent;ShadowsCall_UnboundSpellbook"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(2f281e01-d70c-43f1-bdfc-bc0e0c1f6c01,2,0,ArcaneTricksterCantrip);SelectSpells(c0326e02-4bb3-41c3-a55e-a50d249f6c02,3,0,ArcaneTricksterAny)"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="3344a101-5e7f-42a1-9a1c-3b0c11df5e01"/>
+                </node>
+
+                <!-- Arcane Trickster Level 4: Level 1 Spell Slot + Unbound Spell Selection -->
+                <node id="Progression">
+                    <attribute id="Boosts" type="LSString" value="ActionResource(SpellSlot,1,1)"/>
+                    <attribute id="Level" type="uint8" value="4"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(c0326e02-4bb3-41c3-a55e-a50d249f6c02,1,1,ArcaneTricksterAny)"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="4455b202-6f80-43b2-ab2d-4c1d22e06f02"/>
+                </node>
+
+                <!-- Arcane Trickster Level 7: Level 2 Spell Slots + Level 1 & 2 Unbound Selection -->
+                <node id="Progression">
+                    <attribute id="Boosts" type="LSString" value="ActionResource(SpellSlot,2,2)"/>
+                    <attribute id="Level" type="uint8" value="7"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(4b356e04-8b12-4d39-a9bf-47c1179f6c04,1,1,ArcaneTricksterAny)"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="7788e505-92b3-46e5-de50-7f4055139205"/>
+                </node>
+
+                <!-- Arcane Trickster Level 8: Additional Level 2 Slot -->
+                <node id="Progression">
+                    <attribute id="Boosts" type="LSString" value="ActionResource(SpellSlot,1,2)"/>
+                    <attribute id="Level" type="uint8" value="8"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(4b356e04-8b12-4d39-a9bf-47c1179f6c04,1,1,ArcaneTricksterAny)"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="8899f606-a3c4-47f6-ef61-80516624a306"/>
+                </node>
+
+                <!-- Arcane Trickster Level 9: Magical Ambush Enhanced -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="9"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_MagicalAmbush_Enhanced"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="99a00707-b4d5-4807-f072-91627735b407"/>
+                </node>
+
+                <!-- Arcane Trickster Level 10: Additional Cantrip + Unbound Selection -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="10"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(2f281e01-d70c-43f1-bdfc-bc0e0c1f6c01,1,0,ArcaneTricksterCantrip);SelectSpells(4b356e04-8b12-4d39-a9bf-47c1179f6c04,1,1,ArcaneTricksterAny)"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="aa111808-c5e6-4918-0183-a2738846c508"/>
+                </node>
+
+                <!-- Arcane Trickster Level 11: Unbound Spell Selection -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="11"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(4b356e04-8b12-4d39-a9bf-47c1179f6c04,1,1,ArcaneTricksterAny)"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="bb222909-d6f7-4a29-1294-b3849957d609"/>
+                </node>
+
+                <!-- Arcane Trickster Level 13 (ULC): Versatile Trickster + Level 3 Slots -->
+                <node id="Progression">
+                    <attribute id="Boosts" type="LSString" value="ActionResource(SpellSlot,2,3)"/>
+                    <attribute id="Level" type="uint8" value="13"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_VersatileTrickster"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(6d578e06-ad34-4f5b-c1df-69e339bf6c06,1,1,ArcaneTricksterAny)"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="dd444b0b-f819-4c4b-34b6-d506bb79f80b"/>
+                </node>
+
+                <!-- Arcane Trickster Level 14 (ULC): Unbound Selection -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="14"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(6d578e06-ad34-4f5b-c1df-69e339bf6c06,1,1,ArcaneTricksterAny)"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="ee555c0c-092a-4d5c-45c7-e617cc8a090c"/>
+                </node>
+
+                <!-- Arcane Trickster Level 16 (ULC): Additional Level 3 Slot -->
+                <node id="Progression">
+                    <attribute id="Boosts" type="LSString" value="ActionResource(SpellSlot,1,3)"/>
+                    <attribute id="Level" type="uint8" value="16"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(6d578e06-ad34-4f5b-c1df-69e339bf6c06,1,1,ArcaneTricksterAny)"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="ff666d0d-1a3b-4e6d-56d8-f728dd9b1a0d"/>
+                </node>
+
+                <!-- Arcane Trickster Level 17 (ULC): Spell Thief Feature -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="17"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_SpellThief"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(6d578e06-ad34-4f5b-c1df-69e339bf6c06,0,1,ArcaneTricksterAny)"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="0a777e0e-2b4c-4f7e-67e9-0839ee0c2b0e"/>
+                </node>
+
+                <!-- Arcane Trickster Level 19 (ULC): Level 4 Spell Slot + Unbound Selection -->
+                <node id="Progression">
+                    <attribute id="Boosts" type="LSString" value="ActionResource(SpellSlot,1,4)"/>
+                    <attribute id="Level" type="uint8" value="19"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(8f79af08-cf56-4b7d-e3fa-8b055bdf6c08,1,1,ArcaneTricksterAny)"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="1b888f0f-3c5d-408f-78fa-194aff1d3c0f"/>
+                </node>
+
+                <!-- Arcane Trickster Level 20 (ULC): Pinnacle Unbound Selection -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="20"/>
+                    <attribute id="Name" type="LSString" value="ArcaneTrickster"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(8f79af08-cf56-4b7d-e3fa-8b055bdf6c08,1,1,ArcaneTricksterAny)"/>
+                    <attribute id="TableUUID" type="guid" value="7205dbe2-5eef-4cd6-ad7f-45b3dc254f78"/>
+                    <attribute id="UUID" type="guid" value="2c999010-4d6e-4190-890b-2a5b002e4d10"/>
+                </node>
+
+                <!-- ========================================================================= -->
+                <!-- 4. ASSASSIN (Official TableUUID: 43c75b78-757b-4875-9932-427bc95278a0)     -->
+                <!-- ========================================================================= -->
+
+                <!-- Assassin Level 3: Combat Readiness (+2 Init), Opening Gambit (Advantage), Executioner's Strike (Lvl Dmg) + Alacrity -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="3"/>
+                    <attribute id="Name" type="LSString" value="Assassin"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_Assassinate_CombatReadiness;ShadowsCall_Assassinate_OpeningGambit;ShadowsCall_Assassinate_ExecutionerStrike;AssassinsAlacrity"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="TableUUID" type="guid" value="43c75b78-757b-4875-9932-427bc95278a0"/>
+                    <attribute id="UUID" type="guid" value="3a114403-1234-4567-89ab-cdef01234503"/>
+                </node>
+
+                <!-- Assassin Level 9: Shadow Dance (Vanish On Kill/Crit) + Penetrating Toxins + Infiltration Expertise -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="9"/>
+                    <attribute id="Name" type="LSString" value="Assassin"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_ShadowDance_VanishOnKill;ShadowsCall_PenetratingToxins;InfiltrationExpertise"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="TableUUID" type="guid" value="43c75b78-757b-4875-9932-427bc95278a0"/>
+                    <attribute id="UUID" type="guid" value="9b225509-2345-5678-90bc-def012345609"/>
+                </node>
+
+                <!-- Assassin Level 13 (ULC): Envenomed Strike (+2d6 Necrotic on Cunning Strike Poison) -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="13"/>
+                    <attribute id="Name" type="LSString" value="Assassin"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_EnvenomedStrike"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="TableUUID" type="guid" value="43c75b78-757b-4875-9932-427bc95278a0"/>
+                    <attribute id="UUID" type="guid" value="dc336613-3456-6789-01cd-ef0123456713"/>
+                </node>
+
+                <!-- Assassin Level 17 (ULC): Death Strike (Round 1 / Surprised Con Save or Double Damage) -->
+                <node id="Progression">
+                    <attribute id="Level" type="uint8" value="17"/>
+                    <attribute id="Name" type="LSString" value="Assassin"/>
+                    <attribute id="PassivesAdded" type="LSString" value="ShadowsCall_DeathStrike"/>
+                    <attribute id="ProgressionType" type="uint8" value="1"/>
+                    <attribute id="TableUUID" type="guid" value="43c75b78-757b-4875-9932-427bc95278a0"/>
+                    <attribute id="UUID" type="guid" value="ed447717-4567-7890-12de-f01234567817"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>

@@ -1,0 +1,14 @@
+// ==============================================================================
+// ShadowsCall - Spell_Shout.txt
+// Shout spells and active combat maneuvers
+// ==============================================================================
+
+// Cunning Strike: Withdraw (Direct Active Shout option)
+new entry "Shout_ShadowsCall_Withdraw"
+type "SpellData"
+data "SpellType" "Shout"
+data "DisplayName" "h2747dbf8g3eebg5154ga931gfa26cbd77737;1"
+data "Description" "he184f156ga59bg5f2bgb210g4761e0d077e8;1"
+data "Icon" "Action_Disengage"
+data "CooldownType" "OncePerTurn"
+data "SpellProperties" "ApplyStatus(SELF,SHADOWSCALL_WITHDRAW,100,1)"

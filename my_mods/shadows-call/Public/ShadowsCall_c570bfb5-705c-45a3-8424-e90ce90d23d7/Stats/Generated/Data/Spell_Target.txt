@@ -1,0 +1,53 @@
+// ==============================================================================
+// ShadowsCall - Spell_Target.txt
+// Target spells for Arcane Trickster and Cunning Strike remote delivery
+// ==============================================================================
+
+// Arcane Trickster: Legerdemain Mastery - Recastable ritual Mage Hand
+new entry "Target_ShadowsCall_MageHand"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_MageHand"
+data "DisplayName" "h6d123b65g77d3g5d14gb6e3gba28e97b3d56;1"
+data "Description" "h7d3c5419gb4f7g5a32gaee6g5796fd434c9c;1"
+data "Icon" "Spell_Conjuration_MageHand"
+data "CooldownType" "Default"
+data "UseCosts" "ActionPoint:1"
+
+// Level 13 (ULC): Versatile Trickster - Remote Trip via Mage Hand
+new entry "Target_ShadowsCall_VersatileTrickster_Trip"
+type "SpellData"
+data "SpellType" "Target"
+data "DisplayName" "h4820522ag2a62g5a1ega54cgdbdd5f2a5994;1"
+data "Description" "h7b53fae7g6731g5e1fg98bag57bd2c7b632f;1"
+data "Icon" "Action_KnockOut_MainHand"
+data "UseCosts" "BonusActionPoint:1"
+data "TargetRadius" "18"
+data "SpellRoll" "not SavingThrow(Ability.Dexterity, ManeuverSaveDC())"
+data "SpellSuccess" "ApplyStatus(PRONE,100,1)"
+data "TargetConditions" "Character() and Enemy() and not Dead()"
+
+// Level 13 (ULC): Versatile Trickster - Remote Daze via Mage Hand
+new entry "Target_ShadowsCall_VersatileTrickster_Daze"
+type "SpellData"
+data "SpellType" "Target"
+data "DisplayName" "h1e8ba8f6g49f9g5a71gbe93ga219c54e72dc;1"
+data "Description" "h204d7febg454fg5068g9618g7985104a6620;1"
+data "Icon" "Target_Daze"
+data "UseCosts" "BonusActionPoint:1"
+data "TargetRadius" "18"
+data "SpellRoll" "not SavingThrow(Ability.Constitution, ManeuverSaveDC())"
+data "SpellSuccess" "ApplyStatus(SHADOWSCALL_DAZED,100,1)"
+data "TargetConditions" "Character() and Enemy() and not Dead()"
+
+// Level 17 (ULC): Spell Thief - Siphon and negate targeting spell
+new entry "Target_ShadowsCall_SpellThief"
+type "SpellData"
+data "SpellType" "Target"
+using "Target_Counterspell"
+data "DisplayName" "h1319de0bg2498g51b5gbf9fgf544cb3164f7;1"
+data "Description" "h207fb4b1g7acbg5c6dgb0cfg542cb342eee4;1"
+data "Icon" "Spell_Abjuration_Counterspell"
+data "UseCosts" "ReactionActionPoint:1"
+data "CooldownType" "OncePerShortRest"
+data "TargetRadius" "18"
