@@ -51,7 +51,7 @@ RED = "\033[31m" if _color.enabled else ""
 CYAN = "\033[36m" if _color.enabled else ""
 RESET = "\033[0m" if _color.enabled else ""
 
-# Default GustavDev module entry
+# Default GustavDev module entry (for legacy Patch 7 modsettings)
 GUSTAV_DEV = {
     "Folder": "GustavDev",
     "MD5": "33c1655f7ae3559b579ff3b9d2c45413",
@@ -62,6 +62,85 @@ GUSTAV_DEV = {
 }
 
 CORE_GUSTAV_NAMES = {"gustavdev", "gustavx", "gustav"}
+
+# Full suite of core system modules required by Patch 8 (Build 700)
+CORE_SYSTEM_MODULES = [
+    {
+        "Folder": "GustavX",
+        "MD5": "ef3fcba3f3684b3088ad1f9874d4957c",
+        "Name": "GustavX",
+        "PublishHandle": "0",
+        "UUID": "cb555efe-2d9e-131f-8195-a89329d218ea",
+        "Version64": "145241946983300916",
+    },
+    {
+        "Folder": "DiceSet_01",
+        "MD5": "8edd9729dcdbcafdbba0770834bdd323",
+        "Name": "DiceSet_01",
+        "PublishHandle": "0",
+        "UUID": "e842840a-2449-588c-b0c4-22122cfce31b",
+        "Version64": "36028797018963968",
+    },
+    {
+        "Folder": "DiceSet_02",
+        "MD5": "9c98eaefccfb3f7cfd6870ff4e84a50d",
+        "Name": "DiceSet_02",
+        "PublishHandle": "0",
+        "UUID": "b176a0ac-d79f-ed9d-5a87-5c2c80874e10",
+        "Version64": "36028797018963968",
+    },
+    {
+        "Folder": "DiceSet_03",
+        "MD5": "e800e59821eb3090e7e5f25cc478dbd3",
+        "Name": "DiceSet_03",
+        "PublishHandle": "0",
+        "UUID": "e0a4d990-7b9b-8fa9-d7c6-04017c6cf5b1",
+        "Version64": "36028797018963968",
+    },
+    {
+        "Folder": "DiceSet_06",
+        "MD5": "4a53b4f61b1667007e21c661309b7435",
+        "Name": "DiceSet_06",
+        "PublishHandle": "0",
+        "UUID": "ee4989eb-aab8-968f-8674-812ea2f4bfd7",
+        "Version64": "36028797018963968",
+    },
+    {
+        "Folder": "MainUI",
+        "MD5": "d41d8cd98f00b204e9800998ecf8427e",
+        "Name": "MainUI",
+        "PublishHandle": "0",
+        "UUID": "630daa32-70f8-3da5-41b9-154fe8410236",
+        "Version64": "36028797018963968",
+    },
+    {
+        "Folder": "ModBrowser",
+        "MD5": "981922692a4f3bbfc4dd5941221fc4f3",
+        "Name": "ModBrowser",
+        "PublishHandle": "0",
+        "UUID": "ee5a55ff-eb38-0b27-c5b0-f358dc306d34",
+        "Version64": "36028797018963968",
+    },
+    {
+        "Folder": "PhotoMode",
+        "MD5": "045fe21b32b1c766a0a09193aa9d1215",
+        "Name": "PhotoMode",
+        "PublishHandle": "0",
+        "UUID": "55ef175c-59e3-b44b-3fb2-8f86acc5d550",
+        "Version64": "36028797018963968",
+    },
+    {
+        "Folder": "CrossplayUI",
+        "MD5": "d41d8cd98f00b204e9800998ecf8427e",
+        "Name": "CrossplayUI",
+        "PublishHandle": "0",
+        "UUID": "e1ce736b-52e6-e713-e9e7-e6abbb15a198",
+        "Version64": "36028797018963968",
+    },
+]
+
+CORE_SYSTEM_UUIDS = {m["UUID"].lower() for m in CORE_SYSTEM_MODULES} | {GUSTAV_DEV["UUID"].lower()}
+CORE_SYSTEM_NAMES = {m["Name"].lower() for m in CORE_SYSTEM_MODULES} | CORE_GUSTAV_NAMES
 
 
 def detect_modsettings_path() -> Path | None:
@@ -80,25 +159,55 @@ def detect_modsettings_path() -> Path | None:
     return None
 
 
+def get_appdata_mods_dir(modsettings_path: Path | None = None) -> Path | None:
+    """Detect AppData/Local/Larian Studios/Baldur's Gate 3/Mods directory."""
+    if modsettings_path and (modsettings_path.is_file() or modsettings_path.parent.is_dir()):
+        try:
+            candidate = modsettings_path.resolve().parents[2] / "Mods"
+            if candidate.is_dir() or candidate.parent.is_dir():
+                return candidate
+        except Exception:
+            pass
+
+    for appdata in detect_bg3_appdata_dirs():
+        p = appdata / "Mods"
+        if p.is_dir() or p.parent.is_dir():
+            return p
+
+    return None
+
+
 def create_default_modsettings(path: Path):
-    """Generate a clean Patch 7+ skeleton modsettings.lsx with GustavDev."""
+    """Generate a clean Patch 8 (Build 700) skeleton modsettings.lsx with all core system modules and ModOrder."""
     path.parent.mkdir(parents=True, exist_ok=True)
+    module_nodes = []
+    for mod in CORE_SYSTEM_MODULES:
+        module_nodes.append(f"""                        <node id="ModuleShortDesc">
+                            <attribute id="Folder" type="LSString" value="{mod['Folder']}"/>
+                            <attribute id="MD5" type="LSString" value="{mod['MD5']}"/>
+                            <attribute id="Name" type="LSString" value="{mod['Name']}"/>
+                            <attribute id="PublishHandle" type="uint64" value="{mod['PublishHandle']}"/>
+                            <attribute id="UUID" type="guid" value="{mod['UUID']}"/>
+                            <attribute id="Version64" type="int64" value="{mod['Version64']}"/>
+                        </node>""")
+    mods_xml = "\n".join(module_nodes)
+    base_uuid = CORE_SYSTEM_MODULES[0]["UUID"]
     xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <save>
     <version major="4" minor="8" revision="0" build="700"/>
     <region id="ModuleSettings">
         <node id="root">
             <children>
+                <node id="ModOrder">
+                    <children>
+                        <node id="Module">
+                            <attribute id="UUID" type="FixedString" value="{base_uuid}"/>
+                        </node>
+                    </children>
+                </node>
                 <node id="Mods">
                     <children>
-                        <node id="ModuleShortDesc">
-                            <attribute id="Folder" type="LSString" value="{GUSTAV_DEV['Folder']}"/>
-                            <attribute id="MD5" type="LSString" value="{GUSTAV_DEV['MD5']}"/>
-                            <attribute id="Name" type="LSString" value="{GUSTAV_DEV['Name']}"/>
-                            <attribute id="PublishHandle" type="uint64" value="{GUSTAV_DEV['PublishHandle']}"/>
-                            <attribute id="UUID" type="guid" value="{GUSTAV_DEV['UUID']}"/>
-                            <attribute id="Version64" type="int64" value="{GUSTAV_DEV['Version64']}"/>
-                        </node>
+{mods_xml}
                     </children>
                 </node>
             </children>
@@ -348,18 +457,36 @@ def resolve_all_dependencies(
 
 
 def isolate_load_order(path: Path, keep_uuids: set[str], dry_run: bool = False) -> int:
-    """Disables all mods in modsettings.lsx except GustavDev/GustavX and those in keep_uuids."""
+    """Disables all mods in modsettings.lsx except Patch 8 core system modules and those in keep_uuids."""
     if not path.is_file():
         return 0
 
     tree = ET.parse(path)
     root = tree.getroot()
 
-    mod_order_children = root.find(".//node[@id='ModOrder']/children")
-    mods_children = root.find(".//node[@id='Mods']/children")
+    root_children = root.find(".//node[@id='root']/children")
+    if root_children is None:
+        root_node = root.find(".//node[@id='root']")
+        if root_node is None:
+            root_node = ET.SubElement(root, "node", id="root")
+        root_children = ET.SubElement(root_node, "children")
 
+    mod_order_node = root.find(".//node[@id='ModOrder']")
+    if mod_order_node is None:
+        mod_order_node = ET.Element("node", id="ModOrder")
+        root_children.insert(0, mod_order_node)
+    mod_order_children = mod_order_node.find("children")
+    if mod_order_children is None:
+        mod_order_children = ET.SubElement(mod_order_node, "children")
+
+    mods_children = root.find(".//node[@id='Mods']/children")
     if mods_children is None:
-        return 0
+        mods_node = root.find(".//node[@id='Mods']")
+        if mods_node is None:
+            mods_node = ET.SubElement(root_children, "node", id="Mods")
+        mods_children = ET.SubElement(mods_node, "children")
+
+    norm_keep = {u.lower().strip() for u in keep_uuids if u}
 
     removed_count = 0
     # Clean Mods
@@ -367,26 +494,25 @@ def isolate_load_order(path: Path, keep_uuids: set[str], dry_run: bool = False) 
         u_attr = desc.find("attribute[@id='UUID']")
         n_attr = desc.find("attribute[@id='Name']")
         f_attr = desc.find("attribute[@id='Folder']")
-        u_val = u_attr.get("value", "") if u_attr is not None else ""
-        n_val = (n_attr.get("value", "") if n_attr is not None else "").lower()
-        f_val = (f_attr.get("value", "") if f_attr is not None else "").lower()
+        u_val = (u_attr.get("value", "") if u_attr is not None else "").lower().strip()
+        n_val = (n_attr.get("value", "") if n_attr is not None else "").lower().strip()
+        f_val = (f_attr.get("value", "") if f_attr is not None else "").lower().strip()
 
-        if u_val == GUSTAV_DEV["UUID"] or n_val in CORE_GUSTAV_NAMES or f_val in CORE_GUSTAV_NAMES:
+        if u_val in CORE_SYSTEM_UUIDS or n_val in CORE_SYSTEM_NAMES or f_val in CORE_SYSTEM_NAMES:
             continue
-        if u_val not in keep_uuids:
+        if u_val not in norm_keep:
             mods_children.remove(desc)
             removed_count += 1
 
     # Clean ModOrder
-    if mod_order_children is not None:
-        for m_node in list(mod_order_children.findall("node[@id='Module']")):
-            u_attr = m_node.find("attribute[@id='UUID']")
-            u_val = u_attr.get("value", "") if u_attr is not None else ""
-            if u_val == GUSTAV_DEV["UUID"] or u_val in keep_uuids:
-                continue
-            mod_order_children.remove(m_node)
+    for m_node in list(mod_order_children.findall("node[@id='Module']")):
+        u_attr = m_node.find("attribute[@id='UUID']")
+        u_val = (u_attr.get("value", "") if u_attr is not None else "").lower().strip()
+        if u_val in CORE_SYSTEM_UUIDS or u_val in norm_keep:
+            continue
+        mod_order_children.remove(m_node)
 
-    if removed_count > 0 and not dry_run:
+    if not dry_run:
         save_modsettings(path, tree)
 
     return removed_count
@@ -400,45 +526,69 @@ def backup_file(path: Path) -> Path:
 
 
 def _ensure_base_module(root: ET.Element, mods_children: ET.Element, mod_order_children: ET.Element | None = None) -> bool:
-    """Ensure base game module (GustavDev / GustavX) is present at index 0 in Mods (and ModOrder if present)."""
+    """Ensure base game and Patch 8 core system modules are present at the beginning of Mods."""
     modified = False
-    base_module_uuid = None
-    for desc_node in mods_children.findall("node[@id='ModuleShortDesc']"):
-        u_attr = desc_node.find("attribute[@id='UUID']")
-        n_attr = desc_node.find("attribute[@id='Name']")
-        f_attr = desc_node.find("attribute[@id='Folder']")
-        u_val = u_attr.get("value", "") if u_attr is not None else ""
-        n_val = (n_attr.get("value", "") if n_attr is not None else "").lower()
-        f_val = (f_attr.get("value", "") if f_attr is not None else "").lower()
-        if u_val == GUSTAV_DEV["UUID"] or n_val in CORE_GUSTAV_NAMES or f_val in CORE_GUSTAV_NAMES:
-            base_module_uuid = u_val
-            break
 
-    if not base_module_uuid:
-        base_module_uuid = GUSTAV_DEV["UUID"]
-        gustav_desc = ET.Element("node", id="ModuleShortDesc")
-        ET.SubElement(gustav_desc, "attribute", id="Folder", type="LSString", value=GUSTAV_DEV["Folder"])
-        ET.SubElement(gustav_desc, "attribute", id="MD5", type="LSString", value=GUSTAV_DEV["MD5"])
-        ET.SubElement(gustav_desc, "attribute", id="Name", type="LSString", value=GUSTAV_DEV["Name"])
-        ET.SubElement(gustav_desc, "attribute", id="PublishHandle", type="uint64", value=str(GUSTAV_DEV["PublishHandle"]))
-        ET.SubElement(gustav_desc, "attribute", id="UUID", type="guid", value=GUSTAV_DEV["UUID"])
-        ET.SubElement(gustav_desc, "attribute", id="Version64", type="int64", value=str(GUSTAV_DEV["Version64"]))
-        mods_children.insert(0, gustav_desc)
-        modified = True
+    # Map existing ModuleShortDesc nodes by UUID
+    existing_by_uuid: dict[str, ET.Element] = {}
+    for desc_node in list(mods_children.findall("node[@id='ModuleShortDesc']")):
+        u_attr = desc_node.find("attribute[@id='UUID']")
+        if u_attr is not None:
+            val = u_attr.get("value", "").lower().strip()
+            if val:
+                existing_by_uuid[val] = desc_node
+
+    # If file is legacy Patch 7 (GustavDev present without GustavX), keep GustavDev at index 0
+    is_legacy_p7 = (
+        GUSTAV_DEV["UUID"].lower() in existing_by_uuid
+        and CORE_SYSTEM_MODULES[0]["UUID"].lower() not in existing_by_uuid
+    )
+
+    if is_legacy_p7:
+        gustav_node = existing_by_uuid[GUSTAV_DEV["UUID"].lower()]
+        all_descs = mods_children.findall("node[@id='ModuleShortDesc']")
+        if all_descs and all_descs[0] != gustav_node:
+            mods_children.remove(gustav_node)
+            mods_children.insert(0, gustav_node)
+            modified = True
+    else:
+        # Patch 8: ensure each core system module is present in canonical order
+        for idx, mod in enumerate(CORE_SYSTEM_MODULES):
+            u_key = mod["UUID"].lower()
+            if u_key in existing_by_uuid:
+                node = existing_by_uuid[u_key]
+                all_descs = mods_children.findall("node[@id='ModuleShortDesc']")
+                curr_idx = all_descs.index(node) if node in all_descs else -1
+                if curr_idx != idx and curr_idx > idx:
+                    mods_children.remove(node)
+                    mods_children.insert(idx, node)
+                    modified = True
+            else:
+                node = ET.Element("node", id="ModuleShortDesc")
+                ET.SubElement(node, "attribute", id="Folder", type="LSString", value=mod["Folder"])
+                ET.SubElement(node, "attribute", id="MD5", type="LSString", value=mod["MD5"])
+                ET.SubElement(node, "attribute", id="Name", type="LSString", value=mod["Name"])
+                ET.SubElement(node, "attribute", id="PublishHandle", type="uint64", value=str(mod["PublishHandle"]))
+                ET.SubElement(node, "attribute", id="UUID", type="guid", value=mod["UUID"])
+                ET.SubElement(node, "attribute", id="Version64", type="int64", value=str(mod["Version64"]))
+                mods_children.insert(idx, node)
+                existing_by_uuid[u_key] = node
+                modified = True
 
     # Check mod_order_children only if ModOrder exists in file (legacy compatibility)
     if mod_order_children is not None:
         order_modules = mod_order_children.findall("node[@id='Module']")
+        base_uuid = GUSTAV_DEV["UUID"] if is_legacy_p7 else CORE_SYSTEM_MODULES[0]["UUID"]
         base_order_node = None
         for m in order_modules:
             u_attr = m.find("attribute[@id='UUID']")
-            if u_attr is not None and u_attr.get("value") == base_module_uuid:
+            if u_attr is not None and u_attr.get("value", "").lower() == base_uuid.lower():
                 base_order_node = m
                 break
 
         if base_order_node is None:
             base_order_node = ET.Element("node", id="Module")
-            ET.SubElement(base_order_node, "attribute", id="UUID", type="FixedString", value=base_module_uuid)
+            ET.SubElement(base_order_node, "attribute", id="UUID", type="FixedString", value=base_uuid)
             mod_order_children.insert(0, base_order_node)
             modified = True
         else:
@@ -464,11 +614,27 @@ def enable_mod(path: Path, mod_meta: dict, order_index: int | None = None, dry_r
     tree = ET.parse(path)
     root = tree.getroot()
 
-    mod_order_children = root.find(".//node[@id='ModOrder']/children")
-    mods_children = root.find(".//node[@id='Mods']/children")
+    root_children = root.find(".//node[@id='root']/children")
+    if root_children is None:
+        root_node = root.find(".//node[@id='root']")
+        if root_node is None:
+            root_node = ET.SubElement(root, "node", id="root")
+        root_children = ET.SubElement(root_node, "children")
 
+    mod_order_node = root.find(".//node[@id='ModOrder']")
+    if mod_order_node is None:
+        mod_order_node = ET.Element("node", id="ModOrder")
+        root_children.insert(0, mod_order_node)
+    mod_order_children = mod_order_node.find("children")
+    if mod_order_children is None:
+        mod_order_children = ET.SubElement(mod_order_node, "children")
+
+    mods_children = root.find(".//node[@id='Mods']/children")
     if mods_children is None:
-        raise ValueError("Invalid modsettings.lsx: missing Mods children node.")
+        mods_node = root.find(".//node[@id='Mods']")
+        if mods_node is None:
+            mods_node = ET.SubElement(root_children, "node", id="Mods")
+        mods_children = ET.SubElement(mods_node, "children")
 
     base_modified = _ensure_base_module(root, mods_children, mod_order_children)
 
@@ -479,14 +645,14 @@ def enable_mod(path: Path, mod_meta: dict, order_index: int | None = None, dry_r
     if mod_order_children is not None:
         for mod_node in mod_order_children.findall("node[@id='Module']"):
             u_attr = mod_node.find("attribute[@id='UUID']")
-            if u_attr is not None and u_attr.get("value") == target_uuid:
+            if u_attr is not None and u_attr.get("value", "").lower() == target_uuid.lower():
                 existing_order_node = mod_node
                 break
 
     existing_desc_node = None
     for desc_node in mods_children.findall("node[@id='ModuleShortDesc']"):
         u_attr = desc_node.find("attribute[@id='UUID']")
-        if u_attr is not None and u_attr.get("value") == target_uuid:
+        if u_attr is not None and u_attr.get("value", "").lower() == target_uuid.lower():
             existing_desc_node = desc_node
             break
 
@@ -523,8 +689,16 @@ def enable_mod(path: Path, mod_meta: dict, order_index: int | None = None, dry_r
         ET.SubElement(new_desc_node, "attribute", id="Version64", type="int64", value=str(mod_meta.get("Version64", "36028797018963968")))
 
         if order_index is not None:
-            # Never insert at index 0 ahead of GustavDev/GustavX
-            safe_idx = max(1, order_index)
+            # Never insert ahead of core system modules
+            core_count = sum(
+                1 for d in mods_children.findall("node[@id='ModuleShortDesc']")
+                if (d.find("attribute[@id='UUID']") is not None and 
+                    d.find("attribute[@id='UUID']").get("value", "").lower() in CORE_SYSTEM_UUIDS)
+            )
+            if order_index < core_count:
+                safe_idx = core_count + max(0, order_index - 1)
+            else:
+                safe_idx = order_index
             desc_len = len(mods_children.findall("node[@id='ModuleShortDesc']"))
             mods_children.insert(min(safe_idx, desc_len), new_desc_node)
         else:
@@ -572,19 +746,19 @@ def disable_mod(path: Path, mod_name: str, dry_run: bool = False) -> bool:
     if not target_uuid:
         return False
 
-    if target_uuid == GUSTAV_DEV["UUID"] or target_name.lower() in CORE_GUSTAV_NAMES:
-        raise ValueError(f"Cannot disable core game module {target_name or 'GustavDev'}.")
+    if target_uuid.lower() in CORE_SYSTEM_UUIDS or target_name.lower() in CORE_SYSTEM_NAMES:
+        raise ValueError(f"Cannot disable core game or system module {target_name or target_uuid}.")
 
     if not dry_run:
         if mod_order_children is not None:
             for m_node in list(mod_order_children.findall("node[@id='Module']")):
                 u_attr = m_node.find("attribute[@id='UUID']")
-                if u_attr is not None and u_attr.get("value") == target_uuid:
+                if u_attr is not None and u_attr.get("value", "").lower() == target_uuid.lower():
                     mod_order_children.remove(m_node)
 
         for desc in list(mods_children.findall("node[@id='ModuleShortDesc']")):
             u_attr = desc.find("attribute[@id='UUID']")
-            if u_attr is not None and u_attr.get("value") == target_uuid:
+            if u_attr is not None and u_attr.get("value", "").lower() == target_uuid.lower():
                 mods_children.remove(desc)
 
         save_modsettings(path, tree)
@@ -604,10 +778,27 @@ def validate_load_order(parsed: dict) -> list[str]:
     first_uuid = order[0]
     first_mod = mods.get(first_uuid, {})
     first_name = (first_mod.get("Name") or first_mod.get("Folder") or "").lower()
-    if first_uuid != GUSTAV_DEV["UUID"] and first_name not in CORE_GUSTAV_NAMES:
+    if (
+        first_uuid != GUSTAV_DEV["UUID"]
+        and first_name not in CORE_GUSTAV_NAMES
+        and first_uuid.lower() != CORE_SYSTEM_MODULES[0]["UUID"].lower()
+    ):
         issues.append(
             f"Base game module (GustavDev / GustavX) must be at load order index 0 (found '{first_mod.get('Name', first_uuid)}')."
         )
+
+    # In Patch 8 (GustavX present), verify all core system modules exist
+    has_gustav_x = any(
+        m.get("Name", "").lower() == "gustavx" or u.lower() == CORE_SYSTEM_MODULES[0]["UUID"].lower()
+        for u, m in mods.items()
+    )
+    if has_gustav_x:
+        missing_core = [
+            m["Name"] for m in CORE_SYSTEM_MODULES
+            if m["UUID"].lower() not in {u.lower() for u in mods.keys()}
+        ]
+        if missing_core:
+            issues.append(f"Missing core system modules required by Patch 8: {', '.join(missing_core)}")
 
     for u in order:
         if u not in mods:
@@ -620,10 +811,248 @@ def validate_load_order(parsed: dict) -> list[str]:
         for idx, u in enumerate(order):
             mod_entry = mods.get(u, {})
             m_name = (mod_entry.get("Name") or mod_entry.get("Folder") or "").lower()
-            if idx < ulc_idx and u != GUSTAV_DEV["UUID"] and m_name not in CORE_GUSTAV_NAMES:
+            if idx < ulc_idx and u != GUSTAV_DEV["UUID"] and m_name not in CORE_GUSTAV_NAMES and u.lower() not in CORE_SYSTEM_UUIDS:
                 issues.append(f"Warning: Mod '{mod_entry.get('Name', u)}' is loaded before UnlockLevelCurve.")
 
     return issues
+
+
+def get_pak_module_info(pak_path: Path) -> dict | None:
+    """Extract UUID, Name, Folder, Version64 from meta.lsx inside a .pak archive."""
+    try:
+        archive = LspkArchive(pak_path.read_bytes())
+        for entry in archive.files:
+            if entry["name"].replace("\\", "/").lower().endswith("meta.lsx"):
+                xml_txt = archive.extract_file(entry).decode("utf-8", errors="ignore")
+                return _extract_meta_from_xml_text(xml_txt, pak_path.stem)
+    except Exception:
+        pass
+    return None
+
+
+def clean_steam_data_paks(dry_run: bool = False) -> list[dict]:
+    """
+    Purge or archive stray .pak archives from Steam <Game>/Data/Mods/.
+    Custom mods must reside in AppData/Mods; .pak files in Steam Data/Mods cause duplicate registration collisions.
+    """
+    data_dir = detect_data_dir()
+    if not data_dir:
+        return []
+    steam_mods = data_dir / "Mods"
+    if not steam_mods.is_dir():
+        return []
+
+    cleaned = []
+    quarantine_steam = None
+    for appdata in detect_bg3_appdata_dirs():
+        quarantine_steam = appdata / "Mods_Disabled" / "steam_data_paks"
+        break
+
+    for pak_file in sorted(steam_mods.glob("*.pak")):
+        if not pak_file.is_file():
+            continue
+        dest = (quarantine_steam / pak_file.name) if quarantine_steam else None
+        record = {
+            "file": pak_file.name,
+            "path": str(pak_file),
+            "destination": str(dest) if dest else "",
+            "action": "removed_steam_data_pak",
+        }
+        cleaned.append(record)
+        if not dry_run:
+            if quarantine_steam:
+                quarantine_steam.mkdir(parents=True, exist_ok=True)
+                if dest.exists():
+                    dest.unlink()
+                shutil.move(str(pak_file), str(dest))
+            else:
+                pak_file.unlink()
+
+    return cleaned
+
+
+def deduplicate_installed_paks(
+    mods_dir: Path,
+    quarantine_base: Path | None = None,
+    dry_run: bool = False,
+) -> list[dict]:
+    """
+    Find duplicate .pak archives sharing the same ModuleInfo UUID in mods_dir.
+    Keeps canonical <Folder>_<UUID>.pak or newest archive, moving redundant copies to Mods_Disabled/duplicates/.
+    Also cleans stray .pak.bak files.
+    """
+    if not mods_dir.is_dir():
+        return []
+
+    duplicates_dir = (quarantine_base or mods_dir.parent / "Mods_Disabled") / "duplicates"
+    results = []
+
+    # 1. Clean stray .pak.bak files
+    for bak_file in sorted(mods_dir.glob("*.pak.bak")) + sorted(mods_dir.glob("*.bak")):
+        if not bak_file.is_file():
+            continue
+        dest = duplicates_dir / bak_file.name
+        results.append({
+            "action": "removed_bak",
+            "file": bak_file.name,
+            "path": str(bak_file),
+            "destination": str(dest),
+        })
+        if not dry_run:
+            duplicates_dir.mkdir(parents=True, exist_ok=True)
+            if dest.exists():
+                dest.unlink()
+            shutil.move(str(bak_file), str(dest))
+
+    # 2. Group .pak archives by internal module UUID
+    paks_by_uuid: dict[str, list[tuple[Path, dict]]] = {}
+    for pak_path in sorted(mods_dir.glob("*.pak")):
+        info = get_pak_module_info(pak_path)
+        if info and info.get("UUID"):
+            uuid_key = info["UUID"].lower().strip()
+            paks_by_uuid.setdefault(uuid_key, []).append((pak_path, info))
+
+    for uuid_key, entries in paks_by_uuid.items():
+        if len(entries) <= 1:
+            continue
+
+        def score_entry(item: tuple[Path, dict]) -> tuple[int, int, float]:
+            path, meta = item
+            stem = path.stem.lower()
+            u_clean = uuid_key.replace("-", "")
+            is_canonical = (
+                f"_{uuid_key}" in stem
+                or f"_{u_clean}" in stem
+                or (meta.get("Folder", "").lower() in stem and uuid_key in stem)
+            )
+            is_modio_hash = bool(re.search(r"-[0-9a-z]{4}$", stem))
+            try:
+                v64 = int(meta.get("Version64", 0))
+            except ValueError:
+                v64 = 0
+            mtime = path.stat().st_mtime
+            score = (10 if is_canonical else 0) - (5 if is_modio_hash else 0)
+            return (score, v64, mtime)
+
+        sorted_entries = sorted(entries, key=score_entry, reverse=True)
+        winner_path, winner_meta = sorted_entries[0]
+        losers = sorted_entries[1:]
+
+        for loser_path, loser_meta in losers:
+            dest = duplicates_dir / loser_path.name
+            results.append({
+                "action": "deduplicated",
+                "uuid": uuid_key,
+                "winner": winner_path.name,
+                "redundant": loser_path.name,
+                "destination": str(dest),
+            })
+            if not dry_run:
+                duplicates_dir.mkdir(parents=True, exist_ok=True)
+                if dest.exists():
+                    dest.unlink()
+                shutil.move(str(loser_path), str(dest))
+
+    return results
+
+
+def quarantine_unrelated_paks(
+    mods_dir: Path,
+    keep_uuids: set[str],
+    quarantine_base: Path | None = None,
+    dry_run: bool = False,
+) -> list[dict]:
+    """
+    Move all .pak archives whose module UUID is NOT in keep_uuids into Mods_Disabled/.
+    Saves quarantine_manifest.json so restore can reliably recover original state.
+    """
+    if not mods_dir.is_dir():
+        return []
+
+    quarantine_dir = quarantine_base or mods_dir.parent / "Mods_Disabled"
+    manifest_path = quarantine_dir / "quarantine_manifest.json"
+    norm_keep = {u.lower().strip() for u in keep_uuids if u}
+
+    quarantined = []
+    manifest_data = {}
+    if manifest_path.is_file():
+        try:
+            manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except Exception:
+            manifest_data = {}
+
+    for pak_path in sorted(mods_dir.glob("*.pak")):
+        info = get_pak_module_info(pak_path)
+        u_val = info.get("UUID", "").lower().strip() if info else ""
+        if not u_val:
+            m = re.search(r"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})", pak_path.name, re.IGNORECASE)
+            if m:
+                u_val = m.group(1).lower()
+
+        if u_val and u_val in norm_keep:
+            continue
+
+        dest = quarantine_dir / pak_path.name
+        record = {
+            "filename": pak_path.name,
+            "uuid": u_val,
+            "source": str(pak_path),
+            "destination": str(dest),
+            "timestamp": datetime.datetime.now().isoformat(),
+        }
+        quarantined.append(record)
+        manifest_data[pak_path.name] = record
+
+        if not dry_run:
+            quarantine_dir.mkdir(parents=True, exist_ok=True)
+            if dest.exists():
+                dest.unlink()
+            shutil.move(str(pak_path), str(dest))
+
+    if not dry_run and quarantined:
+        manifest_path.write_text(json.dumps(manifest_data, indent=2), encoding="utf-8")
+
+    return quarantined
+
+
+def restore_quarantined_paks(
+    mods_dir: Path,
+    quarantine_base: Path | None = None,
+    dry_run: bool = False,
+) -> list[dict]:
+    """
+    Restores all quarantined .pak archives from Mods_Disabled/ back into mods_dir.
+    """
+    quarantine_dir = quarantine_base or mods_dir.parent / "Mods_Disabled"
+    if not quarantine_dir.is_dir():
+        return []
+
+    restored = []
+    manifest_path = quarantine_dir / "quarantine_manifest.json"
+
+    for pak_path in sorted(quarantine_dir.glob("*.pak")):
+        if not pak_path.is_file():
+            continue
+        dest = mods_dir / pak_path.name
+        record = {
+            "filename": pak_path.name,
+            "source": str(pak_path),
+            "destination": str(dest),
+        }
+        restored.append(record)
+        if not dry_run:
+            mods_dir.mkdir(parents=True, exist_ok=True)
+            if dest.exists():
+                dest.unlink()
+            shutil.move(str(pak_path), str(dest))
+
+    if not dry_run and manifest_path.is_file():
+        try:
+            manifest_path.unlink()
+        except Exception:
+            pass
+
+    return restored
 
 
 def main():
@@ -638,7 +1067,10 @@ def main():
     parser.add_argument("--with-deps", dest="with_deps", action="store_true", default=True, help="Automatically enable declared dependencies from meta.lsx (default: True)")
     parser.add_argument("--no-deps", dest="with_deps", action="store_false", help="Do not automatically enable dependencies")
     parser.add_argument("--test-dep", action="append", default=[], dest="test_deps", help="Temporary test dependency name, slug, or UUID to activate ahead of the mod")
-    parser.add_argument("--isolate", "--clean", dest="isolate", action="store_true", help="Clean-room isolation: disable all other mods except base game and dependencies")
+    parser.add_argument("--isolate", "--clean", dest="isolate", action="store_true", help="Clean-room isolation: disable all other mods except base game and dependencies in modsettings.lsx")
+    parser.add_argument("--quarantine", action="store_true", help="Physically quarantine unrelated .pak files to Mods_Disabled/ (Warning: triggers mod.io auto-download for subscribed mods)")
+    parser.add_argument("--restore", action="store_true", help="Restore quarantined mods from Mods_Disabled/ back to active Mods directory")
+    parser.add_argument("--dedup", "--deduplicate", dest="dedup", action="store_true", help="Deduplicate installed .pak files in AppData Mods")
     parser.add_argument("--validate", action="store_true", help="Validate current load order rules")
     parser.add_argument("--create-default", action="store_true", help="Create default modsettings.lsx if missing")
     parser.add_argument("--dry-run", action="store_true", help="Preview modifications without writing to disk")
@@ -683,6 +1115,59 @@ def main():
         args.list = True
 
     action_result = {}
+
+    if args.restore:
+        mods_dir = get_appdata_mods_dir(modsettings_path)
+        if not mods_dir:
+            msg = "Could not locate AppData Mods directory for restore."
+            if args.json:
+                print(json.dumps({"error": msg, "success": False}, indent=2))
+            else:
+                print(f"{RED}Error: {msg}{RESET}", file=sys.stderr)
+            sys.exit(1)
+        restored = restore_quarantined_paks(mods_dir, dry_run=args.dry_run)
+        action_result["restore"] = {
+            "count": len(restored),
+            "files": restored,
+            "dry_run": args.dry_run,
+        }
+        if not args.json:
+            verb = "[DRY-RUN] Would restore" if args.dry_run else "Restored"
+            print(f"✓ {verb} {len(restored)} mod archive(s) from Mods_Disabled/ to Mods/.")
+            for r in restored:
+                print(f"  ↳ {r['filename']}")
+        if not (args.enable or args.list or args.validate or args.disable):
+            sys.exit(0)
+
+    if args.dedup:
+        mods_dir = get_appdata_mods_dir(modsettings_path)
+        if not mods_dir:
+            msg = "Could not locate AppData Mods directory for deduplication."
+            if args.json:
+                print(json.dumps({"error": msg, "success": False}, indent=2))
+            else:
+                print(f"{RED}Error: {msg}{RESET}", file=sys.stderr)
+            sys.exit(1)
+        deduped = deduplicate_installed_paks(mods_dir, dry_run=args.dry_run)
+        steam_cleaned = clean_steam_data_paks(dry_run=args.dry_run)
+        action_result["deduplicate"] = {
+            "count": len(deduped),
+            "actions": deduped,
+            "steam_cleaned": steam_cleaned,
+            "dry_run": args.dry_run,
+        }
+        if not args.json:
+            verb = "[DRY-RUN] Would deduplicate" if args.dry_run else "Deduplicated"
+            print(f"✓ {verb} {len(deduped)} duplicate/backup file(s).")
+            for d in deduped:
+                if d.get("action") == "deduplicated":
+                    print(f"  ↳ Kept '{d['winner']}', archived '{d['redundant']}'")
+                elif d.get("action") == "removed_bak":
+                    print(f"  ↳ Archived backup file '{d['file']}'")
+            if steam_cleaned:
+                print(f"✓ Cleaned {len(steam_cleaned)} duplicate .pak archive(s) from Steam Data/Mods.")
+        if not (args.enable or args.list or args.validate or args.disable):
+            sys.exit(0)
 
     if args.enable:
         mod_meta = get_mod_metadata_from_workspace(args.enable)
@@ -735,11 +1220,30 @@ def main():
                 *(d["UUID"] for d in resolved_deps),
                 *(d["UUID"] for d in resolved_test_deps),
             }
+            mods_dir = get_appdata_mods_dir(modsettings_path)
+            clean_steam_results = clean_steam_data_paks(dry_run=args.dry_run)
+            dedup_results = []
+            quarantined_paks = []
+            if mods_dir and mods_dir.is_dir():
+                dedup_results = deduplicate_installed_paks(mods_dir, dry_run=args.dry_run)
+                if getattr(args, "quarantine", False):
+                    quarantined_paks = quarantine_unrelated_paks(mods_dir, keep_uuids, dry_run=args.dry_run)
+
+            action_result["clean_steam_data"] = clean_steam_results
+            action_result["deduplicate"] = dedup_results
+            action_result["quarantined_paks"] = quarantined_paks
+
             isolated_count = isolate_load_order(modsettings_path, keep_uuids, dry_run=args.dry_run)
             action_result["isolated_count"] = isolated_count
-            if not args.json and isolated_count > 0:
+            if not args.json:
                 verb = "[DRY-RUN] Would isolate" if args.dry_run else "Isolated"
-                print(f"✓ {verb} load order (disabled {isolated_count} unrelated mod{'s' if isolated_count != 1 else ''}).")
+                print(f"✓ {verb} load order (disabled {isolated_count} mod entries in modsettings.lsx).")
+                if clean_steam_results:
+                    print(f"  ↳ Cleaned {len(clean_steam_results)} duplicate .pak archive(s) from Steam Data/Mods.")
+                if dedup_results:
+                    print(f"  ↳ Deduplicated {len(dedup_results)} conflicting/redundant .pak archive(s).")
+                if quarantined_paks:
+                    print(f"  ↳ Quarantined {len(quarantined_paks)} unrelated .pak archive(s) to Mods_Disabled/.")
 
         current_order_idx = 1
         dep_results = []

@@ -280,7 +280,9 @@ def find_installed_pak(dep: Dict[str, Any], search_dirs: Sequence[Path]) -> Opti
     norm_folder = normalize_mod_key(folder)
     norm_name = normalize_mod_key(name)
 
-    # 1. Fast filename stem matching
+    # 1. Fast filename stem matching (prefer canonical names without mod.io hashed suffixes)
+    canonical_candidates = []
+    fallback_candidates = []
     for s_dir in search_dirs:
         if not s_dir.is_dir():
             continue
@@ -289,7 +291,15 @@ def find_installed_pak(dep: Dict[str, Any], search_dirs: Sequence[Path]) -> Opti
             p_norm = normalize_mod_key(p_stem)
             # Require exact UUID match or exact normalized folder/name equality to avoid falsely matching sub-patches
             if (dep_uuid and dep_uuid in p_stem.lower()) or p_norm == norm_folder or p_norm == norm_name:
-                return pak_file
+                if re.search(r"-[0-9a-z]{4}$", p_stem.lower()):
+                    fallback_candidates.append(pak_file)
+                else:
+                    canonical_candidates.append(pak_file)
+
+    if canonical_candidates:
+        return canonical_candidates[0]
+    if fallback_candidates:
+        return fallback_candidates[0]
 
     # 2. Deep fallback: Inspect internal meta.lsx in .pak archives for hashed/truncated filenames (e.g. mod.io *-xxxx.pak)
     if dep_uuid:
@@ -304,10 +314,15 @@ def find_installed_pak(dep: Dict[str, Any], search_dirs: Sequence[Path]) -> Opti
                             xml_bytes = archive.extract_file(entry)
                             parsed_meta = parse_meta_lsx(xml_bytes)
                             if parsed_meta.get("UUID", "").lower() == dep_uuid:
-                                return pak_file
+                                if not re.search(r"-[0-9a-z]{4}$", pak_file.stem.lower()):
+                                    return pak_file
+                                fallback_candidates.append(pak_file)
                             break
                 except Exception:
                     pass
+
+    if fallback_candidates:
+        return fallback_candidates[0]
 
     return None
 
@@ -317,17 +332,19 @@ def ensure_dependency_paks(
     target_dirs: Optional[List[Path]] = None,
 ) -> List[Dict[str, Any]]:
     """
-    Ensures .pak files for dependencies exist across game Data/Mods and AppData Mods.
+    Ensures .pak files for dependencies exist in AppData Mods.
     Synchronizes between directories if found in one, or downloads from mod.io if missing.
+    Custom .pak files must reside in AppData/Mods (never copied to Steam Data/Mods).
     """
     if target_dirs is None:
         target_dirs = []
-        data_mods = detect_data_dir() / "Mods"
-        target_dirs.append(data_mods)
         for appdata in detect_bg3_appdata_dirs():
             app_mods = appdata / "Mods"
             if app_mods not in target_dirs:
                 target_dirs.append(app_mods)
+        if not target_dirs:
+            data_mods = detect_data_dir() / "Mods"
+            target_dirs.append(data_mods)
 
     results: List[Dict[str, Any]] = []
 

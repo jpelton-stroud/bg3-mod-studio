@@ -133,6 +133,35 @@ class TestBg3CliIntegration(unittest.TestCase):
         self.assertIsInstance(tools, list)
         self.assertTrue(len(tools) >= 20)
 
+    def test_bg3_save_list_json(self):
+        proc = self.run_cli(["save", "list", "--json"])
+        self.assertEqual(proc.returncode, 0)
+        payload = json.loads(proc.stdout)
+        self.assertEqual(payload["status"], "success")
+        self.assertIn("saves", payload["data"])
+
+    def test_bg3_save_purge_dry_run_json(self):
+        proc = self.run_cli(["save", "purge", "--dry-run", "--json"])
+        self.assertEqual(proc.returncode, 0)
+        payload = json.loads(proc.stdout)
+        self.assertEqual(payload["status"], "success")
+
+    def test_bg3_save_purge_confirmation_required(self):
+        proc = self.run_cli(["save", "purge", "--json"])
+        # If there are saves discovered, it must require confirmation
+        # If 0 saves, it returns OK with 0 purged
+        self.assertIn(proc.returncode, (0, 2))
+        payload = json.loads(proc.stdout)
+        if proc.returncode == 2:
+            self.assertEqual(payload["status"], "error")
+            self.assertEqual(payload["error"]["code"], "CONFIRMATION_REQUIRED")
+
+    def test_bg3_mod_diagnose_logs_purge_dry_run_json(self):
+        proc = self.run_cli(["mod", "diagnose-logs", "--purge", "--dry-run", "--json"])
+        self.assertIn(proc.returncode, (0, 1))
+        payload = json.loads(proc.stdout)
+        self.assertIn(payload["status"], ("success", "error"))
+
 
 if __name__ == "__main__":
     unittest.main()

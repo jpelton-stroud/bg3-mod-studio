@@ -86,6 +86,9 @@ def confirm_action(
         NonInteractiveConfirmationError: If running non-interactively and non_interactive_yes is False.
     """
     out_stream = stream or sys.stderr
+    if non_interactive_yes:
+        return True
+
     is_tty = (
         hasattr(sys.stdin, "isatty")
         and sys.stdin.isatty()
@@ -95,8 +98,6 @@ def confirm_action(
     )
 
     if not is_tty:
-        if non_interactive_yes:
-            return True
         raise NonInteractiveConfirmationError(
             f"Operation requires confirmation: '{prompt}'. In non-interactive mode, pass --yes / -y to proceed."
         )

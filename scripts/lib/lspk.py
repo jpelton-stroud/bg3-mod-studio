@@ -23,6 +23,55 @@ for _libname in ("libzstd.so.1", "libzstd.so", "libzstd.dylib", "libzstd.dll"):
     except Exception:
         continue
 
+_LIBLZ4 = None
+for _libname in ("liblz4.so.1", "liblz4.so", "liblz4.dylib", "liblz4.dll"):
+    try:
+        _lib = ctypes.CDLL(_libname)
+        _lib.LZ4_compress_default.argtypes = [
+            ctypes.c_char_p,
+            ctypes.c_char_p,
+            ctypes.c_int,
+            ctypes.c_int,
+        ]
+        _lib.LZ4_compress_default.restype = ctypes.c_int
+        _lib.LZ4_compressBound.argtypes = [ctypes.c_int]
+        _lib.LZ4_compressBound.restype = ctypes.c_int
+        _LIBLZ4 = _lib
+        break
+    except Exception:
+        continue
+
+
+def lz4_block_compress(data: bytes) -> bytes:
+    """Compress data using standard LZ4 raw block format.
+    
+    Uses system liblz4 via ctypes if available, otherwise falls back to a valid
+    pure-Python LZ4 literal block.
+    """
+    if _LIBLZ4 is not None and len(data) > 0:
+        max_dst = _LIBLZ4.LZ4_compressBound(len(data))
+        dst = ctypes.create_string_buffer(max_dst)
+        comp_len = _LIBLZ4.LZ4_compress_default(data, dst, len(data), max_dst)
+        if comp_len > 0:
+            return dst.raw[:comp_len]
+
+    # Pure-Python fallback: encodes a single LZ4 block containing literals without match tokens
+    l = len(data)
+    if l == 0:
+        return b""
+    token_lit = min(15, l)
+    out = bytearray([token_lit << 4])
+    rem = l - 15
+    while rem >= 0:
+        if rem >= 255:
+            out.append(255)
+            rem -= 255
+        else:
+            out.append(rem)
+            break
+    out.extend(data)
+    return bytes(out)
+
 
 def zstd_decompress(compressed_data: bytes, uncompressed_size: int) -> bytes:
     """Decompress Zstandard frame data using system libzstd via stdlib ctypes."""
@@ -163,9 +212,16 @@ class LspkArchive:
         if len(self.data) < 40 or self.data[:4] != b"LSPK":
             raise ValueError("Not a valid LSPK package (magic mismatch)")
 
-        version, file_list_offset, file_list_size, flags, priority = struct.unpack_from(
-            "<IQIBB", self.data, 4
+        version, file_list_offset, file_list_size, flags, priority, md5, num_parts = struct.unpack_from(
+            "<IQIBB16sH", self.data, 4
         )
+        self.version = version
+        self.file_list_offset = file_list_offset
+        self.file_list_size = file_list_size
+        self.flags = flags
+        self.priority = priority
+        self.md5 = md5
+        self.num_parts = num_parts
 
         file_list_raw = self.data[file_list_offset : file_list_offset + file_list_size]
         if len(file_list_raw) < 8:
