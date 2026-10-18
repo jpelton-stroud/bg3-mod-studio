@@ -1745,6 +1745,42 @@
           "description": "Show resolved toolkit directory status"
         },
         {
+          "name": "--purge",
+          "type": "bool",
+          "required": false,
+          "description": "Purge session log files from the toolkit directory based on retention rules"
+        },
+        {
+          "name": "--keep",
+          "type": "int",
+          "required": false,
+          "description": "Number of most recent log files to preserve during purge (default: 5)"
+        },
+        {
+          "name": "--days",
+          "type": "float",
+          "required": false,
+          "description": "Purge log files older than specified days"
+        },
+        {
+          "name": "--all",
+          "type": "bool",
+          "required": false,
+          "description": "Purge all matching log files without preserving any recent logs"
+        },
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "Simulate purge and preview log files to be deleted without removing them (-n)"
+        },
+        {
+          "name": "--yes",
+          "type": "bool",
+          "required": false,
+          "description": "Confirm deletion non-interactively in automated pipelines (-y)"
+        },
+        {
           "name": "--json",
           "type": "bool",
           "required": false,
@@ -1755,9 +1791,106 @@
         "python3 scripts/diagnose_toolkit_logs.py --json",
         "python3 scripts/diagnose_toolkit_logs.py --mod arcane-progression --severity error",
         "python3 scripts/diagnose_toolkit_logs.py --type thoth --limit 20",
+        "python3 scripts/diagnose_toolkit_logs.py --purge --keep 5 --dry-run",
+        "python3 scripts/diagnose_toolkit_logs.py --purge --days 7 --yes",
         "python3 scripts/diagnose_toolkit_logs.py --follow"
       ],
       "path": "diagnostics/diagnose_toolkit_logs.py"
+    },
+    {
+      "name": "manage_saves.py",
+      "command": "save",
+      "category": "management",
+      "summary": "Baldur's Gate 3 savegame discovery, audit, backup, and cleanup management tool.",
+      "description": "Discovers BG3 .lsv save files across Linux Proton, WSL, and Windows paths. Lists saves with timestamps and sizes, inspects mod dependencies, archives saves into ZIP packages, and safely prunes old saves with retention rules and latest-save protection.",
+      "intents": [
+        "save games",
+        "manage saves",
+        "purge saves",
+        "clean saves",
+        "backup saves",
+        "list saves",
+        "inspect save",
+        "delete saves"
+      ],
+      "cli_usage": "bg3 save [list|inspect|backup|purge] [options]",
+      "flags": [
+        {
+          "name": "--keep",
+          "type": "int",
+          "required": false,
+          "description": "Number of newest saves to preserve during purge (default: 5)"
+        },
+        {
+          "name": "--days",
+          "type": "float",
+          "required": false,
+          "description": "Purge saves older than specified days"
+        },
+        {
+          "name": "--save",
+          "type": "str",
+          "required": false,
+          "description": "Specific save name or filename to target"
+        },
+        {
+          "name": "--all",
+          "type": "bool",
+          "required": false,
+          "description": "Purge all matching saves (preserves latest unless --force-all)"
+        },
+        {
+          "name": "--force-all",
+          "type": "bool",
+          "required": false,
+          "description": "Purge ALL saves including the latest save"
+        },
+        {
+          "name": "--no-keep-latest",
+          "type": "bool",
+          "required": false,
+          "description": "Disable latest save protection"
+        },
+        {
+          "name": "--backup",
+          "type": "bool",
+          "required": false,
+          "description": "Create a ZIP backup before purging"
+        },
+        {
+          "name": "--backup-dir",
+          "type": "path",
+          "required": false,
+          "description": "Custom directory for pre-purge backup"
+        },
+        {
+          "name": "--dry-run",
+          "type": "bool",
+          "required": false,
+          "description": "Simulate purge without modifying files (-n)"
+        },
+        {
+          "name": "--yes",
+          "type": "bool",
+          "required": false,
+          "description": "Confirm deletion non-interactively in automated pipelines (-y)"
+        },
+        {
+          "name": "--json",
+          "type": "bool",
+          "required": false,
+          "description": "Emit structured JSON output"
+        }
+      ],
+      "examples": [
+        "bg3 save list",
+        "bg3 save list --json",
+        "bg3 save backup --dest ~/bg3_backups/",
+        "bg3 save purge --keep 5 --dry-run",
+        "bg3 save purge --days 14 --backup --yes",
+        "bg3 save purge --all --force-all --yes"
+      ],
+      "path": "management/manage_saves.py"
     },
     {
       "name": "tools.py",

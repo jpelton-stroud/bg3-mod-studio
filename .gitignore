@@ -45,6 +45,7 @@ desktop.ini
 *.tmp
 *.bak
 *.pak
+*.loca
 *.zip
 
 # Scratch / temporary experimental folders

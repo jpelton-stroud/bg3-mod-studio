@@ -24,7 +24,13 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from scripts.lib.cli_common import ConsoleColor, ExitCode
+from scripts.lib.cli_common import (
+    ConsoleColor,
+    ExitCode,
+    NonInteractiveConfirmationError,
+    confirm_action,
+    format_json_response,
+)
 from scripts.lib.env_paths import MODS_DIR, MY_MODS_DIR, REPO_ROOT as WORKSPACE_ROOT, detect_data_dir, get_env_var, normalize_mod_key
 
 DEFAULT_TOOLKIT_DIR = Path("/mnt/c/Program Files (x86)/Steam/steamapps/common/Baldurs Gate 3 Toolkit")
@@ -104,6 +110,105 @@ def get_available_log_files(toolkit_dir: Path, log_type: Optional[str] = None) -
     # Sort descending by modification time
     found.sort(key=lambda p: p.stat().st_mtime, reverse=True)
     return found
+
+
+def purge_toolkit_logs(
+    toolkit_dir: Path,
+    log_type: str = "all",
+    keep: int = 5,
+    older_than_days: Optional[float] = None,
+    purge_all: bool = False,
+    dry_run: bool = False,
+) -> Dict[str, Any]:
+    """Safely purge Toolkit runtime log files based on retention parameters.
+
+    Args:
+        toolkit_dir: Path to BG3 Toolkit directory.
+        log_type: Subsystem log filter ('engine', 'osiris', 'thoth', 'personal', 'network', 'all').
+        keep: Number of newest matching log files to preserve (ignored if purge_all is True).
+        older_than_days: If set, only purge log files modified more than this many days ago.
+        purge_all: If True, bypass the 'keep' threshold and consider all matching logs.
+        dry_run: If True, simulate deletion without removing files from disk.
+
+    Returns:
+        Dict containing summary, counts, reclaimed bytes, preserved files, and deleted files.
+    """
+    all_logs = get_available_log_files(toolkit_dir, log_type)
+    now = time.time()
+
+    to_purge: List[Path] = []
+    to_keep: List[Path] = []
+
+    for idx, log_path in enumerate(all_logs):
+        if not purge_all and idx < keep:
+            to_keep.append(log_path)
+            continue
+
+        if older_than_days is not None:
+            try:
+                age_days = (now - log_path.stat().st_mtime) / (24 * 3600)
+                if age_days < older_than_days:
+                    to_keep.append(log_path)
+                    continue
+            except OSError:
+                pass
+
+        to_purge.append(log_path)
+
+    deleted_records: List[Dict[str, Any]] = []
+    failed_records: List[Dict[str, Any]] = []
+    reclaimed_bytes = 0
+
+    for log_path in to_purge:
+        file_size = 0
+        try:
+            file_size = log_path.stat().st_size
+        except OSError:
+            pass
+
+        rec = {
+            "name": log_path.name,
+            "path": str(log_path),
+            "size_bytes": file_size,
+        }
+
+        if dry_run:
+            rec["status"] = "preview_deleted"
+            deleted_records.append(rec)
+            reclaimed_bytes += file_size
+        else:
+            try:
+                log_path.unlink()
+                rec["status"] = "deleted"
+                deleted_records.append(rec)
+                reclaimed_bytes += file_size
+            except OSError as err:
+                rec["status"] = "failed"
+                rec["error"] = str(err)
+                failed_records.append(rec)
+
+    preserved_records = []
+    for p in to_keep:
+        sz = 0
+        try:
+            sz = p.stat().st_size
+        except OSError:
+            pass
+        preserved_records.append({"name": p.name, "path": str(p), "size_bytes": sz})
+
+    return {
+        "toolkit_directory": str(toolkit_dir),
+        "log_type": log_type,
+        "total_discovered": len(all_logs),
+        "purged_count": len(deleted_records),
+        "failed_count": len(failed_records),
+        "preserved_count": len(to_keep),
+        "reclaimed_bytes": reclaimed_bytes,
+        "dry_run": dry_run,
+        "deleted_files": deleted_records,
+        "preserved_files": preserved_records,
+        "failed_files": failed_records,
+    }
 
 
 def classify_entry(message: str, source: str) -> Tuple[str, str]:
@@ -484,6 +589,12 @@ def main():
     parser.add_argument("--follow", "-f", action="store_true", help="Live stream / tail active log file")
     parser.add_argument("--list-logs", action="store_true", help="List all available session logs and exit")
     parser.add_argument("--info", action="store_true", help="Show resolved toolkit directory and status")
+    parser.add_argument("--purge", action="store_true", help="Purge session log files from the toolkit directory based on retention rules")
+    parser.add_argument("--keep", type=int, default=5, help="Number of most recent log files to preserve during purge (default: 5)")
+    parser.add_argument("--days", type=float, default=None, help="Purge log files older than specified days")
+    parser.add_argument("--all", action="store_true", help="Purge all matching log files without preserving any recent logs")
+    parser.add_argument("--dry-run", "-n", action="store_true", help="Simulate purge and preview log files to be deleted without removing them")
+    parser.add_argument("--yes", "-y", action="store_true", help="Confirm deletion non-interactively in automated pipelines")
     parser.add_argument("--json", action="store_true", help="Emit output in structured JSON format")
 
     args = parser.parse_args()
@@ -496,10 +607,66 @@ def main():
             "Set BG3_TOOLKIT_DIR in ~/.config/bg3/env or pass --toolkit-dir <path>."
         )
         if args.json:
-            print(json.dumps({"error": err_msg, "status": "not_found"}, indent=2))
+            print(json.dumps(format_json_response(status="error", error={"code": "TOOLKIT_NOT_FOUND", "message": err_msg}), indent=2))
         else:
             print(f"{RED}{err_msg}{RESET}", file=sys.stderr)
         sys.exit(1)
+
+    # 1.5 Handle --purge
+    if args.purge:
+        if not args.dry_run:
+            try:
+                target_desc = f"matching '{args.type}'" if args.type != "all" else "all types"
+                confirm_action(
+                    f"Purge Toolkit log files ({target_desc}) in '{toolkit_dir}'?",
+                    default=False,
+                    non_interactive_yes=args.yes,
+                    force_non_interactive=args.json,
+                )
+            except NonInteractiveConfirmationError as exc:
+                if args.json:
+                    print(json.dumps(format_json_response(status="error", error={"code": "CONFIRMATION_REQUIRED", "message": str(exc)}), indent=2))
+                else:
+                    print(f"{RED}[ERROR]{RESET} {exc}", file=sys.stderr)
+                    print(f"{CYAN}Hint:{RESET} Pass -y or --yes when running non-interactively.", file=sys.stderr)
+                sys.exit(ExitCode.USAGE)
+
+        purge_result = purge_toolkit_logs(
+            toolkit_dir=toolkit_dir,
+            log_type=args.type,
+            keep=0 if args.all else args.keep,
+            older_than_days=args.days,
+            purge_all=args.all,
+            dry_run=args.dry_run,
+        )
+
+        if args.json:
+            print(json.dumps(format_json_response(data=purge_result, status="success"), indent=2))
+            sys.exit(ExitCode.OK if purge_result["failed_count"] == 0 else ExitCode.GENERAL)
+
+        mode_prefix = f"{CYAN}[DRY-RUN] {RESET}" if args.dry_run else ""
+        print(f"\n{mode_prefix}{BOLD}Toolkit Log Purge Summary:{RESET}")
+        print(f"  Toolkit Directory: {toolkit_dir}")
+        print(f"  Log Type:          {args.type}")
+        print(f"  Discovered Logs:   {purge_result['total_discovered']}")
+        print(f"  Purged Logs:       {purge_result['purged_count']}")
+        print(f"  Preserved Logs:    {purge_result['preserved_count']}")
+        print(f"  Reclaimed Space:   {purge_result['reclaimed_bytes'] / 1024:.1f} KB")
+
+        if purge_result["deleted_files"]:
+            print(f"\n{BOLD}Files Processed:{RESET}")
+            for item in purge_result["deleted_files"]:
+                st = item["status"]
+                size_kb = item["size_bytes"] / 1024
+                print(f"  {GREEN}✓{RESET} {item['name']:<35} ({size_kb:.1f} KB) - {st}")
+
+        if purge_result["failed_files"]:
+            print(f"\n{RED}Failed Deletions:{RESET}")
+            for item in purge_result["failed_files"]:
+                print(f"  {RED}✗{RESET} {item['name']}: {item['error']}")
+
+        print("")
+        sys.exit(ExitCode.OK if purge_result["failed_count"] == 0 else ExitCode.GENERAL)
 
     # 2. Handle --info
     if args.info:

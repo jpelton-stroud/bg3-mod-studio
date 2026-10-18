@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.lib.env_paths import DIST_DIR, REPO_ROOT, detect_bg3_appdata_dirs, get_env_var, resolve_mod_dir
 from scripts.lib.larian_parsers import compile_xml_bytes_to_loca
-from scripts.lib.lspk import LspkArchive
+from scripts.lib.lspk import LspkArchive, lz4_block_compress
 
 EXCLUDED_FILENAMES = {
     ".gitignore",
@@ -58,6 +58,10 @@ def should_include_file(rel_path: Path, include_projects: bool = False) -> bool:
     if len(parts) == 1 and parts[0] == "thumbnail.png":
         return False
 
+    # Exclude dotfiles and dotdirs (e.g. .test_deps.json, .gitignore)
+    if any(p.startswith(".") for p in parts):
+        return False
+
     for part in parts[:-1]:
         if part in EXCLUDED_DIRECTORIES:
             if part == "projects" and include_projects:
@@ -92,7 +96,7 @@ def collect_mod_files(mod_dir: Path, include_projects: bool = False) -> list[tup
             parts_lower = [p.lower() for p in rel_path.parts]
             if "localization" in parts_lower and fname.lower().endswith(".xml"):
                 loca_rel = rel_path.with_suffix(".loca")
-                archive_name = str(loca_rel).replace("/", "\\")
+                archive_name = loca_rel.as_posix()
                 entries_map[archive_name] = compile_xml_bytes_to_loca(file_path.read_bytes())
                 continue
 
@@ -101,7 +105,7 @@ def collect_mod_files(mod_dir: Path, include_projects: bool = False) -> list[tup
                 if xml_equiv in files_set:
                     continue
 
-            archive_name = str(rel_path).replace("/", "\\")
+            archive_name = rel_path.as_posix()
             entries_map[archive_name] = file_path.read_bytes()
 
     return sorted(entries_map.items(), key=lambda x: x[0])
@@ -111,7 +115,7 @@ def build_pak_archive(
     files: list[tuple[str, bytes | Path]],
     compress: bool = True,
 ) -> bytes:
-    """Constructs the LSPK v18 binary package."""
+    """Constructs the LSPK v18 binary package with LZ4 compression."""
     header_size = 40
     data_offset = header_size
 
@@ -125,20 +129,18 @@ def build_pak_archive(
         uncomp_size = len(data)
 
         if compress:
-            compressed = zlib.compress(data)
-            # If compression didn't save space, store uncompressed
-            if len(compressed) < uncomp_size:
-                payload = compressed
-                file_flags = 1  # zlib
-                disk_size = len(compressed)
-            else:
-                payload = data
-                file_flags = 0  # uncompressed
-                disk_size = uncomp_size
+            compressed = lz4_block_compress(data)
+            payload = compressed
+            # Flags: 0x42 = (LSCompressionLevel.Fast << 4) | CompressionMethod.LZ4
+            file_flags = 0x42
+            disk_size = len(compressed)
+            # uncomp_size is preserved as len(data)
         else:
             payload = data
             file_flags = 0
             disk_size = uncomp_size
+            # In FileEntry18, uncompressed files store 0 in UncompressedSize
+            uncomp_size = 0
 
         file_data_blocks.append(payload)
 
@@ -167,28 +169,31 @@ def build_pak_archive(
     file_list_offset = curr_offset
     file_list_payload = b"".join(file_records)
     num_files = len(file_records)
-    comp_size = len(file_list_payload)
+    compressed_file_list = lz4_block_compress(file_list_payload)
+    comp_size = len(compressed_file_list)
 
-    file_list_block = struct.pack("<II", num_files, comp_size) + file_list_payload
+    file_list_block = struct.pack("<II", num_files, comp_size) + compressed_file_list
     file_list_size = len(file_list_block)
 
     # 40-byte LSPK Header:
-    # 4s (magic: LSPK)
-    # I (version: 18)
-    # Q (file_list_offset)
-    # I (file_list_size)
-    # B (flags: 0)
-    # B (priority: 0)
-    # 18s (reserved/md5: 18 null bytes)
+    # 4s (magic: b"LSPK")
+    # I  (version: 18)
+    # Q  (file_list_offset)
+    # I  (file_list_size)
+    # B  (flags: 2 -> PackageFlags.AllowMemoryMapping)
+    # B  (priority: 0)
+    # 16s (md5: 16 null bytes)
+    # H  (num_parts: 1 -> Single-part archive)
     header = struct.pack(
-        "<4sIQIBB18s",
+        "<4sIQIBB16sH",
         b"LSPK",
         18,
         file_list_offset,
         file_list_size,
+        2,
         0,
-        0,
-        b"\x00" * 18,
+        b"\x00" * 16,
+        1,
     )
 
     return header + b"".join(file_data_blocks) + file_list_block

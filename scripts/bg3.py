@@ -559,13 +559,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     diag_parser.add_argument("--mod", help="Target mod name or slug")
     diag_parser.add_argument("--toolkit-dir", help="Path to BG3 Toolkit directory")
-    diag_parser.add_argument("--type", choices=["general", "crash", "assert", "all"], default="general")
-    diag_parser.add_argument("--severity", choices=["error", "warning", "info", "all"], default="error")
+    diag_parser.add_argument("--type", choices=["engine", "osiris", "thoth", "personal", "network", "all", "general", "crash", "assert"], default="engine")
+    diag_parser.add_argument("--severity", choices=["critical", "error", "warning", "info", "debug", "all"], default="warning")
     diag_parser.add_argument("--subsystem", help="Filter by engine subsystem")
     diag_parser.add_argument("--limit", type=int, default=50, help="Max entries to report")
     diag_parser.add_argument("-f", "--follow", action="store_true", help="Follow logs live")
     diag_parser.add_argument("--list-logs", action="store_true", help="List available log files")
     diag_parser.add_argument("--info", action="store_true", help="Show log metadata")
+    diag_parser.add_argument("--purge", action="store_true", help="Purge session log files from the toolkit directory based on retention rules")
+    diag_parser.add_argument("--keep", type=int, default=5, help="Number of most recent log files to preserve during purge (default: 5)")
+    diag_parser.add_argument("--days", type=float, help="Purge log files older than specified days")
+    diag_parser.add_argument("--all", action="store_true", help="Purge all matching log files without preserving any recent logs")
+    diag_parser.add_argument("-n", "--dry-run", action="store_true", help="Simulate purge without modifying files")
+    diag_parser.add_argument("-y", "--yes", action="store_true", help="Confirm deletion non-interactively")
 
     # bg3 mod inspect-save
     inspect_save_parser = mod_subparsers.add_parser(
@@ -677,6 +683,8 @@ def build_parser() -> argparse.ArgumentParser:
     lo_enable_parser.add_argument("--with-deps", action="store_true", default=True, help="Automatically enable declared dependencies")
     lo_enable_parser.add_argument("--no-deps", action="store_false", dest="with_deps", help="Do not automatically enable dependencies")
     lo_enable_parser.add_argument("--test-dep", action="append", default=[], help="Activate test dependency ahead of mod")
+    lo_enable_parser.add_argument("--isolate", "--clean", dest="isolate", action="store_true", help="Clean-room isolation: disable unrelated mods in modsettings.lsx and deduplicate .pak collisions")
+    lo_enable_parser.add_argument("--quarantine", action="store_true", help="Physically quarantine unrelated .pak files to Mods_Disabled/ (Warning: triggers mod.io auto-download for subscribed mods)")
     lo_enable_parser.add_argument("--path", help="Explicit path to modsettings.lsx")
     lo_enable_parser.add_argument("--dry-run", action="store_true", help="Preview modifications without saving")
 
@@ -701,13 +709,41 @@ def build_parser() -> argparse.ArgumentParser:
     # bg3 loadorder isolate
     lo_iso_parser = lo_subparsers.add_parser(
         "isolate",
-        help="Clean-room isolation: disable all mods except target mod and dependencies",
+        help="Clean-room isolation: disable unrelated mods in modsettings.lsx and deduplicate .pak collisions",
+        description="Clean-room isolation: disable unrelated mods in modsettings.lsx and deduplicate .pak collisions",
         parents=[common_parser],
     )
     lo_iso_parser.add_argument("mod", help="Target mod name or slug to isolate")
+    lo_iso_parser.add_argument("--test-dep", action="append", default=[], help="Activate test dependency ahead of mod")
+    lo_iso_parser.add_argument("--with-deps", action="store_true", default=True, help="Automatically enable declared dependencies")
+    lo_iso_parser.add_argument("--no-deps", action="store_false", dest="with_deps", help="Do not automatically enable dependencies")
+    lo_iso_parser.add_argument("--quarantine", action="store_true", help="Physically quarantine unrelated .pak files (Warning: triggers mod.io auto-download for subscribed mods)")
     lo_iso_parser.add_argument("--path", help="Explicit path to modsettings.lsx")
     lo_iso_parser.add_argument("--dry-run", action="store_true", help="Preview modifications without saving")
     lo_iso_parser.add_argument("-y", "--yes", action="store_true", help="Confirm non-interactively")
+
+    # bg3 loadorder restore
+    lo_restore_parser = lo_subparsers.add_parser(
+        "restore",
+        help="Restore quarantined mods from Mods_Disabled/ back to active Mods directory",
+        description="Restore quarantined mods from Mods_Disabled/ back to active Mods directory",
+        parents=[common_parser],
+    )
+    lo_restore_parser.add_argument("--path", help="Explicit path to modsettings.lsx")
+    lo_restore_parser.add_argument("--dry-run", action="store_true", help="Preview restoration without moving files")
+    lo_restore_parser.add_argument("-y", "--yes", action="store_true", help="Confirm non-interactively")
+
+    # bg3 loadorder dedup
+    lo_dedup_parser = lo_subparsers.add_parser(
+        "dedup",
+        aliases=["deduplicate"],
+        help="Deduplicate installed .pak files in AppData Mods",
+        description="Deduplicate installed .pak files in AppData Mods",
+        parents=[common_parser],
+    )
+    lo_dedup_parser.add_argument("--path", help="Explicit path to modsettings.lsx")
+    lo_dedup_parser.add_argument("--dry-run", action="store_true", help="Preview deduplication without moving files")
+    lo_dedup_parser.add_argument("-y", "--yes", action="store_true", help="Confirm non-interactively")
 
     # -------------------------------------------------------------------------
     # 'modio' command group
@@ -982,6 +1018,67 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Preview configuration changes without writing to disk.",
     )
+
+    # -------------------------------------------------------------------------
+    # 'save' command group (manage_saves.py)
+    # -------------------------------------------------------------------------
+    save_parser = subparsers.add_parser(
+        "save",
+        aliases=["saves"],
+        help="Inspect, list, backup, and purge Baldur's Gate 3 save games",
+        parents=[common_parser],
+    )
+    save_subparsers = save_parser.add_subparsers(
+        dest="subcommand",
+        metavar="<action>",
+        parser_class=JsonCompliantArgumentParser,
+    )
+
+    # bg3 save list
+    save_list_p = save_subparsers.add_parser(
+        "list",
+        help="List discovered BG3 save games across standard and custom search paths",
+        parents=[common_parser],
+    )
+    save_list_p.add_argument("--save-dir", help="Custom directory containing .lsv save files")
+
+    # bg3 save inspect
+    save_inspect_p = save_subparsers.add_parser(
+        "inspect",
+        help="Inspect and audit a specific or latest save game",
+        parents=[common_parser],
+    )
+    save_inspect_p.add_argument("save", nargs="?", help="Path or name of .lsv save file, or 'latest'")
+    save_inspect_p.add_argument("--save-dir", help="Custom directory containing .lsv save files")
+    save_inspect_p.add_argument("--audit", action="store_true", help="Audit save mods against active modsettings.lsx")
+
+    # bg3 save backup
+    save_backup_p = save_subparsers.add_parser(
+        "backup",
+        help="Archive save games into a ZIP backup",
+        parents=[common_parser],
+    )
+    save_backup_p.add_argument("--save", help="Specific save game name to back up")
+    save_backup_p.add_argument("--dest", help="Destination directory or ZIP archive path")
+    save_backup_p.add_argument("--save-dir", help="Custom directory containing .lsv save files")
+
+    # bg3 save purge
+    save_purge_p = save_subparsers.add_parser(
+        "purge",
+        help="Prune old or unneeded save games",
+        parents=[common_parser],
+    )
+    save_purge_p.add_argument("--keep", type=int, default=5, help="Number of newest saves to preserve (default: 5)")
+    save_purge_p.add_argument("--days", type=float, help="Purge saves older than specified days")
+    save_purge_p.add_argument("--save", help="Specific save name to purge")
+    save_purge_p.add_argument("--all", action="store_true", help="Purge all matching saves (preserves latest unless --force-all)")
+    save_purge_p.add_argument("--force-all", action="store_true", help="Purge ALL saves including the latest save")
+    save_purge_p.add_argument("--no-keep-latest", action="store_true", help="Disable latest save protection")
+    save_purge_p.add_argument("--backup", action="store_true", help="Create a ZIP backup before purging")
+    save_purge_p.add_argument("--backup-dir", help="Custom directory for pre-purge backup")
+    save_purge_p.add_argument("--save-dir", help="Custom directory containing .lsv save files")
+    save_purge_p.add_argument("-n", "--dry-run", action="store_true", help="Simulate purge without modifying files")
+    save_purge_p.add_argument("-y", "--yes", action="store_true", help="Confirm deletion non-interactively")
 
     # -------------------------------------------------------------------------
     # 'run' universal runner for all scripts/ tools
@@ -1463,6 +1560,18 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--list-logs")
             if getattr(args, "info", False):
                 target_args.append("--info")
+            if getattr(args, "purge", False):
+                target_args.append("--purge")
+            if getattr(args, "keep", None) is not None:
+                target_args.extend(["--keep", str(args.keep)])
+            if getattr(args, "days", None) is not None:
+                target_args.extend(["--days", str(args.days)])
+            if getattr(args, "all", False):
+                target_args.append("--all")
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+            if getattr(args, "yes", False):
+                target_args.append("--yes")
 
         elif sub in ("inspect-save", "inspect_save"):
             script_target = DIAGNOSTICS_DIR / "inspect_save_game.py"
@@ -1553,6 +1662,10 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                 target_args.append("--no-deps")
             for td in getattr(args, "test_dep", []):
                 target_args.extend(["--test-dep", td])
+            if getattr(args, "isolate", False):
+                target_args.append("--isolate")
+            if getattr(args, "quarantine", False):
+                target_args.append("--quarantine")
             if getattr(args, "path", None):
                 target_args.extend(["--path", args.path])
             if getattr(args, "dry_run", False):
@@ -1571,7 +1684,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             if not getattr(args, "dry_run", False):
                 try:
                     confirm_action(
-                        "Isolate mod in load order (all other mods will be disabled)?",
+                        "Isolate mod in load order (all unrelated mods will be disabled in modsettings.lsx)?",
                         non_interactive_yes=getattr(args, "yes", False),
                         force_non_interactive=args.json,
                     )
@@ -1584,7 +1697,41 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
                         exit_process=False,
                     )
                     return ExitCode.USAGE
-            target_args.extend(["--isolate", args.mod])
+            target_args.extend(["--enable", args.mod, "--isolate"])
+            if getattr(args, "quarantine", False):
+                target_args.append("--quarantine")
+            if not getattr(args, "with_deps", True):
+                target_args.append("--no-deps")
+            for td in getattr(args, "test_dep", []):
+                target_args.extend(["--test-dep", td])
+            if getattr(args, "path", None):
+                target_args.extend(["--path", args.path])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif sub == "restore":
+            if not getattr(args, "dry_run", False):
+                try:
+                    confirm_action(
+                        "Restore quarantined mods back to active Mods directory?",
+                        non_interactive_yes=getattr(args, "yes", False),
+                        force_non_interactive=args.json,
+                    )
+                except NonInteractiveConfirmationError as exc:
+                    emitter.error(
+                        message=str(exc),
+                        code="CONFIRMATION_REQUIRED",
+                        remediation="Pass -y or --yes when running in automated scripts or agent skills.",
+                        exit_code=ExitCode.USAGE,
+                        exit_process=False,
+                    )
+                    return ExitCode.USAGE
+            target_args.append("--restore")
+            if getattr(args, "path", None):
+                target_args.extend(["--path", args.path])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
+        elif sub in ("dedup", "deduplicate"):
+            target_args.append("--dedup")
             if getattr(args, "path", None):
                 target_args.extend(["--path", args.path])
             if getattr(args, "dry_run", False):
@@ -1789,6 +1936,39 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
         elif sub == "setup":
             if getattr(args, "dry_run", False):
                 target_args.append("--dry-run")
+
+    elif cmd in ("save", "saves"):
+        script_target = MANAGEMENT_DIR / "manage_saves.py"
+        target_args.append(sub)
+        if getattr(args, "save", None):
+            if sub == "inspect":
+                target_args.append(args.save)
+            else:
+                target_args.extend(["--save", args.save])
+        if getattr(args, "save_dir", None):
+            target_args.extend(["--save-dir", args.save_dir])
+        if getattr(args, "audit", False):
+            target_args.append("--audit")
+        if getattr(args, "dest", None):
+            target_args.extend(["--dest", args.dest])
+        if getattr(args, "keep", None) is not None:
+            target_args.extend(["--keep", str(args.keep)])
+        if getattr(args, "days", None) is not None:
+            target_args.extend(["--days", str(args.days)])
+        if getattr(args, "all", False):
+            target_args.append("--all")
+        if getattr(args, "force_all", False):
+            target_args.append("--force-all")
+        if getattr(args, "no_keep_latest", False):
+            target_args.append("--no-keep-latest")
+        if getattr(args, "backup", False):
+            target_args.append("--backup")
+        if getattr(args, "backup_dir", None):
+            target_args.extend(["--backup-dir", args.backup_dir])
+        if getattr(args, "dry_run", False):
+            target_args.append("--dry-run")
+        if getattr(args, "yes", False):
+            target_args.append("--yes")
 
     if not script_target or not script_target.is_file():
         emitter.error(
