@@ -408,7 +408,7 @@
                     <attribute id="ProgressionType" type="uint8" value="0" />
                     <attribute id="TableUUID" type="guid" value="d274da70-bb53-48b8-8095-ff04c1064560" />
                     <attribute id="UUID" type="guid" value="10cba22c-68f4-5f23-bde1-f2854f87c50d" />
-                    <attribute id="Selectors" type="LSString" value="SelectSpells(67dbcdb8-02c5-412f-8539-099856ee7b79, 2, 0, BardMagicalSecrets)" />
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(67dbcdb8-02c5-412f-8539-099856ee7b79,2,0,BardMagicalSecrets)" />
                 </node>
                 <node id="Progression">
                     <attribute id="Name" type="LSString" value="SwordsCollege" />
@@ -432,7 +432,7 @@
                     <attribute id="ProgressionType" type="uint8" value="0" />
                     <attribute id="TableUUID" type="guid" value="d274da70-bb53-48b8-8095-ff04c1064560" />
                     <attribute id="UUID" type="guid" value="9f4ddaf7-e832-58ee-869a-231f871267bf" />
-                    <attribute id="Selectors" type="LSString" value="SelectSpells(1853ba12-5b98-46b4-8c4e-2af2c3249837, 2, 0, BardMagicalSecrets)" />
+                    <attribute id="Selectors" type="LSString" value="SelectSpells(1853ba12-5b98-46b4-8c4e-2af2c3249837,2,0,BardMagicalSecrets)" />
                 </node>
                 <node id="Progression">
                     <attribute id="Name" type="LSString" value="WildMagic" />

@@ -55,10 +55,10 @@ type "InterruptData"
 data "DisplayName" "h37c7aeb8g17abg5a93g8c18g18a63d61c154;1"
 data "Description" "h32e5361dg2b9fg5bc6g9b7fgc27e720cf3f5;1"
 data "Icon" "Spell_Conjuration_MistyStep"
-data "InterruptContext" "OnCast"
+data "InterruptContext" "OnSpellCast"
 data "Conditions" "IsAbleToReact(context.Observer) and Self(context.Observer, context.Source) and HasSpell('Shout_ActionSurge', context.SpellId)"
 data "Properties" "ApplyStatus(SELF, ARCANE_CHARGE, 100, 1)"
-data "Cost": "ReactionActionPoint:1"
+data "Cost" "ReactionActionPoint:1"
 
 
 new entry "Interrupt_BardicInspiration_Attack_d12"
