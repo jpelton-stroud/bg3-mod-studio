@@ -232,6 +232,12 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False, quiet: bool 
                                             print(f"  [*] Compile .loca: {dst_file.relative_to(data_dir)}")
                                     else:
                                         stats["unchanged"] += 1
+
+                                    # Emit standard lowercase language loca (e.g. english.loca) for Larian engine runtime
+                                    lang_loca_name = f"{rel_root.name.lower()}.loca"
+                                    if lang_loca_name != loca_name.lower():
+                                        lang_dst_file = dst_loc_mod / rel_root / lang_loca_name
+                                        write_bytes_if_different(loca_bytes, lang_dst_file, dry_run)
                                 except Exception as e:
                                     if not quiet:
                                         print(f"  ⚠️ Warning: Failed to compile {src_file.name} to .loca: {e}")

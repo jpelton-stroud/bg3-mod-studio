@@ -5,9 +5,9 @@ description: Diagnoses BG3 mod issues, missing localization text, load order err
 
 # BG3 Mod Diagnostics & Toolkit Verification (Stage 2) (`bg3-diagnose-mod`)
 
-This skill acts as the autonomous "AI Doctor" and **Stage 2** verification gate for *Baldur's Gate 3* mods. It follows a two-phase Shift-Left protocol:
-- **Phase 2A (Static Pre-Flight, Game Sync & Toolkit Launch Gate)**: Audits syntax, localization handles, and community stat collisions in `my_mods/<slug>/`, synchronizes unpacked assets and compiled binary `.loca` to `<Game>/Data/`, and directs the user to load the mod in the BG3 Toolkit (`Glasses.exe`) to generate engine logs.
-- **Phase 2B (Toolkit Runtime Log Diagnosis & Automated Remediation Loop)**: Upon user confirmation that logs are generated, triages `Glasses.exe` runtime log warnings/errors (`diagnose_toolkit_logs.py`), applies fixes in `my_mods/<slug>/`, and loops back to Phase 2A until logs are clean or overridden before offering Phase 3 testing.
+This skill acts as the autonomous "AI Doctor" and **Stage 2** verification gate for *Baldur's Gate 3* mods. It manages **User-Action Gate 1 (Toolkit Diagnostics)**:
+- **Phase 2A (Workspace Assertion, Game Sync & Toolkit Launch Gate)**: Asserts clean static workspace state, synchronizes unpacked mod assets and compiled binary `.loca` to `<Game>/Data/`, and directs the user to load the mod in the BG3 Toolkit (`Glasses.exe`) to generate engine runtime logs.
+- **Phase 2B (Toolkit Runtime Log Diagnosis & Automated Remediation Loop)**: Upon user confirmation that logs are generated, triages `Glasses.exe` runtime log warnings/errors (`diagnose_toolkit_logs.py`), applies targeted fixes in `my_mods/<slug>/`, re-syncs, and loops until logs are clean before offering Stage 3 testing.
 - **Progressive Gate Handoff**: Passes verified mods to **Stage 3: In-Game Testing** ([`bg3-test-mod`](../bg3-test-mod/SKILL.md)).
 
 ## Discovery & Tooling
@@ -28,23 +28,14 @@ python3 scripts/bg3.py tools info toolkit-logs
 
 ```mermaid
 flowchart TD
-    Trigger["Trigger: /bg3-diagnose-mod &lt;slug&gt;"] --> Phase2A["Phase 2A: Static Pre-Flight & Game Sync"]
+    Trigger["Trigger: /bg3-diagnose-mod &lt;slug&gt;"] --> Phase2A["Phase 2A: Workspace Assertion &amp; Game Sync"]
     
-    subgraph Phase 2A Static Triage & Sync
-        Phase2A --> Val["1. Structural & Handle Integrity
+    subgraph Phase 2A Workspace Assertion &amp; Game Sync
+        Phase2A --> Assert["1. Workspace Assertion (verify clean static checks)
 python3 scripts/bg3.py mod validate &lt;slug&gt; --json"]
-        Val --> Loc["2. Localization Handle Audit
-python3 scripts/bg3.py mod sync-localization --mod &lt;slug&gt; --check --json"]
-        Loc --> Conf["3. Library Collision Check
-python3 scripts/bg3.py mod conflict &lt;slug&gt; --against-library --json"]
-        Conf --> Fix2A{"Static Issues Found?"}
-        Fix2A -- "Yes (≤3 retries)" --> Patch2A["Propose & Apply Fixes
-sync_localization --prune, patch files"]
-        Patch2A --> Val
-        Fix2A -- "Circuit Breaker / Override" --> Sync
-        Fix2A -- "No" --> Sync["4. Sync Assets & Binary .loca to Data/
+        Assert --> Sync["2. Sync Assets &amp; Binary .loca to Data/
 python3 scripts/bg3.py mod sync-data --mods &lt;slug&gt; --json"]
-        Sync --> PromptUser["5. Direct User to Load Mod in Toolkit (Glasses.exe)
+        Sync --> PromptUser["3. Direct User to Load Mod in Toolkit (Glasses.exe) [User-Action Gate 1]
 Prompt: Logs generated?"]
     end
     
@@ -52,7 +43,7 @@ Prompt: Logs generated?"]
     UserGate -- "Logs Generated" --> Phase2B["Phase 2B: Runtime Log Diagnosis"]
     UserGate -- "Skip Log Triage" --> Gate["Stage 3 Handoff Gate: ask_question"]
     
-    subgraph Phase 2B Runtime Log Triage & Fixes
+    subgraph Phase 2B Runtime Log Triage &amp; Fixes
         Phase2B --> Logs["1. Triage Glasses Runtime Logs
 python3 scripts/bg3.py mod diagnose-logs --mod &lt;slug&gt; --severity warning --json"]
         Logs --> LogFix{"Toolkit Errors Found?"}
@@ -77,33 +68,20 @@ Determine the target mod name from the prompt (`for <mod-slug>`, `<mod-slug>`), 
 
 ---
 
-### Step 2A: Static Pre-Flight, Game Sync & Toolkit Launch Gate
+### Step 2A: Workspace Assertion, Game Sync & Toolkit Launch Gate
 
-#### 1. Deterministic Static Checks (Repository Workspace)
-Run deterministic static checks on `my_mods/<slug>/` before touching game files:
+#### 1. Pre-Flight Workspace Assertion
+Stage 1 guarantees static cleanliness, so Step 1 runs a rapid deterministic pre-flight assertion on `my_mods/<slug>/` before touching game files:
 
 ```bash
-# 1. Structural, LSX, and XML Integrity Check
+# Structural, LSX, XML, and Handle Integrity Assertion
 python3 scripts/bg3.py mod validate <mod-slug> --json
-
-# 2. Localization Handle Audit (check for orphaned or missing handles)
-python3 scripts/bg3.py mod sync-localization --mod <mod-slug> --check --json
-
-# 3. Community Conflict & Collision Check
-python3 scripts/bg3.py mod conflict <mod-slug> --against-library --json
 ```
 
-#### Remediation & Loop Guardrails for Phase 2A:
-- **Missing Localization Handles**: Add missing `<content contentuid="h..." version="1">Text</content>` to `Localization/English/<ModName>.xml`.
-- **Orphaned Localization Handles**: Run `python3 scripts/bg3.py mod sync-localization --mod <mod-slug> --prune --json` after user confirmation.
-- **Stat Entry Collisions**: When colliding with a tracked mod in [`mods/library.md`](../../../mods/library.md), rename the stat prefix or generate a compatibility patch via `python3 scripts/bg3.py mod compat-patch`.
-- **Loop Prevention**:
-  - Maximum **3 automated remediation attempts** for static errors.
-  - If identical errors persist across attempts (error signature circuit breaker), halt automated fixes and use `ask_question` to prompt the user (inspect failing file manually, override and proceed, or revert changes).
-- Re-run validation to ensure clean status before syncing to game data.
+If assertion fails unexpectedly, resolve the discrepancy or re-run validation before proceeding. When clean, immediately proceed to game data synchronization.
 
 #### 2. Synchronize Assets & Binary `.loca` to Game Data
-Once static checks pass cleanly (or after explicit user override):
+Synchronize unpacked mod assets and compile localization strings to `<Game>/Data/`:
 
 ```bash
 python3 scripts/bg3.py mod sync-data --mods <mod-slug> --json
@@ -112,7 +90,7 @@ python3 scripts/bg3.py mod sync-data --mods <mod-slug> --json
 > [!NOTE]
 > `sync_game_data.py` automatically compiles `Localization/English/*.xml` into `Data/Mods/<ModName>_<UUID>/Localization/English/<ModName>.loca` so the BG3 Toolkit loads strings cleanly without crashing.
 
-#### 3. Direct User to Generate Logs in BG3 Toolkit (Glasses.exe)
+#### 3. Direct User to Load Mod in BG3 Toolkit (Glasses.exe) [User-Action Gate 1]
 Instruct the user:
 1. Launch **Baldur's Gate 3 Toolkit** (`Glasses.exe`).
 2. Select **File -> Open Project...** and open `<ModName>`.
@@ -145,12 +123,12 @@ python3 scripts/bg3.py mod diagnose-logs --follow
 #### 2. Remediate & Loop to Phase 2A
 If log warnings/errors are detected:
 1. Correlate line numbers, missing references, and IDs back to `my_mods/<mod-slug>/`.
-2. Apply fixes directly to source files in `my_mods/<mod-slug>/`.
+2. Apply targeted fixes directly to source files in `my_mods/<mod-slug>/`.
 3. **Loop Prevention Guardrail**:
    - Limit full 2A <-> 2B diagnostic cycles to **3 iterations**.
    - If identical log error signatures persist after a patch, trip the circuit breaker and escalate to user via `ask_question`.
 4. **Automatically loop back to Step 2A**:
-   - Re-run static checks (`validate_mod.py`, `sync_localization.py --check`).
+   - Re-run rapid pre-flight assertion (`validate_mod.py`).
    - Re-sync to game data (`sync_game_data.py`).
    - Prompt the user to reload the project in `Glasses.exe` to generate fresh logs.
 

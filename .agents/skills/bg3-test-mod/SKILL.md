@@ -5,7 +5,7 @@ description: Deploys a local .pak, manages load order in modsettings.lsx, audits
 
 # BG3 Mod In-Game Testing & Verification (Stage 3) (`bg3-test-mod`)
 
-This skill defines the **Stage 3 (In-Game Testing)** workflow of the custom mod lifecycle. It follows a **two-tier progressive gating architecture**:
+This skill defines the **Stage 3 (In-Game Testing)** workflow of the custom mod lifecycle, governing **User-Action Gate 2 (In-Game Playtesting)**. It purges loose files from `Data/` (preventing VFS loose-file shadowing), deploys a clean local test `.pak` to `AppData/Mods/`, isolates load order in `modsettings.lsx`, and guides playtesting with **Dual-Track Defect Routing**. It follows a **two-tier progressive gating architecture**:
 - **Phase 3A: Clean-Room / Smoke Testing (Default)** — Packages the mod, activates it alongside declared dependencies (`--with-deps`), and guides fast functional verification on a clean/new game.
 - **Phase 3B: Multi-Mod Integration & Save Audit (Optional Gate)** — Validates full profile load order rules and audits complex campaign save games for mods requiring extensive third-party integration.
 
@@ -38,13 +38,16 @@ Test mechanics, drops, tooltips on clean save"]
         InGameSmoke --> Gate3A{"Phase 3A Verification Result?"}
     end
 
-    Gate3A -- "Issues Found" --> Loopback["Loop back to Stage 2:
-/bg3-diagnose-mod &lt;slug&gt;"]
-    
     Gate3A -- "Passed (Standalone Mod)" --> ReleaseGate["Proceed to Stage 4:
 /bg3-release-prep &lt;slug&gt;"]
     
     Gate3A -- "Needs Campaign / Multi-Mod Test" --> P3BStart["Proceed to Phase 3B"]
+
+    Gate3A -- "Engine Crash / Missing Asset / Broken Script" --> LoopbackDiag["Loop back to Stage 2:
+/bg3-diagnose-mod &lt;slug&gt;"]
+
+    Gate3A -- "Gameplay / Mechanics / Balance Bug" --> LoopbackAuth["Loop back to Stage 1 Authoring Patch:
+Patch my_mods/&lt;slug&gt;/ &amp; Re-test"]
 
     subgraph P3B["Phase 3B: Multi-Mod Integration & Campaign Save Audit (Optional)"]
         P3BStart --> FullLO["Step 4: Full Load Order Validation & Reordering
@@ -126,9 +129,10 @@ Instruct the user:
 
 Present the smoke test summary and ask the user for their in-game verification outcome via `ask_question`:
 
-- **All tests passed! Ready for Release**: Proceed directly to **Stage 4: Release Preparation** ([`bg3-release-prep`](../bg3-release-prep/SKILL.md)).
+- **(Recommended) All tests passed! Ready for Release: Proceed to Stage 4 (/bg3-release-prep <slug>)**: Proceed directly to **Stage 4: Release Preparation** ([`bg3-release-prep`](../bg3-release-prep/SKILL.md)).
 - **Proceed to Phase 3B (Integration & Save Audit)**: For mods requiring complex multi-mod load order tuning or verification in heavily modded campaign saves.
-- **Issues or bugs detected**: Loop back to **Stage 2: Diagnostics** ([`bg3-diagnose-mod`](../bg3-diagnose-mod/SKILL.md)).
+- **Engine crash or missing asset detected: Loop back to Stage 2 Diagnostics (/bg3-diagnose-mod <slug>)**: Loop back to **Stage 2: Diagnostics** ([`bg3-diagnose-mod`](../bg3-diagnose-mod/SKILL.md)).
+- **Gameplay mechanics or balance bug detected: Apply authoring patch to my_mods/<slug>/, re-deploy local .pak, and re-test**: Apply authoring patch to `my_mods/<slug>/`, re-deploy local `.pak` (Step 1), and re-test.
 
 ---
 

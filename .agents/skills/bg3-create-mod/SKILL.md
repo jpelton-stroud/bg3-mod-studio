@@ -12,7 +12,7 @@ Stage 1 is strictly scoped to the repository workspace:
 2. Drafts a technical mod plan and pauses for **interactive user approval**.
 3. Scaffolds `my_mods/<ModSlug>` with internal `<ModName>_<UUID>` Larian subdirectories via [`scripts/authoring/create_mod_scaffold.py`](../../../scripts/authoring/create_mod_scaffold.py).
 4. Dispatches specialized **concurrent subagents in parallel** to author stats, progressions, localization, and documentation.
-5. Runs read-only smoke checks (`validate_mod.py`, `sync_localization.py --check`) without modifying external game directories or `AppData/`.
+5. Runs comprehensive read-only static verification (`validate_mod.py`, `sync_localization.py --check`, `check_mod_conflicts.py --against-library`) without modifying external game directories or `AppData/`.
 6. Executes a **Progressive Gate Handoff** to **Stage 2: Diagnostics & Toolkit Sync** ([`bg3-diagnose-mod`](../bg3-diagnose-mod/SKILL.md)).
 
 ## Discovery & Tooling
@@ -26,6 +26,7 @@ python3 scripts/bg3.py tools info scaffold-progression
 python3 scripts/bg3.py tools info scaffold-template
 python3 scripts/bg3.py tools info inject-treasure
 python3 scripts/bg3.py tools info validate
+python3 scripts/bg3.py tools info check-conflicts
 ```
 
 ---
@@ -64,8 +65,9 @@ README.md & mod spec tables"]
     I4 --> J
     
     J --> K["Step 5: Read-Only Validation Gate
-python3 scripts/bg3.py mod validate --mod &lt;slug&gt; --json
-python3 scripts/bg3.py mod sync-localization --mod &lt;slug&gt; --check --json"]
+python3 scripts/bg3.py mod validate &lt;slug&gt; --json
+python3 scripts/bg3.py mod sync-localization --mod &lt;slug&gt; --check --json
+python3 scripts/bg3.py mod conflict &lt;slug&gt; --against-library --json"]
     K --> L["Step 6: Progressive Gate Handoff
 ask_question -> Proceed to Stage 2: /bg3-diagnose-mod &lt;slug&gt;"]
 ```
@@ -202,8 +204,9 @@ The Orchestrator halts tool execution and waits for reactive completion messages
 Once all subagents have reported success, run read-only validation on the workspace files without touching game `Data/` or `AppData/`:
 
 ```bash
-python3 scripts/bg3.py mod validate --mod <mod-slug> --json
+python3 scripts/bg3.py mod validate <mod-slug> --json
 python3 scripts/bg3.py mod sync-localization --mod <mod-slug> --check --json
+python3 scripts/bg3.py mod conflict <mod-slug> --against-library --json
 ```
 
 Verify:
@@ -211,6 +214,7 @@ Verify:
 - Metadata parity between `Projects/` and `Mods/` `meta.lsx`
 - Localization handle references (`h...;1`) against `English/<ModName>.xml`
 - Spell references in `SpellLists.lsx` against local stats
+- Community library collision audit against `mods/library.md` (no stat name or RootTemplate name collisions)
 - Compliance of 512×512 PNG thumbnails and logos
 
 If any errors or missing handles are found, prompt the subagents to repair them in `my_mods/<mod-slug>`.
@@ -219,12 +223,12 @@ If any errors or missing handles are found, prompt the subagents to repair them 
 
 ## Step 6: Progressive Gate Handoff to Stage 2
 
-Do not synchronize files to `<Game>/Data/` or build `.pak` archives in Stage 1. Instead, present a concise status report of scaffolded and authored files, then hand off to **Stage 2: Diagnostics & Toolkit Sync**:
+Do not synchronize files to `<Game>/Data/` or build `.pak` archives in Stage 1. Because workspace static verification is 100% clean, Stage 2 focuses strictly on Toolkit staging to `Data/` and User-Action Gate 1. Present a concise status report of scaffolded and authored files, then hand off to **Stage 2: Diagnostics & Toolkit Sync**:
 
 ```text
 Mod '<ModName>' successfully authored and verified in my_mods/<mod-slug>!
 ```
 
 Use `ask_question` to transition:
-- **Proceed to Stage 2 Diagnostics**: Run `/bg3-diagnose-mod <mod-slug>` to perform Phase 2A static checks and game sync, load into the BG3 Toolkit (`Glasses.exe`), and execute Phase 2B runtime log triage.
+- **Proceed to Stage 2 Diagnostics**: Run `/bg3-diagnose-mod <mod-slug>` to execute Toolkit staging to `<Game>/Data/`, guide the user through User-Action Gate 1 (loading the mod in `Glasses.exe`), and triage runtime engine logs.
 - **Review Workspace Files**: Keep working in `my_mods/<mod-slug>` before proceeding to diagnostics.

@@ -8,42 +8,45 @@ This guide walks through creating, authoring, diagnosing, testing, and publishin
 
 Development in this studio follows two foundational principles:
 
-1. **Chat First**: Rather than manually executing command-line scripts, you drive every stage of mod creation conversationally through specialized slash commands (`/bg3_create_mod`, `/bg3_diagnose_mod`, `/bg3_test_mod`, `/bg3_release_prep`, `/bg3_post_release`). Autonomous agent skills orchestrate subagents, manage progressive review gates, and invoke deterministic Python scripts under the hood.
-2. **Shift Left + Loopback**: Potential bugs, XML/LSX structural errors, broken localization handles, and community stat collisions are caught as early as possible—statically in Phase 2A and via BG3 Toolkit runtime logs in Phase 2B—long before packaging or loading into a full game campaign. If gameplay anomalies appear during in-game testing, the workflow provides an instant loopback to diagnostics.
+1. **Chat First**: Rather than manually executing command-line scripts, you drive every stage of mod creation conversationally through specialized slash commands (`/bg3-create-mod`, `/bg3-diagnose-mod`, `/bg3-test-mod`, `/bg3-release-prep`, `/bg3-post-release`). Autonomous agent skills orchestrate subagents, manage progressive review gates, and invoke deterministic Python scripts under the hood.
+2. **Shift Left + Loopback**: Potential bugs, XML/LSX structural errors, broken localization handles, and community stat collisions are caught as early as possible—statically in Stage 1 and via BG3 Toolkit runtime logs in Stage 2—long before packaging or loading into a full game campaign. If gameplay anomalies appear during in-game testing, the workflow provides dual-track loopback to authoring patches or toolkit diagnostics.
 
 ### 5-Stage Shift-Left & Loopback Lifecycle
 
 ```mermaid
 flowchart TD
-    S1["Stage 1: Creation (/bg3_create_mod)
+    S1["Stage 1: Creation (/bg3-create-mod)
     • /grill-me interview & specification plan
-    • Scaffolding & parallel subagents
-    • Read-only smoke check on my_mods/<slug>/"]
+    • Autonomous scaffolding & parallel subagents
+    • Static verification (LSX, string handles, conflict pre-check)"]
     
-    S2["Stage 2: Diagnostics (/bg3_diagnose_mod)
-    • Phase 2A: Static pre-flight, Data/ sync & Toolkit launch
-    • Phase 2B: Runtime log triage, auto-fixes & verification loop"]
+    S2["Stage 2: Diagnostics & Toolkit Staging (/bg3-diagnose-mod)
+    • Toolkit staging (Data/ sync & binary .loca compilation)
+    • User-Action Gate 1: Glasses.exe launch & messages.log triage
+    • Automated remediation loopback"]
     
-    S3["Stage 3: In-Game Testing (/bg3_test_mod)
-    • Phase 3A: Clean-room test with dependency isolation
-    • Phase 3B: Multi-mod campaign integration & save audit (optional)
-    • User in-game verification & loopback/release gate"]
+    S3["Stage 3: Clean-Room In-Game Testing (/bg3-test-mod)
+    • Loose Data purge, local test .pak deploy & load order isolation
+    • User-Action Gate 2: bg3.exe launch & gameplay verification
+    • Dual-Track Defect Routing"]
     
-    S4["Stage 4: Release Preparation (/bg3_release_prep)
-    • Semantic version bump & README sync
-    • Localization prune & binary .loca compilation
-    • Strict linting & mod.io HTML description render
-    • Final Data/ sync & dist/<slug>.pak build"]
+    S4["Stage 4: Release Preparation (/bg3-release-prep)
+    • Atomic Version64 bump & strict lint validation
+    • Localization prune/compile & GFM HTML render
+    • Data/ staging for User-Action Gate 3: Toolkit publishing
+    • Optional standalone dist/<slug>.pak package"]
     
-    S5["Stage 5: Post-Release (/bg3_post_release)
-    • mod.io REST API profile metadata sync
-    • 2-stage tag preview + confirmation"]
+    S5["Stage 5: Post-Release & Teardown (/bg3-post-release)
+    • Storefront governance via REST API (tags, permissions, visibility)
+    • Mandatory dev teardown (purge Data/, clean .pak, disable load order)
+    • Consumer subscriber live verification"]
     
     S1 -->|Stage 1 Gate| S2
-    S2 -->|Stage 2 Gate| S3
-    S3 -->|Testing Passed| S4
-    S3 -.->|Issues Found (Loopback)| S2
-    S4 -->|Publish in Toolkit| S5
+    S2 -->|User-Action Gate 1 Passed| S3
+    S3 -->|Playtesting Passed| S4
+    S3 -.->|Engine Crash / Broken Asset (Stage 2 Loopback)| S2
+    S3 -.->|Gameplay / Mechanics Bug (Stage 1 Authoring Patch)| S1
+    S4 -->|User-Action Gate 3: Publish in Toolkit| S5
 ```
 
 > [!NOTE]
@@ -51,15 +54,15 @@ flowchart TD
 
 ---
 
-## 2. Stage 1: Autonomous Creation (`/bg3_create_mod`)
+## 2. Stage 1: Autonomous Creation (`/bg3-create-mod`)
 
 Trigger mod creation conversationally by describing your concept or invoking the slash command:
 
 ```text
-/bg3_create_mod "A finesse longsword for Eldritch Knights scaling with INT"
+/bg3-create-mod "A finesse longsword for Eldritch Knights scaling with INT"
 ```
 
-The [`bg3_create_mod`](../.agents/skills/bg3_create_mod/SKILL.md) skill orchestrates the entire creation pipeline across five distinct phases:
+The [`bg3-create-mod`](../.agents/skills/bg3-create-mod/SKILL.md) skill orchestrates the entire creation pipeline across five distinct phases:
 
 ### Step 1: Design Interview (`grill-me` Protocol)
 The orchestrator immediately initiates a structured interview to resolve design branches:
@@ -113,105 +116,137 @@ data "Description" "ha3316e15g6546g48bag9827gc56306e90e78;1"
 </contentList>
 ```
 
-### Step 5 & 6: Smoke Gate & Progressive Handoff
-A read-only validation check verifies syntax and handle consistency without altering external directories. Once verified, the agent presents a **Progressive Gate Handoff** prompting you to transition into Stage 2.
+### Step 5: Comprehensive Workspace Static Verification Gate
+The orchestrator awaits completion from all parallel subagents and executes comprehensive read-only static verification strictly within `my_mods/<ModSlug>/` without modifying game `Data/` or `AppData/`:
+1. **LSX & XML Integrity**: Verifies well-formedness and schema compliance via `bg3 mod validate <slug>` (`scripts/diagnostics/validate_mod.py`).
+2. **Metadata Parity**: Asserts identical UUID, author, and `Version64` tags between `Projects/<UUID>/meta.lsx` and `Mods/<UUID>/meta.lsx`.
+3. **String Handle Parity**: Verifies that every `DisplayName` and `Description` handle referenced across stat entries exists in `Localization/English/<ModName>.xml` via `bg3 mod sync-localization --mod <slug> --check` (`scripts/diagnostics/sync_localization.py`).
+4. **Spell List Parity**: Confirms spell identifiers referenced in `SpellLists.lsx` match declared spell definitions.
+5. **Library Conflict Pre-Check**: Checks candidate stats and RootTemplates against over 2,200 cataloged community mods in `mods/library.md` via `bg3 mod conflict <slug> --against-library` (`scripts/diagnostics/check_mod_conflicts.py`).
+6. **Visual Assets**: Ensures compliant 512×512 PNG thumbnails and logos exist in project folders.
+
+If any missing handles or syntax errors are detected, the orchestrator directs the subagents to repair the issues in `my_mods/<ModSlug>/` before proceeding.
+
+### Step 6: Progressive Gate Handoff to Stage 2
+Stage 1 maintains strict workspace isolation: it does not touch `<Game>/Data/` or build `.pak` archives. Because workspace static verification is 100% clean, the orchestrator presents an interactive `ask_question` gate prompting you to transition into **Stage 2: Diagnostics & Toolkit Staging** (`/bg3-diagnose-mod <slug>`).
 
 ---
 
-## 3. Stage 2: Diagnostics & Toolkit Verification (`/bg3_diagnose_mod`)
+## 3. Stage 2: Diagnostics & Toolkit Staging (`/bg3-diagnose-mod`)
 
-Stage 2 acts as the autonomous mod doctor, ensuring full stability before runtime testing:
+Stage 2 acts as the autonomous mod doctor and governs **User-Action Gate 1 (Toolkit Diagnostics)**:
 
 ```text
-/bg3_diagnose_mod arcane-blade
+/bg3-diagnose-mod arcane-blade
 ```
 
-The [`bg3_diagnose_mod`](../.agents/skills/bg3_diagnose_mod/SKILL.md) skill operates in two synchronized phases:
+The [`bg3-diagnose-mod`](../.agents/skills/bg3-diagnose-mod/SKILL.md) skill operates in two synchronized phases:
 
-### Phase 2A: Static Pre-Flight & Game Sync
-1. **Structural & Handle Audit**: Verifies that every `DisplayName` and `Description` handle referenced in stat files exists in `Localization/English/<ModName>.xml` via `bg3 mod validate` (`scripts/diagnostics/validate_mod.py`).
-2. **Library Collision Check**: Scans your candidate mod's stat entries against over 2,200 cataloged community mods in `mods/library.md` via `bg3 mod conflict --against-library` (`scripts/diagnostics/check_mod_conflicts.py`).
-3. **Automated Pre-Flight Fixes**: Automatically audits and prunes orphaned localization handles via `bg3 mod sync-loca --prune` (`scripts/diagnostics/sync_localization.py`).
-4. **Idempotent Data Sync**: Synchronizes unpacked mod assets and compiled binary `.loca` files directly into your game's `Data/` directory via `bg3 mod sync-game` (`scripts/packaging/sync_game_data.py`).
-5. **Toolkit Launch Prompt**: Directs you to open the mod in the official Baldur's Gate 3 Toolkit (`Glasses.exe`) to generate engine log output.
+### Phase 2A: Workspace Assertion, Game Sync & Toolkit Launch Gate
+1. **Workspace Static Assertion**: Runs a rapid deterministic validation check (`bg3 mod validate <slug>`) to assert that workspace files in `my_mods/<ModSlug>/` remain structurally sound.
+2. **Toolkit Staging (Data/ Sync & Binary .loca Compilation)**: Synchronizes unpacked mod source trees (`Editor/Mods/`, `Projects/`, `Public/`) and compiles `Localization/English/<ModName>.xml` into a binary `.loca` directly within `<Game>/Data/` via `bg3 mod sync-data --mods <slug>` (`scripts/packaging/sync_game_data.py`).
+3. **User-Action Gate 1 (Toolkit Launch)**: Prompts you to launch the official Baldur's Gate 3 Toolkit (`Glasses.exe`), open your mod project, and allow the engine to load assets and generate runtime log entries in `messages.log`.
 
-### Phase 2B: Runtime Log Diagnosis & Automated Remediation Loop
-Once you confirm logs have been generated in the Toolkit:
-1. The skill analyzes `Glasses.exe` diagnostic logs via `bg3 mod diagnose-logs` (`scripts/diagnostics/diagnose_toolkit_logs.py`), identifying missing textures, duplicate stats, or invalid boost syntax.
-2. The agent proposes and applies targeted patches directly to files in `my_mods/<ModSlug>/`.
-3. The skill automatically **loops back to Phase 2A** to re-verify fixes statically, repeating the cycle until logs are clean.
-4. Once verified, the agent offers a handoff to Stage 3 In-Game Testing.
+### Phase 2B: Runtime Log Triage & Automated Remediation Loop
+Once you confirm via `ask_question` that `Glasses.exe` has loaded the mod:
+1. **Engine Log Diagnosis**: Triages runtime warnings, asset loading errors, or stat inheritance flaws from `Glasses.exe` logs (`messages.log`) via `bg3 mod diagnose-logs --mod <slug>` (`scripts/diagnostics/diagnose_toolkit_logs.py`).
+2. **Automated Source Remediation**: Proposes and applies targeted patches directly to the source files in `my_mods/<ModSlug>/`.
+3. **Automated Re-Sync Loop**: The skill loops back to Phase 2A, re-syncing patched files to `<Game>/Data/` and re-verifying until logs are clean (or user override / circuit breaker triggers).
+4. **Stage 3 Handoff**: Once Toolkit logs report zero unresolved errors, the skill prompts you to advance to Stage 3 In-Game Testing.
 
 ---
 
-## 4. Stage 3: In-Game Testing & Verification (`/bg3_test_mod`)
+## 4. Stage 3: In-Game Testing & Verification (`/bg3-test-mod`)
 
 Deploy and test your mod in an actual game session:
 
 ```text
-/bg3_test_mod arcane-blade
+/bg3-test-mod arcane-blade
 ```
 
-The [`bg3_test_mod`](../.agents/skills/bg3_test_mod/SKILL.md) skill uses a progressive two-tier testing protocol:
+The [`bg3-test-mod`](../.agents/skills/bg3-test-mod/SKILL.md) skill governs **User-Action Gate 2 (In-Game Playtesting)** with a progressive two-tier testing protocol:
 
 ### Phase 3A: Clean-Room / Smoke Testing (Default Fast Path)
-1. **Loose File Cleanup & Local Packaging**: Cleans loose source files from `Data/` using `bg3 mod sync-game <slug> --clean-mod` to avoid engine locks, and builds an uncorrupted test `.pak` archive via `bg3 mod pack <slug> --publish-local` (`scripts/packaging/pack_mod_pak.py`).
-2. **Clean-Room Load Order Isolation**: Resolves dependencies from both `meta.lsx` and `.test_deps.json`, then injects the target mod and its closure into `modsettings.lsx` while temporarily disabling unrelated mods via `bg3 loadorder isolate <slug>` (`scripts/management/manage_load_order.py`).
-3. **In-Game Verification**: You launch Baldur's Gate 3 and verify mechanics, drop rates, and tooltips on a clean save.
+1. **Loose Data Purge & Local .pak Deployment**: Purges loose development files from `<Game>/Data/` using `bg3 mod sync-data --clean-mod <slug>` (`scripts/packaging/sync_game_data.py`) to prevent Larian Virtual File System (VFS) loose-file shadowing and engine locks, then builds an uncorrupted test `.pak` archive deployed directly to `AppData/Mods/` via `bg3 mod pack --mod <slug> --publish-local` (`scripts/packaging/pack_mod_pak.py`).
+2. **Clean-Room Load Order Isolation**: Resolves dependencies from `meta.lsx` and `.test_deps.json`, then activates the target mod and its closure in `modsettings.lsx` while temporarily disabling unrelated mods via `bg3 loadorder --enable <slug> --with-deps --isolate` (`scripts/management/manage_load_order.py`).
+3. **User-Action Gate 2 (In-Game Playtesting)**: You launch Baldur's Gate 3 (`bg3.exe`), start a new game or load a clean minimal test save, and verify:
+   - **Acquisition**: Container drops (Nautiloid Tutorial Chest, Camp Chest) or vendor inventory.
+   - **Tooltips**: Accurate names and descriptions without `Not Found` or raw string handles.
+   - **Mechanics**: Spell casting, passive triggers, action economy, and level-up progression screens.
+   - **Persistence**: Save the game, reload, and verify state persistence.
 
 ### Phase 3B: Multi-Mod Integration & Save Audit (Optional Gate)
-For complex mods or character class overhauls:
-- Validates profile load order compatibility against active third-party mods via `bg3 loadorder validate`.
+For complex mods, class overhauls, or campaign validation:
+- Validates profile load order compatibility against active third-party mods via `bg3 loadorder --enable <slug> --validate`.
 - Audits existing campaign save games via `bg3 mod inspect-save --audit` (`scripts/diagnostics/inspect_save_game.py`) to confirm safe loading without missing template errors.
+- Optionally simulates build synergy matrices via `bg3 build simulate`.
+- Verifies post-test save integrity via `bg3 mod inspect-save`.
 
-### The Shift Left + Loopback Trigger
-If you encounter missing icons, broken passives, or unexpected interactions while playing in-game, you do not need to manually troubleshoot. Simply alert the assistant:
-
-> *"The weapon's passive isn't applying the spellcasting modifier during combat."*
-
-The assistant immediately **loops back to Stage 2 (`/bg3_diagnose_mod`)**, analyzes the stat inheritance, applies a fix, re-syncs, and presents a freshly packaged test `.pak` for verification.
+### Dual-Track Defect Routing
+If issues emerge during playtesting, the workflow routes defects along two specialized tracks rather than a generic loopback:
+1. **Track 1: Engine Crash, Missing Asset, or Broken Script**:
+   Routes back to **Stage 2: Diagnostics (`/bg3-diagnose-mod <slug>`)**. The skill re-syncs source files to `<Game>/Data/`, directs you to launch `Glasses.exe` (User-Action Gate 1) to inspect engine crash diagnostics and `messages.log`, applies fixes, and re-syncs.
+2. **Track 2: Gameplay Mechanics, Balance, or Stat Calculation Bug**:
+   Routes to **Stage 1 Authoring Patch**: The agent applies targeted patches directly to source files in `my_mods/<ModSlug>/`, executes Step 1 loose file purge and local `.pak` re-packaging (`bg3 mod sync-data --clean-mod` + `bg3 mod pack --publish-local`), and prompts you to resume in-game testing immediately without an unnecessary Toolkit staging cycle.
 
 ---
 
-## 5. Stage 4: Release Preparation (`/bg3_release_prep`)
+## 5. Stage 4: Release Preparation (`/bg3-release-prep`)
 
 When in-game testing is complete and verified, prepare the mod for publication:
 
 ```text
-/bg3_release_prep arcane-blade
+/bg3-release-prep arcane-blade
 ```
 
-The [`bg3_release_prep`](../.agents/skills/bg3_release_prep/SKILL.md) skill automates all release checks:
+The [`bg3-release-prep`](../.agents/skills/bg3-release-prep/SKILL.md) skill automates all release checks and prepares staging for **User-Action Gate 3 (Toolkit Publishing)**:
 
-1. **Atomic Semantic Version Bumping**: Increments version numbers in `Mods/<UUID>/meta.lsx`, `Projects/<UUID>/meta.lsx`, and `README.md` via `bg3 mod bump-version <slug> --patch` (`scripts/management/bump_mod_version.py`).
-2. **Localization Prune & Binary Compilation**: Prunes unused string handles and compiles `English/<ModName>.xml` into a binary `.loca` file via `bg3 mod sync-loca <slug> --prune --compile` (`scripts/diagnostics/sync_localization.py`).
-3. **Strict Linting & Conflict Gate**: Runs zero-tolerance validation (`bg3 mod validate <slug> --strict`) and library collision audits (`bg3 mod conflict <slug> --against-library`).
-4. **mod.io HTML Description Rendering**: Converts `my_mods/<ModSlug>/README.md` into GitHub-Flavored Markdown HTML via `bg3 mod render-desc <slug> --write` (`scripts/management/render_modio_description.py`), generating `modio_description.html` ready for storefront display.
-5. **Final Game Data Sync & Distribution Archive**: Syncs final assets to `<Game>/Data/` (`bg3 mod sync-game <slug>`) and builds an LSPK v18 release `.pak` in `dist/<ModSlug>.pak` via `bg3 mod pack <slug>`.
-
-At this point, your mod can be loaded into the official Baldur's Gate 3 Toolkit and published to mod.io with one click.
+1. **Atomic Semantic Version64 Bumping**: Increments version numbers and atomically encodes the 64-bit integer across `Mods/<UUID>/meta.lsx`, `Projects/<UUID>/meta.lsx`, and synchronizes the version in `my_mods/<slug>/README.md` via `bg3 mod bump-version --mod <slug> --patch` (`scripts/management/bump_mod_version.py`).
+2. **Localization Pruning & Binary Compilation**: Prunes unused string handles and compiles `English/<ModName>.xml` into a binary `.loca` file via `bg3 mod sync-localization --mod <slug> --prune --compile` (`scripts/diagnostics/sync_localization.py`).
+3. **Strict Linting & Conflict Gate**: Runs zero-tolerance validation (`bg3 mod validate --mod <slug> --strict`) and library collision audits (`bg3 mod conflict --candidate <slug> --against-library`).
+4. **mod.io HTML Description Rendering**: Converts `my_mods/<ModSlug>/README.md` into GitHub-Flavored Markdown HTML via `bg3 mod render-description --mod <slug> --write` (`scripts/management/render_modio_description.py`), generating `modio_description.html` formatted for storefront display.
+5. **Data/ Staging for User-Action Gate 3 & Optional Standalone Package**:
+   - Stages loose development files and compiled binary `.loca` into `<Game>/Data/` via `bg3 mod sync-data --mods <slug>` (`scripts/packaging/sync_game_data.py`).
+   - Official mod.io publication in the Baldur's Gate 3 Toolkit (`Glasses.exe`) directly consumes loose development files staged in `<Game>/Data/` (`Data/Editor/Mods/<ModName>/`, `Data/Projects/<ModName>/`, and `Data/Public/<ModName>/`)—it does not consume `.pak` archives.
+   - Optionally packages a standalone LSPK v18 release `.pak` in `dist/<ModSlug>.pak` via `bg3 mod pack --mod <slug> --out dist/<slug>.pak` strictly for Nexus Mods or manual archive sharing.
+6. **User-Action Gate 3 (Toolkit Publishing) & Stage 5 Handoff**:
+   Guides the author through the manual publishing steps in `Glasses.exe` (Mod Project Manager -> paste `modio_description.html` -> click Publish Mod). Once publication is confirmed on mod.io, transitions to **Stage 5: Post-Release** (`/bg3-post-release <slug>`).
 
 ---
 
-## 6. Stage 5: Post-Release Profile Management (`/bg3_post_release`)
+## 6. Stage 5: Post-Release Profile Management & Environment Teardown (`/bg3-post-release`)
 
-After uploading your `.pak` through the Toolkit, update and synchronize the public mod.io storefront profile:
+After publishing through the Toolkit (**User-Action Gate 3**), manage storefront governance and transition the workspace to consumer subscriber mode:
 
 ```text
-/bg3_post_release arcane-blade
+/bg3-post-release arcane-blade
 ```
 
-The [`bg3_post_release`](../.agents/skills/bg3_post_release/SKILL.md) skill provides a 2-stage preview and approval workflow:
+The [`bg3-post-release`](../.agents/skills/bg3-post-release/SKILL.md) skill governs post-release operations across two critical phases:
 
-1. **Tag & Metadata Inspection**:
-   - Fetches official mod.io allowed tags for Baldur's Gate 3.
-   - Evaluates the mod's `README.md` to recommend relevant tags (e.g., `Equipment`, `Weapons`, `Classes`).
-2. **Interactive Preview Gate**:
-   - Displays the exact proposed changes (title, summary, tags, and rendered HTML description).
-   - **No writes occur without explicit confirmation.**
-3. **API Synchronization**:
-   - Updates the live mod profile on mod.io via `bg3 modio update-metadata <slug>` (`scripts/management/modio_update_metadata.py`).
-   - Provides a direct link to the mod profile and admin dashboard.
+### Phase 5A: Storefront Governance via REST API
+1. **Pre-Flight Publication Check**: Asserts that the mod has been published via `Glasses.exe` (User-Action Gate 3) before making API calls, as the mod.io REST API updates metadata for existing profiles but cannot create new mod entries or upload `.pak` binaries.
+2. **Tag Inspection & Suggestion**: Fetches official game-approved tags from mod.io and inspects `my_mods/<ModSlug>/README.md` to recommend relevant tags (e.g. `Equipment`, `Weapons`, `Classes`).
+3. **Interactive 2-Stage Preview Gate**: Displays proposed metadata changes, tags to add, community options (comments, dependents, collections), non-commercial credit permissions, and public visibility (`visible=1`). **No writes occur without explicit confirmation.**
+4. **REST API Synchronization**: Updates the live profile on mod.io via `bg3 modio update-metadata --mod <slug> --tags "..." --confirm` (`scripts/management/modio_update_metadata.py`) and provides direct links to the public profile and admin settings.
+
+### Phase 5B: Mandatory Development Environment Teardown & Subscriber Verification
+Switching from developer authoring mode to consumer subscriber mode is essential to prevent Patch 7 UUID conflicts, third-party mod warnings, and multiplayer checksum mismatches:
+1. **Mandatory Local Teardown**:
+   - Purge loose development files from `<Game>/Data/`:
+     ```bash
+     python3 scripts/bg3.py mod sync-data --clean-mod <slug> --json
+     ```
+   - Delete local test `.pak` from `AppData/Mods/`:
+     ```bash
+     python3 scripts/bg3.py mod pack --mod <slug> --clean-local --json
+     ```
+   - Disable local mod entry in `modsettings.lsx`:
+     ```bash
+     python3 scripts/bg3.py loadorder --disable <slug> --json
+     ```
+2. **Consumer Subscriber Live Verification**:
+   The author launches Baldur's Gate 3, opens the in-game Mod Manager, subscribes to the live published mod on mod.io, enables it in load order, and verifies clean download and game launch as an official subscriber.
 
 ---
 
@@ -221,8 +256,9 @@ The autonomous agent skills invoke deterministic Python automation scripts from 
 
 | Lifecycle Stage | Autonomous Skill | Underlying Script Library & CLI Command | Documentation |
 | :--- | :--- | :--- | :--- |
-| **Stage 1: Creation** | [`bg3_create_mod`](../.agents/skills/bg3_create_mod/SKILL.md) | `scripts/authoring/create_mod_scaffold.py` (`bg3 mod scaffold`)<br>`scripts/authoring/scaffold_stat_entry.py` (`bg3 scaffold stat`)<br>`scripts/authoring/scaffold_progression_node.py` (`bg3 scaffold progression`)<br>`scripts/authoring/scaffold_root_template.py` (`bg3 scaffold root-template`)<br>`scripts/authoring/inject_treasure_table.py` (`bg3 mod inject-treasure`)<br>`scripts/authoring/add_mod_dependency.py` (`bg3 mod add-dependency`) | [FEATURES.md § 3.2](FEATURES.md#32-authoring--scaffolding-tools-scriptsauthoring) |
-| **Stage 2: Diagnostics** | [`bg3_diagnose_mod`](../.agents/skills/bg3_diagnose_mod/SKILL.md) | `scripts/diagnostics/validate_mod.py` (`bg3 mod validate`)<br>`scripts/diagnostics/sync_localization.py` (`bg3 mod sync-loca`)<br>`scripts/diagnostics/check_mod_conflicts.py` (`bg3 mod conflict`)<br>`scripts/packaging/sync_game_data.py` (`bg3 mod sync-game`)<br>`scripts/diagnostics/diagnose_toolkit_logs.py` (`bg3 mod diagnose-logs`) | [FEATURES.md § 3.3](FEATURES.md#33-diagnostics--auditing-tools-scriptsdiagnostics) |
-| **Stage 3: Testing** | [`bg3_test_mod`](../.agents/skills/bg3_test_mod/SKILL.md) | `scripts/packaging/pack_mod_pak.py` (`bg3 mod pack`)<br>`scripts/management/manage_load_order.py` (`bg3 loadorder`)<br>`scripts/diagnostics/inspect_save_game.py` (`bg3 mod inspect-save`) | [FEATURES.md § 3.4–3.5](FEATURES.md#34-packaging--deployment-tools-scriptspackaging) |
-| **Stage 4: Release Prep** | [`bg3_release_prep`](../.agents/skills/bg3_release_prep/SKILL.md) | `scripts/management/bump_mod_version.py` (`bg3 mod bump-version`)<br>`scripts/diagnostics/sync_localization.py` (`bg3 mod sync-loca`)<br>`scripts/diagnostics/validate_mod.py` (`bg3 mod validate`)<br>`scripts/management/render_modio_description.py` (`bg3 mod render-desc`)<br>`scripts/packaging/pack_mod_pak.py` (`bg3 mod pack`) | [FEATURES.md § 3.3–3.5](FEATURES.md#35-management--load-order-tools-scriptsmanagement) |
-| **Stage 5: Post-Release** | [`bg3_post_release`](../.agents/skills/bg3_post_release/SKILL.md) | `scripts/management/modio_update_metadata.py` (`bg3 modio update-metadata`)<br>`scripts/management/render_modio_description.py` (`bg3 mod render-desc`) | [FEATURES.md § 3.5](FEATURES.md#35-management--load-order-tools-scriptsmanagement) |
+| **Stage 1: Creation** | [`bg3-create-mod`](../.agents/skills/bg3-create-mod/SKILL.md) | `scripts/authoring/create_mod_scaffold.py` (`bg3 mod create`)<br>`scripts/authoring/scaffold_stat_entry.py` (`bg3 scaffold stat`)<br>`scripts/authoring/scaffold_progression_node.py` (`bg3 scaffold progression`)<br>`scripts/authoring/scaffold_root_template.py` (`bg3 scaffold root-template`)<br>`scripts/authoring/inject_treasure_table.py` (`bg3 mod inject-treasure`)<br>`scripts/authoring/add_mod_dependency.py` (`bg3 mod add-dependency`)<br>`scripts/diagnostics/validate_mod.py` (`bg3 mod validate`)<br>`scripts/diagnostics/sync_localization.py` (`bg3 mod sync-localization --check`)<br>`scripts/diagnostics/check_mod_conflicts.py` (`bg3 mod conflict --against-library`) | [FEATURES.md § 3.2](FEATURES.md#32-authoring--scaffolding-tools-scriptsauthoring) |
+| **Stage 2: Diagnostics & Toolkit Staging** | [`bg3-diagnose-mod`](../.agents/skills/bg3-diagnose-mod/SKILL.md) | `scripts/diagnostics/validate_mod.py` (`bg3 mod validate`)<br>`scripts/packaging/sync_game_data.py` (`bg3 mod sync-data`)<br>`scripts/diagnostics/diagnose_toolkit_logs.py` (`bg3 mod diagnose-logs`) | [FEATURES.md § 3.3](FEATURES.md#33-diagnostics--auditing-tools-scriptsdiagnostics) |
+| **Stage 3: Testing** | [`bg3-test-mod`](../.agents/skills/bg3-test-mod/SKILL.md) | `scripts/packaging/sync_game_data.py` (`bg3 mod sync-data --clean-mod`)<br>`scripts/packaging/pack_mod_pak.py` (`bg3 mod pack --publish-local`)<br>`scripts/management/manage_load_order.py` (`bg3 loadorder --enable --with-deps --isolate`)<br>`scripts/diagnostics/inspect_save_game.py` (`bg3 mod inspect-save`) | [FEATURES.md § 3.4–3.5](FEATURES.md#34-packaging--deployment-tools-scriptspackaging) |
+| **Stage 4: Release Prep** | [`bg3-release-prep`](../.agents/skills/bg3-release-prep/SKILL.md) | `scripts/management/bump_mod_version.py` (`bg3 mod bump-version`)<br>`scripts/diagnostics/sync_localization.py` (`bg3 mod sync-localization --prune --compile`)<br>`scripts/diagnostics/validate_mod.py` (`bg3 mod validate --strict`)<br>`scripts/diagnostics/check_mod_conflicts.py` (`bg3 mod conflict --against-library`)<br>`scripts/management/render_modio_description.py` (`bg3 mod render-description`)<br>`scripts/packaging/sync_game_data.py` (`bg3 mod sync-data`)<br>`scripts/packaging/pack_mod_pak.py` (`bg3 mod pack --out dist/<slug>.pak`) | [FEATURES.md § 3.3–3.5](FEATURES.md#35-management--load-order-tools-scriptsmanagement) |
+| **Stage 5: Post-Release & Teardown** | [`bg3-post-release`](../.agents/skills/bg3-post-release/SKILL.md) | `scripts/management/modio_update_metadata.py` (`bg3 modio update-metadata`)<br>`scripts/management/render_modio_description.py` (`bg3 mod render-description`)<br>`scripts/packaging/sync_game_data.py` (`bg3 mod sync-data --clean-mod`)<br>`scripts/packaging/pack_mod_pak.py` (`bg3 mod pack --clean-local`)<br>`scripts/management/manage_load_order.py` (`bg3 loadorder --disable`) | [FEATURES.md § 3.5](FEATURES.md#35-management--load-order-tools-scriptsmanagement) |
+
