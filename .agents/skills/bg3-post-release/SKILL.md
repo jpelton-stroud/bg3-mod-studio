@@ -1,11 +1,11 @@
 ---
 name: bg3-post-release
-description: Applies approved metadata, profile tags, and description updates for a local Baldur's Gate 3 mod already published on mod.io (Stage 5 of the mod lifecycle). Triggers on /bg3-post-release, /post_release, or when handed off by bg3-release-prep.
+description: Governs mod.io storefront metadata, profile tags, and transitions authors to consumer subscribers following User-Action Gate 3 Toolkit publication (Stage 5 of the mod lifecycle). Triggers on /bg3-post-release, /post_release, or when handed off by bg3-release-prep.
 ---
 
-# Post-Release Publishing & Profile Metadata (Stage 5) (`bg3-post-release`)
+# Storefront Governance & Consumer Subscriber Transition (Stage 5) (`bg3-post-release`)
 
-Use this skill as **Stage 5** of the custom mod lifecycle to update a published mod profile through the mod.io REST API. This does not upload a `.pak` file; binary publishing is performed via the official Baldur's Gate 3 Toolkit (`Glasses.exe`).
+Use this skill as **Stage 5: Storefront Governance & Consumer Subscriber Transition** of the custom mod lifecycle following **User-Action Gate 3 (Toolkit Publishing)**. Because binary mod publishing is executed exclusively via the official Baldur's Gate 3 Toolkit (`Glasses.exe`), this skill orchestrates post-publication storefront governance through the mod.io REST API and coordinates the critical transition from developer authoring mode to consumer subscriber mode.
 
 ## Discovery & Tooling
 
@@ -25,7 +25,7 @@ Never write to mod.io until both the proposed tag list and the complete set of p
 
 ## Workflow
 
-### 1. Resolve the local mod
+### 1. Resolve the local mod & Toolkit publishing pre-flight
 
 Accept a mod name or slug that identifies exactly one folder under `my_mods/`, for example:
 
@@ -34,6 +34,9 @@ Accept a mod name or slug that identifies exactly one folder under `my_mods/`, f
 ```
 
 Use the local folder name as the CLI `--mod` argument. If there is no exact normalized local folder match, or more than one match, stop and report the issue. Do not guess or use a path outside `my_mods/`.
+
+> [!IMPORTANT]
+> **Pre-Flight Publication Check**: Assert that the mod has been published to mod.io via the official Toolkit (`Glasses.exe`) (**User-Action Gate 3**) before proceeding with REST API updates. The mod.io REST API cannot create a new mod entry or upload binary `.pak` files; it can only update metadata and tags for existing mod profiles created by the official Toolkit. If the mod has not yet been submitted through `Glasses.exe`, halt immediately and direct the user to complete Step 6 of [`bg3-release-prep`](../bg3-release-prep/SKILL.md).
 
 Read only that mod's `README.md` when evaluating its content and implemented features. Do not inspect game files or other documentation to infer tags.
 
@@ -91,24 +94,29 @@ https://mod.io/g/baldursgate3/m/<resolved-mod-slug>/admin/settings
 
 ### 6. Post-Release Environment Teardown & Live Subscription Verification
 
-Once the mod is confirmed published and live on mod.io, switch from developer authoring mode to consumer subscriber mode. Deleting local test artifacts prevents Patch 7 UUID collisions, "third-party mod" warnings, and multiplayer checksum mismatches:
+Once the mod is confirmed published and live on mod.io, switch from developer authoring mode to consumer subscriber mode.
+
+> [!CAUTION]
+> **Mandatory Local Environment Teardown**: Local environment teardown (`--clean-mod`, `--clean-local`, `--disable`) is **mandatory** before launching the game. Leaving loose development files in `<Game>/Data/` or local test `.pak` files in `AppData/Mods/` causes severe Patch 7 UUID conflicts, triggers "third-party mod" warnings, and causes multiplayer checksum mismatches.
+
+Execute all three teardown commands:
 
 ```bash
-# 1. Purge loose files synced to <Game>/Data/ for Toolkit publishing
+# 1. Purge loose files synced to <Game>/Data/ for Toolkit publishing (MANDATORY)
 python3 scripts/bg3.py mod sync-data --clean-mod <mod-slug> --json
 
-# 2. Delete local test .pak from AppData/Mods/
+# 2. Delete local test .pak from AppData/Mods/ (MANDATORY)
 python3 scripts/bg3.py mod pack --mod <mod-slug> --clean-local --json
 
-# 3. Remove local test entry from modsettings.lsx
+# 3. Remove local test entry from modsettings.lsx (MANDATORY)
 python3 scripts/bg3.py loadorder --disable <mod-slug> --json
 ```
 
-Instruct the user:
+Instruct the mod author:
 1. Launch **Baldur's Gate 3**.
 2. Open the in-game **Mod Manager**.
 3. Locate the newly published mod in the browser, subscribe, and enable it.
-4. Verify clean download, activation, and game launch as an official mod.io subscriber.
+4. Verify clean download, activation, and game launch as an official mod.io subscriber without Patch 7 UUID conflicts or third-party warnings.
 
 ## Safety Rules
 

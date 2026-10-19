@@ -45,11 +45,11 @@ Autonomous skills residing in [`.agents/skills/`](../.agents/skills/) allow deve
 
 | Slash Command                   | Skill                                                                                  | Category       | Primary Function                                                           |
 | :------------------------------ | :------------------------------------------------------------------------------------- | :------------- | :------------------------------------------------------------------------- |
-| `/bg3-create-mod`               | [`bg3-create-mod`](../.agents/skills/bg3-create-mod/SKILL.md)                             | Stage 1        | Mod creation orchestrator: scaffolding, authoring, and read-only validation.|
-| `/bg3-diagnose-mod`             | [`bg3-diagnose-mod`](../.agents/skills/bg3-diagnose-mod/SKILL.md)                         | Stage 2        | Two-phase diagnostics: 2A static checks + 2B game sync & Toolkit logs.      |
-| `/bg3-test-mod`                 | [`bg3-test-mod`](../.agents/skills/bg3-test-mod/SKILL.md)                                 | Stage 3        | In-game testing: local `.pak` deploy, load order activation, save audits.  |
-| `/bg3-release-prep`             | [`bg3-release-prep`](../.agents/skills/bg3-release-prep/SKILL.md)                         | Stage 4        | Release prep: atomic version bump, strict lint, HTML render, dist `.pak`.  |
-| `/bg3-post-release`             | [`bg3-post-release`](../.agents/skills/bg3-post-release/SKILL.md)                         | Stage 5        | Post-release: mod.io API metadata, tag preview, permissions, visibility.  |
+| `/bg3-create-mod`               | [`bg3-create-mod`](../.agents/skills/bg3-create-mod/SKILL.md)                             | Stage 1        | Autonomous creation: interview, scaffolding, concurrent subagents, static validation. |
+| `/bg3-diagnose-mod`             | [`bg3-diagnose-mod`](../.agents/skills/bg3-diagnose-mod/SKILL.md)                         | Stage 2        | Toolkit staging & diagnostics: Data/ sync & .loca, User-Action Gate 1 runtime triage. |
+| `/bg3-test-mod`                 | [`bg3-test-mod`](../.agents/skills/bg3-test-mod/SKILL.md)                                 | Stage 3        | Clean-room testing: Data purge, local .pak deploy, User-Action Gate 2, Dual-Track routing. |
+| `/bg3-release-prep`             | [`bg3-release-prep`](../.agents/skills/bg3-release-prep/SKILL.md)                         | Stage 4        | Release staging: Version64 bump, strict lint, GFM HTML render, Data/ staging for Gate 3. |
+| `/bg3-post-release`             | [`bg3-post-release`](../.agents/skills/bg3-post-release/SKILL.md)                         | Stage 5        | Storefront governance: mod.io REST API metadata/tags, dev teardown, subscriber test. |
 | `/bg3-manage-load-order`        | [`bg3-manage-load-order`](../.agents/skills/bg3-manage-load-order/SKILL.md)               | Management     | Natural language inspection, ordering, and activation in `modsettings.lsx`.|
 | `/bg3-check-mod-conflicts`      | [`bg3-check-mod-conflicts`](../.agents/skills/bg3-check-mod-conflicts/SKILL.md)           | Compatibility  | Evaluates stat collisions and console load order compatibility.            |
 | `/bg3-create-modio-collection`  | [`bg3-create-modio-collection`](../.agents/skills/bg3-create-modio-collection/SKILL.md)   | Community      | Creates or updates public mod.io collections from `mods/library.md`.       |
@@ -68,25 +68,25 @@ Autonomous skills residing in [`.agents/skills/`](../.agents/skills/) allow deve
 
 #### 1. `/bg3-create-mod` (Stage 1: Creation)
 
-Orchestrates mod authoring in `my_mods/<ModSlug>/`. Conducts an interactive `/grill-me` interview, generates directories, creates UUIDs and `Version64` tags, allocates localization handles, authors stats and RootTemplates, and executes read-only validation without touching game directories.
+Orchestrates mod authoring in `my_mods/<ModSlug>/`. Conducts an interactive `/grill-me` interview to resolve design decisions, generates directories and metadata (`Version64`, UUIDv4), dispatches specialized concurrent subagents to author stats, progressions, and RootTemplates, and executes comprehensive read-only static verification (LSX/XML schema integrity, string handle parity, and library conflict pre-check) without touching external game directories or `AppData/`.
 
 - **Example Prompt**:
   ```text
   /bg3-create-mod Create a rogue subclass named Shadowblade with psychic sneak attack bonuses and a custom dagger.
   ```
 
-#### 2. `/bg3-diagnose-mod` (Stage 2: Diagnostics & Toolkit Sync)
+#### 2. `/bg3-diagnose-mod` (Stage 2: Diagnostics & Toolkit Staging)
 
-Acts as an autonomous mod doctor with a two-phase protocol: Phase 2A runs static pre-flight checks, syncs assets and compiled binary `.loca` to `<Game>/Data/`, and directs Toolkit (`Glasses.exe`) log generation; Phase 2B triages runtime logs, applies automated fixes, and loops back to Phase 2A until clean before offering Stage 3 testing.
+Acts as an autonomous mod doctor managing **User-Action Gate 1 (Toolkit Diagnostics)**: Phase 2A asserts static workspace cleanliness, stages unpacked assets and compiled binary `.loca` into `<Game>/Data/`, and directs the author to launch the official Baldur's Gate 3 Toolkit (`Glasses.exe`); Phase 2B triages runtime logs (`messages.log`), applies targeted source fixes to `my_mods/<ModSlug>/`, and loops back to Phase 2A until clean before offering Stage 3 testing.
 
 - **Example Prompt**:
   ```text
   /bg3-diagnose-mod Diagnose my_mods/shadowblade and check for any Toolkit log errors.
   ```
 
-#### 3. `/bg3-test-mod` (Stage 3: In-Game Testing)
+#### 3. `/bg3-test-mod` (Stage 3: Clean-Room In-Game Testing)
 
-Features a two-tier progressive gating architecture: Phase 3A builds a local test `.pak` (`pack_mod_pak.py --publish-local`), activates the mod alongside declared prerequisites (`manage_load_order.py --enable <slug> --with-deps`), and guides clean-room in-game functional verification. Phase 3B is an opt-in gate for multi-mod load order optimization (`--validate`) and campaign save-game audits (`inspect_save_game.py`) before handing off to Stage 4.
+Governs **User-Action Gate 2 (In-Game Playtesting)** with a two-tier architecture: Phase 3A purges loose development files from `<Game>/Data/` (preventing VFS loose-file shadowing), deploys a clean local test `.pak` (`pack_mod_pak.py --publish-local`), isolates load order with declared prerequisites (`manage_load_order.py --enable <slug> --with-deps --isolate`), and guides playtesting in `bg3.exe` with **Dual-Track Defect Routing** (engine crashes route to Stage 2 diagnostics; gameplay/mechanics bugs route to Stage 1 authoring patches). Phase 3B is an opt-in gate for multi-mod load order optimization (`--validate`) and campaign save-game audits (`inspect_save_game.py`) before handing off to Stage 4.
 
 - **Example Prompt**:
   ```text
@@ -95,16 +95,16 @@ Features a two-tier progressive gating architecture: Phase 3A builds a local tes
 
 #### 4. `/bg3-release-prep` (Stage 4: Release Preparation)
 
-Automates pre-publication verification: executes atomic semantic version bumping across `meta.lsx` and `README.md`, strict validation, localization pruning/compiling, GFM HTML description rendering (`render_modio_description.py`), final `Data/` sync, and distribution `.pak` packaging.
+Automates pre-publication verification and staging for **User-Action Gate 3 (Toolkit Publishing)**: executes atomic semantic `Version64` bumping across `meta.lsx` and `README.md`, strict lint validation, localization pruning/compiling, GFM HTML description rendering (`render_modio_description.py`), and `<Game>/Data/` staging (where the official Toolkit directly consumes loose files for mod.io publication), with optional standalone distribution `.pak` packaging (`dist/<ModSlug>.pak`).
 
 - **Example Prompt**:
   ```text
   /bg3-release-prep shadowblade
   ```
 
-#### 5. `/bg3-post-release` (Stage 5: Post-Release Publishing)
+#### 5. `/bg3-post-release` (Stage 5: Post-Release Governance & Environment Teardown)
 
-Updates a published mod's mod.io profile metadata via the REST API. Features a 2-stage preview + explicit approval workflow, fetches approved tags, validates descriptions, updates non-commercial permissions and visibility, and provides direct admin links.
+Governs post-publication operations following **User-Action Gate 3 (Toolkit Publishing)**: updates remote mod.io profile metadata via the REST API using a 2-stage preview and explicit approval workflow (allowed tags, non-commercial permissions, public visibility), and coordinates mandatory development environment teardown (purging loose `Data/` files, deleting local test `.pak`, disabling load order entry) to transition the developer into a clean consumer subscriber.
 
 - **Example Prompt**:
   ```text

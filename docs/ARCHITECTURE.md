@@ -72,39 +72,47 @@ flowchart TD
 
 ### 5-Stage Shift-Left & Loopback Lifecycle
 
-Custom mod authoring follows a strict 5-stage pipeline with Progressive Gate Handoffs and loopback diagnostics:
+Custom mod authoring follows a strict 5-stage pipeline aligned across three manual **User-Action Gates** and **Dual-Track Defect Routing**:
+- **Stage 1 (Creation)**: Interactive `/grill-me` interview, autonomous workspace scaffolding, parallel subagent authoring, and comprehensive workspace static verification (LSX/XML schema, string handle parity, and library conflict pre-check).
+- **Stage 2 (Diagnostics & Toolkit Staging)**: Static workspace assertion, differential game data sync to `<Game>/Data/` with compiled binary `.loca`, and **User-Action Gate 1** (`Glasses.exe` launch with `messages.log` triage and auto-remediation loop).
+- **Stage 3 (Clean-Room In-Game Testing)**: Purges loose `Data/` development files, deploys local test `.pak` to `AppData/Mods/`, isolates load order in `modsettings.lsx`, and guides **User-Action Gate 2** (`bg3.exe` playtesting) with **Dual-Track Defect Routing** (engine crashes route to Stage 2 diagnostics; gameplay/mechanics bugs route to Stage 1 authoring patches).
+- **Stage 4 (Release Preparation)**: Atomic `Version64` bump across `meta.lsx` and `README.md`, strict zero-tolerance lint validation, GFM HTML description rendering, `<Game>/Data/` staging for **User-Action Gate 3** (official Toolkit publishing consumes loose `Data/` assets), and optional standalone `dist/<slug>.pak` packaging.
+- **Stage 5 (Post-Release & Teardown)**: Storefront governance via mod.io REST API (2-stage tag preview, non-commercial permissions, public visibility), and mandatory development environment teardown (cleaning loose `Data/`, removing local test `.pak`, and disabling the load order entry) to transition the developer into a consumer subscriber.
 
 ```mermaid
 flowchart TD
     S1["Stage 1: Creation (/bg3-create-mod)
-- /grill-me interview & specification plan
-- Scaffolding & parallel subagents (stats, progressions, loca, docs)
-- Read-only smoke check on my_mods/<slug>/"]
+    • /grill-me interview & specification plan
+    • Autonomous scaffolding & parallel subagents
+    • Static verification (LSX, string handles, conflict pre-check)"]
     
-    S2["Stage 2: Diagnostics (/bg3-diagnose-mod)
-- Phase 2A: Static pre-flight, Data/ sync & Glasses.exe log launch
-- Phase 2B: Runtime log triage, auto-fixes & verification loop"]
+    S2["Stage 2: Diagnostics & Toolkit Staging (/bg3-diagnose-mod)
+    • Toolkit staging (Data/ sync & binary .loca compilation)
+    • User-Action Gate 1: Glasses.exe launch & messages.log triage
+    • Automated remediation loopback"]
     
-    S3["Stage 3: In-Game Testing (/bg3-test-mod)
-- Phase 3A: Clean smoke test with dependency closure (--with-deps / --isolate)
-- Phase 3B: Multi-mod campaign integration & save audit (optional gate)
-- User in-game verification & loopback/release gate"]
+    S3["Stage 3: Clean-Room In-Game Testing (/bg3-test-mod)
+    • Loose Data purge, local test .pak deploy & load order isolation
+    • User-Action Gate 2: bg3.exe launch & gameplay verification
+    • Dual-Track Defect Routing"]
     
     S4["Stage 4: Release Preparation (/bg3-release-prep)
-- bump_mod_version (atomic meta.lsx & README sync)
-- validate_mod --strict & localization prune/compile
-- render_modio_description (GFM HTML table generation)
-- Final Data/ sync & dist/<slug>.pak packaging"]
+    • Atomic Version64 bump & strict lint validation
+    • Localization prune/compile & GFM HTML render
+    • Data/ staging for User-Action Gate 3: Toolkit publishing
+    • Optional standalone dist/<slug>.pak package"]
     
-    S5["Stage 5: Post-Release (/bg3-post-release)
-- modio_update_metadata (2-stage tag/setting preview + confirmation)
-- Optional: modio_create_collection"]
+    S5["Stage 5: Post-Release & Teardown (/bg3-post-release)
+    • Storefront governance via REST API (tags, permissions, visibility)
+    • Mandatory dev teardown (purge Data/, clean .pak, disable load order)
+    • Consumer subscriber live verification"]
     
     S1 -->|Stage 1 Gate| S2
-    S2 -->|Stage 2 Gate| S3
-    S3 -->|Testing Passed| S4
-    S3 -.->|Issues Found (Loopback)| S2
-    S4 -->|Publish in Toolkit| S5
+    S2 -->|User-Action Gate 1 Passed| S3
+    S3 -->|Playtesting Passed| S4
+    S3 -.->|Engine Crash / Broken Asset (Stage 2 Loopback)| S2
+    S3 -.->|Gameplay / Mechanics Bug (Stage 1 Authoring Patch)| S1
+    S4 -->|User-Action Gate 3: Publish in Toolkit| S5
 ```
 
 ### Community Mod Discovery & Ingestion Pipeline

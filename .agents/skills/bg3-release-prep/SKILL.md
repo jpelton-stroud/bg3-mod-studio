@@ -5,7 +5,7 @@ description: Prepares a Baldur's Gate 3 mod for publication via the official Too
 
 # BG3 Mod Release Preparation Assistant (Stage 4) (`bg3-release-prep`)
 
-This skill orchestrates the **Stage 4 (Release Preparation)** pipeline for *Baldur's Gate 3* mods. Because mod publication is locked to the official Baldur's Gate 3 Toolkit and cannot be executed via the mod.io REST API directly, this workflow ensures every asset, handle, version tag, and description is 100% publication-ready before handing off to **Stage 5: Post-Release** ([`bg3-post-release`](../bg3-post-release/SKILL.md)).
+This skill orchestrates the **Stage 4 (Release Preparation)** pipeline for *Baldur's Gate 3* mods. Because mod publication is locked to the official Baldur's Gate 3 Toolkit (`Glasses.exe`) and cannot be executed via the mod.io REST API directly—with `Glasses.exe` mod.io publication consuming loose development files staged in `<Game>/Data/` rather than packed `.pak` archives—this workflow ensures every asset, handle, version tag, and description is 100% publication-ready before handing off to **User-Action Gate 3 (Toolkit Publishing)** and **Stage 5: Post-Release** ([`bg3-post-release`](../bg3-post-release/SKILL.md)).
 
 ## Discovery & Tooling
 
@@ -36,10 +36,10 @@ python3 scripts/bg3.py mod conflict --candidate &lt;slug&gt; --against-library -
     Step3 -->|Pass| Step4["4. Render mod.io HTML Description
 python3 scripts/bg3.py mod render-description --mod &lt;slug&gt; --write --json"]
     Step3 -->|Fail| Halt["Halt: Report Errors & Propose Fixes"]
-    Step4 --> Step5["5. Final Game Data Sync & Dist .pak
+    Step4 --> Step5["5. Final Game Data Sync & Optional Dist .pak
 python3 scripts/bg3.py mod sync-data --mods &lt;slug&gt; --json
 python3 scripts/bg3.py mod pack --mod &lt;slug&gt; --out dist/&lt;slug&gt;.pak --json"]
-    Step5 --> Step6["6. Toolkit Publishing Instructions & Handoff to Stage 5:
+    Step5 --> Step6["6. User-Action Gate 3 (Toolkit Publishing) & Stage 5 Handoff:
 ask_question -> /bg3-post-release &lt;slug&gt;"]
 ```
 
@@ -96,24 +96,30 @@ This writes `my_mods/<mod-slug>/modio_description.html` beside the README, forma
 
 ---
 
-### Step 5: Game Data Synchronization & Distribution Packaging
-Deploy the updated mod into the game's active `Data/` folder so the official Toolkit detects all recent changes and the compiled binary `.loca`:
+### Step 5: Game Data Synchronization & Optional Distribution Packaging
+Deploy the updated mod's loose development files into the game's active `<Game>/Data/` folder so the official Toolkit detects all recent changes and the compiled binary `.loca`:
 
 ```bash
 python3 scripts/bg3.py mod sync-data --mods <mod-slug> --json
 ```
 
-Package a distribution `.pak` for Nexus Mods or manual archive sharing:
+> [!IMPORTANT]
+> Official mod.io publication in the Baldur's Gate 3 Toolkit (`Glasses.exe`) directly consumes loose development files staged in `<Game>/Data/` (specifically `Data/Editor/Mods/<ModName>/`, `Data/Projects/<ModName>/`, and `Data/Public/<ModName>/`).
+
+Optionally, package a standalone distribution `.pak` for Nexus Mods or manual archive sharing:
 
 ```bash
 python3 scripts/bg3.py mod pack --mod <mod-slug> --out "dist/<mod-slug>.pak" --json
 ```
 
+> [!NOTE]
+> `python3 scripts/bg3.py mod pack --mod <mod-slug> --out dist/<mod-slug>.pak` produces an optional standalone package strictly for Nexus Mods or manual archive sharing. Official `Glasses.exe` mod.io publishing does **not** require or read the `dist/` archive.
+
 ---
 
 ### Step 6: Presentation & Progressive Gate Handoff to Stage 5
 
-Present the release summary to the user:
+Present the release summary and guide the user through **User-Action Gate 3 (Toolkit Publishing)**:
 
 ```markdown
 ### 🚀 Mod Release Package Ready: <Mod Name> (v<Version>)
@@ -121,12 +127,12 @@ Present the release summary to the user:
 - **Semantic Version**: `<New Version>` (Version64: `<Encoded Int>`)
 - **Validation**: [✓] Passed strict structural and handle checks
 - **Assets**: [✓] 512×512 thumbnail and publish logo verified
-- **Game Data**: [✓] Synced to local BG3 `Data/` directory with compiled binary `.loca`
-- **Dist Archive**: [✓] `dist/<mod-slug>.pak` packaged and verified
+- **Game Data**: [✓] Loose development files synced to BG3 `Data/` directory with compiled binary `.loca`
+- **Dist Archive**: [✓] `dist/<mod-slug>.pak` packaged (optional for Nexus Mods or manual archive sharing)
 
 ---
 
-#### 🛠️ BG3 Toolkit Publishing Steps:
+#### 🛠️ User-Action Gate 3 (Toolkit Publishing) Steps:
 1. Open the **Baldur's Gate 3 Toolkit** (`Glasses.exe`).
 2. Open Project **`<Mod Name>`**.
 3. Select **File -> Mod Project Manager**.
@@ -134,6 +140,9 @@ Present the release summary to the user:
 5. Click **Publish Mod** to submit the build to mod.io.
 ```
 
-Use `ask_question` to transition to **Stage 5: Post-Release**:
-- **Proceed to Stage 5 Post-Release**: Once published in the Toolkit, run `/bg3-post-release <mod-slug>` to inspect allowed tags, review profile settings, and publish the verified description and tags via the mod.io REST API.
+> [!IMPORTANT]
+> **User-Action Gate 3 (Toolkit Publishing)** is a mandatory manual checkpoint because mod.io binary uploads are strictly restricted to the official Toolkit. Once `Glasses.exe` confirms publication to mod.io, transition to Stage 5 to configure storefront metadata, tags, and perform consumer subscriber cleanup.
+
+Use `ask_question` to transition to **Stage 5: Post-Release** ([`bg3-post-release`](../bg3-post-release/SKILL.md)):
+- **Proceed to Stage 5 Post-Release**: Once published in the Toolkit, run `/bg3-post-release <mod-slug>` to inspect allowed tags, review profile settings, publish the verified description and tags via the mod.io REST API, and tear down local development staging.
 - **Finish Release Process**: Complete workflow without updating mod.io API metadata.
