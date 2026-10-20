@@ -1,79 +1,45 @@
 ---
 name: bg3-query-gear
-description: Conversational equipment and mechanics advisor for Baldur's Gate 3 community mods. Queries the cataloged mod database for BiS gear, stat boosts, spells, and passives. Triggers on /bg3-query-gear, /gear, or gear recommendation requests.
+description: Recommend BiS equipment, stat boosts, spells, and passives from cataloged BG3 community mods in mods/library.md. Use on /bg3-query-gear or when requesting gear advice.
 ---
 
 # BG3 Mod Equipment & Mechanics Advisor (`bg3-query-gear`)
 
-This skill acts as an intelligent gear and build advisor, translating natural language requests into high-speed queries against the cataloged community mod database ([`mods/`](../../../mods)), powered by `scripts/library/query_mod_database.py`.
+Intelligent gear and build advisor, translating natural language requests into high-speed queries against the cataloged community mod database ([`mods/`](../../../mods)).
 
 ---
 
-## Trigger Conditions
+> [!TIP]
+> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
 
-Activate this skill when:
-- The user runs `/bg3-query-gear` or `/gear`.
-- The user asks for gear or mechanics advice:
-  - *"What modded gear increases Spell Save DC?"*
-  - *"Find me good rings or amulets for a Warlock."*
-  - *"Are there any weapons that deal necrotic damage?"*
-  - *"Recommend BiS boots or cloaks from our tracked mods."*
-
----
-
-## Query Translation Workflow
+## Workflow
 
 ```mermaid
 flowchart TD
-    UserQuery["User Query (e.g. 'Rings boosting spell DC')"] --> Translate["Translate to CLI Arguments"]
-    Translate --> Query["Run scripts/library/query_mod_database.py --json"]
-    Query --> Synthesize["Synthesize Recommendations & Synergies"]
-    Synthesize --> Respond["Render Advice with Mod Names & Acquisition"]
+    UserQuery["User Request (e.g. 'Rings boosting spell DC')"] --> Translate["Translate to CLI Arguments"]
+    Translate --> Query["Run scripts/bg3.py query --json"]
+    Query --> Verify["Verify Query Response"]
+    Verify --> Synthesize["Synthesize Recommendations & Synergies"]
 ```
 
----
-
-## Query Translation Mapping
+### 1. Query Translation
 
 | User Intent | CLI Command |
 | :--- | :--- |
-| Any items boosting a specific stat (e.g., Spell DC) | `python3 scripts/bg3.py query --boost "SpellSaveDC" --json` |
-| Items for a specific slot (e.g., Amulet, Ring) | `python3 scripts/bg3.py query --slot "Amulet" --json` |
-| Items with specific passives (e.g., Extra Attack) | `python3 scripts/bg3.py query --passive "ExtraAttack" --json` |
-| Combined search (e.g., Legendary Boots) | `python3 scripts/bg3.py query --slot "Boots" --rarity "Legendary" --json` |
-| General thematic search (e.g., Necrotic) | `python3 scripts/bg3.py query --search "necrotic" --json` |
+| Boosts specific stat | `python3 scripts/bg3.py query --boost "SpellSaveDC" --json` |
+| Specific equipment slot | `python3 scripts/bg3.py query --slot "Amulet" --json` |
+| Specific passive | `python3 scripts/bg3.py query --passive "ExtraAttack" --json` |
+| Slot + Rarity combination | `python3 scripts/bg3.py query --slot "Boots" --rarity "Legendary" --json` |
+| Thematic keyword search | `python3 scripts/bg3.py query --search "necrotic" --json` |
+
+### 2. Synthesize Advice
+Structure recommendations with Item Name, Slot, Mod Source, Key Effects, and Build Synergies. Note early-game container drop mechanics via `scripts/bg3.py mod inject-treasure`.
 
 ---
 
-## Presentation Guidelines
+## Verification Gate
 
-Synthesize the returned JSON into an engaging, structured build recommendation:
-
-```markdown
-### 🛡️ Recommended Mod Equipment: <Focus / Concept>
-
-Here are the top options from your cataloged community mods:
-
-#### 1. [Item Name] ([Rarity])
-- **Slot**: `Amulet`
-- **Mod**: `pact-and-power-warlock-equipment`
-- **Key Effects**:
-  - `SpellSaveDC(1)`: Increases difficulty class of your spells by 1.
-  - `Advantage on Saving Throws`: Protects against crowd control.
-- **Why it fits**: Synergizes with high-difficulty control builds.
-
-#### 2. [Item Name] ([Rarity])
-...
-
----
-
-💡 *To add any of these items to early-game containers, use `python3 scripts/bg3.py mod inject-treasure --mod <your_mod> --item <ItemID> --container tutorial_chest`.*
-```
-
-> [!TIP]
-> **Tool Discovery & Schema Inspection (bg3 tools)**:
-> To inspect all query filters or discover companion authoring tools, query the studio registry:
-> ```bash
-> python3 scripts/bg3.py tools info query-db --json
-> python3 scripts/bg3.py tools search "<intent>" --json
-> ```
+Always verify query results before presenting to user:
+1. Verify `scripts/bg3.py query` exits with code 0.
+2. If the query database is empty or missing, rebuild it with `python3 scripts/bg3.py query --reindex`.
+3. Confirm returned items exist in [`mods/library.md`](../../../mods/library.md) or [`mods/`](../../../mods).

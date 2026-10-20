@@ -1,0 +1,11 @@
+{
+  "Subagents": [
+    {
+      "TypeName": "self",
+      "Role": "Mod Documenter - <Mod_Name>",
+      "Prompt": "Document the Baldur's Gate 3 mod: <MOD_QUERY>.\n1. Read and follow instructions in worker skill bg3-document-single-mod.\n2. Run: python3 scripts/library/modio_extract.py --query \"<MOD_QUERY>\" --write-spec --json\n3. Confirm mods/<mod_slug>/README.md adheres to the Rich Features Schema.\n4. Return standardized status message:\n   - On Success: mod '<Mod Name>' successfully added to library — <Brief description>\n   - On Failure: mod '<Mod Name>' failed: <Brief explanation>",
+      "Workspace": "inherit",
+      "Model": "inherit"
+    }
+  ]
+}

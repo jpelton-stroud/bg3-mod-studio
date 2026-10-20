@@ -1,147 +1,52 @@
 ---
 name: bg3-check-mod-conflicts
-description: Evaluates compatibility and conflicts for BG3 mods against existing tracked mods in mods/library.md or between candidate mods, taking console load order constraints into account. Triggers on /bg3-check-mod-conflicts, /check_conflicts, or when delegated by bg3-search-mods.
+description: Evaluate BG3 mod compatibility and conflicts against mods/library.md or between candidates with console load order rules. Use on /check_conflicts or when searching mods.
 ---
 
 # BG3 Mod Conflict & Compatibility Checker (`bg3-check-mod-conflicts`)
 
-This skill defines the worker subagent procedure for evaluating compatibility and detecting potential conflicts for *Baldur's Gate 3* mods.
+Evaluates compatibility and detects potential conflicts for *Baldur's Gate 3* mods. Invocable by the [`bg3-search-mods`](../bg3-search-mods/SKILL.md) orchestrator or directly.
 
-It is designed to be invoked by the [`bg3-search-mods`](../bg3-search-mods/SKILL.md) orchestrator across two distinct modes:
-1. **Mode 1 (Target vs. Tracked Library)**: Checks a single candidate mod against all mods cataloged in [`mods/library.md`](../../../mods/library.md).
-2. **Mode 2 (Cross-Candidate Batch)**: Checks a set of candidate search results against each other.
+Refer to domain specifications:
+- Methodology & Vectors: [Conflict Methodology](./references/conflict_methodology.md)
+- Message Formats & Patches: [Remediation Templates](./resources/remediation_patch_template.md)
 
 ---
 
-## Conflict Detection Methodology (Hybrid Check)
+> [!TIP]
+> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
 
-The subagent follows a high-efficiency **hybrid check** hierarchy:
+## Workflow
 
 ```mermaid
 flowchart TD
-    Start["Receive Mod Query / Candidate Set & Target Platform"] --> Step1["Step 1: Check mods/library.md Tracking Status"]
-    Step1 --> Step2["Step 2: Inspect mod.io Metadata & Author Notes"]
-    Step2 --> Step3["Step 3: Evaluate Stated Incompatibilities & Dependencies"]
-    Step3 --> Step4{"Platform is Console?"}
-    Step4 -->|"Yes"| Step5["Check PC-only requirements (BG3SE) & Load Order Lock"]
-    Step4 -->|"No"| Step6["Check Script Extender & PC compatibility"]
-    Step5 --> Step7{"Ambiguous system overlap?"}
-    Step6 --> Step7
-    Step7 -->|"Yes (Deep Check)"| Step8["Unpack .pak via scripts/library/modio_extract.py & check LSPK records"]
-    Step7 -->|"No"| Step9["Formulate Standardized Return Message"]
-    Step8 --> Step9
+    Start["Receive Query & Platform"] --> CheckLib["Check Tracked mods/library.md"]
+    CheckLib --> Inspect["Inspect Metadata & Subsystems"]
+    Inspect --> Detect["Run Deterministic Conflict Detection"]
+    Detect --> Format["Format Standardized Return Message"]
 ```
 
----
-
-## Mode 1: Candidate vs. Existing Library
-
-### Step 1: Library Tracking Verification
-1. Inspect the categorized six-column rows in [`mods/library.md`](../../../mods/library.md), matching the candidate against Mod Slug or Mod Name.
-2. Follow the Spec Link (or the row's Mod Slug) to inspect each tracked mod's README under [`mods/`](../../../mods).
-3. Determine if the mod is already cataloged.
-4. If already tracked, note:
-   `Mod '<Mod Name>' is already tracked in mods/library.md.`
-
-### Step 2: Inspection of Candidate & Library Specs
-1. Fetch candidate metadata and description using `python3 scripts/library/modio_search.py --query "<MOD_SLUG>" --platform "<PLATFORM>" --json --include-tracked`.
-2. Inspect tracked mod specifications in [`mods/`](../../../mods) to understand what systems tracked mods alter:
-   - **Progressions & Rules**: Level curves (e.g. UnlockLevelCurve), spell slots, feat intervals.
-   - **Classes & Subclasses**: Class progression overrides (e.g. Warlock pact boons, spell lists).
-   - **Spells**: Vanilla spell modifications (e.g. Longstrider QoL, Eldritch Blast projectile overrides).
-   - **Gear**: Treasure tables, container spawners, stat alteration rings (Choose Your Scores, GearUp).
-
-### Step 3: Conflict Vectors
-Check for the following common BG3 conflict sources:
-* **Direct Stated Incompatibility**: Mod author explicitly lists another mod as incompatible in the description.
-* **Missing Prerequisites**: Mod requires external frameworks (e.g., *Community Library*, *Compatibility Framework*, *5e Spells*, or *BG3 Script Extender*).
-* **Progression Table Clashes**: Both mods replace or edit the same class/subclass node in `Progressions.lsx` without using the Compatibility Framework.
-* **Vanilla Asset Overwrites**: Both mods overwrite the exact same spell, status effect, or item root template.
-
-### Step 4: Console Platform Load Order Rule
-> [!IMPORTANT]
-> If the target platform is **Console** (`xboxseriesx`, `ps5`, or `console`):
-> 1. **No Manual Load Order**: Console players cannot manually reorder mods or customize priority. If two mods touch overlapping systems or require a strict load order (e.g., *"Load this mod AFTER mod X"*), this represents an unresolvable conflict on console.
-> 2. **No Script Extender (BG3SE)**: Any mod requiring BG3SE or native PC dlls will fail or cause crashes on console.
-> 3. Whenever a load-order or system-overlap issue is detected on console, tag it explicitly with `[Console Load Order]`.
-
-### Step 5: Automated Conflict Inspection (`scripts/bg3.py mod conflict`)
-To deterministically detect stat entry collisions, progression level overlaps, and console-incompatible DLLs, run:
+### 1. Hybrid Conflict Inspection
+Run deterministic inspection against cataloged workspace mods or candidate pairs:
 ```bash
+# Check candidate against tracked library
 python3 scripts/bg3.py mod conflict "<MOD_SLUG>" --against-library --json
-```
-Or for comparing two specific candidate mods:
-```bash
+
+# Compare two candidate mods
 python3 scripts/bg3.py mod conflict "<MOD1>" --mod2 "<MOD2>" --json
 ```
-The command will output exact stat collisions, progression level collisions, and DLL detections in structured JSON. If conflicts are detected, synthesize them into the return message below.
 
-### Standardized Status Return (Mode 1)
-Return exactly one of the following formatted responses to the Orchestrator:
-
-* **Clean Compatibility**:
-  ```text
-  No conflicts found with existing mods
-  ```
-* **Conflict Detected**:
-  ```text
-  Possible conflict found: <Tracked Mod Name> - <Brief description of the issue>
-  ```
-* **Conflict Detected (Console Load Order)**:
-  ```text
-  Possible conflict found: <Tracked Mod Name> - <Brief description of issue> [Console Load Order: cannot reorder on console to ensure proper override]
-  ```
-
----
-
-## Mode 2: Cross-Candidate Batch Conflicts
-
-When assigned to evaluate conflicts *between* the set of candidate mods returned by the search:
-
-1. **Intake Candidate List**: Receive the list of selected candidate slugs/names and the target platform.
-2. **Pairwise System Analysis**: Compare candidate pairs against each other:
-   - Do candidate mods modify the same class or subsystem? (e.g., two different Warlock overhaul mods that both alter level 1–12 progression).
-   - Do candidate mods replace the same cantrip or spell mechanics?
-   - Does one candidate mod require another candidate mod to be loaded in a specific order?
-3. **Console Load Order Evaluation**: On Console, any inter-dependency requiring custom load priority must be flagged with `[Console Load Order]`.
-
-### Standardized Status Return (Mode 2)
-* **Clean Batch**:
-  ```text
-  No conflicts found between candidate mods
-  ```
-* **Conflict Detected**:
-  ```text
-  Possible conflict found: <Candidate Mod 1> vs <Candidate Mod 2> - <Brief description of the conflict>
-  ```
-* **Console Conflict Detected**:
-  ```text
-  Possible conflict found: <Candidate Mod 1> vs <Candidate Mod 2> - <Brief description of issue> [Console Load Order: cannot reorder on console to resolve override order]
-  ```
-
----
-
-## Step 6: Automated Remediation & Patch Generation (`scripts/authoring/generate_compat_patch.py`)
-
-When actionable conflicts or stat collisions are detected between two mods (or when requested by the user), offer automated patch generation:
-
+### 2. Remediation & Patch Generation
+When actionable stat collisions occur, offer automated patch generation:
 ```bash
-# Generate a standalone compatibility override patch mod
 python3 scripts/bg3.py mod compat-patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json
-
-# Or generate a Compatibility Framework config payload
-python3 scripts/bg3.py mod compat-patch --mod1 <mod1> --mod2 <mod2> --mode cf --json
 ```
 
-Supported modes:
-- `standalone`: Scaffolds a full patch mod under `my_mods/` merging colliding stats.
-- `cf`: Emits Compatibility Framework config JSON for programmatic runtime injection.
+---
 
-> [!TIP]
-> **Tool Discovery & Schema Inspection (bg3 tools)**:
-> To inspect all conflict analyzer and patch generation flags dynamically:
-> ```bash
-> python3 scripts/bg3.py tools info check-conflicts --json
-> python3 scripts/bg3.py tools info compat-patch --json
-> python3 scripts/bg3.py tools search "conflict" --json
-> ```
+## Verification Gate
+
+Always verify automated conflict output and status formatting before returning:
+1. Verify `scripts/bg3.py mod conflict` exits with code 0 and valid JSON.
+2. Confirm console tags (`[Console Load Order]`) are applied when target platform is console.
+3. Validate return messages match schemas in [Remediation Templates](./resources/remediation_patch_template.md).
