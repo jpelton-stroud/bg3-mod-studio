@@ -24,6 +24,8 @@ class TestAgentSkills(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.skill_files = sorted(list(SKILLS_DIR.glob("*/SKILL.md"))) if SKILLS_DIR.is_dir() else []
+        cls.all_skill_md_files = sorted(list(SKILLS_DIR.rglob("*.md"))) if SKILLS_DIR.is_dir() else []
+        cls.all_skill_files = sorted(list(SKILLS_DIR.rglob("*.md")) + list(SKILLS_DIR.rglob("*.json"))) if SKILLS_DIR.is_dir() else []
 
     def test_skills_exist(self):
         """Verify that agent skills are discovered in .agents/skills/."""
@@ -97,16 +99,19 @@ class TestAgentSkills(unittest.TestCase):
         )
 
     def test_skill_link_integrity(self):
-        """Verify that relative and local file markdown links in SKILL.md resolve to existing files."""
+        """Verify that relative and local file markdown links in all skill files resolve to existing files."""
         broken_links = []
-        for sf in self.skill_files:
+        for sf in self.all_skill_md_files:
             content = sf.read_text(encoding="utf-8")
             links = re.findall(r"\[([^\]]+)\]\(([^)]+)\)", content)
+            rel_path = sf.relative_to(SKILLS_DIR)
             for text, target in links:
                 if target.startswith("http://") or target.startswith("https://") or target.startswith("mailto:"):
                     continue
+                if target.startswith("#"):
+                    continue
                 if target in ("profile_url", "..."):
-                    broken_links.append(f"{sf.parent.name}: placeholder link [{text}]({target})")
+                    broken_links.append(f"{rel_path}: placeholder link [{text}]({target})")
                     continue
                 clean = target[7:] if target.startswith("file://") else target
                 clean = clean.split("#")[0]
@@ -114,19 +119,20 @@ class TestAgentSkills(unittest.TestCase):
                     continue
                 resolved = Path(clean) if os.path.isabs(clean) else (sf.parent / clean).resolve()
                 if not resolved.exists():
-                    broken_links.append(f"{sf.parent.name}: broken link [{text}]({target}) -> {resolved}")
+                    broken_links.append(f"{rel_path}: broken link [{text}]({target}) -> {resolved}")
 
         self.assertEqual(broken_links, [], f"Broken links detected in skills:\n" + "\n".join(broken_links))
 
     def test_subagent_model_inheritance(self):
         """Verify that subagent launch payloads specify Model: 'inherit' per AGY guidelines."""
         illegal_models = []
-        for sf in self.skill_files:
+        for sf in self.all_skill_files:
             content = sf.read_text(encoding="utf-8")
             model_matches = re.findall(r'["\']Model["\']\s*:\s*["\']([^"\']+)["\']', content)
+            rel_path = sf.relative_to(SKILLS_DIR)
             for m in model_matches:
                 if m != "inherit":
-                    illegal_models.append(f"{sf.parent.name}: Model '{m}' (must be 'inherit')")
+                    illegal_models.append(f"{rel_path}: Model '{m}' (must be 'inherit')")
         self.assertEqual(
             illegal_models,
             [],
@@ -152,6 +158,38 @@ class TestAgentSkills(unittest.TestCase):
             f"Skills missing tool discovery guidance: {missing_discovery}"
         )
 
+    def test_skills_conform_to_canonical_standards(self):
+        """Verify that all skills pass validate_rule_or_skill.py with zero errors and zero warnings."""
+        import json
+        import subprocess
+
+        validator_path = Path.home() / ".agents" / "skills-global" / "create-agent-rules-and-skills" / "scripts" / "validate_rule_or_skill.py"
+        if not validator_path.exists():
+            validator_path = Path.home() / ".gemini" / "config" / "skills" / "create-agent-rules-and-skills" / "scripts" / "validate_rule_or_skill.py"
+
+        if not validator_path.exists():
+            self.skipTest(f"Validator script not found at {validator_path}")
+
+        failures = []
+        for sf in self.skill_files:
+            res = subprocess.run(
+                ["python3", str(validator_path), "-f", str(sf), "-t", "skill", "--json"],
+                capture_output=True,
+                text=True
+            )
+            data = json.loads(res.stdout) if res.stdout else {}
+            if not data.get("valid", False) or data.get("errors") or data.get("warnings"):
+                failures.append(
+                    f"{sf.parent.name}: errors={data.get('errors')}, warnings={data.get('warnings')}"
+                )
+
+        self.assertEqual(
+            failures,
+            [],
+            f"Skills failed canonical pre-flight validation:\n" + "\n".join(failures)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
+
