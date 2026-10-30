@@ -16,6 +16,7 @@ import shutil
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 from xml.dom import minidom
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -41,12 +42,15 @@ LANGUAGE_DIR_MAP = {
 
 
 def resolve_mod_dir(mod_path_or_slug: str, workspace_root: Path | None = None) -> Path:
-    return _resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
+    res = _resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
+    if res is None:
+        raise FileNotFoundError(f"Mod directory not found: {mod_path_or_slug}")
+    return res
 
 
 def collect_referenced_handles(mod_dir: Path) -> dict[str, list[str]]:
     """Collects all handle occurrences across stats, LSX, and metadata."""
-    referenced = {}
+    referenced: dict[str, list[str]] = {}
 
     for path in mod_dir.rglob("*"):
         if not path.is_file():
@@ -72,7 +76,7 @@ def collect_referenced_handles(mod_dir: Path) -> dict[str, list[str]]:
     return referenced
 
 
-def load_english_xml(mod_dir: Path) -> tuple[Path, dict[str, str], ET.ElementTree]:
+def load_english_xml(mod_dir: Path) -> tuple[Path, dict[str, str], Any]:
     """Loads Localization/English/<Mod>.xml, returns (file_path, handle_map, ElementTree)."""
     loc_dir = mod_dir / "Localization" / "English"
     if not loc_dir.is_dir():
@@ -149,7 +153,7 @@ def sync_language_skeletons(
 
 def compile_mod_localization(mod_dir: Path, dry_run: bool = False) -> list[str]:
     """Compiles all Localization/<Lang>/*.xml files into binary .loca files alongside the XMLs."""
-    compiled = []
+    compiled: list[str] = []
     loc_root = mod_dir / "Localization"
     if not loc_root.is_dir():
         return compiled

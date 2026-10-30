@@ -23,7 +23,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
@@ -190,7 +190,7 @@ def parse_mod_readme(mod_dir: Path, known_mod_ids: dict[str, str] | None = None)
 
 
 def generate_library_markdown(mods_data: list[dict]) -> str:
-    categories = {cat: [] for cat in CATEGORY_ORDER}
+    categories: dict[str, list[dict[str, Any]]] = {cat: [] for cat in CATEGORY_ORDER}
 
     for mod in mods_data:
         cat = mod["category"]

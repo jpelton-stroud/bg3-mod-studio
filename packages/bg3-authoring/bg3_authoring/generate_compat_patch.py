@@ -17,6 +17,7 @@ import uuid
 import xml.etree.ElementTree as ET
 import zlib
 from pathlib import Path
+from typing import Any
 from xml.dom import minidom
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -25,7 +26,10 @@ from bg3_core.larian_parsers import find_mod_meta_files, find_mod_progression_fi
 
 
 def resolve_mod_dir(mod_name_or_path: str, workspace_root: Path | None = None) -> Path:
-    return _resolve_mod_dir(mod_name_or_path, prefer_my_mods=True)
+    res = _resolve_mod_dir(mod_name_or_path, prefer_my_mods=True)
+    if res is None:
+        raise FileNotFoundError(f"Mod directory not found: {mod_name_or_path}")
+    return res
 
 
 def extract_mod_meta(mod_dir: Path) -> dict:
@@ -78,10 +82,12 @@ def merge_progression_attributes(node1: ET.Element, node2: ET.Element) -> dict[s
         v1 = node1.find(f"attribute[@id='{attr}']")
         v2 = node2.find(f"attribute[@id='{attr}']")
         parts = []
-        if v1 is not None and v1.get("value"):
-            parts.extend([x.strip() for x in v1.get("value").split(";") if x.strip()])
-        if v2 is not None and v2.get("value"):
-            parts.extend([x.strip() for x in v2.get("value").split(";") if x.strip()])
+        val1 = v1.get("value") if v1 is not None else None
+        if val1:
+            parts.extend([x.strip() for x in val1.split(";") if x.strip()])
+        val2 = v2.get("value") if v2 is not None else None
+        if val2:
+            parts.extend([x.strip() for x in val2.split(";") if x.strip()])
 
         # Deduplicate while preserving order
         unique_parts = list(dict.fromkeys(parts))
@@ -247,7 +253,7 @@ def main():
         folder_name = f"{patch_name}_{patch_uuid}"
         patch_dir = workspace_root / "my_mods" / patch_slug
 
-        merged_nodes = []
+        merged_nodes: list[dict[str, Any]] = []
         for (c_name, lvl), (node1, node2) in collisions.items():
             merged_attrs = merge_progression_attributes(node1, node2)
             t1 = node1.find("attribute[@id='TableUUID']")
@@ -326,6 +332,8 @@ def main():
     </region>
 </save>""")
                 children = root_tree.find(".//children")
+                if children is None:
+                    children = ET.SubElement(root_tree, "children")
                 for mn in merged_nodes:
                     node = ET.SubElement(children, "node", id="Progression")
                     ET.SubElement(node, "attribute", id="Level", type="uint8", value=str(mn["level"]))

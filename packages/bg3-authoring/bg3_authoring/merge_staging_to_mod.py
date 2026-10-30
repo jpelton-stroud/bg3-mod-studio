@@ -189,7 +189,9 @@ def merge_lsx(staging_data):
     tree = ET.parse(PROGRESSIONS_LSX)
     root = tree.getroot()
     children = root.find(".//region[@id='Progressions']/node[@id='root']/children")
-    
+    if children is None:
+        return
+
     existing_uuids = set()
     for n in children.findall("node[@id='Progression']"):
         for a in n.findall("attribute[@id='UUID']"):
@@ -202,15 +204,17 @@ def merge_lsx(staging_data):
             if "raw_xml" in p and p["raw_xml"]:
                 # Parse raw xml
                 subelem = ET.fromstring(p["raw_xml"])
-                u = subelem.find("attribute[@id='UUID']").get("value")
-                if u not in existing_uuids:
+                u_node = subelem.find("attribute[@id='UUID']")
+                u = u_node.get("value") if u_node is not None else None
+                if u and u not in existing_uuids:
                     children.append(subelem)
                     existing_uuids.add(u)
                     added_progs += 1
             elif "xml" in p and p["xml"]:
                 subelem = ET.fromstring(p["xml"])
-                u = subelem.find("attribute[@id='UUID']").get("value")
-                if u not in existing_uuids:
+                u_node = subelem.find("attribute[@id='UUID']")
+                u = u_node.get("value") if u_node is not None else None
+                if u and u not in existing_uuids:
                     children.append(subelem)
                     existing_uuids.add(u)
                     added_progs += 1
@@ -228,6 +232,8 @@ def merge_lsx(staging_data):
     dtree = ET.parse(PROGRESSION_DESCRIPTIONS_LSX)
     droot = dtree.getroot()
     dchildren = droot.find(".//region[@id='ProgressionDescriptions']/node[@id='root']/children")
+    if dchildren is None:
+        return
 
     existing_desc_uuids = set()
     for n in dchildren.findall("node[@id='ProgressionDescription']"):
@@ -240,15 +246,17 @@ def merge_lsx(staging_data):
             duuid = pd.get("UUID")
             if "raw_xml" in pd and pd["raw_xml"]:
                 subelem = ET.fromstring(pd["raw_xml"])
-                u = subelem.find("attribute[@id='UUID']").get("value")
-                if u not in existing_desc_uuids:
+                u_node = subelem.find("attribute[@id='UUID']")
+                u = u_node.get("value") if u_node is not None else None
+                if u and u not in existing_desc_uuids:
                     dchildren.append(subelem)
                     existing_desc_uuids.add(u)
                     added_descs += 1
             elif "xml" in pd and pd["xml"]:
                 subelem = ET.fromstring(pd["xml"])
-                u = subelem.find("attribute[@id='UUID']").get("value")
-                if u not in existing_desc_uuids:
+                u_node = subelem.find("attribute[@id='UUID']")
+                u = u_node.get("value") if u_node is not None else None
+                if u and u not in existing_desc_uuids:
                     dchildren.append(subelem)
                     existing_desc_uuids.add(u)
                     added_descs += 1

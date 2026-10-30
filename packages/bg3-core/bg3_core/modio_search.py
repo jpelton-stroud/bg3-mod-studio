@@ -233,7 +233,7 @@ def filter_and_rank_mods(mods, query_str, platform, tracked_slugs, tracked_names
 
         # Check platform compatibility
         mod_platforms = [p.get("platform") for p in m.get("platforms", []) if isinstance(p, dict)]
-        mod_tags = [t.get("name") for t in m.get("tags", []) if isinstance(t, dict)]
+        mod_tags = [t.get("name") for t in m.get("tags", []) if isinstance(t, dict) and t.get("name")]
 
         if platform == "console":
             # Must support both Xbox and PS5, or have the Console tag
@@ -250,7 +250,7 @@ def filter_and_rank_mods(mods, query_str, platform, tracked_slugs, tracked_names
         name_words = set(re.findall(r"[a-zA-Z0-9]+", name))
         summary = (m.get("summary") or "").lower()
         summary_words = set(re.findall(r"[a-zA-Z0-9]+", summary))
-        tag_set = set(t.lower() for t in mod_tags)
+        tag_set = set(t.lower() for t in mod_tags if isinstance(t, str))
 
         score = 0
         clean_q = query_str.strip().lower()

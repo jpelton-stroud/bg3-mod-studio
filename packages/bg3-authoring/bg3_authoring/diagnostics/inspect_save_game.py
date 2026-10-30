@@ -12,6 +12,7 @@ import os
 import re
 import struct
 import sys
+from typing import Any
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -133,7 +134,7 @@ def extract_save_metadata(save_path: Path) -> dict:
     if not meta_lsx_entry and not meta_lsf_entry:
         raise ValueError(f"No meta.lsx or meta.lsf found inside save archive: {save_path.name}")
 
-    save_info = {
+    save_info: dict[str, Any] = {
         "save_file": str(save_path),
         "save_name": save_path.stem,
         "size_bytes": len(data_bytes),
@@ -191,7 +192,7 @@ def audit_against_modsettings(save_mods: list[dict], workspace_root: Path) -> di
     try:
         from bg3_core.manage_load_order import CORE_GUSTAV_NAMES, detect_modsettings_path, parse_modsettings
     except ImportError:
-        from manage_load_order import CORE_GUSTAV_NAMES, detect_modsettings_path, parse_modsettings
+        from manage_load_order import CORE_GUSTAV_NAMES, detect_modsettings_path, parse_modsettings  # type: ignore[no-redef]
 
     settings_file = detect_modsettings_path()
     if not settings_file or not settings_file.exists():

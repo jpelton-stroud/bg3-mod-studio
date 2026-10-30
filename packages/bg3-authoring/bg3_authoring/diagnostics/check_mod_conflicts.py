@@ -61,7 +61,10 @@ BUILTIN_MODULES = {
 
 
 def resolve_mod_path(query: str) -> Path:
-    return resolve_mod_dir(query, prefer_my_mods=True)
+    res = resolve_mod_dir(query, prefer_my_mods=True)
+    if res is None:
+        raise FileNotFoundError(f"Mod directory not found: {query}")
+    return res
 
 
 def extract_stats_entries(mod_dir: Path) -> dict[str, dict]:
@@ -178,7 +181,7 @@ def check_native_dlls(mod_dir: Path) -> list[str]:
 
 def get_mod_dependencies(mod_dir: Path) -> list[str]:
     """Extracts dependency names from meta.lsx."""
-    deps = []
+    deps: list[str] = []
     meta_files = list(mod_dir.rglob("meta.lsx"))
     if not meta_files:
         return deps
@@ -225,7 +228,7 @@ def find_missing_local_dependencies(mod_dir: Path) -> list[str]:
     return missing
 
 
-def extract_lsx_named_nodes(mod_dir: Path, file_pattern: str, node_id: str, exclude_pattern: str = None) -> dict[str, dict]:
+def extract_lsx_named_nodes(mod_dir: Path, file_pattern: str, node_id: str, exclude_pattern: str | None = None) -> dict[str, dict]:
     """Extracts named nodes from specific LSX files."""
     results = {}
     for f in mod_dir.rglob("*.lsx"):

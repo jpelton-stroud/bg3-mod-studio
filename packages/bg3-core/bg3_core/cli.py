@@ -16,7 +16,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, NoReturn, Optional
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
@@ -31,10 +31,13 @@ from bg3_core.cli_common import (
 )
 
 import bg3_core
+bg3_theorycraft: Any
 try:
     import bg3_theorycraft
 except ImportError:
     bg3_theorycraft = None
+
+bg3_authoring: Any
 try:
     import bg3_authoring
 except ImportError:
@@ -105,7 +108,7 @@ def resolve_script_target(name: str) -> Optional[Path]:
 class JsonCompliantArgumentParser(argparse.ArgumentParser):
     """ArgumentParser that emits JSON error envelopes when --json flag is present."""
 
-    def error(self, message: str) -> None:
+    def error(self, message: str) -> NoReturn:
         if "--json" in sys.argv:
             emitter = OutputEmitter(json_mode=True)
             emitter.error(
@@ -118,7 +121,7 @@ class JsonCompliantArgumentParser(argparse.ArgumentParser):
         super().error(message)
 
 
-def setup_scaffold_subparsers(subparsers_obj, common_parser: argparse.ArgumentParser) -> None:
+def setup_scaffold_subparsers(subparsers_obj: Any, common_parser: JsonCompliantArgumentParser) -> None:
     """Configures the unified asset scaffolding subcommands across 'bg3 scaffold' and 'bg3 mod scaffold'."""
     # 1. class
     sc_class = subparsers_obj.add_parser("class", help="Scaffold Class/Subclass definition, ProgressionDescriptions, and parent progression wiring", parents=[common_parser])
@@ -298,9 +301,9 @@ def setup_scaffold_subparsers(subparsers_obj, common_parser: argparse.ArgumentPa
     sc_icons.add_argument("--dry-run", action="store_true", help="Preview icon UV LSX definitions")
 
 
-def build_parser() -> argparse.ArgumentParser:
+def build_parser() -> JsonCompliantArgumentParser:
     """Build the unified CLI argument parser with noun-verb subcommand tree."""
-    common_parser = argparse.ArgumentParser(add_help=False)
+    common_parser = JsonCompliantArgumentParser(add_help=False)
     common_parser.add_argument(
         "--json",
         action="store_true",
@@ -1949,7 +1952,8 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
 
     elif cmd in ("save", "saves"):
         script_target = CORE_DIR / "manage_saves.py"
-        target_args.append(sub)
+        if sub:
+            target_args.append(str(sub))
         if getattr(args, "save", None):
             if sub == "inspect":
                 target_args.append(args.save)

@@ -727,8 +727,8 @@ def process_mod(query="", pak_path=None, output_dir=None, write_spec=False, upda
 
         # 1. Query mod.io
         mod_meta = query_modio(query, api_key)
-        mod_name = mod_meta["name"]
-        slug = mod_meta["name_id"]
+        mod_name = str(mod_meta["name"])
+        slug = str(mod_meta["name_id"])
 
         # 2. Download mod
         archive_bytes = download_mod_file(mod_meta, api_key)
@@ -819,7 +819,7 @@ def process_mod(query="", pak_path=None, output_dir=None, write_spec=False, upda
                     attrs = {child.get("id"): (child.get("value") or child.get("handle")) for child in node.findall("attribute")}
                     mkey = attrs.get("MapKey")
                     stat_id = attrs.get("Stats")
-                    dhandle = attrs.get("DisplayName", "").split(";")[0]
+                    dhandle = (attrs.get("DisplayName") or "").split(";")[0]
                     if dhandle and dhandle in loc_dict:
                         dtext = loc_dict[dhandle]
                         if mkey:

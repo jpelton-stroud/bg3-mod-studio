@@ -13,6 +13,7 @@ import math
 import os
 import re
 import sys
+from typing import Any
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -112,55 +113,57 @@ def calculate_pact_slots(warlock_level: int) -> tuple[int, int]:
     return (4, 5)
 
 
-def parse_boost_effects(boost_str: str) -> dict:
-    effects = {
+def parse_boost_effects(boost_str: str) -> dict[str, Any]:
+    stats_dict: dict[str, int] = {}
+    effects: dict[str, Any] = {
         "dc": 0,
         "ac": 0,
         "attack_bonus": 0,
         "damage_bonus": 0,
         "crit_threshold": 0,
-        "stats": {},
+        "stats": stats_dict,
     }
     for part in boost_str.split(";"):
         part = part.strip()
         m_dc = re.search(r'SpellSaveDC\((\d+)\)', part, re.IGNORECASE)
         if m_dc:
-            effects["dc"] += int(m_dc.group(1))
+            effects["dc"] = int(effects["dc"]) + int(m_dc.group(1))
 
         m_ac = re.search(r'AC\((\d+)\)', part, re.IGNORECASE)
         if m_ac:
-            effects["ac"] += int(m_ac.group(1))
+            effects["ac"] = int(effects["ac"]) + int(m_ac.group(1))
 
         m_att = re.search(r'RollBonus\(Attack,\s*(\d+)', part, re.IGNORECASE)
         if m_att:
-            effects["attack_bonus"] += int(m_att.group(1))
+            effects["attack_bonus"] = int(effects["attack_bonus"]) + int(m_att.group(1))
 
         m_dmg = re.search(r'DamageBonus\((\d+)\)', part, re.IGNORECASE)
         if m_dmg:
-            effects["damage_bonus"] += int(m_dmg.group(1))
+            effects["damage_bonus"] = int(effects["damage_bonus"]) + int(m_dmg.group(1))
 
         m_crit = re.search(r'ReduceCriticalThreshold\((\d+)\)', part, re.IGNORECASE)
         if m_crit:
-            effects["crit_threshold"] += int(m_crit.group(1))
+            effects["crit_threshold"] = int(effects["crit_threshold"]) + int(m_crit.group(1))
 
         m_ovr = re.search(r'AbilityOverrideMinimum\((\w+),\s*(\d+)', part, re.IGNORECASE)
         if m_ovr:
             stat_name = m_ovr.group(1)[:3].capitalize()
-            effects["stats"][stat_name] = max(effects["stats"].get(stat_name, 0), int(m_ovr.group(2)))
+            stats_dict[stat_name] = max(stats_dict.get(stat_name, 0), int(m_ovr.group(2)))
 
     return effects
 
 
-def load_gear_boosts(gear_items: list[str], _workspace_root: Path) -> tuple[dict, list[dict]]:
+def load_gear_boosts(gear_items: list[str], _workspace_root: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     cache_file = get_cache_dir() / "mod_database.json"
-    gear_data = []
-    combined_effects = {
+    gear_data: list[dict[str, Any]] = []
+    combined_stats: dict[str, int] = {}
+    combined_effects: dict[str, Any] = {
         "dc": 0,
         "ac": 0,
         "attack_bonus": 0,
         "damage_bonus": 0,
         "crit_threshold": 0,
-        "stats": {},
+        "stats": combined_stats,
     }
 
     if not cache_file.is_file() or not gear_items:
@@ -178,13 +181,14 @@ def load_gear_boosts(gear_items: list[str], _workspace_root: Path) -> tuple[dict
                 gear_data.append(matched)
                 boosts = matched.get("boosts", "")
                 eff = parse_boost_effects(boosts)
-                combined_effects["dc"] += eff["dc"]
-                combined_effects["ac"] += eff["ac"]
-                combined_effects["attack_bonus"] += eff["attack_bonus"]
-                combined_effects["damage_bonus"] += eff["damage_bonus"]
-                combined_effects["crit_threshold"] += eff["crit_threshold"]
-                for s, val in eff["stats"].items():
-                    combined_effects["stats"][s] = max(combined_effects["stats"].get(s, 0), val)
+                combined_effects["dc"] = int(combined_effects["dc"]) + int(eff["dc"])
+                combined_effects["ac"] = int(combined_effects["ac"]) + int(eff["ac"])
+                combined_effects["attack_bonus"] = int(combined_effects["attack_bonus"]) + int(eff["attack_bonus"])
+                combined_effects["damage_bonus"] = int(combined_effects["damage_bonus"]) + int(eff["damage_bonus"])
+                combined_effects["crit_threshold"] = int(combined_effects["crit_threshold"]) + int(eff["crit_threshold"])
+                eff_stats: dict[str, int] = eff.get("stats", {})
+                for s, val in eff_stats.items():
+                    combined_stats[s] = max(combined_stats.get(s, 0), val)
     except Exception:
         pass
 

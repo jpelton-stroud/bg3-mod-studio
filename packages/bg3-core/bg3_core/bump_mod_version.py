@@ -44,7 +44,7 @@ def find_mod_directories(mod_query: str = "") -> List[Path]:
 
     try:
         target = resolve_mod_dir(mod_query)
-        if target.is_dir():
+        if target and target.is_dir():
             return [target]
     except Exception:
         pass

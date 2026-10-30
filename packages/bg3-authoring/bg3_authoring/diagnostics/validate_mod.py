@@ -503,11 +503,15 @@ def main():
 
     args = parser.parse_args()
 
-    targets = []
+    targets: list[Path] = []
     selected_mod = args.mod or args.mod_pos
     if selected_mod and not args.all:
         try:
-            targets.append(resolve_mod_dir(selected_mod, prefer_my_mods=True))
+            resolved = resolve_mod_dir(selected_mod, prefer_my_mods=True)
+            if resolved is None:
+                print(f"Error: No mod found matching '{selected_mod}'.", file=sys.stderr)
+                sys.exit(ExitCode.NOINPUT)
+            targets.append(resolved)
         except FileNotFoundError:
             print(f"Error: No mod found matching '{selected_mod}'.", file=sys.stderr)
             sys.exit(ExitCode.NOINPUT)

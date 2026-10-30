@@ -214,7 +214,7 @@ def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) ->
             if a.endswith(".py"):
                 registered_names.add(a[:-3])
 
-    results = []
+    results: list[dict[str, Any]] = []
     total_refs = 0
     skills_with_discovery = 0
     all_unregistered = set()

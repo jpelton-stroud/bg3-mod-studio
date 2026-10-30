@@ -24,6 +24,7 @@ import shutil
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.env_paths import (
@@ -218,7 +219,7 @@ def create_default_modsettings(path: Path):
     path.write_text(xml_content, encoding="utf-8")
 
 
-def save_modsettings(path: Path, tree: ET.ElementTree):
+def save_modsettings(path: Path, tree: Any):
     """Save modsettings.lsx with clean 4-space indentation and standard Larian XML declaration."""
     backup_file(path)
     if hasattr(ET, "indent"):
@@ -690,11 +691,11 @@ def enable_mod(path: Path, mod_meta: dict, order_index: int | None = None, dry_r
 
         if order_index is not None:
             # Never insert ahead of core system modules
-            core_count = sum(
-                1 for d in mods_children.findall("node[@id='ModuleShortDesc']")
-                if (d.find("attribute[@id='UUID']") is not None and 
-                    d.find("attribute[@id='UUID']").get("value", "").lower() in CORE_SYSTEM_UUIDS)
-            )
+            core_count = 0
+            for d in mods_children.findall("node[@id='ModuleShortDesc']"):
+                u_node = d.find("attribute[@id='UUID']")
+                if u_node is not None and (u_node.get("value") or "").lower() in CORE_SYSTEM_UUIDS:
+                    core_count += 1
             if order_index < core_count:
                 safe_idx = core_count + max(0, order_index - 1)
             else:
@@ -862,9 +863,10 @@ def clean_steam_data_paks(dry_run: bool = False) -> list[dict]:
         if not dry_run:
             if quarantine_steam:
                 quarantine_steam.mkdir(parents=True, exist_ok=True)
-                if dest.exists():
+                if dest and dest.exists():
                     dest.unlink()
-                shutil.move(str(pak_file), str(dest))
+                if dest:
+                    shutil.move(str(pak_file), str(dest))
             else:
                 pak_file.unlink()
 
@@ -1114,7 +1116,7 @@ def main():
     if args.json and not (args.list or args.enable or args.disable or args.validate):
         args.list = True
 
-    action_result = {}
+    action_result: dict[str, Any] = {}
 
     if args.restore:
         mods_dir = get_appdata_mods_dir(modsettings_path)

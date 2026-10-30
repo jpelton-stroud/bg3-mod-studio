@@ -195,7 +195,7 @@ def build_meta_lsx_content(
 """
 
 
-def build_localization_xml(mod_name: str = "", placeholder_handles: list = None) -> str:
+def build_localization_xml(mod_name: str = "", placeholder_handles: list[str] | None = None) -> str:
     entries = []
     for h in (placeholder_handles or []):
         entries.append(f'  <content contentuid="{h}" version="1">{mod_name} Display Name</content>')
@@ -243,12 +243,12 @@ def build_readme_content(
 
 def scaffold_mod(
     name: str,
-    mod_uuid: str = None,
-    mod_slug: str = None,
-    author: str = None,
+    mod_uuid: str | None = None,
+    mod_slug: str | None = None,
+    author: str | None = None,
     description: str = "",
     version_str: str = "1.0.0.0",
-    dependencies: list = None,
+    dependencies: list[Any] | None = None,
     output_dir: Optional[Path] = None,
     dry_run: bool = False,
 ) -> dict:
