@@ -31,7 +31,16 @@ from bg3_core.cli_common import (
     confirm_action,
     format_json_response,
 )
-from bg3_core.env_paths import MODS_DIR, MY_MODS_DIR, REPO_ROOT as WORKSPACE_ROOT, detect_data_dir, get_env_var, normalize_mod_key
+from bg3_core.env_paths import (
+    MODS_DIR,
+    MY_MODS_DIR,
+    REPO_ROOT as WORKSPACE_ROOT,
+    detect_data_dir,
+    get_authored_mods_dir,
+    get_env_var,
+    get_subscribed_mods_dir,
+    normalize_mod_key,
+)
 
 DEFAULT_TOOLKIT_DIR = Path("/mnt/c/Program Files (x86)/Steam/steamapps/common/Baldurs Gate 3 Toolkit")
 
@@ -278,13 +287,15 @@ def index_mod_content(mod_name: Optional[str] = None) -> Dict[str, List[Tuple[st
     index: Dict[str, List[Tuple[str, int, str]]] = {}
 
     target_dirs: List[Tuple[str, Path]] = []
+    authored_dir = get_authored_mods_dir()
+    subscribed_dir = get_subscribed_mods_dir()
     if mod_name:
-        mod_path = MY_MODS_DIR / mod_name
+        mod_path = authored_dir / mod_name
         if mod_path.is_dir():
             target_dirs.append((mod_name, mod_path))
-        elif MY_MODS_DIR.is_dir():
+        elif authored_dir.is_dir():
             norm_target = normalize_name(mod_name)
-            for d in MY_MODS_DIR.iterdir():
+            for d in authored_dir.iterdir():
                 if d.is_dir() and normalize_name(d.name) == norm_target:
                     target_dirs.append((d.name, d))
                     break
@@ -301,10 +312,10 @@ def index_mod_content(mod_name: Optional[str] = None) -> Dict[str, List[Tuple[st
                         d_folder = d_folder_attr.get("value", "") if d_folder_attr is not None else d_name
                         if not d_name or d_name.lower() in COMMON_EXCLUDES:
                             continue
-                        # Check local mods/<slug>
-                        if MODS_DIR.is_dir():
+                        # Check local subscribed mods/<slug>
+                        if subscribed_dir.is_dir():
                             for m_slug in (d_name, d_folder):
-                                cand_dir = MODS_DIR / m_slug
+                                cand_dir = subscribed_dir / m_slug
                                 if cand_dir.is_dir() and (d_name, cand_dir) not in target_dirs:
                                     target_dirs.append((d_name, cand_dir))
                         # Check Data/Mods/<dep_folder> (strictly scoped to this specific unpacked mod folder)
@@ -316,8 +327,8 @@ def index_mod_content(mod_name: Optional[str] = None) -> Dict[str, List[Tuple[st
                 except Exception:
                     pass
     else:
-        if MY_MODS_DIR.is_dir():
-            for d in MY_MODS_DIR.iterdir():
+        if authored_dir.is_dir():
+            for d in authored_dir.iterdir():
                 if d.is_dir():
                     target_dirs.append((d.name, d))
 

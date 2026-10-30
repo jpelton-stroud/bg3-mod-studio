@@ -37,10 +37,15 @@ from typing import Optional
 
 from bg3_core.env_paths import (
     REPO_ROOT,
+    get_authored_mods_dir,
+    get_build_guides_dir,
     get_env_source,
+    get_studio_dir,
+    get_subscribed_mods_dir,
     get_xdg_cache_home,
     get_xdg_config_home,
     get_xdg_data_home,
+    get_xdg_documents_home,
     get_xdg_state_home,
 )
 from bg3_core.library_catalog import purge_library_mods
@@ -48,7 +53,6 @@ from bg3_core.modio_client import BG3_GAME_ID, MODIO_API_HOST, USER_AGENT
 
 WORKSPACE_ROOT = REPO_ROOT
 ENV_PATH = get_xdg_config_home() / "env"
-ENV_EXAMPLE_PATH = WORKSPACE_ROOT / ".env.example"
 
 # ANSI Terminal Colors
 BOLD = "\033[1m"
@@ -264,6 +268,21 @@ def check_environment_status(as_json: bool = False, config_path: Optional[Path] 
     author = env.get("BG3_MOD_AUTHOR", "")
     data_dir_exists = Path(data_dir).exists() if data_dir else False
 
+    studio_dir = env.get("BG3_STUDIO_DIR", str(get_studio_dir(target_env)))
+    studio_dir_exists = Path(studio_dir).exists() if studio_dir else False
+    build_guides_dir = env.get("BG3_BUILD_GUIDES_DIR", str(get_build_guides_dir(target_env)))
+    build_guides_dir_exists = Path(build_guides_dir).exists() if build_guides_dir else False
+    subscribed_mods_dir = env.get(
+        "BG3_SUBSCRIBED_MODS_DIR",
+        env.get("BG3_LIBRARY_DIR", str(get_subscribed_mods_dir(target_env))),
+    )
+    subscribed_mods_dir_exists = Path(subscribed_mods_dir).exists() if subscribed_mods_dir else False
+    authored_mods_dir = env.get(
+        "BG3_AUTHORED_MODS_DIR",
+        env.get("BG3_MODS_DIR", str(get_authored_mods_dir(target_env))),
+    )
+    authored_mods_dir_exists = Path(authored_mods_dir).exists() if authored_mods_dir else False
+
     _, key_source = get_env_source("MODIO_API_KEY", target_env)
     _, pat_source = get_env_source("MODIO_PAT", target_env)
 
@@ -285,6 +304,14 @@ def check_environment_status(as_json: bool = False, config_path: Optional[Path] 
             "bg3_data_dir": data_dir,
             "bg3_data_dir_exists": data_dir_exists,
             "bg3_mod_author": author or "default",
+            "bg3_studio_dir": studio_dir,
+            "bg3_studio_dir_exists": studio_dir_exists,
+            "bg3_build_guides_dir": build_guides_dir,
+            "bg3_build_guides_dir_exists": build_guides_dir_exists,
+            "bg3_subscribed_mods_dir": subscribed_mods_dir,
+            "bg3_subscribed_mods_dir_exists": subscribed_mods_dir_exists,
+            "bg3_authored_mods_dir": authored_mods_dir,
+            "bg3_authored_mods_dir_exists": authored_mods_dir_exists,
             "xdg": xdg_info,
         }
         print(json.dumps(result, indent=2))
@@ -303,6 +330,10 @@ def check_environment_status(as_json: bool = False, config_path: Optional[Path] 
         status_text = f"{GREEN}Exists{RESET}" if data_dir_exists else f"{YELLOW}Not found on disk{RESET}"
         print(f"  └ Directory:    {status_text}")
     print(f"BG3_MOD_AUTHOR:   {author if author else 'default'}")
+    print(f"BG3_STUDIO_DIR:   {studio_dir if studio_dir else YELLOW + 'Default' + RESET}")
+    if studio_dir:
+        s_status = f"{GREEN}Exists{RESET}" if studio_dir_exists else f"{YELLOW}Not found on disk{RESET}"
+        print(f"  └ Studio Root:  {s_status}")
     print("")
 
 
@@ -467,7 +498,12 @@ def handle_custom_mods_purge(choice: str, dry_run: bool = False) -> None:
     print(f"{GREEN}✓ Successfully purged custom mods in my_mods/.{RESET}")
 
 
-def run_wizard(dry_run: bool = False, non_interactive: bool = False, config_path: Optional[Path] = None):
+def run_wizard(
+    dry_run: bool = False,
+    non_interactive: bool = False,
+    config_path: Optional[Path] = None,
+    studio_dir_override: Optional[str] = None,
+):
     print_banner()
 
     target_env = config_path or ENV_PATH
@@ -477,12 +513,14 @@ def run_wizard(dry_run: bool = False, non_interactive: bool = False, config_path
         print(f"{YELLOW}[!] Detected legacy repository-level .env. Migrating values to {target_env}.{RESET}")
 
     default_data_dir = detect_default_data_dir()
+    default_studio_dir = str(get_xdg_documents_home() / "BG3_Mod_Studio")
 
     if non_interactive:
         api_key = existing_env.get("MODIO_API_KEY", "")
         pat = existing_env.get("MODIO_PAT", existing_env.get("MODIO_OAUTH_TOKEN", ""))
         data_dir = existing_env.get("BG3_DATA_DIR", default_data_dir)
         author = existing_env.get("BG3_MOD_AUTHOR", "default")
+        studio_dir = studio_dir_override or existing_env.get("BG3_STUDIO_DIR", default_studio_dir)
     else:
         # 1. MODIO_API_KEY
         print(f"{BOLD}1. mod.io API Key{RESET}")
@@ -545,6 +583,14 @@ def run_wizard(dry_run: bool = False, non_interactive: bool = False, config_path
         if not author:
             author = "default"
 
+        # 5. BG3_STUDIO_DIR
+        print(f"\n{BOLD}5. BG3 Mod Studio Target Directory{RESET}")
+        print("Root directory where all user-generated content (build guides, subscribed mods, authored mods) is stored.")
+        current_studio_dir = studio_dir_override or existing_env.get("BG3_STUDIO_DIR", default_studio_dir)
+        studio_dir = prompt_input("Enter target directory for BG3_Mod_Studio", current_studio_dir)
+
+    studio_path = Path(os.path.expandvars(os.path.expanduser(studio_dir.strip())))
+
     # Assemble output
     output_lines = [
         "# ==============================================================================",
@@ -562,6 +608,9 @@ def run_wizard(dry_run: bool = False, non_interactive: bool = False, config_path
         "# Mod Author Metadata",
         f"BG3_MOD_AUTHOR={author}",
         "",
+        "# BG3 Mod Studio User Content Directory",
+        f"BG3_STUDIO_DIR={studio_path}",
+        "",
     ]
     content = "\n".join(output_lines)
 
@@ -569,6 +618,10 @@ def run_wizard(dry_run: bool = False, non_interactive: bool = False, config_path
         print(f"\n{CYAN}[DRY-RUN] Would write to {target_env} (secrets masked):{RESET}")
         print(content.replace(f"MODIO_API_KEY={api_key}", f"MODIO_API_KEY={mask_secret(api_key)}")
                      .replace(f"MODIO_PAT={pat}", f"MODIO_PAT={mask_secret(pat)}"))
+        print(f"{CYAN}[DRY-RUN] Would scaffold directories under {studio_path}:{RESET}")
+        print(f"  - {studio_path / 'Build_Guides'}")
+        print(f"  - {studio_path / 'Mods' / 'subscribed'}")
+        print(f"  - {studio_path / 'Mods' / 'authored'}")
     else:
         write_env_file(target_env, content)
         print(f"\n{GREEN}✓ Environment configuration saved successfully to {target_env} (mode 600)!{RESET}")
@@ -579,6 +632,11 @@ def run_wizard(dry_run: bool = False, non_interactive: bool = False, config_path
                 print(f"{GREEN}✓ Removed deprecated repository-level .env file.{RESET}")
             except OSError:
                 pass
+
+        (studio_path / "Build_Guides").mkdir(parents=True, exist_ok=True)
+        (studio_path / "Mods" / "subscribed").mkdir(parents=True, exist_ok=True)
+        (studio_path / "Mods" / "authored").mkdir(parents=True, exist_ok=True)
+        print(f"{GREEN}✓ Ensured studio directories exist at {studio_path}.{RESET}")
 
     # GitHub Remote Setup
     configure_github_remote()
@@ -628,12 +686,23 @@ def main():
         action="store_true",
         help="Run wizard non-interactively with safe default answers (no-sync, no-purge)",
     )
+    parser.add_argument(
+        "--studio-dir",
+        type=str,
+        default=None,
+        help="Target directory for BG3 Mod Studio user content (defaults to XDG_DOCUMENTS_DIR/BG3_Mod_Studio)",
+    )
     args = parser.parse_args()
 
     if args.check:
         check_environment_status(as_json=args.json, config_path=args.config)
     else:
-        run_wizard(dry_run=args.dry_run, non_interactive=args.non_interactive, config_path=args.config)
+        run_wizard(
+            dry_run=args.dry_run,
+            non_interactive=args.non_interactive,
+            config_path=args.config,
+            studio_dir_override=args.studio_dir,
+        )
 
 
 if __name__ == "__main__":

@@ -34,11 +34,11 @@ For a deep-dive into feature & functionality specifics, as well as example agent
 - **Level 1–20 Progression Design**: Plan complete 20-level multiclass builds leveraging expanded progression frameworks like _UnlockLevelCurve_ (`/bg3_create_build_guide`).
 - **Catalog-Wide BiS Gear Queries**: Query the documented mod library for Best-in-Slot weapons, armor, passives, and spell synergies tailored to specific build archetypes (`/bg3_query_gear`).
 - **Tactical Combat Sequences**: Script turn-by-turn combat openers and action economy allocations (actions, bonus actions, reactions, spell slots) to maximize tactical output.
-- **Sandboxed Build Guides**: Keep build guides organized and isolated in `build_guides/` without cluttering version control or game directories.
+- **Sandboxed Build Guides**: Keep build guides organized and isolated in `BG3_Mod_Studio/Build_Guides/` without cluttering version control or game directories.
 
 ### Custom Mod Authorship (5-Stage Shift-Left Lifecycle)
 
-- **Stage 1 (Creation: `/bg3_create_mod`)**: Autonomous scaffolding under `my_mods/<slug>/`, parallel subagents for stats/progressions/loca/docs, and read-only validation.
+- **Stage 1 (Creation: `/bg3_create_mod`)**: Autonomous scaffolding under `BG3_Mod_Studio/Mods/authored/<slug>/`, parallel subagents for stats/progressions/loca/docs, and read-only validation.
 - **Stage 2 (Diagnostics & Toolkit Sync: `/bg3_diagnose_mod`)**: Phase 2A static checks, game data sync (with binary `.loca` compilation), and Toolkit (`Glasses.exe`) log generation prompt -> Phase 2B runtime log diagnosis, automated fixes, and verification loop.
 - **Stage 3 (In-Game Testing: `/bg3_test_mod`)**: Standalone `.pak` packaging (`--publish-local`), load order activation (`/bg3_manage_load_order`), and save-game compatibility audits (`scripts/inspect_save_game.py`).
 - **Stage 4 (Release Prep: `/bg3_release_prep`)**: Atomic semantic version bump, strict validation, GFM HTML description rendering (`scripts/render_modio_description.py`), and distribution `.pak` packaging.
@@ -89,23 +89,20 @@ BaldursGate3/
 │   ├── FEATURES.md            # Features, workflows, and example agent prompts
 │   ├── MOD_CREATION_WORKFLOW.md # Step-by-step mod authoring guide
 │   └── MODIO_INTEGRATION.md   # mod.io API and library reference
-├── mods/                      # Documented mod specifications
-│   ├── library.md             # Master mod catalog (6-column categorized table)
-│   └── <mod_slug>/            # Whitelisted mod specifications & data
-├── my_mods/                   # Custom authored mods
-│   └── <mod_slug>/            # Mod package (Projects, Mods, Public, Localization)
-├── build_guides/              # Sandbox for Level 20 build crafting (ignored by Git)
-├── scripts/                   # Pure Python automation tooling suite (27 CLI tools)
-│   ├── lib/                   # Shared engine parsers, LSPK packager, and mod.io client
-│   ├── tools.py               # Tool discovery and execution hub
-│   └── registry.json          # Machine-readable tools registry
-├── .env.example               # Environment variables template
-├── .gitignore                 # Production-grade gitignore with whitelist rules
+├── packages/                  # Modular Python workspace packages
+│   ├── bg3-core/              # Shared core runtime, XDG path resolvers, and mod.io client
+│   ├── bg3-theorycraft/       # Theorycrafting, progression, and gear optimization tools
+│   └── bg3-authoring/         # Mod scaffolding, packaging, and diagnostic toolchain
+├── tests/                     # Automated test suites
+├── .gitignore                 # Production-grade gitignore
 ├── setup.sh                   # Setup wizard launcher
 ├── CONTRIBUTING.md            # Contribution guidelines
 ├── CODE_OF_CONDUCT.md         # Contributor Covenant v2.1
 ├── LICENSE                    # MIT License
 └── README.md                  # Project overview
+```
+
+> **User Content Studio**: All user-generated content (build guides, subscribed mods, and custom authored mods) is stored externally in `XDG_DOCUMENTS_DIR/BG3_Mod_Studio` (defaults to `~/Documents/BG3_Mod_Studio`), keeping this codebase completely decoupled from user data.
 ```
 
 ---

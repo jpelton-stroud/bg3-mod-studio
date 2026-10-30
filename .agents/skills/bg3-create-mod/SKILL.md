@@ -53,6 +53,6 @@ uv run bg3 mod conflict <mod-slug> --against-library --json
 
 Verify:
 - XML/LSX schema adherence and valid localization handles.
-- Zero collisions with [`mods/library.md`](../../../mods/library.md).
+- Zero collisions with `Mods/subscribed/library.md`.
 
 After clean validation, prompt user to transition to **Stage 2 Diagnostics** ([`bg3-diagnose-mod`](../bg3-diagnose-mod/SKILL.md)).

@@ -27,7 +27,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MY_MODS_DIR, REPO_ROOT as WORKSPACE_ROOT, resolve_mod_dir
+from bg3_core.env_paths import (
+    MY_MODS_DIR,
+    REPO_ROOT as WORKSPACE_ROOT,
+    get_authored_mods_dir,
+    resolve_mod_dir,
+)
 from bg3_core.larian_parsers import HANDLE_PATTERN, has_balanced_parens
 
 # Zero-dependency ANSI Terminal Colors honoring NO_COLOR
@@ -507,10 +512,11 @@ def main():
             print(f"Error: No mod found matching '{selected_mod}'.", file=sys.stderr)
             sys.exit(ExitCode.NOINPUT)
     else:
-        if not MY_MODS_DIR.exists():
-            print(f"Error: {MY_MODS_DIR} does not exist.", file=sys.stderr)
+        authored_dir = get_authored_mods_dir()
+        if not authored_dir.exists():
+            print(f"Error: {authored_dir} does not exist.", file=sys.stderr)
             sys.exit(1)
-        targets = sorted([d for d in MY_MODS_DIR.iterdir() if d.is_dir()])
+        targets = sorted([d for d in authored_dir.iterdir() if d.is_dir()])
 
     results = []
     total_errors = 0

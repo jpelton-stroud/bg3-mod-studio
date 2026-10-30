@@ -5,7 +5,7 @@ description: Create or update a public Baldur's Gate 3 mod.io collection from mo
 
 # Create a BG3 mod.io Collection (`bg3-create-modio-collection`)
 
-Creates a public BG3 collection or updates one of the authenticated user's collections using numeric Mod ID values from [`mods/library.md`](../../../mods/library.md).
+Creates a public BG3 collection or updates one of the authenticated user's collections using numeric Mod ID values from `Mods/subscribed/library.md`.
 
 ---
 
@@ -28,7 +28,7 @@ Confirm `MODIO_PAT` is present, then execute dry run:
 ```bash
 uv run bg3 modio create-collection --dry-run
 ```
-The script confirms BG3 collection membership and checks numeric Mod IDs from [`mods/library.md`](../../../mods/library.md).
+The script confirms BG3 collection membership and checks numeric Mod IDs from `Mods/subscribed/library.md`.
 
 ### 2. User Approval & Live Execution
 1. Present the complete preview (selected mods, additions, removals) to the user.
@@ -46,4 +46,4 @@ Always verify collection state and API responses:
 1. Verify `create-collection` exits with code 0.
 2. Confirm the collection URL and ID are displayed and operational.
 3. Verify all selected mods were added to the target collection.
-4. If missing numeric IDs were reported, verify IDs against trusted mod documentation before updating [`mods/library.md`](../../../mods/library.md).
+4. If missing numeric IDs were reported, verify IDs against trusted mod documentation before updating `Mods/subscribed/library.md`.

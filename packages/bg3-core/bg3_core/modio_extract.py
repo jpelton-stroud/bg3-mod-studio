@@ -26,7 +26,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MODS_DIR, REPO_ROOT, normalize_mod_key
+from bg3_core.env_paths import MODS_DIR, REPO_ROOT, get_subscribed_mods_dir, normalize_mod_key
 from bg3_core.larian_parsers import (
     clean_loc_text,
     parse_loca_bytes,
@@ -734,7 +734,7 @@ def process_mod(query="", pak_path=None, output_dir=None, write_spec=False, upda
         archive_bytes = download_mod_file(mod_meta, api_key)
 
     if not output_dir:
-        output_dir = str(MODS_DIR / slug)
+        output_dir = str(get_subscribed_mods_dir() / slug)
 
     data_dir = os.path.join(output_dir, "data")
     os.makedirs(data_dir, exist_ok=True)
@@ -881,10 +881,9 @@ def process_mod(query="", pak_path=None, output_dir=None, write_spec=False, upda
         with open(os.path.join(output_dir, "README.md"), "w", encoding="utf-8") as out:
             out.write(spec_md)
 
-    # 7. Update mods/library.md if requested
+    # 7. Update library.md if requested
     if update_library or write_spec:
-        workspace_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-        lib_path = os.path.join(workspace_root, "mods", "library.md")
+        lib_path = str(get_subscribed_mods_dir() / "library.md")
         update_library_markdown(lib_path)
 
     result = {

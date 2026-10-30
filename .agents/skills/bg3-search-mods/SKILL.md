@@ -36,7 +36,7 @@ Ensure target platform is specified (prompt user if missing). Execute search:
 ```bash
 uv run bg3 modio search --query "<QUERY>" --platform "<PLATFORM>" --limit 15 --json
 ```
-Automatically filters out mods cataloged in [`mods/library.md`](../../../mods/library.md).
+Automatically filters out mods cataloged in `Mods/subscribed/library.md`.
 
 ### 2. Candidates & Concurrent Subagents
 Present untracked candidates per [Search Rubric](./references/search_ranking_rubric.md). Once selected, launch concurrent subagents per [Conflict Subagents](./resources/conflict_subagent_template.json) to evaluate [`bg3-check-mod-conflicts`](../bg3-check-mod-conflicts/SKILL.md). Await reactive completion notifications without polling.
@@ -50,5 +50,5 @@ Synthesize subagent return strings into a markdown table with conflict status ba
 
 Verify search and subagent results before delivery:
 1. Confirm search command exits with code 0 and valid JSON.
-2. Confirm untracked filtering verified against [`mods/library.md`](../../../mods/library.md).
+2. Confirm untracked filtering verified against `Mods/subscribed/library.md`.
 3. Validate that conflict strings follow schemas in [Search Rubric](./references/search_ranking_rubric.md).

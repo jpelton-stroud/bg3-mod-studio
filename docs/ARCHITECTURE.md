@@ -125,8 +125,8 @@ flowchart LR
     SearchResults -->|bg3 modio extract\n(scripts/library/modio_extract.py)| DL["Download Archive\n(.pak / .zip)"]
     DL --> Extract["Pure-Python Unpacker\n(scripts/lib/lspk.py)"]
     Extract --> Parse["Larian Engine Parsers\n(scripts/lib/larian_parsers.py)"]
-    Parse --> Specs["mods/<slug>/README.md\n(Rich Markdown Spec)"]
-    Parse --> Index["Master Catalog\n(mods/library.md: six columns)"]
+    Parse --> Specs["Mods/subscribed/<slug>/README.md\n(Rich Markdown Spec)"]
+    Parse --> Index["Master Catalog\n(Mods/subscribed/library.md: six columns)"]
     Index --> FastDB["bg3 query\n(scripts/library/query_mod_database.py)"]
 ```
 
@@ -136,10 +136,10 @@ flowchart LR
 
 ### Larian Engine Package Hierarchy
 
-To ensure compatibility with the official Larian Toolkit and game runtime, all custom authored mods in `my_mods/<mod-slug>/` follow this exact four-root layout:
+To ensure compatibility with the official Larian Toolkit and game runtime, all custom authored mods in `Mods/authored/<mod-slug>/` follow this exact four-root layout:
 
 ```text
-my_mods/<mod-slug>/
+BG3_Mod_Studio/Mods/authored/<mod-slug>/
 ├── Mods/<ModName>_<UUID>/
 │   └── meta.lsx                      # Primary engine descriptor (ModuleInfo & dependencies)
 ├── Projects/<ModName>_<UUID>/

@@ -1,8 +1,0 @@
-new entry "Projectile_EldritchBlast_BonusAction"
-type "SpellData"
-data "SpellType" "Projectile"
-using "Projectile_EldritchBlast"
-data "DisplayName" "hf5cf62a4g8fe9ga55ega713g31cc5a0384e4;Eldritch Weave: Blast"
-data "Description" "hf4313616g0411g0ebage989gea2a745375d2;Unleash eldritch power with your off-hand following a successful melee strike."
-data "Action Resources" "BonusActionPoint:1"
-data "Cooldown" "OncePerTurn"

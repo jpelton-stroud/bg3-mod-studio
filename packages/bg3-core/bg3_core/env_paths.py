@@ -8,8 +8,6 @@ from typing import Dict, List, Optional, Sequence, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 SCRIPTS_DIR = Path(__file__).resolve().parent
-MY_MODS_DIR = REPO_ROOT / "my_mods"
-MODS_DIR = REPO_ROOT / "mods"
 DIST_DIR = REPO_ROOT / "dist"
 
 DEFAULT_WSL_DATA_DIR = Path("/mnt/c/Program Files (x86)/Steam/steamapps/common/Baldurs Gate 3/Data")
@@ -71,6 +69,28 @@ def get_xdg_state_home(app: str = "bg3") -> Path:
     return base / app
 
 
+def get_xdg_documents_home() -> Path:
+    """Return user documents directory adhering to XDG user-dirs or platform defaults."""
+    val = os.environ.get("XDG_DOCUMENTS_DIR")
+    if val and val.strip():
+        expanded = os.path.expandvars(os.path.expanduser(val.strip()))
+        return Path(expanded)
+    if os.name != "nt":
+        user_dirs_file = Path.home() / ".config" / "user-dirs.dirs"
+        if user_dirs_file.is_file():
+            try:
+                for line in user_dirs_file.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if line.startswith("XDG_DOCUMENTS_DIR="):
+                        raw_path = line.split("=", 1)[1].strip().strip('"')
+                        raw_path = raw_path.replace("$HOME", str(Path.home()))
+                        if raw_path:
+                            return Path(os.path.expandvars(os.path.expanduser(raw_path)))
+            except OSError:
+                pass
+    return Path.home() / "Documents"
+
+
 def get_cache_dir() -> Path:
     """Resolve active cache directory, honoring BG3_CACHE_DIR or XDG_CACHE_HOME."""
     custom = os.environ.get("BG3_CACHE_DIR")
@@ -130,6 +150,57 @@ def get_env_source(key: str, env_path: Optional[Path] = None) -> Tuple[Optional[
     return None, "unset"
 
 
+def get_studio_dir(env_path: Optional[Path] = None) -> Path:
+    """Resolve active BG3 Mod Studio root directory."""
+    custom = get_env_var("BG3_STUDIO_DIR", env_path=env_path)
+    if custom and custom.strip():
+        return Path(os.path.expandvars(os.path.expanduser(custom.strip())))
+    return get_xdg_documents_home() / "BG3_Mod_Studio"
+
+
+def get_build_guides_dir(env_path: Optional[Path] = None) -> Path:
+    """Resolve build guides directory."""
+    custom = get_env_var("BG3_BUILD_GUIDES_DIR", env_path=env_path)
+    if custom and custom.strip():
+        return Path(os.path.expandvars(os.path.expanduser(custom.strip())))
+    studio_dir = get_studio_dir(env_path=env_path)
+    return studio_dir / "Build_Guides"
+
+
+def get_subscribed_mods_dir(env_path: Optional[Path] = None) -> Path:
+    """Resolve subscribed/community mods directory."""
+    custom = get_env_var("BG3_SUBSCRIBED_MODS_DIR", env_path=env_path) or get_env_var(
+        "BG3_LIBRARY_DIR", env_path=env_path
+    )
+    if custom and custom.strip():
+        return Path(os.path.expandvars(os.path.expanduser(custom.strip())))
+    studio_dir = get_studio_dir(env_path=env_path)
+    studio_subscribed = studio_dir / "Mods" / "subscribed"
+    if not studio_subscribed.exists() and (REPO_ROOT / "mods").is_dir():
+        return REPO_ROOT / "mods"
+    return studio_subscribed
+
+
+def get_authored_mods_dir(env_path: Optional[Path] = None) -> Path:
+    """Resolve authored/custom mods directory."""
+    custom = get_env_var("BG3_AUTHORED_MODS_DIR", env_path=env_path) or get_env_var(
+        "BG3_MODS_DIR", env_path=env_path
+    )
+    if custom and custom.strip():
+        return Path(os.path.expandvars(os.path.expanduser(custom.strip())))
+    studio_dir = get_studio_dir(env_path=env_path)
+    studio_authored = studio_dir / "Mods" / "authored"
+    if not studio_authored.exists() and (REPO_ROOT / "my_mods").is_dir():
+        return REPO_ROOT / "my_mods"
+    return studio_authored
+
+
+STUDIO_DIR = get_studio_dir()
+MY_MODS_DIR = get_authored_mods_dir()
+MODS_DIR = get_subscribed_mods_dir()
+BUILD_GUIDES_DIR = get_build_guides_dir()
+
+
 def normalize_mod_key(value: str) -> str:
     """Normalize a mod slug, folder name, or UUID-suffixed folder name for matching."""
     cleaned = value.strip()
@@ -150,8 +221,8 @@ def resolve_mod_dir(
 ) -> Optional[Path]:
     """Resolve a mod directory across my_mods/ and mods/ by path, slug, Name, or <ModName>_<UUID>."""
     if roots is None:
-        my_mods = Path(os.environ.get("BG3_MODS_DIR", MY_MODS_DIR))
-        mods = Path(os.environ.get("BG3_LIBRARY_DIR", MODS_DIR))
+        my_mods = get_authored_mods_dir()
+        mods = get_subscribed_mods_dir()
         roots = (my_mods, mods)
 
     if prefer_my_mods is not None:

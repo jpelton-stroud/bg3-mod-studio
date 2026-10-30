@@ -149,6 +149,29 @@ class SetupEnvironmentQATests(unittest.TestCase):
                 self.assertIn("MODIO_API_KEY=migrated_key_999", target_config.read_text(encoding="utf-8"))
                 self.assertFalse(legacy_file.exists())
 
+    def test_setup_environment_studio_dir_option(self):
+        """Verify that --studio-dir sets BG3_STUDIO_DIR and scaffolds directories."""
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            target_env = tmp_root / "xdg" / "bg3" / "env"
+            custom_studio = tmp_root / "My_Custom_Studio"
+
+            from bg3_core.setup_environment import run_wizard
+
+            with patch("bg3_core.setup_environment.WORKSPACE_ROOT", tmp_root), \
+                 patch("bg3_core.setup_environment.ENV_PATH", target_env):
+                run_wizard(
+                    dry_run=False,
+                    non_interactive=True,
+                    config_path=target_env,
+                    studio_dir_override=str(custom_studio),
+                )
+                self.assertTrue(target_env.is_file())
+                self.assertIn(f"BG3_STUDIO_DIR={custom_studio}", target_env.read_text(encoding="utf-8"))
+                self.assertTrue((custom_studio / "Build_Guides").is_dir())
+                self.assertTrue((custom_studio / "Mods" / "subscribed").is_dir())
+                self.assertTrue((custom_studio / "Mods" / "authored").is_dir())
+
 
 if __name__ == "__main__":
     unittest.main()
