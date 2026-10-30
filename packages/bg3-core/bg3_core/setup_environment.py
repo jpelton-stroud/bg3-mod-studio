@@ -622,6 +622,7 @@ def run_wizard(
         print(f"  - {studio_path / 'Build_Guides'}")
         print(f"  - {studio_path / 'Mods' / 'subscribed'}")
         print(f"  - {studio_path / 'Mods' / 'authored'}")
+        print(f"  - {studio_path / '.agents' / 'skills'}")
     else:
         write_env_file(target_env, content)
         print(f"\n{GREEN}✓ Environment configuration saved successfully to {target_env} (mode 600)!{RESET}")
@@ -636,7 +637,17 @@ def run_wizard(
         (studio_path / "Build_Guides").mkdir(parents=True, exist_ok=True)
         (studio_path / "Mods" / "subscribed").mkdir(parents=True, exist_ok=True)
         (studio_path / "Mods" / "authored").mkdir(parents=True, exist_ok=True)
+        (studio_path / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
         print(f"{GREEN}✓ Ensured studio directories exist at {studio_path}.{RESET}")
+
+        # Deploy bundled agent skills into studio workspace
+        try:
+            from bg3_core.skills_installer import install_agent_skills
+            skill_res = install_agent_skills(target_dir=studio_path / ".agents" / "skills")
+            count = len(skill_res.get("installed", [])) + len(skill_res.get("updated", []))
+            print(f"{GREEN}✓ Deployed {count} agent skills to {studio_path / '.agents' / 'skills'}.{RESET}")
+        except Exception as e:
+            print(f"{YELLOW}Warning: Could not install agent skills: {e}{RESET}")
 
     # GitHub Remote Setup
     configure_github_remote()
