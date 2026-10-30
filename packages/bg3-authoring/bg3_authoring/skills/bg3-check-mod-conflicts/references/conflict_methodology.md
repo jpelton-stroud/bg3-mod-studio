@@ -15,7 +15,7 @@ Common BG3 conflict sources include:
 1. **Library Verification**: Check categorized rows in `Mods/subscribed/library.md`. Inspect specs in `Mods/subscribed/`.
 2. **Metadata Inspection**:
    ```bash
-   python3 scripts/library/modio_search.py --query "<MOD_SLUG>" --platform "<PLATFORM>" --json --include-tracked
+   uv run bg3 modio search "<MOD_SLUG>" --platform "<PLATFORM>" --json
    ```
 3. **Subsystem Audit**:
    - **Progressions & Rules**: Level curves, spell slots, feat intervals.

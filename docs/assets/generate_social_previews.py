@@ -262,7 +262,7 @@ def render_card_2(output_path):
     draw.text((700, 164), "bg3-mod-studio: engine_pipeline.py", font=font_code, fill=(150, 170, 200, 220))
     
     code_lines = [
-        ("$ python3 scripts/create_mod_scaffold.py \\", (180, 200, 230, 240)),
+        ("$ bg3 mod scaffold \\", (180, 200, 230, 240)),
         ("    --name \"Oath of the Astral Sentinel\" \\", (245, 195, 80, 240)),
         ("    --author \"AgenticStudio\" --version 1.0.0.0", (245, 195, 80, 240)),
         ("", (0,0,0,0)),

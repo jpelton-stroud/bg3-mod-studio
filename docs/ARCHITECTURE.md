@@ -18,22 +18,18 @@ flowchart TD
         GrillMe["Clarification Engine\n(/grill-me Interactive Trees)"]
     end
 
-    subgraph Tier2["2. Automation & Tooling Tier (scripts/)"]
-        CLI["Unified CLI & Router\n(scripts/bg3.py -> ~/.local/bin/bg3)"]
-        Registry["Tooling Catalog & Discovery\n(scripts/registry.json & tools.py - 31 tools)"]
-        SharedLib["Shared Engine Package\n(scripts/lib/: lspk, parsers, paths, modio)"]
-        Authoring["Authoring & Scaffolding\n(scripts/authoring/: create_mod_scaffold, scaffold_stat, etc.)"]
-        Diagnostics["Diagnostics & Validation\n(scripts/diagnostics/: validate_mod, check_mod_conflicts, etc.)"]
-        LibraryPkg["Library & mod.io Integration\n(scripts/library/: modio_search, modio_extract, etc.)"]
-        Management["Management & Load Order\n(scripts/management/: manage_load_order, bump_version, etc.)"]
-        Packaging["Binary Packaging & Sync\n(scripts/packaging/: pack_mod_pak, sync_game_data)"]
-        Theorycrafting["Theorycrafting Engine\n(scripts/theorycrafting/: simulate_build_synergy)"]
+    subgraph Tier2["2. Automation & Tooling Tier (packages/bg3-*)"]
+        CLI["Unified CLI & Router\n(packages/bg3-core: bg3 -> ~/.local/bin/bg3)"]
+        Registry["Tooling Catalog & Discovery\n(packages/bg3-core: registry.json & tools.py - 59 tools)"]
+        CorePkg["bg3-core Engine Package\n(parsers, lspk, env_paths, modio, registry)"]
+        AuthoringPkg["bg3-authoring Studio Package\n(scaffolding, diagnostics, packaging, sync)"]
+        TheorycraftPkg["bg3-theorycraft Studio Package\n(character builder, combat simulator, synergies)"]
     end
 
-    subgraph Tier3["3. Workspace State & Data Tier"]
-        MyMods["Custom Mods Workspace\n(my_mods/<mod-slug>/)"]
-        ModsLib["Community Mod Library\n(mods/library.md & specs)"]
-        Sandboxes["Theorycrafting Sandbox\n(build_guides/)"]
+    subgraph Tier3["3. Workspace State & External Studio Tier"]
+        MyMods["Custom Authored Mods\n($XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/<slug>/)"]
+        ModsLib["Community Mod Library\n($XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/subscribed/library.md)"]
+        Sandboxes["Theorycrafting Sandbox\n($XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Build_Guides/)"]
         XDGConfig["XDG Base Directory Spec\n(~/.config/bg3/env [0600], ~/.cache/bg3/)"]
     end
 
@@ -46,24 +42,20 @@ flowchart TD
 
     Tier1 -->|Routes or executes| CLI
     CLI --> Registry
-    CLI --> SharedLib
-    CLI --> Authoring
-    CLI --> Diagnostics
-    CLI --> LibraryPkg
-    CLI --> Management
-    CLI --> Packaging
-    CLI --> Theorycrafting
+    CLI --> CorePkg
+    CLI --> AuthoringPkg
+    CLI --> TheorycraftPkg
 
-    Authoring -->|Generates source| MyMods
-    Packaging -->|Mirrors source & compiled .loca| GameData
-    Packaging -->|Compiles package| Distribution
-    Diagnostics -->|Linters & audits| MyMods
-    Diagnostics -->|Inspects load order & saves| ProfileSettings
-    LibraryPkg -->|Queries & updates metadata| ModioRemote
-    LibraryPkg -->|Extracts & indexes| ModsLib
-    LibraryPkg -->|Fuzzy search / BiS| ModsLib
-    Tier1 -->|Streams matrices| Sandboxes
-    Management -->|Resolves paths & secrets| XDGConfig
+    AuthoringPkg -->|Generates source| MyMods
+    AuthoringPkg -->|Mirrors source & compiled .loca| GameData
+    AuthoringPkg -->|Compiles package| Distribution
+    AuthoringPkg -->|Linters & audits| MyMods
+    AuthoringPkg -->|Inspects load order & saves| ProfileSettings
+    CorePkg -->|Queries & updates metadata| ModioRemote
+    CorePkg -->|Extracts & indexes| ModsLib
+    CorePkg -->|Fuzzy search / BiS| ModsLib
+    TheorycraftPkg -->|Streams matrices| Sandboxes
+    CorePkg -->|Resolves paths & secrets| XDGConfig
 ```
 
 ---
@@ -121,13 +113,13 @@ When exploring community mods on mod.io, the ingestion pipeline decompresses ups
 
 ```mermaid
 flowchart LR
-    Remote["mod.io REST API\n(v1/games/6715)"] -->|bg3 modio search\n(scripts/library/modio_search.py)| SearchResults["Candidate Mod\n(Platform Filtered)"]
-    SearchResults -->|bg3 modio extract\n(scripts/library/modio_extract.py)| DL["Download Archive\n(.pak / .zip)"]
-    DL --> Extract["Pure-Python Unpacker\n(scripts/lib/lspk.py)"]
-    Extract --> Parse["Larian Engine Parsers\n(scripts/lib/larian_parsers.py)"]
+    Remote["mod.io REST API\n(v1/games/6715)"] -->|bg3 modio search\n(bg3_core.modio_search)| SearchResults["Candidate Mod\n(Platform Filtered)"]
+    SearchResults -->|bg3 modio extract\n(bg3_core.modio_extract)| DL["Download Archive\n(.pak / .zip)"]
+    DL --> Extract["Pure-Python Unpacker\n(bg3_core.lspk)"]
+    Extract --> Parse["Larian Engine Parsers\n(bg3_core.parsers)"]
     Parse --> Specs["Mods/subscribed/<slug>/README.md\n(Rich Markdown Spec)"]
     Parse --> Index["Master Catalog\n(Mods/subscribed/library.md: six columns)"]
-    Index --> FastDB["bg3 query\n(scripts/library/query_mod_database.py)"]
+    Index --> FastDB["bg3 query\n(bg3_core.query_mod_database)"]
 ```
 
 ---
@@ -166,7 +158,7 @@ BG3_Mod_Studio/Mods/authored/<mod-slug>/
 
 ### Larian 64-bit Version Encoding (`Version64`)
 
-Larian's engine encodes semantic versioning into an unsigned 64-bit integer (`Version64`) using bitwise shifts. The formula implemented by `scripts/lib/larian_parsers.py` and utilized by `scripts/authoring/create_mod_scaffold.py` (`bg3 mod scaffold`) and `scripts/management/bump_mod_version.py` (`bg3 mod bump-version`) is:
+Larian's engine encodes semantic versioning into an unsigned 64-bit integer (`Version64`) using bitwise shifts. The formula implemented by `bg3_core.parsers` and utilized by `bg3_authoring.create_mod_scaffold` (`bg3 mod scaffold`) and `bg3_authoring.bump_mod_version` (`bg3 mod bump-version`) is:
 
 $$\text{Version64} = (\text{major} \ll 55) \mid (\text{minor} \ll 47) \mid (\text{revision} \ll 31) \mid \text{build}$$
 
@@ -180,7 +172,7 @@ $$\text{Version64} = (\text{major} \ll 55) \mid (\text{minor} \ll 47) \mid (\tex
 
 ### Pure-Python LSPK v18 Binary Packaging (`pack_mod_pak.py` / `lspk.py`)
 
-Rather than relying on Windows-exclusive binaries (`LSLib/divine.exe`) or running through `wine`, the workspace implements a pure Python packager for Larian's **LSPK v18** format in `scripts/packaging/pack_mod_pak.py` and `scripts/lib/lspk.py` (`bg3 mod pack`):
+Rather than relying on Windows-exclusive binaries (`LSLib/divine.exe`) or running through `wine`, the workspace implements a pure Python packager for Larian's **LSPK v18** format in `packages/bg3-authoring/bg3_authoring/pack_mod_pak.py` and `packages/bg3-core/bg3_core/lspk.py` (`bg3 mod pack`):
 
 - **Zero External Dependencies**: Implemented strictly with Python's standard library `struct`, `zlib`, and `hashlib`.
 - **Package Header**: Writes standard 128-byte LSPK v18 signature (`LSPK`), file version, and file table metadata offset.
@@ -194,13 +186,13 @@ Rather than relying on Windows-exclusive binaries (`LSLib/divine.exe`) or runnin
 
 ### Idempotent Selective Synchronization (`sync_game_data.py`)
 
-The live synchronization system (`scripts/packaging/sync_game_data.py` / `bg3 mod sync-game`) mirrors source files from `my_mods/<mod-slug>/` into the game installation directory (`Baldurs Gate 3/Data/`) for in-engine testing:
+The live synchronization system (`packages/bg3-authoring/bg3_authoring/sync_game_data.py` / `bg3 mod sync-game`) mirrors source files from `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/<mod-slug>/` into the game installation directory (`Baldurs Gate 3/Data/`) for in-engine testing:
 
 1. **Selective Root Mapping**:
-   - `my_mods/<mod-slug>/Mods/<ModName>_<UUID>/` $\to$ `Data/Mods/<ModName>_<UUID>/`
-   - `my_mods/<mod-slug>/Projects/<ModName>_<UUID>/` $\to$ `Data/Projects/<ModName>_<UUID>/`
-   - `my_mods/<mod-slug>/Public/<ModName>_<UUID>/` $\to$ `Data/Public/<ModName>_<UUID>/`
-   - `my_mods/<mod-slug>/Localization/` $\to$ `Data/Localization/` and `Data/Mods/<ModName>_<UUID>/Localization/`
+   - `Mods/authored/<mod-slug>/Mods/<ModName>_<UUID>/` $\to$ `Data/Mods/<ModName>_<UUID>/`
+   - `Mods/authored/<mod-slug>/Projects/<ModName>_<UUID>/` $\to$ `Data/Projects/<ModName>_<UUID>/`
+   - `Mods/authored/<mod-slug>/Public/<ModName>_<UUID>/` $\to$ `Data/Public/<ModName>_<UUID>/`
+   - `Mods/authored/<mod-slug>/Localization/` $\to$ `Data/Localization/` and `Data/Mods/<ModName>_<UUID>/Localization/`
 2. **Differential Comparison Engine**:
    - Compares file metadata (modification times and sizes) and evaluates content differences using `filecmp.cmp(shallow=False)` before writing.
    - Prevents unnecessary write cycles and reduces disk I/O when working with solid-state drives or network storage.
@@ -212,28 +204,28 @@ The live synchronization system (`scripts/packaging/sync_game_data.py` / `bg3 mo
 
 ### Master Mod Indexing & Database Queries (`query_mod_database.py`)
 
-The community mod library (`mods/`) indexes over 2,200 unique community gear items, passives, spells, and boosts:
+The community mod library indexes over 2,200 unique community gear items, passives, spells, and boosts:
 
-- **Aggregation Pipeline**: `scripts/library/update_library_catalog.py` (`bg3 modio update-catalog`) crawls all `mods/<slug>/README.md` files, parses mod.io IDs, titles, descriptions, feature counts, and directory slugs, and compiles the categorized six-column `mods/library.md` with relative spec links.
-- **Query Optimization**: `scripts/library/query_mod_database.py` (`bg3 query`) evaluates queries against cached catalog structures using in-memory tokenization and regex matching. Lookups complete in under 10ms, allowing agent workflows to perform real-time Best-in-Slot gear evaluation without noticeable latency.
+- **Aggregation Pipeline**: `packages/bg3-core/bg3_core/update_library_catalog.py` (`bg3 modio update-catalog`) crawls all `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/subscribed/<slug>/README.md` files, parses mod.io IDs, titles, descriptions, feature counts, and directory slugs, and compiles the categorized six-column `library.md` with relative spec links.
+- **Query Optimization**: `packages/bg3-core/bg3_core/query_mod_database.py` (`bg3 query`) evaluates queries against cached catalog structures using in-memory tokenization and regex matching. Lookups complete in under 10ms, allowing agent workflows to perform real-time Best-in-Slot gear evaluation without noticeable latency.
 
 ---
 
 ## 5. Architectural Principles & Isolation
 
-- **Zero-Dependency Philosophy**: All 30 automation tools across 6 domain packages in `scripts/` (and the `scripts/bg3.py` CLI router) use strictly the Python 3.10+ standard library. They run out-of-the-box on Linux, WSL, and Windows without virtual environment setups or `pip install` requirements.
+- **Zero-Dependency Philosophy**: All 59 canonical automation tools across the 3 modular workspace packages (`bg3-core`, `bg3-authoring`, `bg3-theorycraft`) and the unified `bg3` CLI entry point use strictly the Python 3.10+ standard library. They run out-of-the-box on Linux, WSL, and Windows without virtual environment setups or `pip install` requirements.
 - **Unified 2026 CLI Suite (`bg3`)**:
   - Symlinked to `~/.local/bin/bg3` via `setup.sh`.
   - Implements modern Dual-Channel stream discipline: rich, high-signal human-readable formatting in interactive terminals, and pristine, machine-parsable JSON on `stdout` when `--json` is supplied or non-interactive pipes are detected.
-  - Standardizes POSIX exit codes, non-interactive confirmation guards (`--yes` / `--confirm`), and centralized tool schema registry (`scripts/registry.json`).
+  - Standardizes POSIX exit codes, non-interactive confirmation guards (`--yes` / `--confirm`), and centralized tool schema registry (`packages/bg3-core/bg3_core/registry.json`).
 - **Safe Sandboxing & Clean-Room Isolation**:
-  - Custom authored mods remain safe in `my_mods/` and tracked by version control.
+  - Custom authored mods remain safe in `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/` and tracked by version control.
   - **Dependency Isolation**: Permanent dependencies live in `meta.lsx`, while test-only dependencies live in `.test_deps.json` (`bg3 mod add-dependency <slug> --test`).
   - **Clean-Room Testing**: `bg3 loadorder isolate <slug>` isolates the target mod and its closure in `modsettings.lsx`, disabling all unrelated mods during smoke verification.
-  - Theorycrafting scratchpads reside in `build_guides/` and are explicitly excluded from Git to prevent repository bloat.
+  - Theorycrafting scratchpads reside in `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Build_Guides/` and are explicitly excluded from Git to prevent repository bloat.
   - Backup copies (`.bak`) are created automatically whenever localization handles or `modsettings.lsx` orders are mutated.
 - **XDG Base Directory Compliance & Path Portability**:
-  - Fully compliant with the **XDG Base Directory Specification** via `scripts/lib/env_paths.py`.
+  - Fully compliant with the **XDG Base Directory Specification** via `packages/bg3-core/bg3_core/env_paths.py`.
   - Credentials and environment variables are stored in `$XDG_CONFIG_HOME/bg3/env` (default: `~/.config/bg3/env`) with strict POSIX mode `0600` file permissions.
   - Application caches and temporary artifacts resolve to `$XDG_CACHE_HOME/bg3/` (default: `~/.cache/bg3/`).
   - In-repo `.env` and `.cache` files are completely eliminated from lookup hierarchies.

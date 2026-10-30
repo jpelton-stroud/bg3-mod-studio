@@ -7,7 +7,7 @@ Before authoring, walk down each branch of the mod design tree one question at a
 2. **Branch B (Classes & Progression)**: Target classes/subclasses, level bounds (1-12 vanilla vs. 13-20 `UnlockLevelCurve`), progression unlock levels.
 3. **Branch C (Spells, Passives & Abilities)**: Action economy (Action, Bonus Action, Reaction), resource costs (Spell slots, Ki, Charges), damage/status effects.
 4. **Branch D (Parent Dependencies)**: Base game only (`GustavDev`), `UnlockLevelCurve` (`a2ffd0e4-c407-8642-2611-c934ea0b0a77`), or cataloged community mods in `mods/library.md`.
-5. **Branch E (In-Game Acquisition & Item Drops)**: Container drop locations (Tutorial Chest, Camp Chest, vendors like Arron or Dammon) for `scripts/authoring/inject_treasure_table.py`.
+5. **Branch E (In-Game Acquisition & Item Drops)**: Container drop locations (Tutorial Chest, Camp Chest, vendors like Arron or Dammon) for `bg3 mod inject-treasure`.
 
 ### Interview Formatting
 - List recommended option first with `(Recommended)`.

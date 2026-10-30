@@ -7,9 +7,9 @@ assignees: ''
 ---
 
 **Request Type**
-- [ ] Document new mod.io mod in `mods/` & `mods/library.md`
-- [ ] Tooling or CLI script improvement
-- [ ] New mod feature in `my_mods/`
+- [ ] Document new mod.io mod in `Mods/subscribed/` & `Mods/subscribed/library.md`
+- [ ] Tooling or CLI improvement
+- [ ] New mod feature in `Mods/authored/`
 - [ ] Agent skill enhancement
 
 **Target Mod Information (if mod documentation request)**

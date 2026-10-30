@@ -49,7 +49,6 @@ desktop.ini
 
 # Scratch / temporary experimental folders
 scratch/
-docs/DESIGN.md
 
 # Externalized User Content (Ignore any local studio folders or accidental spills)
 build_guides/

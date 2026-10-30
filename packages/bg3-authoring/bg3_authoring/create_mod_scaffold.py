@@ -28,6 +28,7 @@ import sys
 import uuid
 import zlib
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from bg3_core.env_paths import get_authored_mods_dir, load_env_file
 from bg3_core.larian_parsers import calculate_version64, generate_larian_handle
@@ -35,35 +36,6 @@ from bg3_core.mod_resolver import KNOWN_DEPENDENCIES, resolve_dependency_metadat
 
 
 README_TEMPLATE_PATH = Path(__file__).resolve().parent / "templates" / "custom_mod_readme.md"
-
-
-# Known common dependencies for BG3 (Patch 8)
-KNOWN_DEPENDENCIES = {
-    "GustavX": {
-        "Folder": "GustavX",
-        "MD5": "ef3fcba3f3684b3088ad1f9874d4957c",
-        "Name": "GustavX",
-        "PublishHandle": 0,
-        "UUID": "cb555efe-2d9e-131f-8195-a89329d218ea",
-        "Version64": 145241946983300916,
-    },
-    "GustavDev": {
-        "Folder": "GustavDev",
-        "MD5": "33c1655f7ae3559b579ff3b9d2c45413",
-        "Name": "GustavDev",
-        "PublishHandle": 0,
-        "UUID": "28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8",
-        "Version64": 145100393449790344,
-    },
-    "UnlockLevelCurve": {
-        "Folder": "UnlockLevelCurve_a2ffd0e4-c407-8642-2611-c934ea0b0a77",
-        "MD5": "f94d034502139cf8b65a1597554e7236",
-        "Name": "UnlockLevelCurve",
-        "PublishHandle": 4166963,
-        "UUID": "a2ffd0e4-c407-8642-2611-c934ea0b0a77",
-        "Version64": 72057594037927960,
-    },
-}
 
 
 def sanitize_mod_name(name: str) -> str:
@@ -97,17 +69,6 @@ def generate_uuid() -> str:
 def generate_handle() -> str:
     """Generates a standard Larian localization handle (h...g...g...g...g...)."""
     return generate_larian_handle()
-
-
-def calculate_version64(major: int = 1, minor: int = 0, revision: int = 0, build: int = 0) -> int:
-    """
-    Encodes major.minor.revision.build into Larian's 64-bit version integer:
-    - major: bits 55..63 (9 bits)
-    - minor: bits 47..54 (8 bits)
-    - revision: bits 31..46 (16 bits)
-    - build: bits 0..30 (31 bits)
-    """
-    return (major << 55) | (minor << 47) | (revision << 31) | (build & 0x7FFFFFFF)
 
 
 def generate_png_bytes(width: int = 512, height: int = 512, r: int = 45, g: int = 52, b: int = 64) -> bytes:

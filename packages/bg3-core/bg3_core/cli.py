@@ -1095,7 +1095,7 @@ def build_parser() -> argparse.ArgumentParser:
     # -------------------------------------------------------------------------
     run_parser = subparsers.add_parser(
         "run",
-        help="Execute any studio automation script from scripts/ with stream discipline",
+        help="Execute any registered studio automation tool or legacy alias with stream discipline",
         parents=[common_parser],
     )
     run_parser.add_argument(

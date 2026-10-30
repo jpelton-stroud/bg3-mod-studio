@@ -25,65 +25,71 @@ All contributors are expected to uphold our [Code of Conduct](CODE_OF_CONDUCT.md
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/<your-account>/BaldursGate3.git
-   cd BaldursGate3
+   git clone https://github.com/jpelton-stroud/bg3-mod-studio.git
+   cd bg3-mod-studio
    ```
-2. **Run the Setup Wizard**:
+2. **Synchronize Workspace Dependencies & Install Tools**:
+   This project is organized as a modular `uv` workspace with zero heavy external runtime dependencies.
    ```bash
+   uv sync
    ./setup.sh
    ```
-   This will prompt you for your `MODIO_API_KEY`, optional `MODIO_PAT`, the path to your BG3 `Data` folder (`BG3_DATA_DIR`), and your default author handle (`BG3_MOD_AUTHOR`).
-3. **Verify Python Environment**:
-   This project uses Python 3.10+ standard library. No external pip dependencies are required.
+   This will prompt you for your `MODIO_API_KEY`, optional `MODIO_PAT`, your BG3 `Data` directory, default author handle, and your Studio Document workspace directory.
+3. **Run Automated Test Suite & Verification**:
    ```bash
-   python3 -m py_compile scripts/*.py
+   uv run python -m unittest discover tests
+   uv run bg3 tools verify --audit-skills
    ```
 
 ---
 
 ## Repository Architecture
 
-- `scripts/`: Pure Python automation tools for scaffolding, syncing, searching, and extracting mods.
-- `my_mods/`: Source directory for custom authored mods (contains `Projects/`, `Mods/<UUID>/`, `Public/`, and `Localization/`).
-- `mods/`: Curated reference mod documentation specifications extracted from mod.io. Tracked mods are listed in `mods/library.md`.
-- `build_guides/`: Local sandbox for theorycrafting level 20 builds (contents ignored in Git by default).
-- `.agents/skills/`: Agent skill instructions for autonomous workflows.
+- `packages/bg3-core/`: Core runtime, unified CLI router, pure Python LSPK packager, mod.io REST client, and XDG environment resolution.
+- `packages/bg3-authoring/`: Mod scaffolding, XML/LSX AST parsers, binary localization compilers, conflict analysis, and diagnostics.
+- `packages/bg3-theorycraft/`: Level 1–20 multiclass simulation, spell slot calculations, and combat DPR sequence theorycrafting.
+- `.agents/skills/`: 15 Antigravity agent skills symlinked from package resources for autonomous workflows.
+- `tests/`: Comprehensive integration and unit test suite across all workspace packages.
+
+User-authored mods, subscribed mod archives, and build guides reside in your externalized Studio directory (`$XDG_DOCUMENTS_DIR/BG3_Mod_Studio`), keeping git history clean.
 
 ---
 
 ## Mod Authoring Standards
 
-When submitting or creating custom mods in `my_mods/`:
+When authoring custom mods:
 - **Naming Conventions**: Use PascalCase or CamelCase for mod directory names and metadata (e.g., `ArcaneProgression`).
-- **Scaffolding Tool**: Always generate mod structure using `scripts/create_mod_scaffold.py`:
+- **Scaffolding Tool**: Always generate mod structures using `bg3 mod create`:
   ```bash
-  python3 scripts/create_mod_scaffold.py --name "MyMod" --description "Summary of mod"
+  bg3 mod create "MyMod" --description "Summary of mod"
   ```
 - **Metadata**: Ensure valid Larian Version64 integers and standard UUIDv4 identifiers in `meta.lsx`.
 - **Localization**: Never hardcode user-facing strings into stats or progression entries. Use generated handles linked to `Localization/English/<mod_name>.xml`.
-- **Asset Dimensions**: Placeholders and custom logos should adhere to standard sizes (512x512 PNG for project thumbnails).
+- **Validation**: Validate mod schemas before testing or packaging:
+  ```bash
+  bg3 mod validate --mod my-mod
+  ```
 
 ---
 
 ## Mod Documentation & mod.io Standards
 
-When adding or updating reference mod specifications in `mods/`:
+When adding or updating reference mod specifications in your subscribed mod library:
 - Each mod documentation directory must include a `README.md` containing:
   - Mod Overview & Mod.io Metadata
   - System Architecture & Prerequisites
   - In-Game Items & Stat Definitions
   - Spells, Passives & Status Effects
   - Progression Trees & Unlocks
-- Include the verified mod.io ID, slug, and implemented-feature count in the generated spec metadata; never invent an unknown ID.
-- Run `python3 scripts/update_library_catalog.py --write` to register or refresh the mod under the relevant category in `mods/library.md`. Each row uses Mod Id, Mod Name, Mod Slug, Description, Features Documented, and Spec Link; unknown IDs stay blank until verified.
+- Run `bg3 modio update-catalog --write` to register or refresh the mod under the relevant category in `mods/library.md`. Each row uses Mod Id, Mod Name, Mod Slug, Description, Features Documented, and Spec Link; unknown IDs stay blank until verified.
 
 ---
 
 ## Commit & Pull Request Conventions
 
 We adhere to the [Conventional Commits](https://www.conventionalcommits.org/) specification:
-- `feat:` A new script, tool, mod scaffold, or documentation feature.
-- `fix:` A bug fix in existing scripts or mod definitions.
+- `feat:` A new tool, mod scaffold, or workspace feature.
+- `fix:` A bug fix in existing packages or schema definitions.
 - `docs:` Documentation changes only.
 - `refactor:` Code changes that neither fix a bug nor add a feature.
 - `test:` Adding or updating verification tests.
@@ -91,6 +97,7 @@ We adhere to the [Conventional Commits](https://www.conventionalcommits.org/) sp
 
 ### Submitting a Pull Request
 1. Fork the repo and create a feature branch (`git checkout -b feat/my-new-feature`).
-2. Verify all python scripts compile cleanly (`python3 -m py_compile scripts/*.py`).
-3. Fill out the pull request template completely.
-4. Ensure your PR description links any relevant issues.
+2. Run the test suite: `uv run python -m unittest discover tests`.
+3. Verify tool registry integrity: `uv run bg3 tools verify --audit-skills`.
+4. Fill out the pull request template completely.
+5. Ensure your PR description links any relevant issues.

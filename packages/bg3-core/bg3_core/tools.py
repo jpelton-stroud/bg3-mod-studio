@@ -384,12 +384,12 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python3 scripts/tools.py --list
-  python3 scripts/tools.py --list --category authoring
-  python3 scripts/tools.py --search "stat handles"
-  python3 scripts/tools.py --info scaffold_stat_entry
-  python3 scripts/tools.py --verify
-  python3 scripts/tools.py run scaffold-stat --mod arcane --type weapon --name Blade --json
+  bg3 tools list
+  bg3 tools list --category authoring
+  bg3 tools search "stat handles"
+  bg3 tools info scaffold stat
+  bg3 tools verify
+  bg3 tools verify --audit-skills
         """
     )
     parser.add_argument("--list", action="store_true", help="List all registered tools in the studio")
@@ -413,7 +413,7 @@ Examples:
     # Route positional subcommand if provided
     if args.subcommand == "run":
         if not args.tool_name:
-            print("Error: Missing tool name to run. E.g. 'python3 scripts/tools.py run scaffold-stat [args...]'", file=sys.stderr)
+            print("Error: Missing tool name to run. E.g. 'bg3 tools run <command> [args...]'", file=sys.stderr)
             sys.exit(1)
         sys.exit(dispatch_run(registry, args.tool_name, args.extra_args))
     elif args.subcommand == "list":
@@ -525,7 +525,7 @@ Examples:
                 for r in results
             ]
             print(format_table(rows, ["Command", "Category", "Summary", "Score"]))
-            print(f"\nTip: Run 'python3 scripts/tools.py --info <command>' for full flag specifications.\n")
+            print(f"\nTip: Run 'bg3 tools info <command>' for full flag specifications.\n")
         return
 
     # 5. List
@@ -554,7 +554,7 @@ Examples:
                 for t in tools
             ]
             print(format_table(rows, ["Command", "Script Name", "Category", "Summary"]))
-            print(f"\nTip: Run 'python3 scripts/tools.py --search \"<intent>\"' or '--info <command>' for flags.\n")
+            print(f"\nTip: Run 'bg3 tools search \"<intent>\"' or 'bg3 tools info <command>' for flags.\n")
         return
 
 
