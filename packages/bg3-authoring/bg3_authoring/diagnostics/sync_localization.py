@@ -10,8 +10,6 @@ missing keys, and generate foreign language translation skeletons.
 import argparse
 import datetime
 import json
-import os
-import re
 import shutil
 import sys
 import xml.etree.ElementTree as ET
@@ -168,7 +166,7 @@ def compile_mod_localization(mod_dir: Path, dry_run: bool = False) -> list[str]:
     return compiled
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Audit, prune orphaned string handles, compile binary .loca files, and sync multi-language localization XMLs."
     )
@@ -205,7 +203,7 @@ def main():
 
         synced_files = []
         if args.sync_languages:
-            langs = [l.strip() for l in args.sync_languages.split(",") if l.strip()]
+            langs = [lang.strip() for lang in args.sync_languages.split(",") if lang.strip()]
             synced_files = sync_language_skeletons(mod_dir, xml_file, langs, dry_run=args.dry_run)
 
         compiled_files = []
@@ -257,12 +255,12 @@ def main():
                 print(f"\n[✓] Pruned {pruned_count} orphan handle(s) from XML{dry_str}.")
 
             if synced_files:
-                print(f"\n[✓] Synchronized language skeletons:")
+                print("\n[✓] Synchronized language skeletons:")
                 for sf in synced_files:
                     print(f"    - {sf}")
 
             if compiled_files:
-                print(f"\n[✓] Compiled binary .loca files:")
+                print("\n[✓] Compiled binary .loca files:")
                 for cf in compiled_files:
                     print(f"    - {cf}")
 

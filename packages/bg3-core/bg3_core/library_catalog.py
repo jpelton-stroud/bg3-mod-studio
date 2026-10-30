@@ -1,12 +1,11 @@
 """Shared parsing, catalog queries, pruning, and directory utilities for community mod libraries."""
 
-import os
 import re
 import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
-from .env_paths import MODS_DIR, REPO_ROOT, get_subscribed_mods_dir, normalize_mod_key
+from .env_paths import REPO_ROOT, get_subscribed_mods_dir, normalize_mod_key
 
 LIBRARY_COLUMNS = (
     "Mod Id",

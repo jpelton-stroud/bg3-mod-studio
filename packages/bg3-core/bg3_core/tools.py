@@ -440,7 +440,7 @@ def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) ->
                 broken_links.append(f"[{text}]({target}) [file not found: {clean_path}]")
 
         if broken_links:
-            all_broken_links.extend([f"{skill_name}: {l}" for l in broken_links])
+            all_broken_links.extend([f"{skill_name}: {item}" for item in broken_links])
 
         # 5. Model inheritance check
         invalid_models = []
@@ -505,7 +505,7 @@ def format_table(rows: List[List[str]], headers: List[str]) -> str:
     return f"{header_line}\n{sep_line}\n" + "\n".join(row_lines)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Baldur's Gate 3 Mod Studio — Tooling Registry & CLI Discovery Hub",
         formatter_class=argparse.RawDescriptionHelpFormatter,

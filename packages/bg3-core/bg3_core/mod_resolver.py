@@ -11,24 +11,16 @@ Resolution Priority:
 """
 
 import io
-import json
-import os
 import re
 import shutil
-import sys
 import zipfile
-import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence
 
 from .env_paths import (
-    MODS_DIR,
-    MY_MODS_DIR,
-    REPO_ROOT,
     detect_bg3_appdata_dirs,
     detect_data_dir,
     get_authored_mods_dir,
-    get_env_var,
     get_subscribed_mods_dir,
     normalize_mod_key,
 )

@@ -2,10 +2,11 @@
 
 import ctypes
 import io
+import mmap
 import struct
 import zlib
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 _LIBZSTD = None
 for _libname in ("libzstd.so.1", "libzstd.so", "libzstd.dylib", "libzstd.dll"):
@@ -44,7 +45,7 @@ for _libname in ("liblz4.so.1", "liblz4.so", "liblz4.dylib", "liblz4.dll"):
 
 def lz4_block_compress(data: bytes) -> bytes:
     """Compress data using standard LZ4 raw block format.
-    
+
     Uses system liblz4 via ctypes if available, otherwise falls back to a valid
     pure-Python LZ4 literal block.
     """
@@ -56,12 +57,12 @@ def lz4_block_compress(data: bytes) -> bytes:
             return dst.raw[:comp_len]
 
     # Pure-Python fallback: encodes a single LZ4 block containing literals without match tokens
-    l = len(data)
-    if l == 0:
+    data_len = len(data)
+    if data_len == 0:
         return b""
-    token_lit = min(15, l)
+    token_lit = min(15, data_len)
     out = bytearray([token_lit << 4])
-    rem = l - 15
+    rem = data_len - 15
     while rem >= 0:
         if rem >= 255:
             out.append(255)
@@ -167,7 +168,7 @@ def lz4_frame_or_block_decompress(compressed_data: bytes, uncompressed_size: int
 
 
 def decompress_pak_file_data(
-    pak_bytes: bytes, offset: int, disk_size: int, uncomp_size: int, flags: int
+    pak_bytes: bytes | mmap.mmap, offset: int, disk_size: int, uncomp_size: int, flags: int
 ) -> bytes:
     """Decompress file data from pak archive based on compression flags."""
     raw = pak_bytes[offset : offset + disk_size]
@@ -199,14 +200,49 @@ class LspkArchive:
     """LSPK v18 package reader supporting both .pak mod archives and .lsv save files."""
 
     @classmethod
-    def open(cls, path: str | Path) -> "LspkArchive":
-        """Read and construct an LspkArchive from a file path."""
-        return cls(Path(path).read_bytes())
+    def open(cls, path: str | Path, use_mmap: bool = True) -> "LspkArchive":
+        """Open and construct an LspkArchive from a file path using zero-copy memory mapping."""
+        p = Path(path)
+        if use_mmap:
+            f = p.open("rb")
+            try:
+                mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+                inst = cls(mm)
+                inst._file_obj = f
+                inst._mmap_obj = mm
+                return inst
+            except Exception:
+                f.close()
+                raise
+        return cls(p.read_bytes())
 
-    def __init__(self, data_bytes: bytes):
-        self.data = data_bytes
+    def __init__(self, data_bytes: bytes | mmap.mmap):
+        self.data: bytes | mmap.mmap = data_bytes
         self.files: list[dict[str, Any]] = []
+        self._file_obj: Any = None
+        self._mmap_obj: Any = None
         self._parse_header_and_filelist()
+
+    def close(self) -> None:
+        """Close memory-mapped buffer and underlying file descriptor if open."""
+        if self._mmap_obj is not None:
+            try:
+                self._mmap_obj.close()
+            except Exception:
+                pass
+            self._mmap_obj = None
+        if self._file_obj is not None:
+            try:
+                self._file_obj.close()
+            except Exception:
+                pass
+            self._file_obj = None
+
+    def __enter__(self) -> "LspkArchive":
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        self.close()
 
     def _parse_header_and_filelist(self) -> None:
         if len(self.data) < 40 or self.data[:4] != b"LSPK":

@@ -5,9 +5,9 @@ into the official files of my_mods/arcane-progression/.
 """
 
 import json
-import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 MOD_DIR = Path("my_mods/arcane-progression")
 STAGING_DIR = MOD_DIR / ".staging"
@@ -17,12 +17,12 @@ PROGRESSIONS_LSX = PUBLIC_DIR / "Progressions" / "Progressions.lsx"
 PROGRESSION_DESCRIPTIONS_LSX = PUBLIC_DIR / "Progressions" / "ProgressionDescriptions.lsx"
 STATS_DIR = PUBLIC_DIR / "Stats" / "Generated" / "Data"
 
-def merge_localization(staging_data, xml_path):
+def merge_localization(staging_data: dict[str, Any], xml_path: Path) -> None:
     print("Merging localization...")
     tree = ET.parse(xml_path)
     root = tree.getroot()
     existing_uids = {c.get("contentuid") for c in root.findall("content")}
-    
+
     added = 0
     for file_name, d in staging_data.items():
         loc = d.get("localization", [])
@@ -47,13 +47,20 @@ def merge_localization(staging_data, xml_path):
                     elem.text = text
                     existing_uids.add(uid)
                     added += 1
-                    
+
     # Pretty indent
     ET.indent(tree, space="  ", level=0)
     tree.write(xml_path, encoding="utf-8", xml_declaration=True)
     print(f"Added {added} localization strings to {xml_path}")
 
-def format_stat_entry(entry_type, name, data, using=None, spell_type=None, status_type=None):
+def format_stat_entry(
+    entry_type: str,
+    name: str,
+    data: dict[str, Any],
+    using: str | None = None,
+    spell_type: str | None = None,
+    status_type: str | None = None,
+) -> str:
     lines = [f'new entry "{name}"', f'type "{entry_type}"']
     if using:
         lines.append(f'using "{using}"')
@@ -67,7 +74,7 @@ def format_stat_entry(entry_type, name, data, using=None, spell_type=None, statu
         lines.append(f'data "{k}" "{v}"')
     return "\n".join(lines) + "\n\n"
 
-def append_stats_file(file_path, entries_text):
+def append_stats_file(file_path: Path, entries_text: str) -> None:
     if not entries_text.strip():
         return
     with open(file_path, "r", encoding="utf-8") as f:
@@ -87,7 +94,7 @@ def append_stats_file(file_path, entries_text):
             f.write(new_text)
         print(f"Appended new entries to {file_path}")
 
-def merge_stats(staging_data):
+def merge_stats(staging_data: dict[str, Any]) -> None:
     print("Merging stats files...")
     passives_text = ""
     statuses_text = ""
@@ -124,7 +131,7 @@ def merge_stats(staging_data):
             stype = sp.get("spell_type") or sp.get("data", {}).get("SpellType")
             sname = sp.get("name")
             text = sp.get("raw") + "\n\n" if ("raw" in sp and sp["raw"]) else format_stat_entry(sp.get("type", "SpellData"), sname, sp.get("data", {}), using=sp.get("using"), spell_type=stype)
-            
+
             if stype == "Shout" or sname.startswith("Shout_"):
                 shouts_text += text
             elif stype == "Target" or sname.startswith("Target_"):
@@ -144,7 +151,7 @@ def merge_stats(staging_data):
     append_stats_file(STATS_DIR / "Spell_Zone.txt", zones_text)
     append_stats_file(STATS_DIR / "Spell_Projectile.txt", projectiles_text)
 
-def create_progression_node(parent_children, pdict):
+def create_progression_node(parent_children: ET.Element, pdict: dict[str, Any]) -> None:
     node = ET.SubElement(parent_children, "node", id="Progression")
     for key, val in pdict.items():
         if key in ("xml", "raw_xml"):
@@ -163,7 +170,7 @@ def create_progression_node(parent_children, pdict):
             attr.set("type", "LSString")
             attr.set("value", str(val))
 
-def create_progression_desc_node(parent_children, pdict):
+def create_progression_desc_node(parent_children: ET.Element, pdict: dict[str, Any]) -> None:
     node = ET.SubElement(parent_children, "node", id="ProgressionDescription")
     for key, val in pdict.items():
         if key in ("xml", "raw_xml"):
@@ -184,7 +191,7 @@ def create_progression_desc_node(parent_children, pdict):
             attr.set("type", "LSString")
             attr.set("value", str(val))
 
-def merge_lsx(staging_data):
+def merge_lsx(staging_data: dict[str, Any]) -> None:
     print("Merging Progressions.lsx...")
     tree = ET.parse(PROGRESSIONS_LSX)
     root = tree.getroot()
@@ -270,7 +277,7 @@ def merge_lsx(staging_data):
     dtree.write(PROGRESSION_DESCRIPTIONS_LSX, encoding="utf-8", xml_declaration=True)
     print(f"Added {added_descs} progression descriptions to {PROGRESSION_DESCRIPTIONS_LSX}")
 
-def main():
+def main() -> None:
     staging_data = {}
     for name in ["martials", "divine", "arcane"]:
         fpath = STAGING_DIR / f"{name}.json"

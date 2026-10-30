@@ -6,7 +6,6 @@ Unit tests for mod.io library sync pruning, folder resolution, orphan detection,
 and safe batch folder deletion.
 """
 
-import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -214,7 +213,7 @@ class ModioSyncTests(unittest.TestCase):
         orphan_folder = self.mods_dir / "orphan-folder"
         orphan_folder.mkdir()
 
-        results = sync_library(
+        _ = sync_library(
             oauth_token="fake_token",
             api_key="fake_key",
             dry_run=False,

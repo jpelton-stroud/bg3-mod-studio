@@ -1,8 +1,9 @@
 """bg3-authoring CLI entrypoint."""
 
 import sys
+
 from bg3_core.cli import build_parser, dispatch_command
-from bg3_core.cli_common import ConsoleColor, OutputEmitter, ExitCode
+from bg3_core.cli_common import ConsoleColor, ExitCode, OutputEmitter
 
 
 def main() -> None:

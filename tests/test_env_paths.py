@@ -13,7 +13,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 from bg3_core.env_paths import (
-    REPO_ROOT,
     get_authored_mods_dir,
     get_build_guides_dir,
     get_cache_dir,

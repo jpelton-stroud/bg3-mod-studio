@@ -3,16 +3,14 @@ Unit tests for load order Patch 8 system module preservation,
 physical .pak deduplication, clean-room quarantine, and restore.
 """
 
-import json
-import shutil
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from bg3_authoring.packaging.pack_mod_pak import build_pak_archive
 from bg3_core.manage_load_order import (
     CORE_SYSTEM_MODULES,
-    CORE_SYSTEM_UUIDS,
     _ensure_base_module,
     create_default_modsettings,
     deduplicate_installed_paks,
@@ -24,7 +22,6 @@ from bg3_core.manage_load_order import (
     restore_quarantined_paks,
     validate_load_order,
 )
-from bg3_authoring.packaging.pack_mod_pak import build_pak_archive
 
 
 def create_dummy_pak(path: Path, mod_name: str, mod_uuid: str, version64: int = 36028797018963968):
@@ -192,7 +189,7 @@ class TestManageLoadOrderQuarantine(unittest.TestCase):
         create_dummy_pak(hashed_pak, "UnlockLevelCurve_Patch_XP_Instant", test_uuid)
         bak_file.write_text("dummy backup")
 
-        results = deduplicate_installed_paks(self.mods_dir)
+        _ = deduplicate_installed_paks(self.mods_dir)
 
         # Winner must still exist in Mods/
         self.assertTrue(canonical_pak.is_file())

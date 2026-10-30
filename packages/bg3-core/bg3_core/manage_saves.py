@@ -20,7 +20,6 @@ from __future__ import annotations
 import argparse
 import datetime
 import json
-import os
 import shutil
 import sys
 import time
@@ -32,6 +31,12 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from bg3_authoring.diagnostics.inspect_save_game import (
+    extract_save_metadata,
+    find_save_file,
+    get_save_search_paths,
+)
+
 from bg3_core.cli_common import (
     ConsoleColor,
     ExitCode,
@@ -39,12 +44,7 @@ from bg3_core.cli_common import (
     confirm_action,
     format_json_response,
 )
-from bg3_core.env_paths import detect_bg3_appdata_dirs, get_xdg_data_home
-from bg3_authoring.diagnostics.inspect_save_game import (
-    extract_save_metadata,
-    find_save_file,
-    get_save_search_paths,
-)
+from bg3_core.env_paths import get_xdg_data_home
 
 
 def discover_save_games(search_dirs: Optional[Sequence[Path]] = None) -> List[Dict[str, Any]]:

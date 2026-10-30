@@ -3,12 +3,8 @@
 
 import argparse
 import json
-import os
 import re
 import sys
-import urllib.error
-import urllib.parse
-import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, TextIO, Tuple
@@ -21,9 +17,7 @@ from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import MODS_DIR, REPO_ROOT
 from bg3_core.library_catalog import parse_library_rows
 from bg3_core.modio_client import (
-    API_ROOT,
     BG3_GAME_ID,
-    USER_AGENT,
     ModioClient,
     ModioError,
     get_oauth_token,

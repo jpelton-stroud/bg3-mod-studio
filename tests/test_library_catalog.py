@@ -15,7 +15,6 @@ from bg3_core.library_catalog import (
     find_orphaned_folders,
     get_tracked_mod_identifiers,
     get_tracked_mods,
-    parse_library_rows,
     prune_mod_from_library,
     safe_batch_delete_folders,
 )

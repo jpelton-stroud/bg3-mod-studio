@@ -33,14 +33,10 @@ from bg3_core.cli_common import (
     format_json_response,
 )
 from bg3_core.env_paths import (
-    MODS_DIR,
-    MY_MODS_DIR,
-    REPO_ROOT as WORKSPACE_ROOT,
     detect_data_dir,
     get_authored_mods_dir,
     get_env_var,
     get_subscribed_mods_dir,
-    normalize_mod_key,
 )
 
 DEFAULT_TOOLKIT_DIR = Path("/mnt/c/Program Files (x86)/Steam/steamapps/common/Baldurs Gate 3 Toolkit")
@@ -523,7 +519,7 @@ def stream_log_file(file_path: Path, min_severity: str = "WARNING") -> Generator
                 }
 
 
-def print_human_report(report: Dict[str, Any], show_correlations: bool = True):
+def print_human_report(report: Dict[str, Any], show_correlations: bool = True) -> None:
     """Format and print an ANSI styled terminal report."""
     if "error" in report:
         print(f"{RED}Error: {report['error']}{RESET}")
@@ -536,11 +532,11 @@ def print_human_report(report: Dict[str, Any], show_correlations: bool = True):
 
     print(f"\n{BOLD}{CYAN}=== BG3 Toolkit Log Diagnosis: {fname} ==={RESET}")
     print(f"Total Entries: {report.get('matched_entries_count', 0)}")
-    
+
     # Severity Bar
-    crit_str = f"{RED}{BOLD}Critical: {sev.get('CRITICAL', 0)}{RESET}" if sev.get("CRITICAL") else f"Critical: 0"
-    err_str = f"{RED}Errors: {sev.get('ERROR', 0)}{RESET}" if sev.get("ERROR") else f"Errors: 0"
-    warn_str = f"{YELLOW}Warnings: {sev.get('WARNING', 0)}{RESET}" if sev.get("WARNING") else f"Warnings: 0"
+    crit_str = f"{RED}{BOLD}Critical: {sev.get('CRITICAL', 0)}{RESET}" if sev.get("CRITICAL") else "Critical: 0"
+    err_str = f"{RED}Errors: {sev.get('ERROR', 0)}{RESET}" if sev.get("ERROR") else "Errors: 0"
+    warn_str = f"{YELLOW}Warnings: {sev.get('WARNING', 0)}{RESET}" if sev.get("WARNING") else "Warnings: 0"
     print(f"Severity Breakdown:  {crit_str} | {err_str} | {warn_str} | Info: {sev.get('INFO', 0)}")
 
     # Top Subsystems
@@ -577,7 +573,7 @@ def print_human_report(report: Dict[str, Any], show_correlations: bool = True):
         print()
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="BG3 Toolkit Runtime Message Log Diagnostic & Triage Tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -734,7 +730,7 @@ def main():
     # 4. Handle --follow (Streaming)
     if args.follow:
         print(f"{BOLD}{CYAN}Streaming live logs from:{RESET} {target_log.name} (Min severity: {args.severity.upper()})")
-        print(f"Press Ctrl+C to exit.\n")
+        print("Press Ctrl+C to exit.\n")
         try:
             for item in stream_log_file(target_log, min_severity=args.severity):
                 if args.json:

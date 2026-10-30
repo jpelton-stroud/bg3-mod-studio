@@ -2,8 +2,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bg3_core.modio_extract import generate_spec_markdown
 from bg3_core.library_catalog import parse_library_rows
+from bg3_core.modio_extract import generate_spec_markdown
 from bg3_core.update_library_catalog import (
     generate_library_markdown,
     parse_existing_mod_ids,

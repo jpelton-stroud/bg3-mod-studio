@@ -50,7 +50,7 @@ For a deep-dive into feature & functionality specifics, as well as example agent
 
 ### 1. Prerequisites
 
-- **Python 3.10+** (uses standard library only—no external pip dependencies required).
+- **Python 3.10+** with the **[uv](https://docs.astral.sh/uv/)** workspace package manager (automatically bootstrapped by `./setup.sh`) and `pyyaml>=6.0`.
 - **Baldur's Gate 3** (installed via Steam on WSL, Linux, or Windows).
 - **mod.io Account** (API Key & Personal Access Token from [mod.io/me/access](https://mod.io/me/access)).
 
@@ -103,7 +103,6 @@ BaldursGate3/
 ```
 
 > **User Content Studio**: All user-generated content (build guides, subscribed mods, and custom authored mods) is stored externally in `XDG_DOCUMENTS_DIR/BG3_Mod_Studio` (defaults to `~/Documents/BG3_Mod_Studio`), keeping this codebase completely decoupled from user data.
-```
 
 ---
 
@@ -155,6 +154,8 @@ bg3 modio update-metadata --mod arcane-progression --tags "Classes,Spells" --jso
 ## Documentation
 
 - [Architecture & Technical Design](docs/ARCHITECTURE.md)
+- [CLI Design & Stream Discipline](docs/DESIGN.md)
+- [Comprehensive Features & Agent Skills Catalog](docs/FEATURES.md)
 - [Mod Creation Workflow Guide](docs/MOD_CREATION_WORKFLOW.md)
 - [mod.io Integration & Reference Library](docs/MODIO_INTEGRATION.md)
 

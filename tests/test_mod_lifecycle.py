@@ -25,8 +25,8 @@ sys.path.insert(0, str(PACKAGES_DIR / "bg3-core"))
 sys.path.insert(0, str(PACKAGES_DIR / "bg3-authoring"))
 sys.path.insert(0, str(PACKAGES_DIR / "bg3-theorycraft"))
 
+from bg3_core.larian_parsers import parse_loca_bytes
 from bg3_core.lspk import LspkArchive
-from bg3_core.larian_parsers import parse_loca_bytes, decode_version64
 
 
 class ModLifecycleTests(unittest.TestCase):

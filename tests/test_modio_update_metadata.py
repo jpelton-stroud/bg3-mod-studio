@@ -1,17 +1,12 @@
-import io
-import tempfile
 import unittest
 from pathlib import Path
 
 from bg3_core.modio_update_metadata import (
     BG3_GAME_ID,
     COMMUNITY_OPTIONS,
-    CREDIT_OPTIONS_MASK,
-    ModioClient,
     ModioError,
     extract_allowed_tag_map,
     find_remote_mod,
-    normalize_name,
     validate_selected_tags,
 )
 

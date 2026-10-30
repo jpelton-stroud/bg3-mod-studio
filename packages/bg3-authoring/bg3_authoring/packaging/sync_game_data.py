@@ -29,7 +29,6 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.env_paths import (
-    MY_MODS_DIR,
     detect_data_dir,
     get_authored_mods_dir,
     get_env_var,
@@ -37,7 +36,6 @@ from bg3_core.env_paths import (
     resolve_mod_dir,
 )
 from bg3_core.larian_parsers import compile_xml_bytes_to_loca
-
 
 EXCLUDED_FILENAMES = {
     "README.md",
@@ -566,7 +564,7 @@ def run_sync(
     clean_custom: bool = False,
     bump_build: bool = False,
     json_mode: bool = False,
-):
+) -> None:
     if not source_dir.exists():
         msg = f"Source directory does not exist: {source_dir}"
         if json_mode:
@@ -588,7 +586,7 @@ def run_sync(
             sys.exit(1)
 
     if not json_mode:
-        print(f"=== BG3 Custom Mod Sync ===")
+        print("=== BG3 Custom Mod Sync ===")
         print(f"Source:      {source_dir.resolve()}")
         print(f"Destination: {data_dir.resolve()}")
         print(f"Mode:        {'DRY RUN (no files modified)' if dry_run else 'LIVE SYNC'}")
@@ -650,7 +648,7 @@ def run_sync(
         print("=" * 40 + "\n")
 
 
-def watch_and_sync(source_dir: Path, data_dir: Path, mod_filter: list[Any] | None = None, interval: float = 2.0, clean: bool = False, clean_custom: bool = False):
+def watch_and_sync(source_dir: Path, data_dir: Path, mod_filter: list[Any] | None = None, interval: float = 2.0, clean: bool = False, clean_custom: bool = False) -> None:
     print(f"👀 Watching {source_dir} for changes every {interval}s... Press Ctrl+C to stop.")
     try:
         while True:
@@ -660,7 +658,7 @@ def watch_and_sync(source_dir: Path, data_dir: Path, mod_filter: list[Any] | Non
         print("\nWatcher stopped.")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Sync custom BG3 mods from my_mods/ to Steam Baldurs Gate 3/Data directory"
     )

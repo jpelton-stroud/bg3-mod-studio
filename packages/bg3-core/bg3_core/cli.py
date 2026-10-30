@@ -22,6 +22,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+import bg3_core
 from bg3_core.cli_common import (
     ConsoleColor,
     ExitCode,
@@ -30,7 +31,6 @@ from bg3_core.cli_common import (
     confirm_action,
 )
 
-import bg3_core
 bg3_theorycraft: Any
 try:
     import bg3_theorycraft
@@ -1041,6 +1041,19 @@ def build_parser() -> JsonCompliantArgumentParser:
     return parser
 
 
+def resolve_module_fallback(script_target: Path) -> Optional[str]:
+    """Derives a fully-qualified Python module name from a target script path."""
+    for base_pkg in ("bg3_authoring", "bg3_core", "bg3_theorycraft"):
+        parts = script_target.parts
+        if base_pkg in parts:
+            idx = parts.index(base_pkg)
+            rel_parts = list(parts[idx:])
+            if rel_parts[-1].endswith(".py"):
+                rel_parts[-1] = rel_parts[-1][:-3]
+            return ".".join(rel_parts)
+    return None
+
+
 def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
     """Route parsed CLI arguments to the target implementation script."""
     cmd = args.command
@@ -1902,7 +1915,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
         if getattr(args, "yes", False):
             target_args.append("--yes")
 
-    if not script_target or not script_target.is_file():
+    if not script_target:
         emitter.error(
             message=f"Handler script not found for command '{cmd} {sub}'.",
             code="COMMAND_NOT_FOUND",
@@ -1919,7 +1932,20 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
     if args.json:
         target_args.append("--json")
 
-    cmd_line = [sys.executable, str(script_target)] + target_args
+    force_module = os.environ.get("_BG3_FORCE_MODULE_DISPATCH") == "1"
+    if script_target.is_file() and not force_module:
+        cmd_line = [sys.executable, str(script_target)] + target_args
+    else:
+        module_name = resolve_module_fallback(script_target)
+        if not module_name:
+            emitter.error(
+                message=f"Handler script not found on disk or as module for command '{cmd} {sub}'.",
+                code="COMMAND_NOT_FOUND",
+                exit_code=ExitCode.UNAVAILABLE,
+                exit_process=False,
+            )
+            return ExitCode.UNAVAILABLE
+        cmd_line = [sys.executable, "-m", module_name] + target_args
     emitter.log(f"Executing: {' '.join(cmd_line)}", level="INFO")
 
     proc = subprocess.run(cmd_line)

@@ -19,7 +19,6 @@ Features:
 
 import argparse
 import json
-import os
 import re
 import sys
 from pathlib import Path
@@ -30,7 +29,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MODS_DIR, REPO_ROOT, get_subscribed_mods_dir
+from bg3_core.env_paths import REPO_ROOT, get_subscribed_mods_dir
 from bg3_core.library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
 
 WORKSPACE_ROOT = REPO_ROOT
@@ -163,10 +162,10 @@ def parse_mod_readme(mod_dir: Path, known_mod_ids: dict[str, str] | None = None)
     if desc_match:
         raw_desc = desc_match.group(1).strip()
         # Take first non-empty line
-        desc_lines = [l.strip() for l in raw_desc.splitlines() if l.strip() and not l.startswith("-") and not l.startswith("|")]
+        desc_lines = [line.strip() for line in raw_desc.splitlines() if line.strip() and not line.startswith("-") and not line.startswith("|")]
         if desc_lines:
             desc = desc_lines[0]
-    
+
     if not desc:
         desc = f"{title} mod specification."
 
@@ -250,7 +249,7 @@ def write_library_catalog(
     return mods_data
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Update or check master catalog in mods/library.md from mods/*/README.md."
     )

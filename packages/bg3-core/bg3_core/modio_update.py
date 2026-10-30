@@ -14,23 +14,23 @@ import os
 import re
 import sys
 import xml.etree.ElementTree as ET
-
 from pathlib import Path
+from typing import Any, Optional
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MODS_DIR, REPO_ROOT
-from bg3_core.library_catalog import get_tracked_mods as _get_tracked_mods, parse_library_rows
-from bg3_core.modio_client import BG3_GAME_ID, MODIO_API_HOST, get_api_key, query_modio
+from bg3_core.env_paths import REPO_ROOT
+from bg3_core.library_catalog import get_tracked_mods as _get_tracked_mods
+from bg3_core.modio_client import get_api_key, query_modio
 from bg3_core.modio_extract import process_mod
 
 WORKSPACE_ROOT = str(REPO_ROOT)
 
 
-def get_tracked_mods(library_path=None):
+def get_tracked_mods(library_path: Optional[str | Path] = None) -> dict[str, dict[str, str]]:
     """
     Parses mods/library.md and existing mod directories to identify tracked mods.
     Returns a dict mapping lowercase slug to mod details.
@@ -42,7 +42,7 @@ def get_tracked_mods(library_path=None):
     )
 
 
-def get_local_mod_state(slug, mods_dir=None):
+def get_local_mod_state(slug: str, mods_dir: Optional[str | Path] = None) -> dict[str, Any]:
     """
     Inspects local files for a mod to extract MD5 hash, version, and features.
     """
@@ -50,7 +50,7 @@ def get_local_mod_state(slug, mods_dir=None):
         mods_dir = os.path.join(WORKSPACE_ROOT, "mods")
 
     mod_dir = os.path.join(mods_dir, slug)
-    state = {
+    state: dict[str, Any] = {
         "exists": os.path.isdir(mod_dir),
         "slug": slug,
         "md5": None,
@@ -111,7 +111,7 @@ def get_local_mod_state(slug, mods_dir=None):
     return state
 
 
-def extract_modfile_hash(metadata_blob):
+def extract_modfile_hash(metadata_blob: Optional[str]) -> Optional[str]:
     """Extract MD5 hash from modfile metadata_blob string: 'hash=<md5>;filesize=...'"""
     if not metadata_blob:
         return None
@@ -119,7 +119,7 @@ def extract_modfile_hash(metadata_blob):
     return match.group(1).lower() if match else None
 
 
-def compute_feature_diff(old_features, new_features):
+def compute_feature_diff(old_features: dict[str, Any], new_features: dict[str, Any]) -> str:
     """
     Compares previous features against new features and returns a human-readable
     summary of additions, modifications, and removals.
@@ -169,7 +169,12 @@ def compute_feature_diff(old_features, new_features):
     return "; ".join(parts)
 
 
-def check_and_apply_update(query, api_key=None, check_only=False, force=False):
+def check_and_apply_update(
+    query: str,
+    api_key: Optional[str] = None,
+    check_only: bool = False,
+    force: bool = False,
+) -> dict[str, Any]:
     """
     Main update controller for an individual mod query.
     1. Validates tracking in mods/library.md
@@ -337,7 +342,7 @@ def check_and_apply_update(query, api_key=None, check_only=False, force=False):
         }
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="BG3 Mod Documentation Update Checker & Pipeline.")
     parser.add_argument("query_pos", nargs="?", help="Mod slug, name, ID, or URL (positional)")
     parser.add_argument("--query", "-q", dest="query_flag", help="Mod slug, name, ID, or URL to check/update")

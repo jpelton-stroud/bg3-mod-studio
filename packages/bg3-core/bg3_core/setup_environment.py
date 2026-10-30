@@ -20,7 +20,6 @@ import argparse
 import getpass
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -63,7 +62,7 @@ RED = "\033[31m"
 RESET = "\033[0m"
 
 
-def print_banner():
+def print_banner() -> None:
     print(f"\n{BOLD}{CYAN}========================================================================{RESET}")
     print(f"{BOLD}{CYAN}      Baldur's Gate 3 Mod Studio & Mod.io Toolkit Setup Wizard          {RESET}")
     print(f"{BOLD}{CYAN}========================================================================{RESET}\n")
@@ -219,7 +218,7 @@ def write_env_file(path: Path, content: str) -> None:
     os.chmod(path, 0o600)  # O_CREAT mode is ignored for pre-existing files
 
 
-def check_environment_status(as_json: bool = False, config_path: Optional[Path] = None):
+def check_environment_status(as_json: bool = False, config_path: Optional[Path] = None) -> None:
     """Non-interactive check of project environment configuration and XDG paths."""
     target_env = config_path or ENV_PATH
     cfg_home = get_xdg_config_home()
@@ -337,7 +336,7 @@ def check_environment_status(as_json: bool = False, config_path: Optional[Path] 
     print("")
 
 
-def configure_github_remote(non_interactive: bool = False):
+def configure_github_remote(non_interactive: bool = False) -> None:
     """Optionally configure a GitHub remote repository using GitHub CLI."""
     if non_interactive:
         return
@@ -501,7 +500,7 @@ def run_wizard(
     non_interactive: bool = False,
     config_path: Optional[Path] = None,
     studio_dir_override: Optional[str] = None,
-):
+) -> None:
     print_banner()
 
     target_env = config_path or ENV_PATH
@@ -663,7 +662,7 @@ def run_wizard(
     print("Run `bg3 --help` to get started.\n")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="BG3 Mod Studio & Mod.io Toolkit Environment Setup Wizard"
     )

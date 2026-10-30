@@ -18,7 +18,6 @@ Modes:
 
 import argparse
 import json
-import os
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -27,9 +26,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import (
-    MODS_DIR,
-    MY_MODS_DIR,
-    REPO_ROOT as WORKSPACE_ROOT,
     get_authored_mods_dir,
     get_subscribed_mods_dir,
     normalize_mod_key,
@@ -402,7 +398,7 @@ def compare_candidate_against_catalog(candidate_dir: Path, catalog_dirs: list[Pa
     return results
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Static entry collision and compatibility analyzer for BG3 mods."
     )

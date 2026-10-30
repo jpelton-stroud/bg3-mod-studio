@@ -8,7 +8,6 @@ and damage values across levels 1–20.
 
 import argparse
 import json
-import os
 import re
 import sys
 import uuid
@@ -19,7 +18,6 @@ from xml.dom import minidom
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import resolve_mod_dir
-from bg3_core.larian_parsers import PATCH_8_VERSION
 
 EMPTY_LEVEL_MAP_VALUES_LSX = """<?xml version="1.0" encoding="UTF-8"?>
 <save>
@@ -164,7 +162,7 @@ def scaffold_level_map(
     }
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Scaffold Patch 8 LevelMapValues scaling curves across levels 1–20.")
     parser.add_argument("--mod", required=True, help="Target mod name or path in my_mods/")
     parser.add_argument("--name", required=True, help="Internal curve name (e.g. SneakAttack, ShadowDice)")

@@ -13,12 +13,11 @@ import os
 import re
 import struct
 import sys
-import zlib
 from pathlib import Path
 from typing import Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from bg3_core.env_paths import DIST_DIR, REPO_ROOT, detect_bg3_appdata_dirs, get_env_var, resolve_mod_dir
+from bg3_core.env_paths import DIST_DIR, detect_bg3_appdata_dirs, get_env_var, resolve_mod_dir
 from bg3_core.larian_parsers import compile_xml_bytes_to_loca
 from bg3_core.lspk import LspkArchive, lz4_block_compress
 
@@ -331,7 +330,7 @@ def clean_local_pak(mod_dir: Path, dry_run: bool = False) -> dict:
     }
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Pure-Python LSPK v18 .pak package builder for Baldur's Gate 3 mods."
     )
@@ -456,7 +455,7 @@ def main():
             size_kb = len(pak_bytes) / 1024
             target_desc = "published to local BG3 Mods directory" if args.publish_local else "packaged"
             print(f"[✓] Successfully {target_desc}: {out_path} ({size_kb:.1f} KB, {len(files_to_pack)} files)")
-            print(f"    Verification: [✓] LSPK v18 checksum and extraction verified cleanly.")
+            print("    Verification: [✓] LSPK v18 checksum and extraction verified cleanly.")
 
         return 0
 

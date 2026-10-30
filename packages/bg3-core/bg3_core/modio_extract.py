@@ -12,31 +12,26 @@ import io
 import json
 import os
 import re
-import struct
 import sys
-import tempfile
-import urllib.parse
-import urllib.request
-import zipfile
 import xml.etree.ElementTree as ET
+import zipfile
 from pathlib import Path
+from typing import Any, Optional
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MODS_DIR, REPO_ROOT, get_subscribed_mods_dir, normalize_mod_key
+from bg3_core.env_paths import get_subscribed_mods_dir, normalize_mod_key
 from bg3_core.larian_parsers import (
-    clean_loc_text,
     parse_loca_bytes,
     parse_localization_xml,
     parse_meta_lsx,
     parse_progressions_lsx,
     parse_stats_txt,
 )
-from bg3_core.lspk import LspkArchive, decompress_pak_file_data, lz4_block_decompress
-from bg3_core.update_library_catalog import write_library_catalog
+from bg3_core.lspk import LspkArchive
 from bg3_core.mod_overrides import (
     BASE_GAME_LOCA_HANDLES,
     BASE_GAME_PASSIVES,
@@ -44,17 +39,11 @@ from bg3_core.mod_overrides import (
     MOD_SPECIFIC_OVERRIDES,
 )
 from bg3_core.modio_client import (
-    BG3_GAME_ID,
-    MODIO_API_HOST,
-    USER_AGENT,
     download_mod_file,
     get_api_key,
     query_modio,
 )
-
-
-
-
+from bg3_core.update_library_catalog import write_library_catalog
 
 # ----------------------------------------------------------------------
 # Feature Extraction and In-Game Validation
@@ -62,7 +51,12 @@ from bg3_core.modio_client import (
 # Reference dictionaries imported from bg3_core.mod_overrides
 
 
-def extract_and_verify_features(all_stats, loc_dict, roottemplate_names=None, progressions=None):
+def extract_and_verify_features(
+    all_stats: dict[str, Any],
+    loc_dict: dict[str, str],
+    roottemplate_names: Optional[dict[str, str]] = None,
+    progressions: Optional[list[dict[str, Any]]] = None,
+) -> list[dict[str, Any]]:
     """Filter implemented features, excluding stubs and resolving linked effects."""
     roottemplate_names = roottemplate_names or {}
     progressions = progressions or []
@@ -71,12 +65,8 @@ def extract_and_verify_features(all_stats, loc_dict, roottemplate_names=None, pr
     # Separate dictionaries by category for fast cross-referencing
     passives = {k: v for k, v in all_stats.items() if v.get("type") == "PassiveData"}
     spells = {k: v for k, v in all_stats.items() if "Spell" in v.get("type", "")}
-    statuses = {k: v for k, v in all_stats.items() if v.get("type") == "StatusData"}
-    weapons = {k: v for k, v in all_stats.items() if v.get("type") == "Weapon"}
-    armor = {k: v for k, v in all_stats.items() if v.get("type") == "Armor"}
-    objects = {k: v for k, v in all_stats.items() if v.get("type") == "Object"}
 
-    def resolve_passive_mechanics(passive_name):
+    def resolve_passive_mechanics(passive_name: str) -> str:
         if passive_name in BASE_GAME_PASSIVES:
             return BASE_GAME_PASSIVES[passive_name]
         p = passives.get(passive_name)
@@ -101,7 +91,7 @@ def extract_and_verify_features(all_stats, loc_dict, roottemplate_names=None, pr
             parts.append(f"({'; '.join(details)})")
         return " ".join(parts)
 
-    def resolve_spell_mechanics(spell_name):
+    def resolve_spell_mechanics(spell_name: str) -> str:
         if spell_name in BASE_GAME_SPELLS:
             return BASE_GAME_SPELLS[spell_name]
         s = spells.get(spell_name)
@@ -572,7 +562,7 @@ def extract_and_verify_features(all_stats, loc_dict, roottemplate_names=None, pr
 # ----------------------------------------------------------------------
 # Categorization & Spec Generator
 # ----------------------------------------------------------------------
-def determine_category(mod_metadata, features):
+def determine_category(mod_metadata: dict[str, Any], features: list[dict[str, Any]]) -> str:
     """Categorize mod into Gear, Spells, Classes, Progression, or Cheats/Utilities."""
     tags = [t.get("name", "").lower() for t in mod_metadata.get("tags", [])]
 
@@ -598,7 +588,12 @@ def determine_category(mod_metadata, features):
     return "Utilities & Cheats"
 
 
-def generate_spec_markdown(mod_metadata, meta_lsx, features, category):
+def generate_spec_markdown(
+    mod_metadata: dict[str, Any],
+    meta_lsx: dict[str, Any],
+    features: list[dict[str, Any]],
+    category: str,
+) -> str:
     """Generate rich README.md spec for the mod."""
     name = mod_metadata.get("name", "Unknown Mod")
     summary = mod_metadata.get("summary", "")
@@ -614,7 +609,7 @@ def generate_spec_markdown(mod_metadata, meta_lsx, features, category):
             "Upon loading into the game, the **GearUp Amulet** is automatically seeded into the Tutorial Cart/Chest on the Nautiloid (`TUT_Chest_Potions`) as well as into the inventories of primary Act 1, Act 2, and Act 3 traders (including Arron, Dammon, Brem, Roah Moonglow, Quartermaster Talli, and Lann Tarv). Equipping the amulet grants the **Summon GearUp Chest** conjuration spell (`Target_SummonGearUpChest_no_Despawn`), allowing the player to summon the master **Gear Up Equipment Chest** directly into their inventory permanently without despawning. Inside the master chest are 27 specialized sub-chests neatly categorized by gear slot and rarity tier (Uncommon, Rare, Epic/Very Rare, and Legendary), allowing players to test, theorycraft, or gear up for any build archetype at any point in their playthrough."
         )
 
-        def gearup_sort_key(f):
+        def gearup_sort_key(f: dict[str, Any]) -> tuple[int, str]:
             fid = f.get("identifier", "")
             ftype = f.get("type", "")
             if "SummonGearUpChest" in fid:
@@ -639,7 +634,7 @@ def generate_spec_markdown(mod_metadata, meta_lsx, features, category):
             "Each item features customized mechanics ranging from pact-scaling weapon enhancements and spell slot restoration to dark retaliatory wards, necrotic damage surges, and patron synergies. All 30 items are immersively distributed across the campaign using **Fade's Equipment Distribution (FED)**, and can also be acquired immediately from the camp chest via **Fade's Camp Chest** (or the master container `PP_AIO_CHEST` containing the Act 1, Act 2, and Act 3 backpacks)."
         )
 
-        def pp_sort_key(f):
+        def pp_sort_key(f: dict[str, Any]) -> tuple[int, int, str]:
             fid = f.get("identifier", "")
             ftype = f.get("type", "")
             facq = f.get("acquisition", "")
@@ -696,7 +691,7 @@ def generate_spec_markdown(mod_metadata, meta_lsx, features, category):
     return "\n".join(lines)
 
 
-def update_library_markdown(library_path):
+def update_library_markdown(library_path: str | Path) -> None:
     """Regenerate the complete library from specs while preserving known IDs."""
     write_library_catalog(library_file=Path(library_path), mods_dir=Path(library_path).parent)
 
@@ -704,7 +699,13 @@ def update_library_markdown(library_path):
 # ----------------------------------------------------------------------
 # Main Execution Pipeline
 # ----------------------------------------------------------------------
-def process_mod(query="", pak_path=None, output_dir=None, write_spec=False, update_library=False):
+def process_mod(
+    query: str = "",
+    pak_path: Optional[str | Path] = None,
+    output_dir: Optional[str | Path] = None,
+    write_spec: bool = False,
+    update_library: bool = False,
+) -> dict[str, Any]:
     if pak_path:
         pak_file = Path(pak_path).resolve()
         if not pak_file.is_file():
@@ -899,7 +900,7 @@ def process_mod(query="", pak_path=None, output_dir=None, write_spec=False, upda
     return result
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Fetch, unpack, and parse BG3 mods from mod.io or local .pak archives.")
     parser.add_argument("query_pos", nargs="?", help="Mod name, slug, URL, or ID on mod.io (positional)")
     parser.add_argument("--query", "-q", dest="query_flag", help="Mod name, slug, URL, or ID on mod.io")
