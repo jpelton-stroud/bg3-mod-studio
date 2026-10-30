@@ -4,10 +4,10 @@
 Synchronize community library directly against authenticated mod.io subscriptions:
 ```bash
 # Preview subscription sync without modifications
-python3 scripts/bg3.py modio sync --dry-run --json
+uv run bg3 modio sync --dry-run --json
 
 # Synchronize and safely prune unsubscribed rows and orphaned folders
-python3 scripts/bg3.py modio sync --prune --json
+uv run bg3 modio sync --prune --json
 ```
 
 ---

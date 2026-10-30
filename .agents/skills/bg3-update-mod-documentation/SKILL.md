@@ -14,7 +14,7 @@ Refer to specifications:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -30,7 +30,7 @@ flowchart TD
 ### 1. Batch Resolution & Subagent Dispatch
 Accept targeted slugs or inspect all tracked mods:
 ```bash
-python3 scripts/bg3.py modio update --list-tracked --json
+uv run bg3 modio update --list-tracked --json
 ```
 Launch one worker subagent per mod using the schema in [Update Subagent Template](./resources/update_subagent_template.json), following [`bg3-update-single-mod`](../bg3-update-single-mod/SKILL.md).
 
@@ -39,7 +39,7 @@ Stop calling tools and await reactive completion notifications without polling.
 ### 2. Catalog & Table Compilation
 When any mod is updated, refresh the catalog:
 ```bash
-python3 scripts/bg3.py library update-catalog --write
+uv run bg3 library update-catalog --write
 ```
 Render the consolidated update status table with status indicators (`🟢 Up-to-date`, `🔄 Updated`, `⚠️ Not Tracked`, `❌ Failed`).
 

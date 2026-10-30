@@ -10,7 +10,7 @@ Inspects and manages the active *Baldur's Gate 3* load order directly through na
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -26,22 +26,22 @@ flowchart TD
 ### 1. View & Sync Load Order
 ```bash
 # List current profile load order
-python3 scripts/bg3.py loadorder list --json
+uv run bg3 loadorder list --json
 
 # Synchronize local mods into active load order profile
-python3 scripts/bg3.py loadorder sync --yes --json
+uv run bg3 loadorder sync --yes --json
 
 # Clean missing or removed mods from active profile
-python3 scripts/bg3.py loadorder clean --yes --json
+uv run bg3 loadorder clean --yes --json
 ```
 
 ### 2. Mod Activation & Deactivation
 ```bash
 # Enable at end of load order with dependencies
-python3 scripts/bg3.py loadorder --enable "<mod_slug_or_UUID>" --with-deps --json
+uv run bg3 loadorder --enable "<mod_slug_or_UUID>" --with-deps --json
 
 # Disable a mod safely
-python3 scripts/bg3.py loadorder --disable "<mod_slug_or_UUID>" --json
+uv run bg3 loadorder --disable "<mod_slug_or_UUID>" --json
 ```
 
 ### 3. Output Presentation
@@ -59,7 +59,7 @@ Present active mods as a table:
 Always verify load order integrity before concluding:
 1. Validate profile rules:
    ```bash
-   python3 scripts/bg3.py loadorder --validate --json
+   uv run bg3 loadorder --validate --json
    ```
 2. Confirm command exits with code 0 and valid JSON.
 3. Confirm `GustavDev` is at position 1.

@@ -4,10 +4,10 @@
 Activate the mod while isolating the profile so that only declared dependencies and test companions are active:
 ```bash
 # Isolate mod with prerequisites
-python3 scripts/bg3.py loadorder --enable <mod-slug> --with-deps --isolate --json
+uv run bg3 loadorder --enable <mod-slug> --with-deps --isolate --json
 
 # Optional test companions (e.g. instant XP)
-python3 scripts/bg3.py loadorder --enable <mod-slug> --with-deps --isolate --test-dep "UnlockLevelCurve - Instant XP" --json
+uv run bg3 loadorder --enable <mod-slug> --with-deps --isolate --test-dep "UnlockLevelCurve - Instant XP" --json
 ```
 
 Verify in JSON:

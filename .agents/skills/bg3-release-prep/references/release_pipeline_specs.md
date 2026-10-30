@@ -3,7 +3,7 @@
 ## 1. Release Architecture & Versioning
 - **Version64 Encoding**: Encodes `major.minor.patch.build` into a 64-bit integer synchronized across `Projects/<ModName>_<UUID>/meta.lsx` and `Mods/<ModName>_<UUID>/meta.lsx`.
 - **Localization Compilation**: Compiles `Localization/English/*.xml` into binary `.loca` and stages in `<Game>/Data/`.
-- **HTML Description**: `scripts/bg3.py mod render-description` translates GitHub Flavored Markdown to clean HTML suitable for mod.io.
+- **HTML Description**: `bg3 mod render-description` translates GitHub Flavored Markdown to clean HTML suitable for mod.io.
 
 ---
 

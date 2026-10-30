@@ -13,7 +13,7 @@ Refer to specifications:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -30,21 +30,21 @@ flowchart TD
 ### 1. Pre-Flight Assertion & Tag Preview
 Assert mod has been published via the official Toolkit (`Glasses.exe`). Require `MODIO_PAT` in environment. Fetch allowed tags and preview changes:
 ```bash
-python3 scripts/bg3.py modio update-metadata --mod "<slug>" --json
+uv run bg3 modio update-metadata --mod "<slug>" --json
 ```
 
 ### 2. User Approval & Live API Writes
 Present tag recommendations and profile changes. Upon explicit user confirmation, execute writes with `--confirm`:
 ```bash
-python3 scripts/bg3.py modio update-metadata --mod "<slug>" --tags "<approved-tags>" --confirm --json
+uv run bg3 modio update-metadata --mod "<slug>" --tags "<approved-tags>" --confirm --json
 ```
 
 ### 3. Mandatory Teardown
 Clean loose authoring assets per [Storefront Guide](./references/storefront_metadata_guide.md) before launching the game:
 ```bash
-python3 scripts/bg3.py mod sync-data --clean-mod <mod-slug> --json
-python3 scripts/bg3.py mod pack --mod <mod-slug> --clean-local --json
-python3 scripts/bg3.py loadorder --disable <mod-slug> --json
+uv run bg3 mod sync-data --clean-mod <mod-slug> --json
+uv run bg3 mod pack --mod <mod-slug> --clean-local --json
+uv run bg3 loadorder --disable <mod-slug> --json
 ```
 
 ---

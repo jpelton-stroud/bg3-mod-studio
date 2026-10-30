@@ -14,7 +14,7 @@ Refer to specifications:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -34,14 +34,14 @@ flowchart TD
 ### 1. Clean Data & Deploy Local `.pak`
 Purge loose files and package `.pak`:
 ```bash
-python3 scripts/bg3.py mod sync-data --clean-mod <mod-slug> --json
-python3 scripts/bg3.py mod pack --mod <mod-slug> --publish-local --json
+uv run bg3 mod sync-data --clean-mod <mod-slug> --json
+uv run bg3 mod pack --mod <mod-slug> --publish-local --json
 ```
 
 ### 2. Configure Clean-Room Load Order (Phase 3A)
 Enable target mod with dependencies per [Smoke Runbook](./references/smoke_testing_runbook.md):
 ```bash
-python3 scripts/bg3.py loadorder --enable <mod-slug> --with-deps --isolate --json
+uv run bg3 loadorder --enable <mod-slug> --with-deps --isolate --json
 ```
 
 ### 3. Guided Playtesting & Routing

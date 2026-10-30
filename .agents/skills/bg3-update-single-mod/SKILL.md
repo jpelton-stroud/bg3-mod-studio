@@ -13,7 +13,7 @@ Refer to resources:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -35,7 +35,7 @@ Verify `MODIO_API_KEY` is available in environment or `.env`. Ensure mod is trac
 ### 2. Check & Update Pipeline
 Execute update pipeline:
 ```bash
-python3 scripts/bg3.py modio update --query "<MOD_QUERY>" --json
+uv run bg3 modio update --query "<MOD_QUERY>" --json
 ```
 The script compares release hashes, downloads new `.pak` packages if needed, updates `mods/<slug>/README.md`, and re-catalogs [`mods/library.md`](../../../mods/library.md).
 

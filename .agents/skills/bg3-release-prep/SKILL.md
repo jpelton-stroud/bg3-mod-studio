@@ -13,7 +13,7 @@ Refer to specifications:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -30,24 +30,24 @@ flowchart TD
 
 ### 1. Semantic Bump & Localization Compilation
 ```bash
-python3 scripts/bg3.py mod bump-version --mod <mod-slug> --patch --json
-python3 scripts/bg3.py mod sync-localization --mod <mod-slug> --prune --compile --json
+uv run bg3 mod bump-version --mod <mod-slug> --patch --json
+uv run bg3 mod sync-localization --mod <mod-slug> --prune --compile --json
 ```
 
 ### 2. Strict Validation & Description Rendering
 ```bash
-python3 scripts/bg3.py mod validate --mod <mod-slug> --strict --json
-python3 scripts/bg3.py mod conflict --candidate <mod-slug> --against-library --json
-python3 scripts/bg3.py mod render-description --mod <mod-slug> --write --json
+uv run bg3 mod validate --mod <mod-slug> --strict --json
+uv run bg3 mod conflict --candidate <mod-slug> --against-library --json
+uv run bg3 mod render-description --mod <mod-slug> --write --json
 ```
 
 ### 3. Game Data Staging & Packaging
 Sync loose development files and `.loca` to `<Game>/Data/`:
 ```bash
-python3 scripts/bg3.py mod sync-data --mods <mod-slug> --json
+uv run bg3 mod sync-data --mods <mod-slug> --json
 
 # Optional package for Nexus Mods
-python3 scripts/bg3.py mod pack --mod <mod-slug> --out "dist/<mod-slug>.pak" --json
+uv run bg3 mod pack --mod <mod-slug> --out "dist/<mod-slug>.pak" --json
 ```
 
 ---

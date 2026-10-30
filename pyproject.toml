@@ -1,0 +1,26 @@
+[project]
+name = "bg3-mod-studio"
+version = "1.0.0"
+description = "Baldur's Gate 3 Mod Studio & Mod.io Automation Workspace"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "bg3-core",
+    "bg3-theorycraft",
+    "bg3-authoring",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+bg3 = "bg3_core.cli:main"
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+bg3-core = { workspace = true }
+bg3-theorycraft = { workspace = true }
+bg3-authoring = { workspace = true }
+
+[tool.uv]
+package = false

@@ -14,7 +14,7 @@ Refer to specifications:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -34,7 +34,7 @@ Conduct structured design interview following [Design Interview Protocol](./refe
 ### 2. Workspace Scaffolding
 After approval, run the scaffolding script:
 ```bash
-python3 scripts/bg3.py mod create "<ModName>" [--slug "<slug>"] --author "MTGHillGiant" --description "<Desc>" [--unlock-level-curve] --json
+uv run bg3 mod create "<ModName>" [--slug "<slug>"] --author "MTGHillGiant" --description "<Desc>" [--unlock-level-curve] --json
 ```
 
 ### 3. Concurrent Subagent Dispatch
@@ -46,9 +46,9 @@ Launch the 4 specialist subagents in parallel following [Subagent Launch Templat
 
 Once subagents complete, run read-only static verification before handoff:
 ```bash
-python3 scripts/bg3.py mod validate <mod-slug> --json
-python3 scripts/bg3.py mod sync-localization --mod <mod-slug> --check --json
-python3 scripts/bg3.py mod conflict <mod-slug> --against-library --json
+uv run bg3 mod validate <mod-slug> --json
+uv run bg3 mod sync-localization --mod <mod-slug> --check --json
+uv run bg3 mod conflict <mod-slug> --against-library --json
 ```
 
 Verify:

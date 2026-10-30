@@ -18,7 +18,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.management.manage_saves import (
+from bg3_core.manage_saves import (
     backup_save_games,
     discover_save_games,
     filter_saves_for_purge,
@@ -146,7 +146,7 @@ class TestManageSaves(unittest.TestCase):
             self.assertIn("Campaign_Save_3/Campaign_Save_3.lsv", namelist)
 
     def test_cli_list_json(self):
-        script = REPO_ROOT / "scripts" / "management" / "manage_saves.py"
+        script = REPO_ROOT / "packages" / "bg3-core" / "bg3_core" / "manage_saves.py"
         cmd = [
             sys.executable,
             str(script),
@@ -162,7 +162,7 @@ class TestManageSaves(unittest.TestCase):
         self.assertEqual(payload["data"]["total_count"], 4)
 
     def test_cli_purge_confirmation_required(self):
-        script = REPO_ROOT / "scripts" / "management" / "manage_saves.py"
+        script = REPO_ROOT / "packages" / "bg3-core" / "bg3_core" / "manage_saves.py"
         cmd = [
             sys.executable,
             str(script),
@@ -180,7 +180,7 @@ class TestManageSaves(unittest.TestCase):
         self.assertEqual(payload["error"]["code"], "CONFIRMATION_REQUIRED")
 
     def test_cli_purge_with_yes(self):
-        script = REPO_ROOT / "scripts" / "management" / "manage_saves.py"
+        script = REPO_ROOT / "packages" / "bg3-core" / "bg3_core" / "manage_saves.py"
         cmd = [
             sys.executable,
             str(script),

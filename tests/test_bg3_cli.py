@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-BG3_CLI = REPO_ROOT / "scripts" / "bg3.py"
+BG3_CLI = REPO_ROOT / "packages" / "bg3-core" / "bg3_core" / "cli.py"
 
 
 class TestBg3CliIntegration(unittest.TestCase):

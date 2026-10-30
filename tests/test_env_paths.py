@@ -12,7 +12,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts.lib.env_paths import (
+from bg3_core.env_paths import (
     REPO_ROOT,
     get_cache_dir,
     get_env_source,
@@ -98,7 +98,7 @@ class TestXDGPaths(unittest.TestCase):
             fake_env.write_text("IN_REPO_VAR=should_never_be_read\n", encoding="utf-8")
 
             # Point REPO_ROOT to fake repo
-            with patch("scripts.lib.env_paths.REPO_ROOT", fake_repo):
+            with patch("bg3_core.env_paths.REPO_ROOT", fake_repo):
                 # Empty out any existing XDG config directory
                 empty_xdg = fake_repo / "xdg_config"
                 with patch.dict(os.environ, {"XDG_CONFIG_HOME": str(empty_xdg)}, clear=False):

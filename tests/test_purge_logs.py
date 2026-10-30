@@ -16,7 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.diagnostics.diagnose_toolkit_logs import purge_toolkit_logs
+from bg3_authoring.diagnostics.diagnose_toolkit_logs import purge_toolkit_logs
 
 
 class TestPurgeToolkitLogs(unittest.TestCase):
@@ -106,7 +106,7 @@ class TestPurgeToolkitLogs(unittest.TestCase):
             self.assertEqual(res["preserved_count"], 0)
 
     def test_cli_purge_confirmation_required(self):
-        script = REPO_ROOT / "scripts" / "diagnostics" / "diagnose_toolkit_logs.py"
+        script = REPO_ROOT / "packages" / "bg3-authoring" / "bg3_authoring" / "diagnostics" / "diagnose_toolkit_logs.py"
         cmd = [
             sys.executable,
             str(script),
@@ -122,7 +122,7 @@ class TestPurgeToolkitLogs(unittest.TestCase):
         self.assertEqual(payload["error"]["code"], "CONFIRMATION_REQUIRED")
 
     def test_cli_purge_with_yes(self):
-        script = REPO_ROOT / "scripts" / "diagnostics" / "diagnose_toolkit_logs.py"
+        script = REPO_ROOT / "packages" / "bg3-authoring" / "bg3_authoring" / "diagnostics" / "diagnose_toolkit_logs.py"
         cmd = [
             sys.executable,
             str(script),
