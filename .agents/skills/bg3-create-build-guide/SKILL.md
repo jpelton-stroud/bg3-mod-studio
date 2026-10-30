@@ -14,7 +14,7 @@ Refer to specifications:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow Overview
 
@@ -22,7 +22,7 @@ Refer to specifications:
 2. **Mod & Gear Inspection**: Inspect [`mods/`](../../../mods) for mod items (e.g. *Sets of Faerun*). Fall back to top-tier vanilla gear.
 3. **Synergy Simulation**: Calculate Turn 1 DPR, Spell DC, and slot matrices:
    ```bash
-   python3 scripts/bg3.py build simulate --classes "<Class=Level,...>" --stats "<S=N,D=N,C=N,I=N,W=N,Ch=N>" --gear "<Items>" --dpr-sequence <melee_burst|eldritch_blast> --json
+   uv run bg3 build simulate --classes "<Class=Level,...>" --stats "<S=N,D=N,C=N,I=N,W=N,Ch=N>" --gear "<Items>" --dpr-sequence <melee_burst|eldritch_blast> --json
    ```
 4. **Draft Guide**: Populate the 5 standardized sections following the [Build Guide Template](./resources/build_guide_template.md).
 5. **Artifact Delivery**: Write the complete document to disk under `build_guides/<category>/build_guide_<classes>.md`. Deliver concise executive summary in chat with file link.

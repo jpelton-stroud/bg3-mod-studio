@@ -6,7 +6,7 @@ import os
 import unittest
 from unittest.mock import patch
 
-from scripts.lib.cli_common import (
+from bg3_core.cli_common import (
     ConsoleColor,
     ExitCode,
     NonInteractiveConfirmationError,

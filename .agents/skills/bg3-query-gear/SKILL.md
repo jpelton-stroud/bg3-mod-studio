@@ -10,14 +10,14 @@ Intelligent gear and build advisor, translating natural language requests into h
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
 ```mermaid
 flowchart TD
     UserQuery["User Request (e.g. 'Rings boosting spell DC')"] --> Translate["Translate to CLI Arguments"]
-    Translate --> Query["Run scripts/bg3.py query --json"]
+    Translate --> Query["Run bg3 query --json"]
     Query --> Verify["Verify Query Response"]
     Verify --> Synthesize["Synthesize Recommendations & Synergies"]
 ```
@@ -26,20 +26,20 @@ flowchart TD
 
 | User Intent | CLI Command |
 | :--- | :--- |
-| Boosts specific stat | `python3 scripts/bg3.py query --boost "SpellSaveDC" --json` |
-| Specific equipment slot | `python3 scripts/bg3.py query --slot "Amulet" --json` |
-| Specific passive | `python3 scripts/bg3.py query --passive "ExtraAttack" --json` |
-| Slot + Rarity combination | `python3 scripts/bg3.py query --slot "Boots" --rarity "Legendary" --json` |
-| Thematic keyword search | `python3 scripts/bg3.py query --search "necrotic" --json` |
+| Boosts specific stat | `uv run bg3 query --boost "SpellSaveDC" --json` |
+| Specific equipment slot | `uv run bg3 query --slot "Amulet" --json` |
+| Specific passive | `uv run bg3 query --passive "ExtraAttack" --json` |
+| Slot + Rarity combination | `uv run bg3 query --slot "Boots" --rarity "Legendary" --json` |
+| Thematic keyword search | `uv run bg3 query --search "necrotic" --json` |
 
 ### 2. Synthesize Advice
-Structure recommendations with Item Name, Slot, Mod Source, Key Effects, and Build Synergies. Note early-game container drop mechanics via `scripts/bg3.py mod inject-treasure`.
+Structure recommendations with Item Name, Slot, Mod Source, Key Effects, and Build Synergies. Note early-game container drop mechanics via `bg3 mod inject-treasure`.
 
 ---
 
 ## Verification Gate
 
 Always verify query results before presenting to user:
-1. Verify `scripts/bg3.py query` exits with code 0.
-2. If the query database is empty or missing, rebuild it with `python3 scripts/bg3.py query --reindex`.
+1. Verify `bg3 query` exits with code 0.
+2. If the query database is empty or missing, rebuild it with `uv run bg3 query --reindex`.
 3. Confirm returned items exist in [`mods/library.md`](../../../mods/library.md) or [`mods/`](../../../mods).

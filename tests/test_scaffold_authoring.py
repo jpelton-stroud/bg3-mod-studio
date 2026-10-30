@@ -20,16 +20,16 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.lib.larian_parsers import (
+from bg3_core.larian_parsers import (
     PATCH_8_VERSION,
     format_patch8_lsx_header,
     generate_larian_handle,
     update_localization_xml,
 )
-from scripts.diagnostics.validate_mod import ModValidator
-from scripts.diagnostics.check_mod_conflicts import compare_two_mods
+from bg3_authoring.diagnostics.validate_mod import ModValidator
+from bg3_authoring.diagnostics.check_mod_conflicts import compare_two_mods
 
-BG3_CLI = REPO_ROOT / "scripts" / "bg3.py"
+BG3_CLI = REPO_ROOT / "packages" / "bg3-core" / "bg3_core" / "cli.py"
 
 
 class TestPatch8Primitives(unittest.TestCase):

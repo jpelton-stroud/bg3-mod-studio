@@ -13,7 +13,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts.management.setup_environment import (
+from bg3_core.setup_environment import (
     handle_custom_mods_purge,
     handle_subscription_sync,
     prompt_custom_mods_purge,
@@ -85,7 +85,7 @@ class SetupEnvironmentQATests(unittest.TestCase):
             (mock_my_mods / "sample-mod" / "meta.lsx").write_text("<save/>", encoding="utf-8")
             (mock_my_mods / "notes.txt").write_text("notes", encoding="utf-8")
 
-            with patch("scripts.management.setup_environment.WORKSPACE_ROOT", temp_root):
+            with patch("bg3_core.setup_environment.WORKSPACE_ROOT", temp_root):
                 # When choice is 'n', nothing is removed
                 handle_custom_mods_purge("n", dry_run=False)
                 self.assertTrue((mock_my_mods / "sample-mod").is_dir())
@@ -123,7 +123,7 @@ class SetupEnvironmentQATests(unittest.TestCase):
 
         # 3. python3 scripts/management/setup_environment.py --dry-run --non-interactive
         proc_dry = subprocess.run(
-            [sys.executable, "scripts/management/setup_environment.py", "--dry-run", "--non-interactive"],
+            [sys.executable, "packages/bg3-core/bg3_core/setup_environment.py", "--dry-run", "--non-interactive"],
             cwd=repo_root,
             capture_output=True,
             text=True,
@@ -140,10 +140,10 @@ class SetupEnvironmentQATests(unittest.TestCase):
             legacy_file.write_text("MODIO_API_KEY=migrated_key_999\n", encoding="utf-8")
             target_config = tmp_root / "xdg" / "bg3" / "env"
 
-            from scripts.management.setup_environment import check_environment_status
+            from bg3_core.setup_environment import check_environment_status
 
-            with patch("scripts.management.setup_environment.WORKSPACE_ROOT", tmp_root), \
-                 patch("scripts.management.setup_environment.ENV_PATH", target_config):
+            with patch("bg3_core.setup_environment.WORKSPACE_ROOT", tmp_root), \
+                 patch("bg3_core.setup_environment.ENV_PATH", target_config):
                 check_environment_status(as_json=True)
                 self.assertTrue(target_config.is_file())
                 self.assertIn("MODIO_API_KEY=migrated_key_999", target_config.read_text(encoding="utf-8"))

@@ -2,8 +2,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.lib.env_paths import MY_MODS_DIR, normalize_mod_key, resolve_mod_dir
-from scripts.lib.larian_parsers import (
+from bg3_core.env_paths import MY_MODS_DIR, normalize_mod_key, resolve_mod_dir
+from bg3_core.larian_parsers import (
     calculate_version64,
     compile_xml_bytes_to_loca,
     compile_xml_to_loca,

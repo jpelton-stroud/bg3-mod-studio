@@ -14,7 +14,7 @@ Refer to domain specifications:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -30,16 +30,16 @@ flowchart TD
 Run deterministic inspection against cataloged workspace mods or candidate pairs:
 ```bash
 # Check candidate against tracked library
-python3 scripts/bg3.py mod conflict "<MOD_SLUG>" --against-library --json
+uv run bg3 mod conflict "<MOD_SLUG>" --against-library --json
 
 # Compare two candidate mods
-python3 scripts/bg3.py mod conflict "<MOD1>" --mod2 "<MOD2>" --json
+uv run bg3 mod conflict "<MOD1>" --mod2 "<MOD2>" --json
 ```
 
 ### 2. Remediation & Patch Generation
 When actionable stat collisions occur, offer automated patch generation:
 ```bash
-python3 scripts/bg3.py mod compat-patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json
+uv run bg3 mod compat-patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json
 ```
 
 ---
@@ -47,6 +47,6 @@ python3 scripts/bg3.py mod compat-patch --mod1 <mod1> --mod2 <mod2> --name "<Mod
 ## Verification Gate
 
 Always verify automated conflict output and status formatting before returning:
-1. Verify `scripts/bg3.py mod conflict` exits with code 0 and valid JSON.
+1. Verify `bg3 mod conflict` exits with code 0 and valid JSON.
 2. Confirm console tags (`[Console Load Order]`) are applied when target platform is console.
 3. Validate return messages match schemas in [Remediation Templates](./resources/remediation_patch_template.md).

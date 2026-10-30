@@ -10,7 +10,7 @@ import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from scripts.management.manage_load_order import (
+from bg3_core.manage_load_order import (
     CORE_SYSTEM_MODULES,
     CORE_SYSTEM_UUIDS,
     _ensure_base_module,
@@ -24,7 +24,7 @@ from scripts.management.manage_load_order import (
     restore_quarantined_paks,
     validate_load_order,
 )
-from scripts.packaging.pack_mod_pak import build_pak_archive
+from bg3_authoring.packaging.pack_mod_pak import build_pak_archive
 
 
 def create_dummy_pak(path: Path, mod_name: str, mod_uuid: str, version64: int = 36028797018963968):
@@ -241,7 +241,7 @@ class TestManageLoadOrderQuarantine(unittest.TestCase):
     def test_cli_loadorder_commands(self):
         import subprocess
         import sys
-        bg3_cli = Path(__file__).resolve().parent.parent / "scripts" / "bg3.py"
+        bg3_cli = Path(__file__).resolve().parent.parent / "packages" / "bg3-core" / "bg3_core" / "cli.py"
 
         # 1. Test bg3 loadorder enable --help shows --isolate and --quarantine
         proc = subprocess.run([sys.executable, str(bg3_cli), "loadorder", "enable", "--help"], capture_output=True, text=True)

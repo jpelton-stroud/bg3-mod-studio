@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.lib.library_catalog import (
+from bg3_core.library_catalog import (
     find_mod_folder,
     find_orphaned_folders,
     get_tracked_mod_identifiers,

@@ -5,15 +5,15 @@
 Execute deterministic triage against BG3 Toolkit (`Glasses.exe`) sessions:
 ```bash
 # General warning/error triage
-python3 scripts/bg3.py mod diagnose-logs --mod <mod-slug> --severity warning --json
+uv run bg3 mod diagnose-logs --mod <mod-slug> --severity warning --json
 
 # Filter by engine subsystem
-python3 scripts/bg3.py mod diagnose-logs --subsystem Boosts --mod <mod-slug> --json
-python3 scripts/bg3.py mod diagnose-logs --subsystem Stats --mod <mod-slug> --json
-python3 scripts/bg3.py mod diagnose-logs --subsystem Osiris --mod <mod-slug> --json
+uv run bg3 mod diagnose-logs --subsystem Boosts --mod <mod-slug> --json
+uv run bg3 mod diagnose-logs --subsystem Stats --mod <mod-slug> --json
+uv run bg3 mod diagnose-logs --subsystem Osiris --mod <mod-slug> --json
 
 # Live stream active session
-python3 scripts/bg3.py mod diagnose-logs --follow
+uv run bg3 mod diagnose-logs --follow
 ```
 
 ---
@@ -22,7 +22,7 @@ python3 scripts/bg3.py mod diagnose-logs --follow
 
 1. **Missing String Handles**: If logs indicate missing localization handles, run:
    ```bash
-   python3 scripts/bg3.py mod sync-localization --mod <mod-slug> --write --json
+   uv run bg3 mod sync-localization --mod <mod-slug> --write --json
    ```
 2. **Stat Typo / Missing Reference**: Correlate logged IDs to `Public/<ModName>_<UUID>/Stats/Generated/Data/`.
 3. **Circuit Breaker Guardrail**:

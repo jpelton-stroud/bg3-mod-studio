@@ -5,7 +5,7 @@ import urllib.error
 from pathlib import Path
 from unittest.mock import Mock
 
-from scripts.library.modio_create_collection import (
+from bg3_core.modio_create_collection import (
     BG3_GAME_ID,
     ModEntry,
     ModioClient,
@@ -15,9 +15,9 @@ from scripts.library.modio_create_collection import (
     parse_catalog,
     run_workflow,
 )
-from scripts.library.modio_search import get_tracked_mods as search_tracked_mods
-from scripts.library.modio_sync import get_tracked_mods_from_library, prune_mod_from_library
-from scripts.library.modio_update import get_tracked_mods as update_tracked_mods
+from bg3_core.modio_search import get_tracked_mods as search_tracked_mods
+from bg3_core.modio_sync import get_tracked_mods_from_library, prune_mod_from_library
+from bg3_core.modio_update import get_tracked_mods as update_tracked_mods
 
 
 class StubClient:

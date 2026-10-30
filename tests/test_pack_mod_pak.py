@@ -5,8 +5,8 @@ import struct
 import unittest
 from pathlib import Path
 
-from scripts.lib.lspk import LspkArchive, lz4_block_compress, lz4_block_decompress
-from scripts.packaging.pack_mod_pak import build_pak_archive, verify_pak_archive
+from bg3_core.lspk import LspkArchive, lz4_block_compress, lz4_block_decompress
+from bg3_authoring.packaging.pack_mod_pak import build_pak_archive, verify_pak_archive
 
 
 class TestLspkPackaging(unittest.TestCase):
@@ -96,7 +96,7 @@ class TestLspkPackaging(unittest.TestCase):
     def test_collect_mod_files_posix_paths_and_dotfile_filtering(self):
         """Test that collect_mod_files outputs POSIX forward slashes and filters dotfiles."""
         import tempfile
-        from scripts.packaging.pack_mod_pak import collect_mod_files
+        from bg3_authoring.packaging.pack_mod_pak import collect_mod_files
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             mod_dir = Path(tmp_dir)

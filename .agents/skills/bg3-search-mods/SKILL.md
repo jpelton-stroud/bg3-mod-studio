@@ -14,7 +14,7 @@ Refer to specifications:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -34,7 +34,7 @@ flowchart TD
 ### 1. Platform Check & Search
 Ensure target platform is specified (prompt user if missing). Execute search:
 ```bash
-python3 scripts/bg3.py modio search --query "<QUERY>" --platform "<PLATFORM>" --limit 15 --json
+uv run bg3 modio search --query "<QUERY>" --platform "<PLATFORM>" --limit 15 --json
 ```
 Automatically filters out mods cataloged in [`mods/library.md`](../../../mods/library.md).
 

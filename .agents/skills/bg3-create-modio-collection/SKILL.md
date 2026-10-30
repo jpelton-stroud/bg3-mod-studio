@@ -19,14 +19,14 @@ Creates a public BG3 collection or updates one of the authenticated user's colle
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
 ### 1. Verification & Dry Run Preview
 Confirm `MODIO_PAT` is present, then execute dry run:
 ```bash
-python3 scripts/bg3.py modio create-collection --dry-run
+uv run bg3 modio create-collection --dry-run
 ```
 The script confirms BG3 collection membership and checks numeric Mod IDs from [`mods/library.md`](../../../mods/library.md).
 
@@ -34,7 +34,7 @@ The script confirms BG3 collection membership and checks numeric Mod IDs from [`
 1. Present the complete preview (selected mods, additions, removals) to the user.
 2. Upon user approval, rerun without `--dry-run`:
    ```bash
-   python3 scripts/bg3.py modio create-collection
+   uv run bg3 modio create-collection
    ```
 3. Enter `yes` at the CLI confirmation prompt only when the live preview matches the approved dry-run preview.
 

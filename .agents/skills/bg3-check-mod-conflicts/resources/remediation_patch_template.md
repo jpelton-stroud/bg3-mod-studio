@@ -36,8 +36,8 @@
 
 ```bash
 # Generate standalone compatibility override patch mod
-python3 scripts/bg3.py mod compat-patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json
+uv run bg3 mod compat-patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json
 
 # Generate Compatibility Framework config payload
-python3 scripts/bg3.py mod compat-patch --mod1 <mod1> --mod2 <mod2> --mode cf --json
+uv run bg3 mod compat-patch --mod1 <mod1> --mod2 <mod2> --mode cf --json
 ```

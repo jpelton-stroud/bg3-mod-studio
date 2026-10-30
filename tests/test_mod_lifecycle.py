@@ -19,12 +19,14 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCRIPTS_DIR = REPO_ROOT / "scripts"
+PACKAGES_DIR = REPO_ROOT / "packages"
 sys.path.insert(0, str(REPO_ROOT))
-sys.path.insert(0, str(SCRIPTS_DIR))
+sys.path.insert(0, str(PACKAGES_DIR / "bg3-core"))
+sys.path.insert(0, str(PACKAGES_DIR / "bg3-authoring"))
+sys.path.insert(0, str(PACKAGES_DIR / "bg3-theorycraft"))
 
-from scripts.lib.lspk import LspkArchive
-from scripts.lib.larian_parsers import parse_loca_bytes, decode_version64
+from bg3_core.lspk import LspkArchive
+from bg3_core.larian_parsers import parse_loca_bytes, decode_version64
 
 
 class ModLifecycleTests(unittest.TestCase):
@@ -82,19 +84,20 @@ class ModLifecycleTests(unittest.TestCase):
         self.env["BG3_DATA_DIR"] = str(self.game_data_dir)
         self.env["BG3_LOCALAPPDATA"] = str(self.temp_path / "AppData")
         self.env["BG3_USER_MODS_DIR"] = str(self.appdata_mods_dir)
-        self.env["PYTHONPATH"] = f"{REPO_ROOT}:{SCRIPTS_DIR}"
+        self.env["PYTHONPATH"] = f"{REPO_ROOT}:{PACKAGES_DIR}/bg3-core:{PACKAGES_DIR}/bg3-authoring:{PACKAGES_DIR}/bg3-theorycraft"
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def run_script(self, script_name: str, *args) -> tuple[int, str, dict | None]:
         """Helper to run a Python script from scripts/ and return code, stdout, and parsed JSON."""
-        target = SCRIPTS_DIR / script_name
+        target = None
+        for cand in PACKAGES_DIR.rglob(script_name):
+            if "__pycache__" not in cand.as_posix():
+                target = cand
+                break
         if not target.is_file():
-            for cand in SCRIPTS_DIR.rglob(script_name):
-                if "/lib/" not in cand.as_posix() and "__pycache__" not in cand.as_posix():
-                    target = cand
-                    break
+            pass
         cmd = [sys.executable, str(target)] + list(args)
         proc = subprocess.run(
             cmd,

@@ -14,7 +14,7 @@ Refer to resources:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -30,7 +30,7 @@ flowchart TD
 ### 1. Extraction & Data Unpacking
 Verify `MODIO_API_KEY` is set in the environment, then run extraction:
 ```bash
-python3 scripts/bg3.py modio extract --query "<MOD_QUERY>" --write-spec --json
+uv run bg3 modio extract --query "<MOD_QUERY>" --write-spec --json
 ```
 This downloads the package, unpacks LSPK v18 assets into `mods/<slug>/data/`, and scaffolds an initial markdown specification at `mods/<slug>/README.md`.
 

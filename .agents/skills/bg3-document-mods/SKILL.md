@@ -14,7 +14,7 @@ Refer to specifications:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `python3 scripts/bg3.py tools search "<intent>" --json`.
+> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -36,10 +36,10 @@ Stop calling tools and await reactive completion notifications without polling.
 Once all subagents report status, update the centralized catalog and warm the query cache:
 ```bash
 # Update mods/library.md
-python3 scripts/bg3.py library update-catalog --write
+uv run bg3 library update-catalog --write
 
 # Reindex high-speed query database
-python3 scripts/bg3.py query --reindex
+uv run bg3 query --reindex
 ```
 
 ### 3. Summary Presentation
