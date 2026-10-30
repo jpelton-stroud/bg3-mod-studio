@@ -24,6 +24,7 @@ import urllib.parse
 import urllib.request
 
 from pathlib import Path
+from typing import Any
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
@@ -129,10 +130,10 @@ def sync_library(
             if slug not in subscribed_slug_map:
                 unsubscribed_tracked.append((slug, info))
 
-    active_slugs = set(subscribed_slug_map.keys()) | set(tracked_mods.keys())
+    active_slugs = list(set(subscribed_slug_map.keys()) | set(tracked_mods.keys()))
     orphaned_folders = find_orphaned_folders(mods_dir, active_slugs) if not filter_query else []
 
-    results = {
+    results: dict[str, Any] = {
         "total_subscribed": len(subscribed_mods),
         "total_tracked": len(tracked_mods),
         "new_count": len(new_mods),

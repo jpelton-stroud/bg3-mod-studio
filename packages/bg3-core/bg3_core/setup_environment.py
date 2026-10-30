@@ -71,7 +71,7 @@ def print_banner():
 
 def parse_env_file(path: Path) -> dict:
     """Safely parse key-value pairs from an existing .env file."""
-    env = {}
+    env: dict[str, str] = {}
     if not path.is_file():
         return env
     try:

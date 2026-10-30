@@ -176,7 +176,8 @@ def add_or_merge_progression(
         lvl_attr = p_node.find("attribute[@id='Level']")
         name_attr = p_node.find("attribute[@id='Name']")
         if lvl_attr is not None and name_attr is not None:
-            if lvl_attr.get("value") == str(level) and name_attr.get("value").lower() == class_name.lower():
+            name_val = name_attr.get("value")
+            if lvl_attr.get("value") == str(level) and name_val and name_val.lower() == class_name.lower():
                 existing_node = p_node
                 break
 
@@ -204,7 +205,7 @@ def add_or_merge_progression(
         ET.SubElement(node, "attribute", id="UUID", type="guid", value=node_uuid)
     else:
         uuid_attr = node.find("attribute[@id='UUID']")
-        node_uuid = uuid_attr.get("value") if uuid_attr is not None else str(uuid.uuid4())
+        node_uuid = (uuid_attr.get("value") if uuid_attr is not None else None) or str(uuid.uuid4())
 
     if passives:
         p_str = ";".join(p.strip() for p in passives if p.strip())

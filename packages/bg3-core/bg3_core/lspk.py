@@ -5,7 +5,7 @@ import io
 import struct
 import zlib
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 _LIBZSTD = None
 for _libname in ("libzstd.so.1", "libzstd.so", "libzstd.dylib", "libzstd.dll"):
@@ -205,7 +205,7 @@ class LspkArchive:
 
     def __init__(self, data_bytes: bytes):
         self.data = data_bytes
-        self.files = []
+        self.files: list[dict[str, Any]] = []
         self._parse_header_and_filelist()
 
     def _parse_header_and_filelist(self) -> None:

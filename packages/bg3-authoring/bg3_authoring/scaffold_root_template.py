@@ -241,9 +241,13 @@ def scaffold_root_template_node(
     action = "updated" if existing is not None else "created"
     node = existing if existing is not None else ET.SubElement(children, "node", id="GameObjects")
 
-    map_key = str(uuid.uuid4()) if existing is None else node.find("attribute[@id='MapKey']").get("value")
+    if existing is None:
+        map_key = str(uuid.uuid4())
+    else:
+        mk_attr = node.find("attribute[@id='MapKey']")
+        map_key = (mk_attr.get("value") if mk_attr is not None else None) or str(uuid.uuid4())
 
-    def set_attr(attr_id: str, attr_type: str, val: str, extra_attrs: dict = None):
+    def set_attr(attr_id: str, attr_type: str, val: str | None, extra_attrs: dict[str, str] | None = None) -> None:
         cur = node.find(f"attribute[@id='{attr_id}']")
         if cur is None:
             cur = ET.SubElement(node, "attribute", id=attr_id, type=attr_type)

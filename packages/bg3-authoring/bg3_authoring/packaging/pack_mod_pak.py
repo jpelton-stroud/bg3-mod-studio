@@ -15,6 +15,7 @@ import struct
 import sys
 import zlib
 from pathlib import Path
+from typing import Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.env_paths import DIST_DIR, REPO_ROOT, detect_bg3_appdata_dirs, get_env_var, resolve_mod_dir
@@ -112,7 +113,7 @@ def collect_mod_files(mod_dir: Path, include_projects: bool = False) -> list[tup
 
 
 def build_pak_archive(
-    files: list[tuple[str, bytes | Path]],
+    files: Sequence[tuple[str, bytes | Path]],
     compress: bool = True,
 ) -> bytes:
     """Constructs the LSPK v18 binary package with LZ4 compression."""
@@ -199,7 +200,7 @@ def build_pak_archive(
     return header + b"".join(file_data_blocks) + file_list_block
 
 
-def verify_pak_archive(pak_bytes: bytes, original_files: list[tuple[str, bytes | Path]]) -> bool:
+def verify_pak_archive(pak_bytes: bytes, original_files: Sequence[tuple[str, bytes | Path]]) -> bool:
     """Verifies that the generated pak can be completely parsed and extracted."""
     if LspkArchive is None:
         return True
@@ -372,6 +373,8 @@ def main():
 
     try:
         mod_dir = resolve_mod_dir(args.mod, prefer_my_mods=True)
+        if mod_dir is None:
+            raise FileNotFoundError(f"Mod directory not found: {args.mod}")
         mod_slug = mod_dir.name
 
         if args.clean_local:

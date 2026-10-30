@@ -15,6 +15,7 @@ import sys
 import uuid
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
@@ -26,7 +27,7 @@ from bg3_core.larian_parsers import (
 )
 
 # Mapping of entry types to their file and default schema
-TYPE_CONFIG = {
+TYPE_CONFIG: dict[str, dict[str, Any]] = {
     "weapon": {
         "file": "Weapon.txt",
         "type_header": 'type "Weapon"',

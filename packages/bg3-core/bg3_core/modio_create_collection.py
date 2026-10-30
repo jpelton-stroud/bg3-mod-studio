@@ -142,7 +142,10 @@ def fetch_collection_mods(client: ModioClient, collection_id: int) -> Dict[int, 
     )
     mods: Dict[int, str] = {}
     for item in items:
-        mod = item.get("mod") if isinstance(item.get("mod"), dict) else item
+        if not isinstance(item, dict):
+            continue
+        mod_obj = item.get("mod")
+        mod = mod_obj if isinstance(mod_obj, dict) else item
         mod_id = mod.get("id")
         if not isinstance(mod_id, int) or mod_id < 1:
             raise ModioError("A collection mod response did not include a valid mod ID.")
@@ -362,7 +365,7 @@ def run_workflow(
     target = choose_collection(collections, input_fn, output)
 
     creating = target is None
-    if creating:
+    if target is None:
         collection_name = _required_input("New collection name", input_fn)
         collection_summary = _required_input("New collection description", input_fn)
         strategy = "add"

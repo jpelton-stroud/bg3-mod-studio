@@ -196,7 +196,7 @@ def scaffold_class_description(
         key = parent_class.strip().lower()
         if key in VANILLA_PARENT_CLASSES:
             parent_info = VANILLA_PARENT_CLASSES[key]
-            resolved_parent_guid = parent_info["guid"]
+            resolved_parent_guid = str(parent_info["guid"])
             is_subclass = True
         else:
             raise ValueError(f"Unknown vanilla parent class '{parent_class}'. Specify valid class or --parent-guid.")
@@ -307,10 +307,12 @@ def scaffold_class_description(
         ps_children = ps_root.find(".//node[@id='root']/children")
         if ps_children is None:
             ps_root_node = ps_root.find(".//node[@id='root']")
+            if ps_root_node is None:
+                ps_root_node = ET.SubElement(ps_root, "node", id="root")
             ps_children = ET.SubElement(ps_root_node, "children")
 
-        subclass_level = parent_info["subclass_level"] if parent_info else 3
-        parent_table_uuid = parent_info["table_uuid"] if parent_info else ""
+        subclass_level = int(str(parent_info["subclass_level"])) if parent_info else 3
+        parent_table_uuid = str(parent_info["table_uuid"]) if parent_info else ""
 
         # Find matching progression node for parent class at subclass choice level
         target_prog_node = None

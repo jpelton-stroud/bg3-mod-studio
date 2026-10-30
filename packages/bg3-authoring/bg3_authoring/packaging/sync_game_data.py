@@ -25,6 +25,7 @@ import sys
 import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.env_paths import (
@@ -108,7 +109,7 @@ def check_mod_dependencies(mod_path: Path, data_dir: Path) -> list:
     Validates that all dependencies declared in meta.lsx are resolvable in the game environment.
     Returns list of missing dependency descriptions.
     """
-    missing = []
+    missing: list[str] = []
     meta_files = list(mod_path.glob("Mods/*/meta.lsx"))
     if not meta_files:
         return missing
@@ -125,12 +126,12 @@ def check_mod_dependencies(mod_path: Path, data_dir: Path) -> list:
                 folder_attr = dep.find("attribute[@id='Folder']")
                 uuid_attr = dep.find("attribute[@id='UUID']")
                 dep_name = name_attr.get("value") if name_attr is not None else ""
-                dep_folder = folder_attr.get("value") if folder_attr is not None else dep_name
+                dep_folder = (folder_attr.get("value") if folder_attr is not None else None) or dep_name or ""
                 dep_uuid = uuid_attr.get("value", "").lower() if uuid_attr is not None else ""
                 if not dep_name or dep_name in BUILTIN_MODULES:
                     continue
 
-                in_data_mods = (data_dir / "Mods" / dep_folder).is_dir()
+                in_data_mods = (data_dir / "Mods" / dep_folder).is_dir() if dep_folder else False
                 in_data_pak = (
                     (data_dir / f"{dep_name}.pak").is_file()
                     or (data_dir / f"{dep_folder}.pak").is_file()
@@ -160,14 +161,13 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False, quiet: bool 
     """
     Synchronizes a single mod folder into Data/.
     """
-    stats = {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0, "compiled_loca": 0, "missing_dependencies": []}
+    stats: dict[str, int] = {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0, "compiled_loca": 0}
     mod_name = mod_path.name
     if not quiet:
         print(f"\n📦 Processing mod: {mod_name} ({mod_path})")
 
     # Check dependencies before syncing
     missing_deps = check_mod_dependencies(mod_path, data_dir)
-    stats["missing_dependencies"] = missing_deps
     if missing_deps and not quiet:
         print(f"  ⚠️  WARNING: Mod '{mod_name}' has unresolved dependencies:")
         for m in missing_deps:
@@ -295,7 +295,9 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False, quiet: bool 
                     else:
                         stats["unchanged"] += 1
 
-    return stats
+    result: dict[str, Any] = dict(stats)
+    result["missing_dependencies"] = missing_deps
+    return result
 
 
 LEGACY_PATTERNS = [
@@ -468,7 +470,7 @@ def clean_mod_data(mod_path: Path, data_dir: Path, dry_run: bool = False, quiet:
     }
 
 
-def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list = None, quiet: bool = False, source_dir: Path | None = None) -> int:
+def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list[Any] | None = None, quiet: bool = False, source_dir: Path | None = None) -> int:
     """
     Purges custom studio mods from Data/ without touching eldritch-blast baseline or base game files.
     """
@@ -558,7 +560,7 @@ def matches_mod_filter(mod_dir: Path, filters: list[str]) -> bool:
 def run_sync(
     source_dir: Path,
     data_dir: Path,
-    mod_filter: list = None,
+    mod_filter: list[Any] | None = None,
     dry_run: bool = False,
     clean: bool = False,
     clean_custom: bool = False,
@@ -648,7 +650,7 @@ def run_sync(
         print("=" * 40 + "\n")
 
 
-def watch_and_sync(source_dir: Path, data_dir: Path, mod_filter: list = None, interval: float = 2.0, clean: bool = False, clean_custom: bool = False):
+def watch_and_sync(source_dir: Path, data_dir: Path, mod_filter: list[Any] | None = None, interval: float = 2.0, clean: bool = False, clean_custom: bool = False):
     print(f"👀 Watching {source_dir} for changes every {interval}s... Press Ctrl+C to stop.")
     try:
         while True:

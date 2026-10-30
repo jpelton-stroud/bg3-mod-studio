@@ -209,7 +209,7 @@ def render_mod_description(mod_query: str, write_file: bool = False, as_json: bo
 
     html_file = mod_dir / "modio_description.html"
     html_content = markdown_to_html(readme_file.read_text(encoding="utf-8"), mod_dir.name)
-    result = {
+    result: dict[str, Any] = {
         "mod_name": mod_dir.name,
         "mod_dir": str(mod_dir),
         "readme_file": str(readme_file),
