@@ -1,8 +1,0 @@
-new entry "POLYMORPH_SHEEP_NIGHTFALL_PARAGON_FLARE"
-type "StatusData"
-data "StatusType" "POLYMORPHED"
-using "POLYMORPH_SHEEP"
-data "DisplayName" "he8b5f9e8gd8a6gfc83g6d61gc04a0771aed1;1"
-data "Description" "h6c6761cdgc4f6gd6d1g2f0dg9346bb103e9c;3"
-data "Boosts" "Tag(POLYMORPHED_UNWILLING);Resistance(All,Vulnerable);"
-

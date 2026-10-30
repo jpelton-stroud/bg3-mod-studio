@@ -51,5 +51,5 @@ Deliver an executive summary table detailing mod name, status (Success/Failed), 
 
 Always verify catalog and cache updates before concluding:
 1. Verify `update-catalog` and `query --reindex` exit with code 0.
-2. Confirm all documented mods appear in [`mods/library.md`](../../../mods/library.md) under correct categories.
+2. Confirm all documented mods appear in `Mods/subscribed/library.md` under correct categories.
 3. Validate that relative links to `mods/<slug>/README.md` resolve to existing files.

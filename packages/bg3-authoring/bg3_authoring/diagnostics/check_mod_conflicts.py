@@ -26,7 +26,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MODS_DIR, MY_MODS_DIR, REPO_ROOT as WORKSPACE_ROOT, normalize_mod_key, resolve_mod_dir
+from bg3_core.env_paths import (
+    MODS_DIR,
+    MY_MODS_DIR,
+    REPO_ROOT as WORKSPACE_ROOT,
+    get_authored_mods_dir,
+    get_subscribed_mods_dir,
+    normalize_mod_key,
+    resolve_mod_dir,
+)
 
 # Zero-dependency ANSI Terminal Colors honoring NO_COLOR
 _color = ConsoleColor(stream=sys.stderr)
@@ -196,7 +204,7 @@ def find_missing_local_dependencies(mod_dir: Path) -> list[str]:
         return []
 
     known_keys: set[str] = set()
-    for base in (MY_MODS_DIR, MODS_DIR):
+    for base in (get_authored_mods_dir(), get_subscribed_mods_dir()):
         if base.is_dir():
             for d in base.iterdir():
                 if d.is_dir():
@@ -498,10 +506,12 @@ def main():
     elif args.candidate:
         cand_path = resolve_mod_path(args.candidate)
         catalog = []
-        if args.against_library and MODS_DIR.exists():
-            catalog = [d for d in MODS_DIR.iterdir() if d.is_dir()]
-        elif MY_MODS_DIR.exists():
-            catalog = [d for d in MY_MODS_DIR.iterdir() if d.is_dir()]
+        subscribed_dir = get_subscribed_mods_dir()
+        authored_dir = get_authored_mods_dir()
+        if args.against_library and subscribed_dir.exists():
+            catalog = [d for d in subscribed_dir.iterdir() if d.is_dir()]
+        elif authored_dir.exists():
+            catalog = [d for d in authored_dir.iterdir() if d.is_dir()]
 
         results = compare_candidate_against_catalog(cand_path, catalog)
         cand_dlls = check_native_dlls(cand_path)
@@ -582,10 +592,12 @@ def main():
 
     elif args.all:
         all_mods = []
-        if MY_MODS_DIR.exists():
-            all_mods.extend([d for d in MY_MODS_DIR.iterdir() if d.is_dir()])
-        if MODS_DIR.exists():
-            all_mods.extend([d for d in MODS_DIR.iterdir() if d.is_dir()])
+        authored_dir = get_authored_mods_dir()
+        subscribed_dir = get_subscribed_mods_dir()
+        if authored_dir.exists():
+            all_mods.extend([d for d in authored_dir.iterdir() if d.is_dir()])
+        if subscribed_dir.exists():
+            all_mods.extend([d for d in subscribed_dir.iterdir() if d.is_dir()])
 
         pair_conflicts = []
         for i in range(len(all_mods)):

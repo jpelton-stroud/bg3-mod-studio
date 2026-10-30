@@ -29,11 +29,11 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MODS_DIR, REPO_ROOT
+from bg3_core.env_paths import MODS_DIR, REPO_ROOT, get_subscribed_mods_dir
 from bg3_core.library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
 
 WORKSPACE_ROOT = REPO_ROOT
-LIBRARY_FILE = MODS_DIR / "library.md"
+LIBRARY_FILE = get_subscribed_mods_dir() / "library.md"
 
 CATEGORY_ORDER = [
     "Gear",
@@ -222,25 +222,30 @@ def generate_library_markdown(mods_data: list[dict]) -> str:
     return "\n".join(lines).strip() + "\n"
 
 
-def collect_mods_data(mods_dir: Path = MODS_DIR, library_content: str = "") -> list[dict]:
+def collect_mods_data(mods_dir: Optional[Path] = None, library_content: str = "") -> list[dict]:
+    active_mods_dir = mods_dir if mods_dir is not None else get_subscribed_mods_dir()
     known_mod_ids = parse_existing_mod_ids(library_content)
     mods_data = []
-    for mod_dir in sorted(mods_dir.iterdir()):
-        if mod_dir.is_dir() and not mod_dir.name.startswith("."):
-            parsed = parse_mod_readme(mod_dir, known_mod_ids)
-            if parsed:
-                mods_data.append(parsed)
+    if active_mods_dir.is_dir():
+        for mod_dir in sorted(active_mods_dir.iterdir()):
+            if mod_dir.is_dir() and not mod_dir.name.startswith("."):
+                parsed = parse_mod_readme(mod_dir, known_mod_ids)
+                if parsed:
+                    mods_data.append(parsed)
     return mods_data
 
 
 def write_library_catalog(
-    mods_dir: Path = MODS_DIR, library_file: Path = LIBRARY_FILE
+    mods_dir: Optional[Path] = None, library_file: Optional[Path] = None
 ) -> list[dict]:
+    active_mods_dir = mods_dir if mods_dir is not None else get_subscribed_mods_dir()
+    active_library_file = library_file if library_file is not None else (active_mods_dir / "library.md")
     current_content = (
-        library_file.read_text(encoding="utf-8") if library_file.is_file() else ""
+        active_library_file.read_text(encoding="utf-8") if active_library_file.is_file() else ""
     )
-    mods_data = collect_mods_data(mods_dir, current_content)
-    library_file.write_text(generate_library_markdown(mods_data), encoding="utf-8")
+    mods_data = collect_mods_data(active_mods_dir, current_content)
+    active_library_file.parent.mkdir(parents=True, exist_ok=True)
+    active_library_file.write_text(generate_library_markdown(mods_data), encoding="utf-8")
     return mods_data
 
 
@@ -258,14 +263,17 @@ def main():
     color = ConsoleColor(stream=sys.stdout)
     err_color = ConsoleColor(stream=sys.stderr)
 
-    if not MODS_DIR.exists():
-        print(f"{err_color.red('[ERROR]')} {MODS_DIR} does not exist.", file=sys.stderr)
+    target_mods_dir = get_subscribed_mods_dir()
+    target_library_file = target_mods_dir / "library.md"
+
+    if not target_mods_dir.exists():
+        print(f"{err_color.red('[ERROR]')} {target_mods_dir} does not exist.", file=sys.stderr)
         sys.exit(ExitCode.NOINPUT)
 
     current_content = ""
-    if LIBRARY_FILE.is_file():
-        current_content = LIBRARY_FILE.read_text(encoding="utf-8")
-    mods_data = collect_mods_data(MODS_DIR, current_content)
+    if target_library_file.is_file():
+        current_content = target_library_file.read_text(encoding="utf-8")
+    mods_data = collect_mods_data(target_mods_dir, current_content)
     generated_md = generate_library_markdown(mods_data)
 
     is_identical = current_content.strip() == generated_md.strip()

@@ -5,7 +5,7 @@ description: Recommend BiS equipment, stat boosts, spells, and passives from cat
 
 # BG3 Mod Equipment & Mechanics Advisor (`bg3-query-gear`)
 
-Intelligent gear and build advisor, translating natural language requests into high-speed queries against the cataloged community mod database ([`mods/`](../../../mods)).
+Intelligent gear and build advisor, translating natural language requests into high-speed queries against the cataloged community mod database (`Mods/subscribed/`).
 
 ---
 
@@ -42,4 +42,4 @@ Structure recommendations with Item Name, Slot, Mod Source, Key Effects, and Bui
 Always verify query results before presenting to user:
 1. Verify `bg3 query` exits with code 0.
 2. If the query database is empty or missing, rebuild it with `uv run bg3 query --reindex`.
-3. Confirm returned items exist in [`mods/library.md`](../../../mods/library.md) or [`mods/`](../../../mods).
+3. Confirm returned items exist in `Mods/subscribed/library.md` or `Mods/subscribed/`.

@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
-from .env_paths import MODS_DIR, REPO_ROOT, normalize_mod_key
+from .env_paths import MODS_DIR, REPO_ROOT, get_subscribed_mods_dir, normalize_mod_key
 
 LIBRARY_COLUMNS = (
     "Mod Id",
@@ -190,7 +190,7 @@ def find_mod_folder(slug: str, mods_dir: Optional[Any] = None) -> Optional[Path]
     Checks exact slug name, lowercase match, and normalized mod key match.
     Returns Path or None.
     """
-    mods_path = Path(mods_dir).resolve() if mods_dir else Path(MODS_DIR).resolve()
+    mods_path = Path(mods_dir).resolve() if mods_dir else get_subscribed_mods_dir().resolve()
     if not mods_path.is_dir():
         return None
 
@@ -220,7 +220,7 @@ def find_orphaned_folders(
     (subscribed or tracked in library.md) mod slug.
     Returns list of Path objects.
     """
-    mods_path = Path(mods_dir).resolve() if mods_dir else Path(MODS_DIR).resolve()
+    mods_path = Path(mods_dir).resolve() if mods_dir else get_subscribed_mods_dir().resolve()
     if not mods_path.is_dir():
         return []
 
@@ -251,7 +251,7 @@ def safe_batch_delete_folders(
     Guarantees every folder is an existing direct child of mods_dir.
     Returns list of dicts with deletion results: [{"path": str, "name": str, "status": str, "message": str}]
     """
-    mods_path = Path(mods_dir).resolve() if mods_dir else Path(MODS_DIR).resolve()
+    mods_path = Path(mods_dir).resolve() if mods_dir else get_subscribed_mods_dir().resolve()
     results: List[Dict[str, str]] = []
     seen: Set[Path] = set()
 
@@ -341,7 +341,7 @@ def purge_library_mods(
       - "mods_dir": str
       - "dry_run": bool
     """
-    mods_path = Path(mods_dir).resolve() if mods_dir else Path(MODS_DIR).resolve()
+    mods_path = Path(mods_dir).resolve() if mods_dir else get_subscribed_mods_dir().resolve()
     if library_path is None:
         lib_file = (mods_path / "library.md").resolve()
     else:

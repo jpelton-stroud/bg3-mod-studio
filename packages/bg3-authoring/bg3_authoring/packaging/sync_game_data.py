@@ -27,7 +27,14 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from bg3_core.env_paths import MY_MODS_DIR, detect_data_dir, get_env_var, normalize_mod_key, resolve_mod_dir
+from bg3_core.env_paths import (
+    MY_MODS_DIR,
+    detect_data_dir,
+    get_authored_mods_dir,
+    get_env_var,
+    normalize_mod_key,
+    resolve_mod_dir,
+)
 from bg3_core.larian_parsers import compile_xml_bytes_to_loca
 
 
@@ -346,7 +353,7 @@ def clean_legacy(data_dir: Path, dry_run: bool = False, quiet: bool = False) -> 
 def get_custom_mod_prefixes(source_dir: Path | None = None) -> list[str]:
     """Dynamically collects mod directory and folder prefixes from my_mods/."""
     prefixes = list(CUSTOM_STUDIO_MODS)
-    root = source_dir or Path(get_env_var("BG3_MODS_DIR") or MY_MODS_DIR)
+    root = source_dir or Path(get_env_var("BG3_MODS_DIR") or get_authored_mods_dir())
     if root.is_dir():
         for mod_folder in root.iterdir():
             if not mod_folder.is_dir() or mod_folder.name.startswith("."):
@@ -658,8 +665,8 @@ def main():
     parser.add_argument(
         "--source-dir",
         type=Path,
-        default=Path(os.environ.get("BG3_MODS_DIR", "my_mods")),
-        help="Path to source directory containing mods (default: my_mods or $BG3_MODS_DIR)",
+        default=Path(os.environ.get("BG3_MODS_DIR") or get_authored_mods_dir()),
+        help="Path to source directory containing mods (default: $BG3_STUDIO_DIR/Mods/authored or $BG3_MODS_DIR)",
     )
     parser.add_argument(
         "--data-dir",

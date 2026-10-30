@@ -14,12 +14,17 @@ from unittest.mock import patch
 
 from bg3_core.env_paths import (
     REPO_ROOT,
+    get_authored_mods_dir,
+    get_build_guides_dir,
     get_cache_dir,
     get_env_source,
     get_env_var,
+    get_studio_dir,
+    get_subscribed_mods_dir,
     get_xdg_cache_home,
     get_xdg_config_home,
     get_xdg_data_home,
+    get_xdg_documents_home,
     get_xdg_state_home,
     load_env_file,
 )
@@ -142,6 +147,36 @@ class TestXDGPaths(unittest.TestCase):
                 val, source = get_env_source("TEST_KEY")
                 self.assertEqual(val, "from_env")
                 self.assertEqual(source, "environment")
+
+    def test_studio_paths_defaults_and_overrides(self):
+        """Test default studio paths and environment variable overrides."""
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_docs = Path(tmp) / "Documents"
+            with patch.dict(os.environ, {"XDG_DOCUMENTS_DIR": str(tmp_docs), "BG3_STUDIO_DIR": ""}):
+                self.assertEqual(get_xdg_documents_home(), tmp_docs)
+                self.assertEqual(get_studio_dir(), tmp_docs / "BG3_Mod_Studio")
+                self.assertEqual(get_build_guides_dir(), tmp_docs / "BG3_Mod_Studio" / "Build_Guides")
+                self.assertEqual(get_subscribed_mods_dir(), tmp_docs / "BG3_Mod_Studio" / "Mods" / "subscribed")
+                self.assertEqual(get_authored_mods_dir(), tmp_docs / "BG3_Mod_Studio" / "Mods" / "authored")
+
+            # Custom BG3_STUDIO_DIR override
+            custom_studio = Path(tmp) / "custom_studio"
+            with patch.dict(os.environ, {"BG3_STUDIO_DIR": str(custom_studio)}):
+                self.assertEqual(get_studio_dir(), custom_studio)
+                self.assertEqual(get_build_guides_dir(), custom_studio / "Build_Guides")
+                self.assertEqual(get_subscribed_mods_dir(), custom_studio / "Mods" / "subscribed")
+                self.assertEqual(get_authored_mods_dir(), custom_studio / "Mods" / "authored")
+
+            # Individual subfolder overrides
+            with patch.dict(os.environ, {
+                "BG3_STUDIO_DIR": str(custom_studio),
+                "BG3_BUILD_GUIDES_DIR": str(Path(tmp) / "guides"),
+                "BG3_SUBSCRIBED_MODS_DIR": str(Path(tmp) / "sub"),
+                "BG3_AUTHORED_MODS_DIR": str(Path(tmp) / "auth"),
+            }):
+                self.assertEqual(get_build_guides_dir(), Path(tmp) / "guides")
+                self.assertEqual(get_subscribed_mods_dir(), Path(tmp) / "sub")
+                self.assertEqual(get_authored_mods_dir(), Path(tmp) / "auth")
 
 
 if __name__ == "__main__":

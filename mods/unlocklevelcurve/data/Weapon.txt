@@ -1,6 +1,0 @@
-new entry "WPN_Scimitar_FlameBlade_8"
-type "Weapon"
-using "WPN_Scimitar_FlameBlade"
-data "RootTemplate" "e07090e6-9c93-4680-98ec-303c4b9881f9"
-data "Damage" "6d6"
-

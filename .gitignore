@@ -6,7 +6,6 @@
 .env
 *.env
 .env.*.local
-!.env.example
 
 # Python runtime & caches
 __pycache__/
@@ -50,35 +49,11 @@ desktop.ini
 
 # Scratch / temporary experimental folders
 scratch/
-my_mods/notes.md
 docs/DESIGN.md
 
-# Build Guides (User sandbox for level 20 build crafting)
-build_guides/*
-!build_guides/.gitkeep
-
-# Tracked Mod Reference Specifications (Selective Whitelist)
-mods/*
-!mods/library.md
-
-# Whitelisted mod directories tracked in Git
-!mods/dynamic-difficulty-scaling/
-!mods/dynamic-difficulty-scaling/**
-!mods/dynamic-extra-encounters/
-!mods/dynamic-extra-encounters/**
-!mods/enemy-legends-patch/
-!mods/enemy-legends-patch/**
-!mods/enemy-tacticians/
-!mods/enemy-tacticians/**
-!mods/extra-encounters-and-minibosses/
-!mods/extra-encounters-and-minibosses/**
-!mods/more-enemies-in-basic-fights/
-!mods/more-enemies-in-basic-fights/**
-!mods/nightmare-difficulty/
-!mods/nightmare-difficulty/**
-!mods/paragon-encounters/
-!mods/paragon-encounters/**
-!mods/requiem-for-the-absolute/
-!mods/requiem-for-the-absolute/**
-!mods/unlocklevelcurve/
-!mods/unlocklevelcurve/**
+# Externalized User Content (Ignore any local studio folders or accidental spills)
+build_guides/
+mods/
+my_mods/
+BG3_Mod_Studio/
+.agents/ledgers/artifacts-ledger.md

@@ -29,7 +29,7 @@ import uuid
 import zlib
 from pathlib import Path
 
-from bg3_core.env_paths import load_env_file
+from bg3_core.env_paths import get_authored_mods_dir, load_env_file
 from bg3_core.larian_parsers import calculate_version64, generate_larian_handle
 from bg3_core.mod_resolver import KNOWN_DEPENDENCIES, resolve_dependency_metadata
 
@@ -288,9 +288,13 @@ def scaffold_mod(
     description: str = "",
     version_str: str = "1.0.0.0",
     dependencies: list = None,
-    output_dir: Path = Path("my_mods"),
+    output_dir: Optional[Path] = None,
     dry_run: bool = False,
 ) -> dict:
+    if output_dir is None:
+        output_dir = get_authored_mods_dir()
+    else:
+        output_dir = Path(output_dir)
     clean_name = sanitize_mod_name(name)
     if not mod_uuid:
         mod_uuid = generate_uuid()
@@ -456,8 +460,8 @@ def main():
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path(os.environ.get("BG3_MODS_DIR", "my_mods")),
-        help="Base directory for mods (default: my_mods or $BG3_MODS_DIR)",
+        default=None,
+        help="Base directory for mods (default: $BG3_STUDIO_DIR/Mods/authored or $BG3_MODS_DIR)",
     )
     parser.add_argument(
         "--type",

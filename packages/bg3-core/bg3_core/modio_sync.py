@@ -29,7 +29,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from bg3_core.env_paths import MODS_DIR, REPO_ROOT, normalize_mod_key
+from bg3_core.env_paths import MODS_DIR, REPO_ROOT, get_subscribed_mods_dir, normalize_mod_key
 from bg3_core.library_catalog import (
     find_mod_folder,
     find_orphaned_folders,
@@ -92,12 +92,12 @@ def sync_library(
     6. Regenerates catalog once if extractions occurred
     7. Executes batched deletion of all flagged mod folders (if prune=True)
     """
-    if library_path is None:
-        library_path = os.path.join(WORKSPACE_ROOT, "mods", "library.md")
     if mods_dir is None:
-        mods_dir = Path(MODS_DIR)
+        mods_dir = get_subscribed_mods_dir()
     else:
         mods_dir = Path(mods_dir)
+    if library_path is None:
+        library_path = str(mods_dir / "library.md")
 
     tracked_mods = get_tracked_mods_from_library(library_path)
 

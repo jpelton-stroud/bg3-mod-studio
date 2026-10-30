@@ -49,5 +49,5 @@ Render the consolidated update status table with status indicators (`🟢 Up-to-
 
 Always verify documentation updates before concluding:
 1. Verify `update --list-tracked` or `update-catalog` commands exit with code 0.
-2. Confirm all updated mods have valid six-column rows in [`mods/library.md`](../../../mods/library.md).
+2. Confirm all updated mods have valid six-column rows in `Mods/subscribed/library.md`.
 3. Validate that relative links to `mods/<slug>/README.md` resolve correctly.

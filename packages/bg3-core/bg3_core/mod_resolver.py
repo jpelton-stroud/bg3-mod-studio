@@ -27,7 +27,9 @@ from .env_paths import (
     REPO_ROOT,
     detect_bg3_appdata_dirs,
     detect_data_dir,
+    get_authored_mods_dir,
     get_env_var,
+    get_subscribed_mods_dir,
     normalize_mod_key,
 )
 from .larian_parsers import find_mod_meta_files, parse_meta_lsx
@@ -74,7 +76,8 @@ def parse_library_catalog() -> Dict[str, Dict[str, Any]]:
     Returns mapping keyed by normalized mod key -> {name, slug, modio_id, path}.
     """
     catalog: Dict[str, Dict[str, Any]] = {}
-    library_md = REPO_ROOT / "mods" / "library.md"
+    subscribed_dir = get_subscribed_mods_dir()
+    library_md = subscribed_dir / "library.md"
     if not library_md.is_file():
         return catalog
 
@@ -91,7 +94,7 @@ def parse_library_catalog() -> Dict[str, Dict[str, Any]]:
             "Name": name,
             "Slug": slug,
             "ModioID": mid,
-            "Path": REPO_ROOT / "mods" / slug,
+            "Path": subscribed_dir / slug,
         }
         catalog[normalize_mod_key(slug)] = entry
         catalog[normalize_mod_key(name)] = entry
@@ -174,8 +177,9 @@ def resolve_dependency_metadata(
                     return meta
 
     # Check by UUID if identifier looks like a UUID
+    search_bases = (get_subscribed_mods_dir(), get_authored_mods_dir())
     if "-" in clean_id and len(clean_id) >= 32:
-        for base in (MODS_DIR, MY_MODS_DIR):
+        for base in search_bases:
             if not base.is_dir():
                 continue
             for child in sorted(base.iterdir()):
@@ -187,7 +191,7 @@ def resolve_dependency_metadata(
                         return meta
 
     # 3. Search local directories in mods/ and my_mods/ (exact match first)
-    for base in (MODS_DIR, MY_MODS_DIR):
+    for base in search_bases:
         if not base.is_dir():
             continue
         for child in sorted(base.iterdir()):
@@ -201,7 +205,7 @@ def resolve_dependency_metadata(
                         return meta
 
     # 3b. Search local directories (substring match fallback)
-    for base in (MODS_DIR, MY_MODS_DIR):
+    for base in search_bases:
         if not base.is_dir():
             continue
         for child in sorted(base.iterdir()):

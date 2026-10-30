@@ -30,14 +30,14 @@ flowchart TD
 ```
 
 ### 1. Environment & Tracking Check
-Verify `MODIO_API_KEY` is available in environment or `.env`. Ensure mod is tracked in [`mods/library.md`](../../../mods/library.md).
+Verify `MODIO_API_KEY` is available in environment or `.env`. Ensure mod is tracked in `Mods/subscribed/library.md`.
 
 ### 2. Check & Update Pipeline
 Execute update pipeline:
 ```bash
 uv run bg3 modio update --query "<MOD_QUERY>" --json
 ```
-The script compares release hashes, downloads new `.pak` packages if needed, updates `mods/<slug>/README.md`, and re-catalogs [`mods/library.md`](../../../mods/library.md).
+The script compares release hashes, downloads new `.pak` packages if needed, updates mod README.md specs, and re-catalogs `Mods/subscribed/library.md`.
 
 ### 3. Return Message
 Format status output according to [Update Status Messages](./resources/update_status_messages.md) (Up-to-Date, Updated, Not Tracked, Failed).

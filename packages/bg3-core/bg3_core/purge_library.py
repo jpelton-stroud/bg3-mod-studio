@@ -28,7 +28,7 @@ from bg3_core.cli_common import (
     NonInteractiveConfirmationError,
     confirm_action,
 )
-from bg3_core.env_paths import MODS_DIR, REPO_ROOT
+from bg3_core.env_paths import MODS_DIR, REPO_ROOT, get_subscribed_mods_dir
 from bg3_core.library_catalog import purge_library_mods
 
 
@@ -74,7 +74,7 @@ def main():
 
     args = parser.parse_args()
 
-    mods_dir = args.mods_dir.resolve() if args.mods_dir else Path(MODS_DIR).resolve()
+    mods_dir = args.mods_dir.resolve() if args.mods_dir else get_subscribed_mods_dir().resolve()
     lib_path = (
         args.library_path.resolve()
         if args.library_path
