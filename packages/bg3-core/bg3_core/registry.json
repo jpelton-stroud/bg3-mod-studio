@@ -4530,21 +4530,23 @@
       "name": "run",
       "command": "bg3 run",
       "category": "management",
-      "summary": "Execute any studio automation script from scripts/ with stream discipline",
-      "description": "Execute any studio automation script from scripts/ with stream discipline",
+      "summary": "Execute any registered studio automation tool or legacy alias with stream discipline",
+      "description": "Execute any registered studio automation tool or legacy alias with stream discipline",
       "intents": [
         "",
+        "alias",
         "any",
         "automation",
         "bg3 run ",
         "discipline",
         "execute",
+        "legacy",
+        "registered",
         "run",
         "run ",
-        "script",
-        "scripts/",
         "stream",
-        "studio"
+        "studio",
+        "tool"
       ],
       "cli_usage": "bg3 run [options]",
       "flags": [

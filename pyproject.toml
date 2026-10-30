@@ -11,6 +11,12 @@ dependencies = [
     "pyyaml>=6.0",
 ]
 
+[dependency-groups]
+dev = [
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+]
+
 [project.scripts]
 bg3 = "bg3_core.cli:main"
 
@@ -28,6 +34,9 @@ package = false
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82"]
 
 [tool.mypy]
 python_version = "3.10"

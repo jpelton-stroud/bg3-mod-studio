@@ -9,13 +9,14 @@ assignees: ''
 **Describe the Bug**
 A clear and concise description of what the bug is.
 
-**Script or Tool Affected**
-- [ ] `setup.sh` / `scripts/setup_environment.py`
-- [ ] `scripts/create_mod_scaffold.py`
-- [ ] `scripts/sync_game_data.py`
-- [ ] `scripts/modio_search.py`
-- [ ] `scripts/modio_extract.py`
-- [ ] `scripts/modio_sync.py`
+**Tool or Component Affected**
+- [ ] `setup.sh` / `bg3 env` (`bg3_core.setup_environment`)
+- [ ] `bg3 mod` (`bg3_authoring` / `bg3_core`)
+- [ ] `bg3 scaffold` (`bg3_authoring`)
+- [ ] `bg3 loadorder` (`bg3_core.manage_load_order`)
+- [ ] `bg3 modio` (`bg3_core`)
+- [ ] `bg3 query` / `bg3 build` (`bg3_core` / `bg3_theorycraft`)
+- [ ] `bg3 tools` (`bg3_core.tools`)
 - [ ] Agent Skill (specify below)
 
 **Environment Information**

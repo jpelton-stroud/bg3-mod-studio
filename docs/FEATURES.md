@@ -10,24 +10,24 @@ The workspace combines autonomous AI orchestration with deterministic Python aut
 
 ### Key Technical Capabilities
 
-- **Zero-Dependency Automation Engine (30 Tools in 6 Domain Packages)**:
-  All 30 studio automation scripts (and the unified `bg3` CLI entrypoint) are implemented strictly using the **Python 3.10+ Standard Library** (`zlib`, `struct`, `xml.etree.ElementTree`, `urllib.request`, `hashlib`). They require zero virtual environments, third-party packages (`pip`), or external compilers.
-- **Unified 2026 CLI Suite (`bg3` / `scripts/bg3.py`)**:
-  The primary entrypoint is symlinked to `~/.local/bin/bg3` by `setup.sh`. It exposes structured domain commands (`mod`, `loadorder`, `modio`, `scaffold`, `query`, `build`, `tools`, `env`, `run`), standardizes POSIX exit codes, and provides modern **Dual-Channel Stream Discipline**: rich, styled output on interactive terminals, and pristine, machine-parsable JSON on `stdout` when `--json` is supplied or piped.
+- **Zero-Dependency Automation Engine (59 Tools across 3 Workspace Packages)**:
+  All studio automation tools (and the unified `bg3` CLI entrypoint) are implemented strictly using the **Python 3.10+ Standard Library** (`zlib`, `struct`, `xml.etree.ElementTree`, `urllib.request`, `hashlib`). They require zero virtual environments, third-party packages (`pip`), or external compilers for standard runtime operation.
+- **Unified 2026 CLI Suite (`bg3`)**:
+  The primary entrypoint is installed to `~/.local/bin/bg3` by `setup.sh`. It exposes structured domain commands (`mod`, `loadorder`, `modio`, `scaffold`, `query`, `build`, `tools`, `env`, `run`), standardizes POSIX exit codes, and provides modern **Dual-Channel Stream Discipline**: rich, styled output on interactive terminals, and pristine, machine-parsable JSON on `stdout` when `--json` is supplied or piped.
 - **XDG Base Directory Specification Compliance**:
-  Adheres strictly to the XDG standard via `scripts/lib/env_paths.py`. Secrets and configurations are stored in `$XDG_CONFIG_HOME/bg3/env` (mode `0600`), and caches resolve to `$XDG_CACHE_HOME/bg3/`. In-repo `.env` and `.cache` directories are completely eliminated. Introspectable via `bg3 env paths` and `bg3 env check`.
-- **Pure-Python LSPK v18 Binary Packaging (`pack_mod_pak.py` / `lspk.py`)**:
+  Adheres strictly to the XDG standard via `bg3_core.env_paths`. Secrets and configurations are stored in `$XDG_CONFIG_HOME/bg3/env` (mode `0600`), and caches resolve to `$XDG_CACHE_HOME/bg3/`. In-repo `.env` and `.cache` directories are completely eliminated. Introspectable via `bg3 env paths` and `bg3 env check`.
+- **Pure-Python LSPK v18 Binary Packaging (`bg3 mod pack` / `bg3_core.lspk`)**:
   Builds uncorrupted Larian LSPK v18 package archives with custom zlib compression and binary headers directly on Linux, WSL, or Windows—bypassing the need for Windows-exclusive `LSLib` or `wine`.
 - **Larian 64-bit Version Encoding (`Version64`)**:
   Calculates and updates Larian-compliant 64-bit unsigned integer version tags across `meta.lsx` and game profiles:
   $$\text{Version64} = (\text{major} \ll 55) \mid (\text{minor} \ll 47) \mid (\text{revision} \ll 31) \mid \text{build}$$
 - **Larian XML Structure Engine (`*.lsx` & `*.xml`)**:
   Generates and parses standard Larian v4.8 XML structures, handles deterministic UUIDv4 generation, automatically allocates localization string handles in `Localization/English/*.xml`, and scaffolds `_merged.lsx` RootTemplates with valid 3D presets.
-- **Sub-10ms Mod Database Query Engine (`query_mod_database.py`)**:
+- **Sub-10ms Mod Database Query Engine (`bg3 query`)**:
   Indexes over 2,200 cataloged community mod items, passives, spells, and boosts. Provides fuzzy search, slot filtering, and handle lookups in milliseconds (`bg3 query`).
-- **Idempotent Differential Game Synchronization (`sync_game_data.py`)**:
+- **Idempotent Differential Game Synchronization (`bg3 mod sync-game`)**:
   Selectively mirrors source mod files from `my_mods/<ModSlug>/` to your `Baldurs Gate 3/.../Data/` directory. Features SHA/timestamp caching to prevent redundant disk I/O, an optional file watcher (`--watch`), and clean-up modes (`--clean-mod`).
-- **Mod.io REST Integration Suite (`scripts/library/`)**:
+- **Mod.io REST Integration Suite (`bg3 modio`)**:
   Automates mod discovery, platform-tag filtering (`windows`, `mac`, `playstation_5`, `xboxseries`), archive extraction, collection creation, and catalog synchronization using personal mod.io API keys and access tokens (`bg3 modio`).
 - **Safe Sandboxing & Clean-Room Testing**:
   - Test dependencies are declared cleanly in `.test_deps.json` without contaminating production `meta.lsx` (`bg3 mod add-dependency <slug> --test`).
@@ -35,7 +35,7 @@ The workspace combines autonomous AI orchestration with deterministic Python aut
   - Theorycrafting generators stream progression matrices directly to disk (`build_guides/`) outside Git.
 - **Cost & Token Optimization Protocols**:
   - Background subagent workers run on lightweight models (`"Model": "flash"`) to reduce token costs by 80%–90%.
-  - High-speed discovery hub (`scripts/management/tools.py` / `bg3 tools`) emits compact manifests (`--json`) saving up to 83.5% tokens during automated AI routing.
+  - High-speed discovery hub (`bg3 tools`) emits compact manifests (`--json`) saving up to 83.5% tokens during automated AI routing.
 
 ---
 
@@ -212,24 +212,24 @@ Conducts an interactive, branching interview using multiple-choice prompts to cl
 
 ---
 
-## 3. Automation Scripts Reference (`scripts/` & `setup.sh`)
+## 3. Automation Tools & Packages Reference (`packages/bg3-*` & `setup.sh`)
 
-All 30 studio automation scripts are organized into domain-specific packages within [`scripts/`](../scripts/) and registered alongside the `bg3` CLI entrypoint in [`scripts/registry.json`](../scripts/registry.json) (31 tools total).
+All 59 canonical studio automation tools are organized into domain-specific packages within `packages/` (`bg3-core`, `bg3-authoring`, `bg3-theorycraft`) and registered alongside the `bg3` CLI entrypoint in [`packages/bg3-core/bg3_core/registry.json`](../packages/bg3-core/bg3_core/registry.json).
 
 Every tool supports dual-mode execution:
 1. **Unified CLI Command** (recommended): `bg3 <command> <subcommand> [flags...] [--json]` (or `bg3 run <alias> [flags...]`)
-2. **Direct Script Execution**: `python3 scripts/<domain>/<script>.py [flags...]`
+2. **Direct Module Execution**: `uv run -m <module> [flags...]`
 
 ---
 
-### 3.1 Unified CLI Suite & Environment (`setup.sh`, `scripts/bg3.py`)
+### 3.1 Unified CLI Suite & Environment (`setup.sh`, `packages/bg3-core/bg3_core/cli.py`)
 
 #### `setup.sh`
 - **Location**: `setup.sh`
-- **Purpose**: POSIX bootstrap script. Validates Python 3.10+ in `$PATH`, creates symlink `~/.local/bin/bg3 -> scripts/bg3.py`, and launches the environment configuration wizard.
+- **Purpose**: POSIX bootstrap script. Validates Python 3.10+ in `$PATH`, creates symlink `~/.local/bin/bg3 -> packages/bg3-core/bg3_core/cli.py`, and launches the environment configuration wizard.
 - **Usage**: `./setup.sh [--non-interactive] [--skip-steam] [--check]`
 
-#### `scripts/bg3.py`
+#### `packages/bg3-core/bg3_core/cli.py`
 - **Command Alias**: `bg3`
 - **Primary CLI**: `bg3 <command> <subcommand> [flags...] [--json]`
 - **Category**: Unified Entrypoint
@@ -245,10 +245,10 @@ Every tool supports dual-mode execution:
   - `bg3 env <action>`: XDG Base Directory path introspection, health checks, and wizard setup.
   - `bg3 run <alias>`: Universal execution runner for any registered tool alias.
 
-#### `scripts/management/tools.py`
+#### `bg3 tools` (`packages/bg3-core/bg3_core/tools.py`)
 - **Command Alias**: `tools`
 - **Primary CLI**: `bg3 tools [list|search|info|verify|run] [flags...]`
-- **Script Location**: `scripts/management/tools.py`
+- **Module Location**: `packages/bg3-core/bg3_core/tools.py`
 - **Purpose**: Centralized tooling catalog, schema inspection, discovery router, and integrity auditor.
 - **Key Flags**:
   - `--list`: Lists all registered tools (supports `--category <name>` and `--json`).
@@ -258,123 +258,123 @@ Every tool supports dual-mode execution:
   - `run <alias> [args...]`: Dispatches execution to any registered tool.
 - **Usage**: `bg3 tools search "stat handles" --json`
 
-#### `scripts/management/setup_environment.py`
+#### `bg3 env` (`packages/bg3-core/bg3_core/setup_environment.py`)
 - **Command Alias**: `setup-env`
 - **Primary CLI**: `bg3 env [check|paths|setup] [flags...]`
-- **Script Location**: `scripts/management/setup_environment.py`
+- **Module Location**: `packages/bg3-core/bg3_core/setup_environment.py`
 - **Purpose**: Setup wizard and path diagnostics. Validates Steam installation paths, Larian AppData directories, and mod.io API keys in `$XDG_CONFIG_HOME/bg3/env` (mode `0600`).
 - **Usage**: `bg3 env check --json` or `bg3 env paths`
 
 ---
 
-### 3.2 Authoring & Scaffolding Tools (`scripts/authoring/`)
+### 3.2 Authoring & Scaffolding Tools (`packages/bg3-authoring/`)
 
-#### `scripts/authoring/create_mod_scaffold.py`
+#### `bg3 mod scaffold` (`packages/bg3-authoring/bg3_authoring/create_mod_scaffold.py`)
 - **Command Alias**: `scaffold-mod`
 - **Primary CLI**: `bg3 mod scaffold --name <ModName> [--slug <slug>] [--unlock-level-curve] [--json]`
-- **Script Location**: `scripts/authoring/create_mod_scaffold.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/create_mod_scaffold.py`
 - **Purpose**: Generates the complete Larian directory tree (`Mods/`, `Projects/`, `Public/`, `Localization/`), calculates `Version64`, allocates UUIDs, and creates a default 512x512 project thumbnail.
 
-#### `scripts/authoring/scaffold_stat_entry.py`
+#### `bg3 scaffold stat` (`packages/bg3-authoring/bg3_authoring/scaffold_stat_entry.py`)
 - **Command Alias**: `scaffold-stat`
 - **Primary CLI**: `bg3 scaffold stat --mod <ModName> --type <Type> --name <Name> --display-name <Text> --description <Text>`
-- **Script Location**: `scripts/authoring/scaffold_stat_entry.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/scaffold_stat_entry.py`
 - **Purpose**: Appends new stats (`Weapon`, `Armor`, `SpellData`, `PassiveData`, `StatusData`) to `Public/<Mod>/Stats/Generated/Data/*.txt` and registers localized DisplayName and Description handles in `Localization/English/*.xml`.
 
-#### `scripts/authoring/scaffold_progression_node.py`
+#### `bg3 scaffold progression` (`packages/bg3-authoring/bg3_authoring/scaffold_progression_node.py`)
 - **Command Alias**: `scaffold-progression`
 - **Primary CLI**: `bg3 scaffold progression --mod <ModName> --class <Class> --subclass <Subclass> --level <Level>`
-- **Script Location**: `scripts/authoring/scaffold_progression_node.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/scaffold_progression_node.py`
 - **Purpose**: Scaffolds and merges Larian v4.8 XML Progression and `SpellLists.lsx` nodes for class or subclass leveling, automatically resolving `TableUUID` associations.
 
-#### `scripts/authoring/scaffold_root_template.py`
+#### `bg3 scaffold root-template` (`packages/bg3-authoring/bg3_authoring/scaffold_root_template.py`)
 - **Command Alias**: `scaffold-template`
 - **Primary CLI**: `bg3 scaffold root-template --mod <ModName> --item <StatName> --visual-preset <Preset>`
-- **Script Location**: `scripts/authoring/scaffold_root_template.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/scaffold_root_template.py`
 - **Purpose**: Binds a stat entry to a 3D GameObject RootTemplate in `Public/<Mod>/RootTemplates/_merged.lsx`, linking collision, visual meshes, and physics presets.
 
-#### `scripts/authoring/inject_treasure_table.py`
+#### `bg3 mod inject-treasure` (`packages/bg3-authoring/bg3_authoring/inject_treasure_table.py`)
 - **Command Alias**: `inject-drop`
 - **Primary CLI**: `bg3 mod inject-treasure --mod <ModName> --item <ItemName> --container <Container>`
-- **Script Location**: `scripts/authoring/inject_treasure_table.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/inject_treasure_table.py`
 - **Purpose**: Injects custom items into world drop containers (Tutorial Chest, Camp Chest, or early Act 1 vendors) via `TreasureTable.txt` without modifying base game story files.
 
-#### `scripts/authoring/scaffold_icon_uvs.py`
+#### `bg3 scaffold icon-uvs` (`packages/bg3-authoring/bg3_authoring/scaffold_icon_uvs.py`)
 - **Command Alias**: `scaffold-icon-uvs`
 - **Primary CLI**: `bg3 scaffold icon-uvs --mod <ModName> --atlas-size <Size> --icon-size <Size>`
-- **Script Location**: `scripts/authoring/scaffold_icon_uvs.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/scaffold_icon_uvs.py`
 - **Purpose**: Computes normalized UV texture atlas coordinates and generates `GUI/Icons.lsx` entries for custom ability or item icons.
 
-#### `scripts/authoring/generate_compat_patch.py`
+#### `bg3 mod patch` (`packages/bg3-authoring/bg3_authoring/generate_compat_patch.py`)
 - **Command Alias**: `compat-patch`
-- **Primary CLI**: `bg3 mod patch --mod1 <ModA> --mod2 <ModB> --output my_mods/<PatchSlug>`
-- **Script Location**: `scripts/authoring/generate_compat_patch.py`
+- **Primary CLI**: `bg3 mod patch --mod1 <ModA> --mod2 <ModB> --output Mods/authored/<PatchSlug>`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/generate_compat_patch.py`
 - **Purpose**: Generates standalone compatibility patches or Compatibility Framework (`CF`) JSON/LSX configurations between two mods modifying colliding tables.
 
-#### `scripts/authoring/add_mod_dependency.py`
+#### `bg3 mod add-dependency` (`packages/bg3-authoring/bg3_authoring/add_mod_dependency.py`)
 - **Command Alias**: `add-dependency`
 - **Primary CLI**: `bg3 mod add-dependency <ModSlug> <DependencySlug> [--test] [--json]`
-- **Script Location**: `scripts/authoring/add_mod_dependency.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/add_mod_dependency.py`
 - **Purpose**: Appends community or core mod dependencies into `meta.lsx`, updates `README.md`, or adds test-only dependencies to `.test_deps.json` without modifying production manifests.
 
 ---
 
-### 3.3 Diagnostics & Auditing Tools (`scripts/diagnostics/`)
+### 3.3 Diagnostics & Auditing Tools (`packages/bg3-authoring/`)
 
-#### `scripts/diagnostics/validate_mod.py`
+#### `bg3 mod validate` (`packages/bg3-authoring/bg3_authoring/diagnostics/validate_mod.py`)
 - **Command Alias**: `validate`
 - **Primary CLI**: `bg3 mod validate <ModSlug> [--strict] [--json]`
-- **Script Location**: `scripts/diagnostics/validate_mod.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/diagnostics/validate_mod.py`
 - **Purpose**: Static linter and validator. Verifies LSX XML well-formedness, checks UUID formats, detects missing localization string handles, and validates directory structures.
 
-#### `scripts/diagnostics/check_mod_conflicts.py`
+#### `bg3 mod conflict` (`packages/bg3-authoring/bg3_authoring/diagnostics/check_mod_conflicts.py`)
 - **Command Alias**: `check-conflicts`
 - **Primary CLI**: `bg3 mod conflict <ModSlug> [--against-library] [--candidate <ModSlug>] [--json]`
-- **Script Location**: `scripts/diagnostics/check_mod_conflicts.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/diagnostics/check_mod_conflicts.py`
 - **Purpose**: Analyzes mod packages for entry collisions (duplicate stats, identical RootTemplate names) and flags console-incompatible files (such as native `.dll` files).
 
-#### `scripts/diagnostics/sync_localization.py`
+#### `bg3 mod sync-loca` (`packages/bg3-authoring/bg3_authoring/diagnostics/sync_localization.py`)
 - **Command Alias**: `sync-loca`
 - **Primary CLI**: `bg3 mod sync-loca <ModSlug> [--prune] [--compile] [--json]`
-- **Script Location**: `scripts/diagnostics/sync_localization.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/diagnostics/sync_localization.py`
 - **Purpose**: Audits localization XML files, prunes orphaned string handles, compiles binary `.loca` tables, and syncs multi-language XMLs.
 
-#### `scripts/diagnostics/diagnose_toolkit_logs.py`
+#### `bg3 mod diagnose-logs` (`packages/bg3-authoring/bg3_authoring/diagnostics/diagnose_toolkit_logs.py`)
 - **Command Alias**: `toolkit-logs`
 - **Primary CLI**: `bg3 mod diagnose-logs --mod <ModSlug> [--severity warning|error] [--follow] [--json]`
-- **Script Location**: `scripts/diagnostics/diagnose_toolkit_logs.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/diagnostics/diagnose_toolkit_logs.py`
 - **Purpose**: Parses BG3 Toolkit (`Glasses.exe`) message logs, filters by subsystem (Boosts, Stats, Thoth, Osiris), correlates errors to workspace mods, or streams active sessions with `--follow`.
 
-#### `scripts/diagnostics/inspect_save_game.py`
+#### `bg3 mod inspect-save` (`packages/bg3-authoring/bg3_authoring/diagnostics/inspect_save_game.py`)
 - **Command Alias**: `inspect-save`
 - **Primary CLI**: `bg3 mod inspect-save [--audit] [--save-file <Path>] [--json]`
-- **Script Location**: `scripts/diagnostics/inspect_save_game.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/diagnostics/inspect_save_game.py`
 - **Purpose**: Extracts active mod UUIDs and load orders from `.lsv` save files (Zstandard and LSOF v7 LZ4-frame decoding) and audits them against the player's active `modsettings.lsx`.
 
 ---
 
-### 3.4 Packaging & Deployment Tools (`scripts/packaging/`)
+### 3.4 Packaging & Deployment Tools (`packages/bg3-authoring/`)
 
-#### `scripts/packaging/pack_mod_pak.py`
+#### `bg3 mod pack` (`packages/bg3-authoring/bg3_authoring/packaging/pack_mod_pak.py`)
 - **Command Alias**: `pack-pak`
 - **Primary CLI**: `bg3 mod pack <ModSlug> [--output dist/<ModSlug>.pak] [--publish-local] [--json]`
-- **Script Location**: `scripts/packaging/pack_mod_pak.py`
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/packaging/pack_mod_pak.py`
 - **Purpose**: Pure-Python LSPK v18 packager. Compresses mod files using zlib, auto-compiles binary `.loca`, and writes binary headers directly to `.pak` format without third-party dependencies.
 
-#### `scripts/packaging/sync_game_data.py`
+#### `bg3 mod sync-game` (`packages/bg3-authoring/bg3_authoring/packaging/sync_game_data.py`)
 - **Command Alias**: `sync-game`
 - **Primary CLI**: `bg3 mod sync-game <ModSlug> [--watch] [--clean-mod] [--json]`
-- **Script Location**: `scripts/packaging/sync_game_data.py`
-- **Purpose**: Performs idempotent synchronization of mod source trees from `my_mods/` to Steam `Baldurs Gate 3/Data/`. Supports continuous file watching with `--watch` and targeted loose data cleanup with `--clean-mod`.
+- **Module Location**: `packages/bg3-authoring/bg3_authoring/packaging/sync_game_data.py`
+- **Purpose**: Performs idempotent synchronization of mod source trees from `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/` to Steam `Baldurs Gate 3/Data/`. Supports continuous file watching with `--watch` and targeted loose data cleanup with `--clean-mod`.
 
 ---
 
-### 3.5 Management & Load Order Tools (`scripts/management/`)
+### 3.5 Management & Load Order Tools (`packages/bg3-core/`)
 
-#### `scripts/management/manage_load_order.py`
+#### `bg3 loadorder` (`packages/bg3-core/bg3_core/manage_load_order.py`)
 - **Command Alias**: `load-order`
 - **Primary CLI**: `bg3 loadorder [list|enable|disable|isolate|validate|clean|sync] [flags...]`
-- **Script Location**: `scripts/management/manage_load_order.py`
+- **Module Location**: `packages/bg3-core/bg3_core/manage_load_order.py`
 - **Purpose**: Parses, modifies, and validates the player's `modsettings.lsx`. Enables, disables, orders, isolates, and audits active mods.
 - **Key Actions**:
   - `bg3 loadorder list`: Lists active mods in current profile.
@@ -382,82 +382,82 @@ Every tool supports dual-mode execution:
   - `bg3 loadorder isolate <slug>`: Clean-room isolation disabling all unrelated mods.
   - `bg3 loadorder validate`: Validates active load order against dependency ordering rules.
 
-#### `scripts/management/bump_mod_version.py`
+#### `bg3 mod bump-version` (`packages/bg3-core/bg3_core/bump_mod_version.py`)
 - **Command Alias**: `bump-version`
 - **Primary CLI**: `bg3 mod bump-version <ModSlug> [patch|minor|major|build] [--json]`
-- **Script Location**: `scripts/management/bump_mod_version.py`
+- **Module Location**: `packages/bg3-core/bg3_core/bump_mod_version.py`
 - **Purpose**: Increments semantic versions and re-encodes 64-bit uint `Version64` across all `meta.lsx` instances while updating `README.md`.
 
-#### `scripts/management/render_modio_description.py`
+#### `bg3 mod render-desc` (`packages/bg3-core/bg3_core/render_modio_description.py`)
 - **Command Alias**: `render-description`
 - **Primary CLI**: `bg3 mod render-desc <ModSlug> [--write] [--json]`
-- **Script Location**: `scripts/management/render_modio_description.py`
+- **Module Location**: `packages/bg3-core/bg3_core/render_modio_description.py`
 - **Purpose**: Renders the mod's root `README.md` as GFM-table-formatted `modio_description.html` for publishing.
 
-#### `scripts/management/modio_update_metadata.py`
+#### `bg3 modio update-metadata` (`packages/bg3-core/bg3_core/modio_update_metadata.py`)
 - **Command Alias**: `modio-update-metadata`
 - **Primary CLI**: `bg3 modio update-metadata <ModSlug> [--tags <Tags>] [--confirm] [--json]`
-- **Script Location**: `scripts/management/modio_update_metadata.py`
+- **Module Location**: `packages/bg3-core/bg3_core/modio_update_metadata.py`
 - **Purpose**: Previews and applies approved mod.io metadata, tags, non-commercial permissions, and public visibility via REST API; writes require explicit `--confirm`.
 
 ---
 
-### 3.6 Library & Mod.io Search Tools (`scripts/library/`)
+### 3.6 Library & Mod.io Search Tools (`packages/bg3-core/`)
 
-#### `scripts/library/query_mod_database.py`
+#### `bg3 query` (`packages/bg3-core/bg3_core/query_mod_database.py`)
 - **Command Alias**: `query-db`
 - **Primary CLI**: `bg3 query [--slot <Slot>] [--search <Query>] [--limit <N>] [--json]`
-- **Script Location**: `scripts/library/query_mod_database.py`
+- **Module Location**: `packages/bg3-core/bg3_core/query_mod_database.py`
 - **Purpose**: High-speed database engine searching cataloged items, spells, passives, and boosts. Supports filtering by equipment slot, rarity, and keywords in under 10ms.
 
-#### `scripts/library/update_library_catalog.py`
+#### `bg3 modio update-catalog` (`packages/bg3-core/bg3_core/update_library_catalog.py`)
 - **Command Alias**: `update-catalog`
 - **Primary CLI**: `bg3 modio update-catalog [--check] [--json]`
-- **Script Location**: `scripts/library/update_library_catalog.py`
-- **Purpose**: Aggregates individual mod specs in `mods/*/README.md` into the master six-column index at `mods/library.md`.
+- **Module Location**: `packages/bg3-core/bg3_core/update_library_catalog.py`
+- **Purpose**: Aggregates individual mod specs in `Mods/subscribed/*/README.md` into the master six-column index at `Mods/subscribed/library.md`.
 
-#### `scripts/library/modio_search.py`
+#### `bg3 modio search` (`packages/bg3-core/bg3_core/modio_search.py`)
 - **Command Alias**: `modio-search`
 - **Primary CLI**: `bg3 modio search <query> [--platform <Platform>] [--limit <N>] [--json]`
-- **Script Location**: `scripts/library/modio_search.py`
+- **Module Location**: `packages/bg3-core/bg3_core/modio_search.py`
 - **Purpose**: Queries the mod.io REST API with platform tags (`windows`, `mac`, `playstation_5`, `xboxseries`) and natural language terms.
 
-#### `scripts/library/modio_sync.py`
+#### `bg3 modio sync` (`packages/bg3-core/bg3_core/modio_sync.py`)
 - **Command Alias**: `modio-sync`
 - **Primary CLI**: `bg3 modio sync [--download-all] [--prune|--no-prune] [--sync-library] [--json]`
-- **Script Location**: `scripts/library/modio_sync.py`
-- **Purpose**: Synchronizes all subscribed mods from mod.io into local `mods/` and updates `mods/library.md`. Supports safe pruning guards.
+- **Module Location**: `packages/bg3-core/bg3_core/modio_sync.py`
+- **Purpose**: Synchronizes all subscribed mods from mod.io into local `Mods/subscribed/` and updates `Mods/subscribed/library.md`. Supports safe pruning guards.
 
-#### `scripts/library/modio_update.py`
+#### `bg3 modio update` (`packages/bg3-core/bg3_core/modio_update.py`)
 - **Command Alias**: `modio-update`
 - **Primary CLI**: `bg3 modio update [--all | --mod <slug>] [--check-only] [--json]`
-- **Script Location**: `scripts/library/modio_update.py`
+- **Module Location**: `packages/bg3-core/bg3_core/modio_update.py`
 - **Purpose**: Compares local mod versions against remote mod.io releases and reports or triggers updates.
 
-#### `scripts/library/modio_extract.py`
+#### `bg3 modio extract` (`packages/bg3-core/bg3_core/modio_extract.py`)
 - **Command Alias**: `modio-extract`
 - **Primary CLI**: `bg3 modio extract [--mod-id <ID> | --pak <Path>] [--slug <Slug>] [--json]`
-- **Script Location**: `scripts/library/modio_extract.py`
-- **Purpose**: Unpacks mod archives (`.pak` or `.zip`), extracts Larian XML/TXT files, and outputs structured markdown documentation for `mods/<slug>/README.md`.
+- **Module Location**: `packages/bg3-core/bg3_core/modio_extract.py`
+- **Purpose**: Unpacks mod archives (`.pak` or `.zip`), extracts Larian XML/TXT files, and outputs structured markdown documentation for `Mods/subscribed/<slug>/README.md`.
 
-#### `scripts/library/modio_create_collection.py`
+#### `bg3 modio create-collection` (`packages/bg3-core/bg3_core/modio_create_collection.py`)
 - **Command Alias**: `modio-collection`
 - **Primary CLI**: `bg3 modio create-collection [--dry-run] [--title <Title>] [--json]`
-- **Script Location**: `scripts/library/modio_create_collection.py`
-- **Purpose**: Creates or updates public mod.io collections from cataloged mods in `mods/library.md`, checking numeric mod IDs and game ID `6715`.
+- **Module Location**: `packages/bg3-core/bg3_core/modio_create_collection.py`
+- **Purpose**: Creates or updates public mod.io collections from cataloged mods in `Mods/subscribed/library.md`, checking numeric mod IDs and game ID `6715`.
 
-#### `scripts/library/purge_library.py`
+#### `bg3 modio purge` (`packages/bg3-core/bg3_core/purge_library.py`)
 - **Command Alias**: `purge-library`
 - **Primary CLI**: `bg3 modio purge [--confirm] [--dry-run] [--json]`
-- **Script Location**: `scripts/library/purge_library.py`
-- **Purpose**: Purges local mod folders from `mods/` and resets `mods/library.md` catalog with strict confirmation guards.
+- **Module Location**: `packages/bg3-core/bg3_core/purge_library.py`
+- **Purpose**: Purges local mod folders from `Mods/subscribed/` and resets `Mods/subscribed/library.md` catalog with strict confirmation guards.
 
 ---
 
-### 3.7 Theorycrafting & Combat Modeling (`scripts/theorycrafting/`)
+### 3.7 Theorycrafting & Combat Modeling (`packages/bg3-theorycraft/`)
 
-#### `scripts/theorycrafting/simulate_build_synergy.py`
+#### `bg3 build` (`packages/bg3-theorycraft/bg3_theorycraft/simulate_build_synergy.py`)
 - **Command Alias**: `simulate-build`
 - **Primary CLI**: `bg3 build [--classes <ClassSpecs>] [--iterations <N>] [--json]`
-- **Script Location**: `scripts/theorycrafting/simulate_build_synergy.py`
+- **Module Location**: `packages/bg3-theorycraft/bg3_theorycraft/simulate_build_synergy.py`
 - **Purpose**: Simulates multiclass progression, spell slot matrices, Spell Save DC ceilings, and Turn 1 combat damage per round (DPR) sequences.
