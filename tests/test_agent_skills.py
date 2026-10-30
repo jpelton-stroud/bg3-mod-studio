@@ -146,7 +146,6 @@ class TestAgentSkills(unittest.TestCase):
             content = sf.read_text(encoding="utf-8")
             has_discovery = (
                 "bg3 tools" in content
-                or "scripts/bg3.py tools" in content
                 or "tools.py" in content
                 or "registry" in content.lower()
             )

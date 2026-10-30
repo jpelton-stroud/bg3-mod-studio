@@ -90,7 +90,7 @@ class ModLifecycleTests(unittest.TestCase):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def run_script(self, script_name: str, *args) -> tuple[int, str, dict | None]:
-        """Helper to run a Python script from scripts/ and return code, stdout, and parsed JSON."""
+        """Helper to run a tool module from packages/ and return code, stdout, and parsed JSON."""
         target = None
         for cand in PACKAGES_DIR.rglob(script_name):
             if "__pycache__" not in cand.as_posix():

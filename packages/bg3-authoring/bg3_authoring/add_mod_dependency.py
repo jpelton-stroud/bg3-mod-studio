@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-scripts/add_mod_dependency.py
------------------------------
+packages/bg3-authoring/bg3_authoring/add_mod_dependency.py
+-----------------------------------------------------------
 Appends community or core mod dependencies and test dependencies to an existing custom mod in my_mods/.
 
 Features:

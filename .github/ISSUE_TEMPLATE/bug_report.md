@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a report to help improve scripts or mod tools
+about: Create a report to help improve CLI commands or mod tools
 title: "[BUG] "
 labels: bug
 assignees: ''

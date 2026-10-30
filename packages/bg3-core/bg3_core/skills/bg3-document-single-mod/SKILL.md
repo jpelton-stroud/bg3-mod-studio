@@ -20,7 +20,7 @@ Refer to resources:
 
 ```mermaid
 flowchart TD
-    Start["Query / mod.io URL"] --> Extract["1. Run modio_extract.py"]
+    Start["Query / mod.io URL"] --> Extract["1. Run bg3 modio extract"]
     Extract --> Decompress["2. Unpack LSPK Assets to mods/<slug>/data/"]
     Decompress --> Validate["3. Filter In-Game Features (exclude dummies)"]
     Validate --> Schema["4. Generate mods/<slug>/README.md"]

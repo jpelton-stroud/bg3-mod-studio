@@ -3,7 +3,7 @@
 tests/test_library_catalog.py
 -----------------------------
 Unit tests for centralized library catalog queries, tracked mod discovery,
-row pruning, orphan detection, and safe folder deletion in scripts/lib/library_catalog.py.
+row pruning, orphan detection, and safe folder deletion in bg3_core.library_catalog.
 """
 
 import tempfile

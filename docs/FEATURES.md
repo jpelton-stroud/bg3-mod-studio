@@ -214,10 +214,10 @@ Conducts an interactive, branching interview using multiple-choice prompts to cl
 
 ## 3. Automation Tools & Packages Reference (`packages/bg3-*` & `setup.sh`)
 
-All 59 canonical studio automation tools are organized into domain-specific packages within `packages/` (`bg3-core`, `bg3-authoring`, `bg3-theorycraft`) and registered alongside the `bg3` CLI entrypoint in [`packages/bg3-core/bg3_core/registry.json`](../packages/bg3-core/bg3_core/registry.json).
+All 59 canonical studio automation tools are organized into domain-specific packages within `packages/` (`bg3-core`, `bg3-authoring`, `bg3-theorycraft`) and discoverable dynamically via `bg3 tools`.
 
 Every tool supports dual-mode execution:
-1. **Unified CLI Command** (recommended): `bg3 <command> <subcommand> [flags...] [--json]` (or `bg3 run <alias> [flags...]`)
+1. **Unified CLI Command** (recommended): `bg3 <command> <subcommand> [flags...] [--json]`
 2. **Direct Module Execution**: `uv run -m <module> [flags...]`
 
 ---
@@ -243,19 +243,18 @@ Every tool supports dual-mode execution:
   - `bg3 build` / `bg3 sim`: Character build theorycrafting and combat simulation.
   - `bg3 tools <action>`: Tool registry discovery, search, schema inspection, and verification.
   - `bg3 env <action>`: XDG Base Directory path introspection, health checks, and wizard setup.
-  - `bg3 run <alias>`: Universal execution runner for any registered tool alias.
 
 #### `bg3 tools` (`packages/bg3-core/bg3_core/tools.py`)
 - **Command Alias**: `tools`
-- **Primary CLI**: `bg3 tools [list|search|info|verify|run] [flags...]`
+- **Primary CLI**: `bg3 tools [list|search|info|verify|audit] [flags...]`
 - **Module Location**: `packages/bg3-core/bg3_core/tools.py`
 - **Purpose**: Centralized tooling catalog, schema inspection, discovery router, and integrity auditor.
 - **Key Flags**:
   - `--list`: Lists all registered tools (supports `--category <name>` and `--json`).
   - `--search <query>`: Keyword and intent search across tools and descriptions.
-  - `--info <alias>`: Emits complete CLI schema, flags, and usage examples for a tool.
-  - `--verify`: Runs automated integrity verification across registry, scripts, and skills (`--audit-skills`).
-  - `run <alias> [args...]`: Dispatches execution to any registered tool.
+  - `--info <name>`: Emits complete CLI schema, flags, and usage examples for a tool.
+  - `--verify`: Runs automated integrity verification across packages and skills (`--audit-skills`).
+  - `--audit-skills`: Audits agent skills for registry discovery compliance and link integrity.
 - **Usage**: `bg3 tools search "stat handles" --json`
 
 #### `bg3 env` (`packages/bg3-core/bg3_core/setup_environment.py`)

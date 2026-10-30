@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-scripts/modio_sync.py
+packages/bg3-core/bg3_core/modio_sync.py
 
 Synchronizes Baldur's Gate 3 mods documented in mods/library.md with the
 authenticated user's mod.io subscribed mods using an OAuth 2.0 access token.

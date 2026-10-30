@@ -2,8 +2,8 @@
 """
 tests/test_purge_library.py
 ---------------------------
-Unit tests for library purging utilities and CLI in scripts/lib/library_catalog.py
-and scripts/purge_library.py.
+Unit tests for library purging utilities and CLI in bg3_core.library_catalog
+and bg3_core.purge_library.
 """
 
 import json
