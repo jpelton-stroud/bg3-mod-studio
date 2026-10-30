@@ -30,33 +30,44 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 
-def load_registry() -> Dict[str, Any]:
-    """Load the machine-readable registry JSON."""
-    if not REGISTRY_PATH.is_file():
-        print(f"Error: Registry file not found at {REGISTRY_PATH}", file=sys.stderr)
-        sys.exit(1)
-    try:
-        with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"Error: Failed to parse {REGISTRY_PATH}: {e}", file=sys.stderr)
-        sys.exit(1)
+def load_registry(dynamic: bool = True) -> Dict[str, Any]:
+    """Load the machine-readable registry (dynamically from CLI or fallback to JSON)."""
+    if dynamic:
+        try:
+            from bg3_core.registry_builder import extract_registry_from_parser
+            return extract_registry_from_parser()
+        except Exception:
+            pass
+    if REGISTRY_PATH.is_file():
+        try:
+            with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error: Failed to parse {REGISTRY_PATH}: {e}", file=sys.stderr)
+            sys.exit(1)
+    from bg3_core.registry_builder import extract_registry_from_parser
+    return extract_registry_from_parser()
 
 
 def find_tool(registry: Dict[str, Any], query: str) -> Optional[Dict[str, Any]]:
-    """Find a tool by script name, command name, or stem."""
+    """Find a tool by command name, subcmd, legacy script name, or alias."""
     q_norm = query.strip().lower()
-    if q_norm.endswith(".py"):
-        stem = q_norm[:-3]
-    else:
-        stem = q_norm
+    if q_norm.startswith("bg3 "):
+        q_norm = q_norm[4:].strip()
+    stem = q_norm[:-3] if q_norm.endswith(".py") else q_norm
 
     for tool in registry.get("tools", []):
         t_name = tool.get("name", "").lower()
         t_cmd = tool.get("command", "").lower()
-        t_stem = t_name[:-3] if t_name.endswith(".py") else t_name
+        t_cmd_short = t_cmd[4:].strip() if t_cmd.startswith("bg3 ") else t_cmd
+        aliases = [a.lower() for a in tool.get("aliases", [])]
 
-        if q_norm in (t_name, t_cmd, t_stem) or stem in (t_name, t_cmd, t_stem):
+        match_targets = {t_name, t_cmd, t_cmd_short} | set(aliases)
+        for a in list(aliases):
+            if a.endswith(".py"):
+                match_targets.add(a[:-3])
+
+        if q_norm in match_targets or stem in match_targets:
             return tool
     return None
 
@@ -143,59 +154,40 @@ def find_script_path(tool_entry: Dict[str, Any]) -> Optional[Path]:
 
 
 def verify_registry(registry: Dict[str, Any]) -> Dict[str, Any]:
-    """Verify that all scripts on disk are registered, compile, and run --help."""
-    tools_by_name = {t.get("name"): t for t in registry.get("tools", [])}
-    registered_names = set(tools_by_name.keys())
-    disk_scripts = {
-        p.name for p in SCRIPTS_DIR.rglob("*.py")
-        if p.name != "__init__.py" and "/lib/" not in p.as_posix() and "__pycache__" not in p.as_posix()
-    }
-
-    missing_from_disk = sorted(list(registered_names - disk_scripts))
-    unregistered_on_disk = sorted(list(disk_scripts - registered_names))
-
-    compile_errors = []
+    """Verify that all registered CLI commands are valid, documented, and executable."""
+    tools = registry.get("tools", [])
+    missing_docs = []
     help_errors = []
 
-    for script_name in sorted(list(registered_names.intersection(disk_scripts))):
-        tool = tools_by_name[script_name]
-        script_path = find_script_path(tool)
-        if not script_path or not script_path.is_file():
-            missing_from_disk.append(script_name)
-            continue
+    for tool in tools:
+        cmd_name = tool.get("command", "")
+        if not tool.get("summary"):
+            missing_docs.append(f"{cmd_name}: Missing summary")
 
-        # Test compilation
-        try:
-            py_compile.compile(str(script_path), doraise=True)
-        except Exception as e:
-            compile_errors.append({"script": script_name, "error": str(e)})
+        parts = cmd_name.split()
+        if parts and parts[0] == "bg3":
+            cmd_args = parts[1:] + ["--help"]
+            try:
+                res = subprocess.run(
+                    [sys.executable, "-m", "bg3_core.cli"] + cmd_args,
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+                if res.returncode != 0:
+                    help_errors.append({
+                        "command": cmd_name,
+                        "returncode": res.returncode,
+                        "stderr": res.stderr.strip()[:200],
+                    })
+            except Exception as e:
+                help_errors.append({"command": cmd_name, "error": str(e)})
 
-        # Test --help invocation
-        try:
-            res = subprocess.run(
-                [sys.executable, str(script_path), "--help"],
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
-            if res.returncode != 0:
-                help_errors.append({
-                    "script": script_name,
-                    "returncode": res.returncode,
-                    "stderr": res.stderr.strip()[:200]
-                })
-        except Exception as e:
-            help_errors.append({"script": script_name, "error": str(e)})
-
-    is_valid = not (missing_from_disk or unregistered_on_disk or compile_errors or help_errors)
-
+    is_valid = not (missing_docs or help_errors)
     return {
         "valid": is_valid,
-        "total_registered": len(registered_names),
-        "total_on_disk": len(disk_scripts),
-        "missing_from_disk": sorted(list(set(missing_from_disk))),
-        "unregistered_on_disk": unregistered_on_disk,
-        "compile_errors": compile_errors,
+        "total_registered": len(tools),
+        "missing_docs": missing_docs,
         "help_errors": help_errors,
     }
 
@@ -213,8 +205,14 @@ def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) ->
             "skills": []
         }
 
-    registered_tools = {t["name"]: t for t in registry.get("tools", [])}
-    registered_names = set(registered_tools.keys())
+    registered_names = set()
+    for t in registry.get("tools", []):
+        registered_names.add(t.get("name"))
+        registered_names.add(t.get("command"))
+        for a in t.get("aliases", []):
+            registered_names.add(a)
+            if a.endswith(".py"):
+                registered_names.add(a[:-3])
 
     results = []
     total_refs = 0
@@ -470,20 +468,15 @@ Examples:
         else:
             status = "PASSED" if report["valid"] else "FAILED"
             print(f"\nRegistry Verification: [{status}]")
-            print(f"  Total on disk:     {report['total_on_disk']}")
-            print(f"  Total registered:  {report['total_registered']}")
-            if report["missing_from_disk"]:
-                print(f"  Missing on disk:   {', '.join(report['missing_from_disk'])}")
-            if report["unregistered_on_disk"]:
-                print(f"  Unregistered:      {', '.join(report['unregistered_on_disk'])}")
-            if report["compile_errors"]:
-                print("  Compilation Errors:")
-                for err in report["compile_errors"]:
-                    print(f"    - {err['script']}: {err['error']}")
-            if report["help_errors"]:
+            print(f"  Total commands verified: {report['total_registered']}")
+            if report.get("missing_docs"):
+                print("  Missing Documentation:")
+                for doc in report["missing_docs"]:
+                    print(f"    - {doc}")
+            if report.get("help_errors"):
                 print("  CLI Help Invocation Errors:")
                 for err in report["help_errors"]:
-                    print(f"    - {err['script']}: {err.get('stderr') or err.get('error')}")
+                    print(f"    - {err['command']}: {err.get('stderr') or err.get('error')}")
             print()
         sys.exit(0 if report["valid"] else 1)
 
