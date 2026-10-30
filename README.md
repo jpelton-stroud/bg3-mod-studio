@@ -68,7 +68,7 @@ The wizard will:
 2. Prompt for your `MODIO_PAT` (Personal Access Token).
 3. Detect your OS/WSL environment and configure your game's `Data` path (`BG3_DATA_DIR`).
 4. Set your default mod author name (`BG3_MOD_AUTHOR`).
-5. Save your settings to `.env`.
+5. Save your settings securely to `$XDG_CONFIG_HOME/bg3/env` (mode 0600).
 6. (Optional) Link a remote GitHub repository via GitHub CLI (`gh`).
 
 You can review your configuration anytime with:

@@ -102,6 +102,66 @@ class ModioClientTests(unittest.TestCase):
         with self.assertRaises(ModioError):
             client.get_paged("/me/subscribed")
 
+    def test_get_caches_response_and_avoids_second_network_call(self):
+        import tempfile
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_file = Path(tmpdir) / "test_cache.json"
+            response = Mock()
+            response.read.return_value = json.dumps({"result": "cached_val"}).encode("utf-8")
+            response.__enter__ = Mock(return_value=response)
+            response.__exit__ = Mock(return_value=False)
+            opener = Mock(return_value=response)
+
+            client = ModioClient("tok", opener=opener, cache_path=cache_file, cache_ttl_seconds=60, enable_cache=True)
+            res1 = client.request("GET", "/games/6715")
+            self.assertEqual(res1, {"result": "cached_val"})
+            self.assertEqual(opener.call_count, 1)
+
+            # Second call should read from cache without invoking opener
+            res2 = client.request("GET", "/games/6715")
+            self.assertEqual(res2, {"result": "cached_val"})
+            self.assertEqual(opener.call_count, 1)
+
+    def test_post_clears_cache(self):
+        import tempfile
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_file = Path(tmpdir) / "test_cache.json"
+            response = Mock()
+            response.read.return_value = json.dumps({"status": "ok"}).encode("utf-8")
+            response.__enter__ = Mock(return_value=response)
+            response.__exit__ = Mock(return_value=False)
+            opener = Mock(return_value=response)
+
+            client = ModioClient("tok", opener=opener, cache_path=cache_file, cache_ttl_seconds=60, enable_cache=True)
+            client.request("GET", "/games/6715")
+            self.assertTrue(cache_file.exists())
+
+            client.request("POST", "/games/6715/mods")
+            self.assertFalse(cache_file.exists())
+
+    def test_bypass_cache_flag(self):
+        import tempfile
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_file = Path(tmpdir) / "test_cache.json"
+            response = Mock()
+            response.read.return_value = json.dumps({"status": "live"}).encode("utf-8")
+            response.__enter__ = Mock(return_value=response)
+            response.__exit__ = Mock(return_value=False)
+            opener = Mock(return_value=response)
+
+            client = ModioClient("tok", opener=opener, cache_path=cache_file, cache_ttl_seconds=60, enable_cache=True)
+            client.request("GET", "/games/6715")
+            self.assertEqual(opener.call_count, 1)
+
+            client.request("GET", "/games/6715", bypass_cache=True)
+            self.assertEqual(opener.call_count, 2)
+
 
 if __name__ == "__main__":
     unittest.main()
