@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional
 
 SCRIPTS_DIR = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = Path(__file__).resolve().parent / "registry.json"
-_REPO_ROOT = SCRIPTS_DIR.parent
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
@@ -203,7 +203,7 @@ def verify_registry(registry: Dict[str, Any]) -> Dict[str, Any]:
 def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) -> Dict[str, Any]:
     """Audit agent skills in .agents/skills/ for registry compliance, portability, and best practices."""
     if skills_dir is None:
-        workspace_dir = SCRIPTS_DIR.parent
+        workspace_dir = _REPO_ROOT
         skills_dir = workspace_dir / ".agents" / "skills"
 
     if not skills_dir.is_dir():
@@ -273,7 +273,12 @@ def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) ->
             clean = clean.split("#")[0]
             if not clean:
                 continue
-            resolved = Path(clean) if os.path.isabs(clean) else (skill_path.parent / clean).resolve()
+            if os.path.isabs(clean):
+                resolved = Path(clean)
+            elif clean.startswith("../") and (skills_dir / clean[3:]).exists():
+                resolved = (skills_dir / clean[3:]).resolve()
+            else:
+                resolved = (skill_path.parent / clean).resolve()
             if not resolved.exists():
                 broken_links.append(f"[{text}]({target})")
         if broken_links:

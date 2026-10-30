@@ -32,5 +32,9 @@ uv tool install --editable "${SCRIPT_DIR}/packages/bg3-core" --force
 uv tool install --editable "${SCRIPT_DIR}/packages/bg3-theorycraft" --force
 uv tool install --editable "${SCRIPT_DIR}/packages/bg3-authoring" --force
 
-# 5. Launch interactive setup wizard
+# 5. Deploy bundled agent skills into studio workspace
+echo "Installing agent skills into studio workspace..."
+uv run --directory "${SCRIPT_DIR}" python3 -m bg3_core.skills_installer || true
+
+# 6. Launch interactive setup wizard
 exec uv run --directory "${SCRIPT_DIR}" python3 -m bg3_core.setup_environment "$@"
