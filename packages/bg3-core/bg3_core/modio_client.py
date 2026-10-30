@@ -2,13 +2,15 @@
 
 import json
 import re
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from .env_paths import get_env_var
+from .env_paths import get_env_var, get_xdg_cache_home
 
 BG3_GAME_ID = 6715
 MODIO_API_HOST = f"g-{BG3_GAME_ID}.modapi.io"
@@ -23,9 +25,72 @@ class ModioError(RuntimeError):
 class ModioClient:
     """Authenticated mod.io v1 REST client supporting GET, form-urlencoded, and multipart POST/PUT."""
 
-    def __init__(self, token: str, opener: Any = urllib.request.urlopen) -> None:
+    def __init__(
+        self,
+        token: str,
+        opener: Any = urllib.request.urlopen,
+        cache_ttl_seconds: int = 300,
+        enable_cache: bool = False,
+        cache_path: Optional[Path] = None,
+    ) -> None:
         self.token = token
         self.opener = opener
+        self.cache_ttl_seconds = cache_ttl_seconds
+        self.enable_cache = enable_cache
+        self._cache_path = cache_path
+
+    def get_cache_path(self) -> Path:
+        """Resolve path to local mod.io response cache."""
+        if self._cache_path is not None:
+            return self._cache_path
+        cache_dir = get_xdg_cache_home()
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        return cache_dir / "modio_cache.json"
+
+    def _read_cache(self, key: str) -> Optional[Dict[str, Any]]:
+        try:
+            path = self.get_cache_path()
+            if path.is_file():
+                with open(path, "r", encoding="utf-8") as f:
+                    cache = json.load(f)
+                entry = cache.get(key)
+                if entry and isinstance(entry, dict):
+                    ts = entry.get("timestamp", 0)
+                    if time.time() - ts < self.cache_ttl_seconds:
+                        return entry.get("data")
+        except Exception:
+            pass
+        return None
+
+    def _write_cache(self, key: str, data: Dict[str, Any]) -> None:
+        try:
+            path = self.get_cache_path()
+            cache: Dict[str, Any] = {}
+            if path.is_file():
+                try:
+                    with open(path, "r", encoding="utf-8") as f:
+                        cache = json.load(f)
+                except Exception:
+                    cache = {}
+            cache[key] = {
+                "timestamp": time.time(),
+                "data": data,
+            }
+            tmp = path.with_suffix(".tmp")
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(cache, f, indent=2)
+            tmp.replace(path)
+        except Exception:
+            pass
+
+    def clear_cache(self) -> None:
+        """Clear local mod.io response cache."""
+        try:
+            path = self.get_cache_path()
+            if path.exists():
+                path.unlink()
+        except Exception:
+            pass
 
     def request(
         self,
@@ -34,6 +99,7 @@ class ModioClient:
         params: Optional[Dict[str, Any]] = None,
         fields: Optional[Sequence[Tuple[str, str]]] = None,
         multipart: bool = False,
+        bypass_cache: bool = False,
     ) -> Dict[str, Any]:
         if path.startswith("http://") or path.startswith("https://"):
             url = path
@@ -42,6 +108,12 @@ class ModioClient:
         if params:
             sep = "&" if "?" in url else "?"
             url = f"{url}{sep}{urllib.parse.urlencode(params)}"
+
+        cache_key = url
+        if method.upper() == "GET" and self.enable_cache and not bypass_cache and self.cache_ttl_seconds > 0:
+            cached = self._read_cache(cache_key)
+            if cached is not None:
+                return cached
         auth_header = "Auth" + "orization"
         headers = {
             "Accept": "application/json",
@@ -92,6 +164,12 @@ class ModioClient:
             raise ModioError("mod.io returned an invalid JSON response.") from None
         if not isinstance(payload, dict):
             raise ModioError("mod.io returned an unexpected response shape.")
+
+        if method.upper() == "GET" and self.enable_cache and not bypass_cache and self.cache_ttl_seconds > 0:
+            self._write_cache(cache_key, payload)
+        elif method.upper() in ("POST", "PUT", "DELETE"):
+            self.clear_cache()
+
         return payload
 
     def get_paged(
