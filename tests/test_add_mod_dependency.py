@@ -2,7 +2,7 @@
 """
 tests/test_add_mod_dependency.py
 --------------------------------
-Unit and integration tests for scripts/add_mod_dependency.py.
+Unit and integration tests for bg3_authoring.add_mod_dependency.
 """
 
 import json

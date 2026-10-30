@@ -1,60 +1,248 @@
 #!/usr/bin/env python3
 """Baldur's Gate 3 Mod Studio — Unified Tooling Registry & CLI Discovery Hub.
 
-Provides machine-readable discovery, search, schema inspection, and execution
-dispatching for all studio automation scripts.
+Provides machine-readable discovery, search, schema inspection, and verification
+for all studio CLI commands dynamically generated from the unified command parser.
 
 Usage:
-    python3 scripts/tools.py --list [--category <cat>] [--json]
-    python3 scripts/tools.py --search "<intent or keyword>" [--json]
-    python3 scripts/tools.py --info <tool_name> [--json]
-    python3 scripts/tools.py --verify [--json]
-    python3 scripts/tools.py run <tool_name> [args...]
+    bg3 tools --list [--category <cat>] [--json]
+    bg3 tools --search "<intent or keyword>" [--json]
+    bg3 tools --info <tool_name> [--json]
+    bg3 tools --verify [--json]
+    bg3 tools --audit-skills [--json]
 """
+
+from __future__ import annotations
 
 import argparse
 import json
 import os
-import py_compile
 import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-
-SCRIPTS_DIR = Path(__file__).resolve().parents[1]
-REGISTRY_PATH = Path(__file__).resolve().parent / "registry.json"
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+CATEGORIES: Dict[str, str] = {
+    "authoring": "Mod authoring, stat generation, progression curves, and asset scaffolding",
+    "packaging": "Pure Python LSPK .pak archive building and game data deployment",
+    "diagnostics": "Static validation, conflict detection, handle auditing, and save file inspection",
+    "management": "Load order management, version bumping, metadata generation, and setup",
+    "library": "Mod.io API search, archive synchronization, and community mod database queries",
+    "theorycrafting": "Combat DPR simulation, multiclass spell slots, and build mechanics",
+}
 
-def load_registry(dynamic: bool = True) -> Dict[str, Any]:
-    """Load the machine-readable registry (dynamically from CLI or fallback to JSON)."""
-    if dynamic:
-        try:
-            from bg3_core.registry_builder import extract_registry_from_parser
-            return extract_registry_from_parser()
-        except Exception:
-            pass
-    if REGISTRY_PATH.is_file():
-        try:
-            with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception as e:
-            print(f"Error: Failed to parse {REGISTRY_PATH}: {e}", file=sys.stderr)
-            sys.exit(1)
-    from bg3_core.registry_builder import extract_registry_from_parser
-    return extract_registry_from_parser()
+COMMAND_CATEGORY_OVERRIDES: Dict[str, str] = {
+    "mod conflict": "diagnostics",
+    "mod validate": "diagnostics",
+    "mod diagnose-logs": "diagnostics",
+    "mod inspect-save": "diagnostics",
+    "mod pack": "packaging",
+    "mod sync-game": "packaging",
+    "mod sync-loca": "diagnostics",
+    "mod bump-version": "management",
+    "mod render-desc": "management",
+    "modio purge": "library",
+    "modio catalog": "library",
+    "modio update-catalog": "library",
+    "modio update-metadata": "library",
+    "modio create-collection": "library",
+    "save": "diagnostics",
+    "save list": "diagnostics",
+    "save inspect": "diagnostics",
+    "save backup": "management",
+    "save purge": "management",
+    "build": "theorycrafting",
+    "sim": "theorycrafting",
+    "query": "theorycrafting",
+    "tools": "management",
+    "env": "management",
+}
+
+
+def determine_category(group: str, subcmd: Optional[str] = None) -> str:
+    """Resolve category for a command group or subcmd pair."""
+    key = f"{group} {subcmd}" if subcmd else group
+    if key in COMMAND_CATEGORY_OVERRIDES:
+        return COMMAND_CATEGORY_OVERRIDES[key]
+    if group in ("scaffold", "mod"):
+        return "authoring"
+    if group == "modio":
+        return "library"
+    if group == "loadorder":
+        return "management"
+    if group in ("build", "sim", "query"):
+        return "theorycrafting"
+    return "management"
+
+
+def extract_flags_from_subparser(subp: argparse.ArgumentParser) -> List[Dict[str, Any]]:
+    """Extract argument flag metadata from an argparse subparser."""
+    flags: List[Dict[str, Any]] = []
+    seen = set()
+
+    for action in subp._actions:
+        if isinstance(action, (argparse._HelpAction, argparse._SubParsersAction)):
+            continue
+        dest = action.dest
+        if dest in ("help", "version") or dest in seen:
+            continue
+        seen.add(dest)
+
+        flag_name = action.option_strings[0] if action.option_strings else f"<{dest}>"
+        if isinstance(action, (argparse._StoreTrueAction, argparse._StoreFalseAction)):
+            type_str = "bool"
+        elif action.type is not None:
+            type_str = getattr(action.type, "__name__", str(action.type))
+        else:
+            type_str = "str"
+
+        flag_entry: Dict[str, Any] = {
+            "name": flag_name,
+            "type": type_str,
+            "required": bool(action.required),
+            "description": action.help or "",
+        }
+        if action.choices:
+            flag_entry["choices"] = list(action.choices)
+        if action.default not in (None, argparse.SUPPRESS):
+            flag_entry["default"] = action.default
+
+        flags.append(flag_entry)
+
+    return flags
+
+
+def generate_intents(group: str, subcmd: str, summary: str, aliases: List[str]) -> List[str]:
+    """Generate search intent keywords for discovery matching."""
+    intents = set()
+    intents.add(group)
+    if subcmd:
+        intents.add(subcmd)
+        intents.add(f"{group} {subcmd}")
+        intents.add(f"{group}-{subcmd}")
+
+    for alias in aliases:
+        intents.add(alias)
+        intents.add(f"bg3 {alias}")
+
+    if summary:
+        for word in summary.replace(",", " ").replace(".", " ").replace("-", " ").split():
+            clean_word = word.lower().strip()
+            if len(clean_word) >= 3 and clean_word not in ("and", "the", "for", "with", "from"):
+                intents.add(clean_word)
+
+    return sorted(list(intents))
+
+
+def extract_registry_from_parser(parser: Optional[argparse.ArgumentParser] = None) -> Dict[str, Any]:
+    """
+    Introspect the build_parser() CLI hierarchy dynamically to produce a comprehensive,
+    canonical tool registry without any legacy script aliases.
+    """
+    if parser is None:
+        from bg3_core.cli import build_parser
+        parser = build_parser()
+
+    tools: List[Dict[str, Any]] = []
+
+    for action in parser._actions:
+        if not (action.choices and isinstance(action.choices, dict)):
+            continue
+
+        for ca in getattr(action, "_choices_actions", []):
+            group_name = ca.dest
+            group_subp = action.choices[group_name]
+            group_summary = ca.help or ""
+
+            sub_actions = [a for a in group_subp._actions if a.choices and isinstance(a.choices, dict)]
+            if sub_actions:
+                sub_a = sub_actions[0]
+                for nca in getattr(sub_a, "_choices_actions", []):
+                    subcmd_name = nca.dest
+                    leaf_subp = sub_a.choices[subcmd_name]
+                    summary = nca.help or leaf_subp.description or ""
+                    description = leaf_subp.description or summary or f"bg3 {group_name} {subcmd_name} command"
+                    category = determine_category(group_name, subcmd_name)
+                    cmd_line = f"bg3 {group_name} {subcmd_name}"
+                    flags = extract_flags_from_subparser(leaf_subp)
+
+                    all_aliases: List[str] = []
+                    for alias_name, alias_subp in sub_a.choices.items():
+                        if alias_subp is leaf_subp and alias_name != subcmd_name:
+                            all_aliases.append(alias_name)
+                            all_aliases.append(f"{group_name} {alias_name}")
+
+                    intents = generate_intents(group_name, subcmd_name, summary, all_aliases)
+                    cli_usage = f"bg3 {group_name} {subcmd_name} [options]"
+
+                    tools.append({
+                        "name": f"{group_name} {subcmd_name}",
+                        "command": cmd_line,
+                        "category": category,
+                        "summary": summary,
+                        "description": description,
+                        "intents": intents,
+                        "cli_usage": cli_usage,
+                        "flags": flags,
+                        "aliases": all_aliases,
+                    })
+            else:
+                category = determine_category(group_name)
+                cmd_line = f"bg3 {group_name}"
+                summary = group_summary or group_subp.description or ""
+                description = group_subp.description or summary or f"{cmd_line} command"
+                flags = extract_flags_from_subparser(group_subp)
+
+                all_aliases = []
+                for alias_name, alias_subp in action.choices.items():
+                    if alias_subp is group_subp and alias_name != group_name:
+                        all_aliases.append(alias_name)
+
+                intents = generate_intents(group_name, "", summary, all_aliases)
+                cli_usage = f"bg3 {group_name} [options]"
+
+                tools.append({
+                    "name": group_name,
+                    "command": cmd_line,
+                    "category": category,
+                    "summary": summary,
+                    "description": description,
+                    "intents": intents,
+                    "cli_usage": cli_usage,
+                    "flags": flags,
+                    "aliases": all_aliases,
+                })
+
+    return {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "version": "1.0.0",
+        "description": "Baldur's Gate 3 Mod Studio & Mod.io Automation Workspace — Canonical Tool Registry",
+        "categories": CATEGORIES,
+        "tools": tools,
+    }
+
+
+_CACHED_REGISTRY: Optional[Dict[str, Any]] = None
+
+
+def load_registry(force_refresh: bool = False) -> Dict[str, Any]:
+    """Load and dynamically cache the machine-readable registry in memory."""
+    global _CACHED_REGISTRY
+    if _CACHED_REGISTRY is None or force_refresh:
+        _CACHED_REGISTRY = extract_registry_from_parser()
+    return _CACHED_REGISTRY
 
 
 def find_tool(registry: Dict[str, Any], query: str) -> Optional[Dict[str, Any]]:
-    """Find a tool by command name, subcmd, legacy script name, or alias."""
+    """Find a tool by canonical command name or alias."""
     q_norm = query.strip().lower()
     if q_norm.startswith("bg3 "):
         q_norm = q_norm[4:].strip()
-    stem = q_norm[:-3] if q_norm.endswith(".py") else q_norm
 
     for tool in registry.get("tools", []):
         t_name = tool.get("name", "").lower()
@@ -63,11 +251,7 @@ def find_tool(registry: Dict[str, Any], query: str) -> Optional[Dict[str, Any]]:
         aliases = [a.lower() for a in tool.get("aliases", [])]
 
         match_targets = {t_name, t_cmd, t_cmd_short} | set(aliases)
-        for a in list(aliases):
-            if a.endswith(".py"):
-                match_targets.add(a[:-3])
-
-        if q_norm in match_targets or stem in match_targets:
+        if q_norm in match_targets:
             return tool
     return None
 
@@ -90,7 +274,6 @@ def search_tools(registry: Dict[str, Any], query: str) -> List[Dict[str, Any]]:
 
         full_query = query.strip().lower()
 
-        # Exact phrase bonus
         if full_query in name or full_query in cmd:
             score += 100
         for intent in intents:
@@ -104,7 +287,6 @@ def search_tools(registry: Dict[str, Any], query: str) -> List[Dict[str, Any]]:
         if full_query in desc:
             score += 20
 
-        # Token matches
         for t in tokens:
             if t in name or t in cmd:
                 score += 30
@@ -134,23 +316,6 @@ def list_tools(registry: Dict[str, Any], category: Optional[str] = None) -> List
         cat_lower = category.strip().lower()
         tools = [t for t in tools if t.get("category", "").lower() == cat_lower]
     return tools
-
-
-def find_script_path(tool_entry: Dict[str, Any]) -> Optional[Path]:
-    """Find script path for a tool entry across domain subfolders or scripts root."""
-    rel_path = tool_entry.get("path")
-    if rel_path and (SCRIPTS_DIR / rel_path).is_file():
-        return SCRIPTS_DIR / rel_path
-    name = tool_entry.get("name", "")
-    if (SCRIPTS_DIR / name).is_file():
-        return SCRIPTS_DIR / name
-    category = tool_entry.get("category", "")
-    if category and (SCRIPTS_DIR / category / name).is_file():
-        return SCRIPTS_DIR / category / name
-    for p in SCRIPTS_DIR.rglob(name):
-        if "/lib/" not in p.as_posix() and "__pycache__" not in p.as_posix():
-            return p
-    return None
 
 
 def verify_registry(registry: Dict[str, Any]) -> Dict[str, Any]:
@@ -211,8 +376,6 @@ def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) ->
         registered_names.add(t.get("command"))
         for a in t.get("aliases", []):
             registered_names.add(a)
-            if a.endswith(".py"):
-                registered_names.add(a[:-3])
 
     results: list[dict[str, Any]] = []
     total_refs = 0
@@ -232,21 +395,21 @@ def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) ->
             results.append({"skill": skill_name, "error": str(e), "status": "read_error"})
             continue
 
-        # 1. Script references
-        script_refs = sorted(list(set(re.findall(r"scripts/(?:[a-zA-Z0-9_\-]+/)?([a-zA-Z0-9_\-]+\.py)", content))))
-        total_refs += len(script_refs)
+        # 1. Script references (flags any lingering loose .py or scripts/ paths)
+        script_refs = sorted(list(set(re.findall(r"(?:scripts/|[a-zA-Z0-9_\-]+\.py)", content))))
+        # Filter out self-mentions or legitimate docs
+        forbidden_refs = [s for s in script_refs if s.startswith("scripts/") or (s not in registered_names and s.endswith(".py"))]
+        total_refs += len(forbidden_refs)
 
         has_discovery_tip = (
             "bg3 tools" in content
-            or "scripts/bg3.py tools" in content
             or "tools.py" in content
             or "registry" in content.lower()
         )
         if has_discovery_tip:
             skills_with_discovery += 1
 
-        unregistered = [s for s in script_refs if s not in registered_names and s != "tools.py"]
-        all_unregistered.update(unregistered)
+        all_unregistered.update(forbidden_refs)
 
         # 2. Kebab-case naming check
         is_kebab = bool(re.match(kebab_pattern, skill_name))
@@ -268,97 +431,61 @@ def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) ->
                 broken_links.append(f"[{text}]({target}) [placeholder]")
                 continue
             clean = target[7:] if target.startswith("file://") else target
-            clean = clean.split("#")[0]
-            if not clean:
+            clean_path = clean.split("#")[0]
+            if not clean_path:
                 continue
-            if os.path.isabs(clean):
-                resolved = Path(clean)
-            elif clean.startswith("../") and (skills_dir / clean[3:]).exists():
-                resolved = (skills_dir / clean[3:]).resolve()
-            else:
-                resolved = (skill_path.parent / clean).resolve()
-            if not resolved.exists():
-                broken_links.append(f"[{text}]({target})")
+            target_file = (skill_path.parent / clean_path).resolve()
+            via_agents_symlink = Path(os.path.normpath(os.path.join(str(skills_dir), skill_name, clean_path)))
+            if not target_file.exists() and not via_agents_symlink.exists():
+                broken_links.append(f"[{text}]({target}) [file not found: {clean_path}]")
+
         if broken_links:
-            all_broken_links.extend([f"{skill_name}: {lnk}" for lnk in broken_links])
+            all_broken_links.extend([f"{skill_name}: {l}" for l in broken_links])
 
-        # 5. Subagent model inheritance check
-        model_matches = re.findall(r'["\']Model["\']\s*:\s*["\']([^"\']+)["\']', content)
-        invalid_models = [m for m in model_matches if m != "inherit"]
+        # 5. Model inheritance check
+        invalid_models = []
+        for match in re.finditer(r"invoke_subagent\([^)]*Model=['\"]([^'\"]+)['\"]", content):
+            model_val = match.group(1)
+            if model_val != "inherit":
+                invalid_models.append(model_val)
+        for match in re.finditer(r"Model:\s*['\"]?([a-zA-Z0-9_-]+)['\"]?", content):
+            model_val = match.group(1)
+            if model_val != "inherit" and model_val not in ("None", "null"):
+                invalid_models.append(model_val)
         if invalid_models:
-            all_invalid_models.extend([f"{skill_name}: {m}" for m in invalid_models])
-
-        defects = []
-        if unregistered:
-            defects.append(f"unregistered: {unregistered}")
-        if not has_discovery_tip:
-            defects.append("missing_discovery")
-        if not is_kebab:
-            defects.append("non_kebab_case")
-        if user_paths:
-            defects.append(f"user_paths: {user_paths}")
-        if broken_links:
-            defects.append(f"broken_links: {len(broken_links)}")
-        if invalid_models:
-            defects.append(f"invalid_models: {invalid_models}")
-
-        status = "fully_integrated" if not defects else "defects_detected"
+            all_invalid_models.extend([f"{skill_name}: Model '{m}'" for m in invalid_models])
 
         results.append({
             "skill": skill_name,
-            "is_kebab_case": is_kebab,
-            "script_references": script_refs,
-            "has_discovery_guidance": has_discovery_tip,
-            "unregistered_references": unregistered,
-            "user_paths": user_paths,
+            "has_discovery_tip": has_discovery_tip,
+            "script_references": forbidden_refs,
             "broken_links": broken_links,
             "invalid_models": invalid_models,
-            "defects": defects,
-            "status": status
+            "is_kebab": is_kebab,
+            "status": "fully_integrated" if has_discovery_tip and not forbidden_refs else "needs_alignment"
         })
 
     is_valid = (
         len(all_unregistered) == 0
-        and len(non_kebab_skills) == 0
         and len(all_user_paths) == 0
         and len(all_broken_links) == 0
         and len(all_invalid_models) == 0
+        and len(non_kebab_skills) == 0
+        and (skills_with_discovery == len(results) if results else True)
     )
-
-    fully_compliant = sum(1 for r in results if r["status"] == "fully_integrated")
 
     return {
         "valid": is_valid,
         "total_skills": len(results),
-        "fully_compliant_skills": fully_compliant,
-        "compliance_rate_pct": round(fully_compliant / len(results) * 100, 1) if results else 0,
         "skills_with_discovery": skills_with_discovery,
-        "discovery_coverage_pct": round(skills_with_discovery / len(results) * 100, 1) if results else 0,
-        "non_kebab_skills": non_kebab_skills,
+        "discovery_percentage": round((skills_with_discovery / len(results) * 100), 1) if results else 100.0,
         "unregistered_scripts": sorted(list(all_unregistered)),
-        "user_path_violations": all_user_paths,
+        "portability_violations": all_user_paths,
+        "non_kebab_names": non_kebab_skills,
         "broken_link_violations": all_broken_links,
         "invalid_subagent_models": all_invalid_models,
         "skills": results
     }
-
-
-
-def dispatch_run(registry: Dict[str, Any], tool_query: str, extra_args: List[str]) -> int:
-    """Dispatch and execute the targeted tool script."""
-    tool = find_tool(registry, tool_query)
-    if not tool:
-        print(f"Error: Unknown tool '{tool_query}'. Run 'bg3 tools list' to see available tools.", file=sys.stderr)
-        return 1
-
-    script_path = find_script_path(tool)
-    if not script_path or not script_path.is_file():
-        print(f"Error: Script file not found for: {tool['name']}", file=sys.stderr)
-        return 1
-
-    cmd = [sys.executable, str(script_path)] + extra_args
-    proc = subprocess.run(cmd)
-    return proc.returncode
 
 
 def format_table(rows: List[List[str]], headers: List[str]) -> str:
@@ -402,21 +529,14 @@ Examples:
     parser.add_argument("--full", action="store_true", help="Include full schemas, flags, and examples when listing tools (default: compact manifest)")
     parser.add_argument("--json", action="store_true", help="Emit output formatted as JSON")
 
-    # Dispatch subcommand
-    parser.add_argument("subcommand", nargs="?", choices=["run", "list", "search", "info", "verify", "audit"], help="Subcommand action")
+    # Positional subcommand dispatch
+    parser.add_argument("subcommand", nargs="?", choices=["list", "search", "info", "verify", "audit"], help="Subcommand action")
     parser.add_argument("tool_name", nargs="?", help="Tool name or query for subcommand")
-    parser.add_argument("extra_args", nargs=argparse.REMAINDER, help="Arguments passed to tool when using 'run'")
 
     args = parser.parse_args()
     registry = load_registry()
 
-    # Route positional subcommand if provided
-    if args.subcommand == "run":
-        if not args.tool_name:
-            print("Error: Missing tool name to run. E.g. 'bg3 tools run <command> [args...]'", file=sys.stderr)
-            sys.exit(1)
-        sys.exit(dispatch_run(registry, args.tool_name, args.extra_args))
-    elif args.subcommand == "list":
+    if args.subcommand == "list":
         args.list = True
     elif args.subcommand == "search":
         args.search = args.tool_name
@@ -445,40 +565,69 @@ Examples:
         if args.json:
             print(json.dumps(report, indent=2))
         else:
-            status = "PASSED" if report["valid"] else "FAILED"
-            print(f"\nSkills Audit Report: [{status}]")
+            status_symbol = "[PASSED]" if report["valid"] else "[FAILED]"
+            print(f"\nSkills Audit Report: {status_symbol}")
             print(f"  Total Skills:             {report['total_skills']}")
-            print(f"  With Discovery Guidance:  {report['skills_with_discovery']} / {report['total_skills']} ({report['discovery_coverage_pct']}%)")
+            print(f"  With Discovery Guidance:  {report['skills_with_discovery']} / {report['total_skills']} ({report['discovery_percentage']}%)")
             print(f"  Unregistered Scripts:     {len(report['unregistered_scripts'])}\n")
 
             rows = []
-            for s in report["skills"]:
-                scripts_str = ", ".join(s["script_references"]) if s["script_references"] else "(none)"
-                discovery_icon = "[✓]" if s["has_discovery_guidance"] else "[ ]"
-                rows.append([s["skill"], discovery_icon, s["status"], scripts_str])
+            for s in report.get("skills", []):
+                disc_mark = "[✓]" if s["has_discovery_tip"] else "[✗]"
+                ref_summary = ", ".join(s["script_references"]) if s["script_references"] else "(none)"
+                rows.append([s["skill"], disc_mark, s["status"], ref_summary])
+
             print(format_table(rows, ["Skill Name", "Discovery", "Status", "Referenced Scripts"]))
             print()
+
+            if report.get("portability_violations"):
+                print("⚠️ Portability Violations (absolute user paths detected):")
+                for v in report["portability_violations"]:
+                    print(f"  - {v}")
+                print()
+
+            if report.get("broken_link_violations"):
+                print("⚠️ Broken Link Violations (invalid relative markdown links):")
+                for bl in report["broken_link_violations"]:
+                    print(f"  - {bl}")
+                print()
+
+            if report.get("invalid_subagent_models"):
+                print("⚠️ Subagent Model Violations (must use Model='inherit'):")
+                for im in report["invalid_subagent_models"]:
+                    print(f"  - {im}")
+                print()
+
+            if report.get("non_kebab_names"):
+                print("⚠️ Naming Violations (skill directory names must be kebab-case):")
+                for nk in report["non_kebab_names"]:
+                    print(f"  - {nk}")
+                print()
+
         sys.exit(0 if report["valid"] else 1)
 
     # 2. Verify
     if args.verify:
-        report = verify_registry(registry)
+        verify_res = verify_registry(registry)
         if args.json:
-            print(json.dumps(report, indent=2))
+            print(json.dumps(verify_res, indent=2))
         else:
-            status = "PASSED" if report["valid"] else "FAILED"
+            status = "PASSED" if verify_res["valid"] else "FAILED"
             print(f"\nRegistry Verification: [{status}]")
-            print(f"  Total commands verified: {report['total_registered']}")
-            if report.get("missing_docs"):
-                print("  Missing Documentation:")
-                for doc in report["missing_docs"]:
-                    print(f"    - {doc}")
-            if report.get("help_errors"):
-                print("  CLI Help Invocation Errors:")
-                for err in report["help_errors"]:
-                    print(f"    - {err['command']}: {err.get('stderr') or err.get('error')}")
-            print()
-        sys.exit(0 if report["valid"] else 1)
+            print(f"  Total Registered: {verify_res['total_registered']}")
+            print(f"  Missing Docs:     {len(verify_res['missing_docs'])}")
+            print(f"  Help Failures:    {len(verify_res['help_errors'])}\n")
+            if verify_res["missing_docs"]:
+                print("Missing Documentation:")
+                for d in verify_res["missing_docs"]:
+                    print(f"  - {d}")
+            if verify_res["help_errors"]:
+                print("Help Invocation Errors:")
+                for h in verify_res["help_errors"]:
+                    print(f"  - {h['command']}: exit {h['returncode']}")
+                    if h.get("stderr"):
+                        print(f"    {h['stderr']}")
+        sys.exit(0 if verify_res["valid"] else 1)
 
     # 3. Info
     if args.info:
@@ -489,24 +638,22 @@ Examples:
         if args.json:
             print(json.dumps(tool, indent=2))
         else:
-            print(f"\n🛠️  Tool: {tool['name']} (alias: {tool.get('command')})")
-            print(f"Category:    {tool.get('category')}")
-            print(f"Summary:     {tool.get('summary')}")
-            print(f"Description: {tool.get('description')}\n")
-            print(f"CLI Usage:   {tool.get('cli_usage')}\n")
-            print("Intents / Capabilities:")
-            for intent in tool.get("intents", []):
-                print(f"  • {intent}")
-            print("\nOptions & Flags:")
-            flag_rows = [
-                [f.get("name"), f.get("type"), "Yes" if f.get("required") else "No", f.get("description")]
-                for f in tool.get("flags", [])
-            ]
-            if flag_rows:
+            print(f"\n🛠️  Tool: {tool['name']}")
+            print(f"Command:     {tool['command']}")
+            print(f"Category:    {tool['category']}")
+            print(f"Usage:       {tool['cli_usage']}")
+            print(f"Summary:     {tool['summary']}")
+            if tool.get("aliases"):
+                print(f"Aliases:     {', '.join(tool['aliases'])}")
+            print("\nOptions / Flags:")
+            if tool.get("flags"):
+                flag_rows = []
+                for f in tool["flags"]:
+                    req = "YES" if f.get("required") else "NO"
+                    flag_rows.append([f["name"], f.get("type", "str"), req, f.get("description", "")])
                 print(format_table(flag_rows, ["Flag", "Type", "Required", "Description"]))
-            print("\nExamples:")
-            for ex in tool.get("examples", []):
-                print(f"  $ {ex}")
+            else:
+                print("  (None or positional only)")
             print()
         return
 
@@ -516,45 +663,29 @@ Examples:
         if args.json:
             print(json.dumps(results, indent=2))
         else:
-            if not results:
-                print(f"\nNo tools found matching query: '{args.search}'\n")
-                return
             print(f"\n🔍 Search Results for '{args.search}' ({len(results)} matches):\n")
-            rows = [
-                [r["command"], r["category"], r["summary"], str(r["relevance_score"])]
-                for r in results
-            ]
-            print(format_table(rows, ["Command", "Category", "Summary", "Score"]))
-            print(f"\nTip: Run 'bg3 tools info <command>' for full flag specifications.\n")
+            if not results:
+                print("  No matching tools found. Try broader keywords or run 'bg3 tools list'.")
+            else:
+                rows = []
+                for t in results[:10]:
+                    rows.append([t["name"], t["category"], t["command"], t["summary"][:60]])
+                print(format_table(rows, ["Tool Name", "Category", "Command", "Summary"]))
+            print()
         return
 
     # 5. List
-    if args.list or not any([args.search, args.info, args.verify, args.audit_skills, args.categories]):
+    if args.list or not any([args.search, args.info, args.verify, args.categories, args.audit_skills]):
         tools = list_tools(registry, args.category)
         if args.json:
-            if args.full:
-                print(json.dumps(tools, indent=2))
-            else:
-                compact_manifest = [
-                    {
-                        "name": t.get("name"),
-                        "command": t.get("command"),
-                        "category": t.get("category"),
-                        "summary": t.get("summary"),
-                        "cli_usage": t.get("cli_usage"),
-                    }
-                    for t in tools
-                ]
-                print(json.dumps(compact_manifest, indent=2))
+            print(json.dumps(tools if args.full else [{"name": t["name"], "command": t["command"], "category": t["category"], "summary": t["summary"]} for t in tools], indent=2))
         else:
-            cat_label = f" [{args.category}]" if args.category else ""
-            print(f"\n🧰 BG3 Mod Studio Tools{cat_label} ({len(tools)} available):\n")
-            rows = [
-                [t.get("command", ""), t.get("name", ""), t.get("category", ""), t.get("summary", "")]
-                for t in tools
-            ]
-            print(format_table(rows, ["Command", "Script Name", "Category", "Summary"]))
-            print(f"\nTip: Run 'bg3 tools search \"<intent>\"' or 'bg3 tools info <command>' for flags.\n")
+            filter_msg = f" (Category: {args.category})" if args.category else ""
+            print(f"\n📦 Registered Studio Tools ({len(tools)}){filter_msg}:\n")
+            rows = [[t["name"], t["category"], t["command"], t["summary"][:55]] for t in tools]
+            print(format_table(rows, ["Tool Name", "Category", "Command", "Summary"]))
+            print("\nRun 'bg3 tools info <tool_name>' for full parameter schemas.")
+            print()
         return
 
 

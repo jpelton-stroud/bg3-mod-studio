@@ -3,7 +3,7 @@
 tests/test_setup_environment.py
 -------------------------------
 Unit and integration tests for environment wizard prompts, subscription sync,
-custom mod purge, and non-interactive safety guards in scripts/setup_environment.py.
+custom mod purge, and non-interactive safety guards in bg3_core.setup_environment.
 """
 
 import subprocess
@@ -121,7 +121,7 @@ class SetupEnvironmentQATests(unittest.TestCase):
         self.assertIn('"xdg"', proc_json.stdout)
         self.assertIn('"config_home"', proc_json.stdout)
 
-        # 3. python3 scripts/management/setup_environment.py --dry-run --non-interactive
+        # 3. python3 -m bg3_core.setup_environment --dry-run --non-interactive
         proc_dry = subprocess.run(
             [sys.executable, "packages/bg3-core/bg3_core/setup_environment.py", "--dry-run", "--non-interactive"],
             cwd=repo_root,

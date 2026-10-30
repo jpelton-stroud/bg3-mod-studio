@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-scripts/modio_search.py
+packages/bg3-core/bg3_core/modio_search.py
 
 Searches Baldur's Gate 3 mods on mod.io using natural language queries,
 platform filtering (PC/Windows, XboxSeriesX, PS5, or Console), tag mapping,

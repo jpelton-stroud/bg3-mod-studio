@@ -1,4 +1,4 @@
-"""Unit tests for scripts/lib/cli_common.py."""
+"""Unit tests for bg3_core.cli_common."""
 
 import io
 import json

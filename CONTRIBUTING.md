@@ -1,6 +1,6 @@
 # Contributing to Baldur's Gate 3 Mod Studio & Mod.io Toolkit
 
-Thank you for your interest in contributing to the **Baldur's Gate 3 Mod Studio & Mod.io Toolkit**! This project provides tools, scripts, and autonomous agent workflows to author, document, sync, and validate mods for Baldur's Gate 3.
+Thank you for your interest in contributing to the **Baldur's Gate 3 Mod Studio & Mod.io Toolkit**! This project provides CLI tools, modular packages, and autonomous agent workflows to author, document, sync, and validate mods for Baldur's Gate 3.
 
 ---
 

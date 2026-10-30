@@ -5,7 +5,7 @@ Unified entrypoint providing structured noun-verb command execution, stream
 discipline, and standard exit codes across the entire automation toolchain.
 
 Usage:
-    python3 scripts/bg3.py [--json] [--no-color] [--verbose] <command> <subcommand> [options...]
+    bg3 [--json] [--no-color] [--verbose] <command> <subcommand> [options...]
 """
 
 from __future__ import annotations
@@ -48,61 +48,6 @@ THEORYCRAFTING_DIR = Path(bg3_theorycraft.__file__).resolve().parent if bg3_theo
 AUTHORING_DIR = Path(bg3_authoring.__file__).resolve().parent if bg3_authoring else CORE_DIR.parent.parent / "bg3-authoring" / "bg3_authoring"
 DIAGNOSTICS_DIR = AUTHORING_DIR / "diagnostics"
 PACKAGING_DIR = AUTHORING_DIR / "packaging"
-LIBRARY_DIR = CORE_DIR
-MANAGEMENT_DIR = CORE_DIR
-SCRIPTS_DIR = CORE_DIR
-DOMAIN_DIRS = [
-    CORE_DIR,
-    AUTHORING_DIR,
-    DIAGNOSTICS_DIR,
-    PACKAGING_DIR,
-    THEORYCRAFTING_DIR,
-]
-
-
-def resolve_script_target(name: str) -> Optional[Path]:
-    """Resolve script path across domain subdirectories, registry.json, and scripts root."""
-    clean_name = name if name.endswith(".py") else f"{name}.py"
-    # Direct relative path check
-    direct = SCRIPTS_DIR / name
-    if direct.is_file():
-        return direct
-    direct_py = SCRIPTS_DIR / clean_name
-    if direct_py.is_file():
-        return direct_py
-
-    # Domain directory search
-    for d in DOMAIN_DIRS:
-        cand = d / clean_name
-        if cand.is_file():
-            return cand
-        cand_raw = d / name
-        if cand_raw.is_file():
-            return cand_raw
-
-    # Registry lookup
-    reg_path = SCRIPTS_DIR / "registry.json"
-    if reg_path.is_file():
-        try:
-            with open(reg_path, "r", encoding="utf-8") as f:
-                reg_data = json.load(f)
-            stem = name[:-3] if name.endswith(".py") else name
-            for t in reg_data.get("tools", []):
-                t_name = t.get("name", "")
-                t_cmd = t.get("command", "")
-                t_path = t.get("path", "")
-                t_cat = t.get("category", "")
-                if name in (t_name, t_cmd, t_path, stem) or stem in (t_name, t_cmd, t_name.replace(".py", "")):
-                    if t_path and (SCRIPTS_DIR / t_path).is_file():
-                        return SCRIPTS_DIR / t_path
-                    if t_cat and (SCRIPTS_DIR / t_cat / t_name).is_file():
-                        return SCRIPTS_DIR / t_cat / t_name
-                    cand = SCRIPTS_DIR / t_name
-                    if cand.is_file():
-                        return cand
-        except Exception:
-            pass
-    return None
 
 
 class JsonCompliantArgumentParser(argparse.ArgumentParser):
@@ -1093,24 +1038,6 @@ def build_parser() -> JsonCompliantArgumentParser:
     save_purge_p.add_argument("-n", "--dry-run", action="store_true", help="Simulate purge without modifying files")
     save_purge_p.add_argument("-y", "--yes", action="store_true", help="Confirm deletion non-interactively")
 
-    # -------------------------------------------------------------------------
-    # 'run' universal runner for all scripts/ tools
-    # -------------------------------------------------------------------------
-    run_parser = subparsers.add_parser(
-        "run",
-        help="Execute any registered studio automation tool or legacy alias with stream discipline",
-        parents=[common_parser],
-    )
-    run_parser.add_argument(
-        "tool",
-        help="Script name (e.g. add_mod_dependency.py or add_mod_dependency)",
-    )
-    run_parser.add_argument(
-        "extra_args",
-        nargs=argparse.REMAINDER,
-        help="Arguments forwarded directly to the tool",
-    )
-
     return parser
 
 
@@ -1119,7 +1046,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
     cmd = args.command
     sub = getattr(args, "subcommand", None)
 
-    if not cmd or (cmd not in ("run", "query") and not sub):
+    if not cmd or (cmd != "query" and not sub):
         emitter.error(
             message="Missing required command and action. Run 'bg3 --help' for available commands.",
             code="MISSING_COMMAND",
@@ -1132,16 +1059,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
     script_target: Optional[Path] = None
     target_args: List[str] = []
 
-    if cmd == "run":
-        tool_name = args.tool
-        target = resolve_script_target(tool_name)
-        if not target:
-            target = SCRIPTS_DIR / tool_name
-        script_target = target
-        if getattr(args, "extra_args", None):
-            target_args.extend(args.extra_args)
-
-    elif cmd == "scaffold" or (cmd == "mod" and sub == "scaffold"):
+    if cmd == "scaffold" or (cmd == "mod" and sub == "scaffold"):
         actual_sub = getattr(args, "mod_scaffold_subcommand", None) or getattr(args, "subcommand", None)
         if actual_sub == "class":
             script_target = AUTHORING_DIR / "scaffold_class_description.py"

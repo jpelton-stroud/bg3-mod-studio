@@ -1,6 +1,6 @@
 """
-scripts/lib/mod_resolver.py
----------------------------
+packages/bg3-core/bg3_core/mod_resolver.py
+-------------------------------------------
 Centralized dependency metadata resolution and .pak provisioning for Baldur's Gate 3 mods.
 
 Resolution Priority:

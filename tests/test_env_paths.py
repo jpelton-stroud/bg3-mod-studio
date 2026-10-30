@@ -3,7 +3,7 @@
 tests/test_env_paths.py
 -----------------------
 Unit tests for XDG Base Directory Specification compliance, cross-platform fallbacks,
-cache directory resolution, and cascading configuration precedence in scripts/lib/env_paths.py.
+cache directory resolution, and cascading configuration precedence in bg3_core.env_paths.
 """
 
 import os

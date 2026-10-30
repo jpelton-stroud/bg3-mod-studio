@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-scripts/modio_update.py
+packages/bg3-core/bg3_core/modio_update.py
 
 Inspects Baldur's Gate 3 mods on mod.io for updates, compares local unpacked
 assets (meta.lsx MD5 hash and version) against mod.io release metadata,

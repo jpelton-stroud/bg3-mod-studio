@@ -8,7 +8,7 @@ This guide walks through creating, authoring, diagnosing, testing, and publishin
 
 Development in this studio follows two foundational principles:
 
-1. **Chat First**: Rather than manually executing command-line scripts, you drive every stage of mod creation conversationally through specialized slash commands (`/bg3-create-mod`, `/bg3-diagnose-mod`, `/bg3-test-mod`, `/bg3-release-prep`, `/bg3-post-release`). Autonomous agent skills orchestrate subagents, manage progressive review gates, and invoke deterministic Python scripts under the hood.
+1. **Chat First**: Rather than manually executing command-line scripts, you drive every stage of mod creation conversationally through specialized slash commands (`/bg3-create-mod`, `/bg3-diagnose-mod`, `/bg3-test-mod`, `/bg3-release-prep`, `/bg3-post-release`). Autonomous agent skills orchestrate subagents, manage progressive review gates, and invoke deterministic CLI commands under the hood.
 2. **Shift Left + Loopback**: Potential bugs, XML/LSX structural errors, broken localization handles, and community stat collisions are caught as early as possible—statically in Stage 1 and via BG3 Toolkit runtime logs in Stage 2—long before packaging or loading into a full game campaign. If gameplay anomalies appear during in-game testing, the workflow provides dual-track loopback to authoring patches or toolkit diagnostics.
 
 ### 5-Stage Shift-Left & Loopback Lifecycle

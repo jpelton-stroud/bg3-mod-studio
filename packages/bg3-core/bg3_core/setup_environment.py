@@ -422,11 +422,9 @@ def prompt_subscription_sync(non_interactive: bool = False) -> str:
 
 def handle_subscription_sync(choice: str, dry_run: bool = False) -> None:
     """Execute the selected subscription sync or library purge action."""
-    modio_sync_script = WORKSPACE_ROOT / "scripts" / "modio_sync.py"
-
     if choice == "1":
         print(f"\n{CYAN}Running subscription sync with pruning (--prune)...{RESET}")
-        cmd = [sys.executable, str(modio_sync_script), "--prune"]
+        cmd = [sys.executable, "-m", "bg3_core.modio_sync", "--prune"]
         if dry_run:
             print(f"{CYAN}[DRY-RUN] Would run: {' '.join(cmd)}{RESET}")
         else:
@@ -434,7 +432,7 @@ def handle_subscription_sync(choice: str, dry_run: bool = False) -> None:
 
     elif choice == "2":
         print(f"\n{CYAN}Running subscription sync without pruning...{RESET}")
-        cmd = [sys.executable, str(modio_sync_script)]
+        cmd = [sys.executable, "-m", "bg3_core.modio_sync"]
         if dry_run:
             print(f"{CYAN}[DRY-RUN] Would run: {' '.join(cmd)}{RESET}")
         else:

@@ -20,8 +20,8 @@ flowchart TD
 
     subgraph Tier2["2. Automation & Tooling Tier (packages/bg3-*)"]
         CLI["Unified CLI & Router\n(packages/bg3-core: bg3 -> ~/.local/bin/bg3)"]
-        Registry["Tooling Catalog & Discovery\n(packages/bg3-core: registry.json & tools.py - 59 tools)"]
-        CorePkg["bg3-core Engine Package\n(parsers, lspk, env_paths, modio, registry)"]
+        Registry["Tooling Catalog & Discovery\n(packages/bg3-core: bg3 tools dynamic inspection)"]
+        CorePkg["bg3-core Engine Package\n(parsers, lspk, env_paths, modio, dynamic tools)"]
         AuthoringPkg["bg3-authoring Studio Package\n(scaffolding, diagnostics, packaging, sync)"]
         TheorycraftPkg["bg3-theorycraft Studio Package\n(character builder, combat simulator, synergies)"]
     end
@@ -217,7 +217,7 @@ The community mod library indexes over 2,200 unique community gear items, passiv
 - **Unified 2026 CLI Suite (`bg3`)**:
   - Symlinked to `~/.local/bin/bg3` via `setup.sh`.
   - Implements modern Dual-Channel stream discipline: rich, high-signal human-readable formatting in interactive terminals, and pristine, machine-parsable JSON on `stdout` when `--json` is supplied or non-interactive pipes are detected.
-  - Standardizes POSIX exit codes, non-interactive confirmation guards (`--yes` / `--confirm`), and centralized tool schema registry (`packages/bg3-core/bg3_core/registry.json`).
+  - Standardizes POSIX exit codes, non-interactive confirmation guards (`--yes` / `--confirm`), and dynamic in-memory tool catalog (`bg3 tools`).
 - **Safe Sandboxing & Clean-Room Isolation**:
   - Custom authored mods remain safe in `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/` and tracked by version control.
   - **Dependency Isolation**: Permanent dependencies live in `meta.lsx`, while test-only dependencies live in `.test_deps.json` (`bg3 mod add-dependency <slug> --test`).

@@ -2,7 +2,7 @@
 """
 tests/test_modio_client.py
 --------------------------
-Unit tests for scripts/lib/modio_client.py: ModioClient, pagination, auth, and error redaction.
+Unit tests for bg3_core.modio_client: ModioClient, pagination, auth, and error redaction.
 """
 
 import io

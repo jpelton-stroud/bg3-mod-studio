@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-scripts/modio_extract.py
+packages/bg3-core/bg3_core/modio_extract.py
 
 Fetches Baldur's Gate 3 mod pak files from mod.io, unpacks Larian LSPK v18 archives,
 parses mod data (Stats, Localization, Meta), filters verified in-game features,

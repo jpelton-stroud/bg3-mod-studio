@@ -1,4 +1,4 @@
-"""Integration tests for scripts/bg3.py unified CLI entrypoint."""
+"""Integration tests for bg3 unified CLI entrypoint."""
 
 import json
 import subprocess
@@ -80,10 +80,15 @@ class TestBg3CliIntegration(unittest.TestCase):
         proc = self.run_cli(["mod", "add_dependency", "--help"])
         self.assertEqual(proc.returncode, 2)
 
-    def test_bg3_run_universal(self):
+    def test_bg3_run_deprecated_rejected(self):
         proc = self.run_cli(["run", "query_mod_database", "--help"])
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn("invalid choice: 'run'", proc.stderr)
+
+    def test_bg3_query_canonical(self):
+        proc = self.run_cli(["query", "--help"])
         self.assertEqual(proc.returncode, 0)
-        self.assertIn("query_mod_database", proc.stdout)
+        self.assertIn("General search term across name", proc.stdout)
 
     def test_scaffold_stat_dry_run_json(self):
         proc = self.run_cli([
