@@ -27,10 +27,10 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from bg3_core.cli_common import ConsoleColor
 from bg3_core.env_paths import (
     MODS_DIR,
     MY_MODS_DIR,
-    REPO_ROOT as WORKSPACE_ROOT,
     detect_bg3_appdata_dirs,
     detect_data_dir,
     get_env_var,
@@ -40,8 +40,6 @@ from bg3_core.env_paths import (
 from bg3_core.larian_parsers import find_mod_meta_files
 from bg3_core.lspk import LspkArchive
 from bg3_core.mod_resolver import ensure_dependency_paks, resolve_dependency_metadata
-
-from bg3_core.cli_common import ConsoleColor, ExitCode
 
 # Zero-dependency ANSI Terminal Colors honoring NO_COLOR
 _color = ConsoleColor(stream=sys.stderr)
@@ -178,7 +176,7 @@ def get_appdata_mods_dir(modsettings_path: Path | None = None) -> Path | None:
     return None
 
 
-def create_default_modsettings(path: Path):
+def create_default_modsettings(path: Path) -> None:
     """Generate a clean Patch 8 (Build 700) skeleton modsettings.lsx with all core system modules and ModOrder."""
     path.parent.mkdir(parents=True, exist_ok=True)
     module_nodes = []
@@ -219,7 +217,7 @@ def create_default_modsettings(path: Path):
     path.write_text(xml_content, encoding="utf-8")
 
 
-def save_modsettings(path: Path, tree: Any):
+def save_modsettings(path: Path, tree: Any) -> None:
     """Save modsettings.lsx with clean 4-space indentation and standard Larian XML declaration."""
     backup_file(path)
     if hasattr(ET, "indent"):
@@ -1057,7 +1055,7 @@ def restore_quarantined_paks(
     return restored
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Inspect, activate, reorder, and validate Baldur's Gate 3 modsettings.lsx load order."
     )

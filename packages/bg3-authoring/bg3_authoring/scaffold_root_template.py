@@ -8,7 +8,6 @@ audio, and localized string handles directly to custom Weapon/Armor/Object stats
 
 import argparse
 import json
-import os
 import re
 import sys
 import uuid
@@ -110,7 +109,7 @@ EMPTY_ROOT_TEMPLATES_LSX = """<?xml version="1.0" encoding="utf-8"?>
 """
 
 
-from bg3_core.env_paths import MY_MODS_DIR, resolve_mod_dir
+from bg3_core.env_paths import resolve_mod_dir
 
 
 def resolve_mod_directories(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, Path, str]:
@@ -290,7 +289,7 @@ def scaffold_root_template_node(
     }
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Bind stat entries to in-game 3D RootTemplates in Public/<Mod>/RootTemplates/_merged.lsx."
     )

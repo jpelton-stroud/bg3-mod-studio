@@ -15,36 +15,25 @@ Features:
 
 import argparse
 import json
-import os
-import re
-import shutil
 import sys
-import urllib.error
-import urllib.parse
-import urllib.request
-
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from bg3_core.env_paths import MODS_DIR, REPO_ROOT, get_subscribed_mods_dir, normalize_mod_key
+from bg3_core.env_paths import REPO_ROOT, get_subscribed_mods_dir
 from bg3_core.library_catalog import (
     find_mod_folder,
     find_orphaned_folders,
     get_tracked_mods,
-    parse_library_rows,
     prune_mod_from_library,
     safe_batch_delete_folders,
 )
 from bg3_core.modio_client import (
     BG3_GAME_ID,
-    MODIO_API_HOST,
-    USER_AGENT,
     ModioClient,
-    ModioError,
     get_api_key,
     get_oauth_token,
 )
@@ -59,7 +48,11 @@ get_tracked_mods_from_library = get_tracked_mods
 
 
 
-def fetch_subscribed_mods(oauth_token, game_id=BG3_GAME_ID, client=None):
+def fetch_subscribed_mods(
+    oauth_token: str,
+    game_id: int = BG3_GAME_ID,
+    client: Optional[ModioClient] = None,
+) -> list[dict[str, Any]]:
     """
     Fetch all mods the authenticated user is subscribed to for the given game.
     Handles pagination automatically.
@@ -73,16 +66,16 @@ def fetch_subscribed_mods(oauth_token, game_id=BG3_GAME_ID, client=None):
 
 
 def sync_library(
-    oauth_token,
-    api_key=None,
-    dry_run=False,
-    prune=False,
-    limit=None,
-    skip_updates=False,
-    filter_query=None,
-    library_path=None,
-    mods_dir=None,
-):
+    oauth_token: str,
+    api_key: Optional[str] = None,
+    dry_run: bool = False,
+    prune: bool = False,
+    limit: Optional[int] = None,
+    skip_updates: bool = False,
+    filter_query: Optional[str] = None,
+    library_path: Optional[str | Path] = None,
+    mods_dir: Optional[str | Path] = None,
+) -> dict[str, Any]:
     """
     Core sync controller:
     1. Fetches remote subscriptions
@@ -333,12 +326,12 @@ def sync_library(
     return results
 
 
-def print_summary(results, dry_run=False, prune=False):
+def print_summary(results: dict[str, Any], dry_run: bool = False, prune: bool = False) -> None:
     """Pretty prints the sync results to stdout."""
     prefix = "[DRY-RUN] " if dry_run else ""
-    print(f"\n========================================================")
+    print("\n========================================================")
     print(f"{prefix}BG3 Mod Library Sync Summary")
-    print(f"========================================================")
+    print("========================================================")
     print(f"Total Subscribed on mod.io : {results['total_subscribed']}")
     print(f"Currently in library.md    : {results['total_tracked']}")
     print(f"  - Active & Documented    : {results['existing_count']}")
@@ -346,7 +339,7 @@ def print_summary(results, dry_run=False, prune=False):
     print(f"  - Tracked but Unsubscribed: {results['unsubscribed_count']}")
     if results.get("orphaned_count", 0) > 0:
         print(f"  - Orphaned Mod Folders   : {results['orphaned_count']}")
-    print(f"--------------------------------------------------------")
+    print("--------------------------------------------------------")
 
     actions = results["actions"]
 
@@ -389,10 +382,10 @@ def print_summary(results, dry_run=False, prune=False):
         for item in actions["failed"]:
             print(f"  ! {item.get('name', item.get('slug'))}: {item.get('message')}")
 
-    print(f"========================================================\n")
+    print("========================================================\n")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Sync BG3 mods/library.md with your mod.io subscribed mods."
     )

@@ -8,13 +8,12 @@ against modsettings.lsx to warn of missing or mismatched mods before loading the
 
 import argparse
 import json
-import os
 import re
 import struct
 import sys
-from typing import Any
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
@@ -54,7 +53,7 @@ def find_save_file(save_arg: str | None = None, save_dir_arg: str | None = None)
     if not candidates:
         dirs_searched = [str(d) for d in search_dirs if str(d).strip()]
         raise FileNotFoundError(
-            f"No .lsv save games found. Searched:\n" + "\n".join(f"  - {d}" for d in dirs_searched)
+            "No .lsv save games found. Searched:\n" + "\n".join(f"  - {d}" for d in dirs_searched)
         )
 
     # Return latest
@@ -62,8 +61,34 @@ def find_save_file(save_arg: str | None = None, save_dir_arg: str | None = None)
     return candidates[0][1]
 
 
-def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict]:
-    """Extracts ModuleShortDesc entries from binary LSOF v7 meta.lsf values chunk."""
+def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict[str, str]]:
+    """Extracts ModuleShortDesc entries from binary LSOF meta.lsf via AST traversal with regex fallback."""
+    # 1. Primary path: Pure-Python LSF AST decompiler
+    try:
+        from bg3_core.lsf import LsfDocument
+
+        doc = LsfDocument.from_bytes(lsf_bytes)
+        mod_nodes = doc.find_all("ModuleShortDesc")
+        if mod_nodes:
+            ast_mods: list[dict[str, str]] = []
+            for node in mod_nodes:
+                uuid_val = str(node.get_attr_value("UUID") or "")
+                name_val = str(node.get_attr_value("Name") or "")
+                folder_val = str(node.get_attr_value("Folder") or "")
+                ver_val = str(node.get_attr_value("Version64") or "")
+                if uuid_val or name_val:
+                    ast_mods.append({
+                        "uuid": uuid_val,
+                        "name": name_val,
+                        "folder": folder_val,
+                        "version": ver_val,
+                    })
+            if ast_mods:
+                return ast_mods
+    except Exception:
+        pass
+
+    # 2. Fallback path: Raw binary payload scanning
     from bg3_core.lspk import lz4_frame_or_block_decompress
 
     payload = lsf_bytes
@@ -80,7 +105,7 @@ def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict]:
         except Exception:
             payload = lsf_bytes
 
-    mods = []
+    mods: list[dict[str, str]] = []
     # In LSOF values table, each ModuleShortDesc stores:
     # 16-byte Larian GUID (<IHHHHHH) + 8-byte Version64 + 32-char MD5 + \x00 + Folder + \x00 + Name + \x00
     pattern = re.compile(rb"([0-9a-f]{32})\x00([A-Za-z0-9_\-\. ]{2,128})\x00([A-Za-z0-9_\-\. ]{2,128})\x00")
@@ -190,7 +215,11 @@ def extract_save_metadata(save_path: Path) -> dict:
 def audit_against_modsettings(save_mods: list[dict], workspace_root: Path) -> dict:
     """Compares save mod list against active modsettings.lsx."""
     try:
-        from bg3_core.manage_load_order import CORE_GUSTAV_NAMES, detect_modsettings_path, parse_modsettings
+        from bg3_core.manage_load_order import (
+            CORE_GUSTAV_NAMES,
+            detect_modsettings_path,
+            parse_modsettings,
+        )
     except ImportError:
         from manage_load_order import CORE_GUSTAV_NAMES, detect_modsettings_path, parse_modsettings  # type: ignore[no-redef]
 
@@ -246,7 +275,7 @@ def audit_against_modsettings(save_mods: list[dict], workspace_root: Path) -> di
     }
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Inspect BG3 .lsv save files and audit them against active mod load orders."
     )

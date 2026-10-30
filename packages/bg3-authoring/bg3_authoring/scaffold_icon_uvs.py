@@ -8,8 +8,6 @@ power-of-two texture atlas grid and emits engine-compliant Larian Icons.lsx.
 
 import argparse
 import json
-import math
-import os
 import sys
 import uuid
 import xml.etree.ElementTree as ET
@@ -18,7 +16,7 @@ from xml.dom import minidom
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MY_MODS_DIR, resolve_mod_dir
+from bg3_core.env_paths import resolve_mod_dir
 
 
 def resolve_mod_public_dir(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, str]:
@@ -125,7 +123,7 @@ def build_icons_lsx(
     return "\n".join(lines) + "\n"
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Calculate UV coordinates and generate GUI/Icons.lsx for custom BG3 icons."
     )

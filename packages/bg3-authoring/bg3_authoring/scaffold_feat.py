@@ -10,7 +10,6 @@ Generates:
 
 import argparse
 import json
-import os
 import sys
 import uuid
 import xml.etree.ElementTree as ET
@@ -21,7 +20,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import resolve_mod_dir
 from bg3_core.larian_parsers import (
-    PATCH_8_VERSION,
     generate_larian_handle,
     split_larian_items,
     update_localization_xml,
@@ -215,7 +213,7 @@ def scaffold_feat(
     }
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Scaffold Patch 8 Feats and FeatDescriptions with atomic localization registration.")
     parser.add_argument("--mod", required=True, help="Target mod name or path in my_mods/")
     parser.add_argument("--name", required=True, help="Internal feat name (e.g. NightInfiltrator)")

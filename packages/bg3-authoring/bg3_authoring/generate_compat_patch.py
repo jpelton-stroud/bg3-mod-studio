@@ -9,7 +9,6 @@ Compatibility Framework (CF) integration payload.
 
 import argparse
 import json
-import os
 import re
 import struct
 import sys
@@ -213,7 +212,7 @@ def prettify_xml_element(elem: ET.Element) -> str:
     return "\n".join(lines) + "\n"
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Scaffold compatibility patches or Compatibility Framework configs for colliding BG3 mods."
     )

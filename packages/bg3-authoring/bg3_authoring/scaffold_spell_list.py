@@ -8,7 +8,6 @@ feats, and class descriptions.
 
 import argparse
 import json
-import os
 import sys
 import uuid
 import xml.etree.ElementTree as ET
@@ -18,7 +17,7 @@ from xml.dom import minidom
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import resolve_mod_dir
-from bg3_core.larian_parsers import PATCH_8_VERSION, split_larian_items
+from bg3_core.larian_parsers import split_larian_items
 
 EMPTY_SPELL_LISTS_LSX = """<?xml version="1.0" encoding="UTF-8"?>
 <save>
@@ -142,7 +141,7 @@ def scaffold_list(
     }
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Scaffold Patch 8 SpellLists.lsx and PassiveLists.lsx selector lists.")
     parser.add_argument("--mod", required=True, help="Target mod name or path in my_mods/")
     parser.add_argument("--comment", help="Documentation label/comment for the list")

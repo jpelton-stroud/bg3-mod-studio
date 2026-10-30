@@ -10,7 +10,6 @@ Generates:
 
 import argparse
 import json
-import os
 import sys
 import uuid
 import xml.etree.ElementTree as ET
@@ -20,7 +19,7 @@ from xml.dom import minidom
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import resolve_mod_dir
-from bg3_core.larian_parsers import PATCH_8_VERSION, split_larian_items
+from bg3_core.larian_parsers import split_larian_items
 
 VANILLA_CLASS_TABLES = {
     "barbarian": "60bb7dc1-7143-400e-ae34-7d8da6c8a782",
@@ -200,7 +199,7 @@ def scaffold_default_values(
     return results
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Scaffold Patch 8 Character Creation DefaultValues schemas (Abilities, Skills, Spells).")
     parser.add_argument("--mod", required=True, help="Target mod name or path in my_mods/")
     parser.add_argument("--class", dest="class_name", required=True, help="Target class name (resolves TableUUID automatically)")

@@ -86,7 +86,7 @@ def get_meta_files(mod_dir: Path) -> List[Path]:
 def read_mod_version(meta_path: Path) -> Tuple[int, int, int, int, int]:
     """Extract Version64 integer and decoded tuple from a meta.lsx file."""
     content = meta_path.read_text(encoding="utf-8")
-    
+
     # Locate ModuleInfo node first to avoid matching dependencies or PublishVersion
     mod_info_match = re.search(r'<node\s+id="ModuleInfo">(.*?)</node>', content, re.DOTALL)
     if mod_info_match:
@@ -107,7 +107,7 @@ def update_meta_version(meta_path: Path, new_v64: int, dry_run: bool = False) ->
     """Updates Version64 under ModuleInfo in meta.lsx while preserving formatting."""
     content = meta_path.read_text(encoding="utf-8")
 
-    def replacer(match):
+    def replacer(match: re.Match[str]) -> str:
         node_content = match.group(0)
         updated_node = re.sub(
             r'(<attribute\s+id="Version64"\s+type="int64"\s+value=")\d+("\s*/>)',
@@ -231,7 +231,7 @@ def bump_version(
             for mf in meta_files:
                 print(f"  └ {_rel_path(mf, WORKSPACE_ROOT)}")
         else:
-            action_desc = f"[DRY-RUN] Would update" if dry_run else "Successfully updated"
+            action_desc = "[DRY-RUN] Would update" if dry_run else "Successfully updated"
             print(f"{action_desc} '{target_mod.name}': {old_version_str} -> {new_version_str} (Version64: {new_v64})")
             for f in updated_files:
                 print(f"  ✓ Updated {f}")
@@ -239,7 +239,7 @@ def bump_version(
     return result
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Auto-generate and bump semantic versions and Larian Version64 integers in BG3 mods."
     )

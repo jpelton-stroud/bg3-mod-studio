@@ -18,9 +18,7 @@ if str(_REPO_ROOT) not in sys.path:
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import MY_MODS_DIR, REPO_ROOT, normalize_mod_key, resolve_mod_dir
 from bg3_core.modio_client import (
-    API_ROOT,
     BG3_GAME_ID,
-    USER_AGENT,
     ModioClient,
     ModioError,
     get_oauth_token,

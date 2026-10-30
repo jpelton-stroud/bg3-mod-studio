@@ -10,11 +10,10 @@ factoring in cataloged mod equipment and multi-class synergies.
 import argparse
 import json
 import math
-import os
 import re
 import sys
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
@@ -267,7 +266,7 @@ def simulate_turn_1_dpr(
     }
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Theorycrafting simulator for Level 20 BG3 character builds and mod gear synergies."
     )

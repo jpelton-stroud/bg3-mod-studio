@@ -9,20 +9,19 @@ and automatic exclusion of already-tracked mods in mods/library.md.
 
 import argparse
 import json
-import os
 import re
 import sys
 import urllib.parse
 import urllib.request
 from pathlib import Path
+from typing import Any, Optional
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from bg3_core.env_paths import MODS_DIR, REPO_ROOT
-from bg3_core.library_catalog import get_tracked_mod_identifiers, parse_library_rows
-from bg3_core.modio_client import BG3_GAME_ID, MODIO_API_HOST, USER_AGENT, get_api_key
+from bg3_core.library_catalog import get_tracked_mod_identifiers
+from bg3_core.modio_client import BG3_GAME_ID, MODIO_API_HOST, get_api_key
 
 # Pre-mapped domain terms to mod.io tags
 TAG_MAPPINGS = {
@@ -83,14 +82,14 @@ STOP_WORDS = {
 }
 
 
-def get_tracked_mods(workspace_root=None):
+def get_tracked_mods(workspace_root: Optional[Path | str] = None) -> tuple[set[str], set[str]]:
     """
     Parse mods/library.md to collect names and slugs of already tracked mods.
     """
     return get_tracked_mod_identifiers(workspace_root=workspace_root)
 
 
-def normalize_platform(platform_str):
+def normalize_platform(platform_str: Optional[str]) -> Optional[str]:
     """Normalize user platform input to mod.io platform key or special 'console' mode."""
     if not platform_str:
         return None
@@ -108,7 +107,7 @@ def normalize_platform(platform_str):
     return p
 
 
-def parse_query_terms(query_str):
+def parse_query_terms(query_str: str) -> tuple[list[str], list[str]]:
     """
     Extract meaningful search terms and infer mod.io tags from natural language.
     """
@@ -132,7 +131,13 @@ def parse_query_terms(query_str):
     return cleaned_terms, list(inferred_tags)
 
 
-def fetch_mods_from_modio(api_key, search_text, platform, tags, limit=30):
+def fetch_mods_from_modio(
+    api_key: str,
+    search_text: str,
+    platform: Optional[str],
+    tags: list[str],
+    limit: int = 30,
+) -> list[dict[str, Any]]:
     """
     Query the mod.io REST API with search text, platform, and optional tags.
     Also checks exact name_id/slug match if search_text matches slug patterns.
@@ -214,7 +219,15 @@ def fetch_mods_from_modio(api_key, search_text, platform, tags, limit=30):
         raise RuntimeError(f"mod.io API request failed: {e}")
 
 
-def filter_and_rank_mods(mods, query_str, platform, tracked_slugs, tracked_names, exclude_tracked=True, limit=15):
+def filter_and_rank_mods(
+    mods: list[dict[str, Any]],
+    query_str: str,
+    platform: Optional[str],
+    tracked_slugs: set[str],
+    tracked_names: set[str],
+    exclude_tracked: bool = True,
+    limit: int = 15,
+) -> list[dict[str, Any]]:
     """
     Filter results by platform compatibility, tracked status, and rank by relevance.
     """
@@ -304,7 +317,7 @@ def filter_and_rank_mods(mods, query_str, platform, tracked_slugs, tracked_names
     return results[:limit]
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Search Baldur's Gate 3 mods on mod.io with natural language and platform filters.")
     parser.add_argument("--query", "-q", required=True, help="Natural language search query or keywords")
     parser.add_argument("--platform", "-p", default="windows", help="Target platform (PC/Windows, XboxSeriesX, PS5, or Console)")

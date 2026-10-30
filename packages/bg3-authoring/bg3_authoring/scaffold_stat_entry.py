@@ -9,17 +9,14 @@ and registering them into Localization/English/<ModName>.xml.
 
 import argparse
 import json
-import os
 import re
 import sys
-import uuid
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MY_MODS_DIR, resolve_mod_dir
+from bg3_core.env_paths import resolve_mod_dir
 from bg3_core.larian_parsers import (
     generate_larian_handle,
     split_larian_items,
@@ -392,7 +389,7 @@ def parse_props(props_str: str | None) -> dict[str, str]:
     return res
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Scaffold Larian stat entries with automatic localization handle allocation."
     )

@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
@@ -28,12 +29,11 @@ import sys
 import uuid
 import zlib
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from bg3_core.env_paths import get_authored_mods_dir, load_env_file
 from bg3_core.larian_parsers import calculate_version64, generate_larian_handle
 from bg3_core.mod_resolver import KNOWN_DEPENDENCIES, resolve_dependency_metadata
-
 
 README_TEMPLATE_PATH = Path(__file__).resolve().parent / "templates" / "custom_mod_readme.md"
 
@@ -395,7 +395,7 @@ def load_env_defaults() -> dict:
     return load_env_file()
 
 
-def main():
+def main() -> None:
     env_vars = load_env_defaults()
     default_author = os.environ.get("BG3_MOD_AUTHOR") or env_vars.get("BG3_MOD_AUTHOR") or "MTGHillGiant"
 

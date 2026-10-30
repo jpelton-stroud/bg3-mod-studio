@@ -18,7 +18,6 @@ Features:
 
 import argparse
 import json
-import os
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -268,7 +267,7 @@ def resolve_cli_targets(args: argparse.Namespace) -> Tuple[List[str], List[str]]
     return dedup_perm, dedup_test
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Add community or core mod dependencies and test dependencies to an existing custom mod in my_mods/."
     )

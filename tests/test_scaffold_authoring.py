@@ -20,14 +20,14 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from bg3_authoring.diagnostics.check_mod_conflicts import compare_two_mods
+from bg3_authoring.diagnostics.validate_mod import ModValidator
 from bg3_core.larian_parsers import (
     PATCH_8_VERSION,
     format_patch8_lsx_header,
     generate_larian_handle,
     update_localization_xml,
 )
-from bg3_authoring.diagnostics.validate_mod import ModValidator
-from bg3_authoring.diagnostics.check_mod_conflicts import compare_two_mods
 
 BG3_CLI = REPO_ROOT / "packages" / "bg3-core" / "bg3_core" / "cli.py"
 
@@ -313,7 +313,7 @@ class TestDiagnosticsConflictDetection(unittest.TestCase):
         for m in (self.mod1, self.mod2):
             cd_dir = m / "Public" / m.name / "ClassDescriptions"
             cd_dir.mkdir(parents=True)
-            (cd_dir / "ClassDescriptions.lsx").write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
+            (cd_dir / "ClassDescriptions.lsx").write_text("""<?xml version="1.0" encoding="UTF-8"?>
 <save>
     <version major="4" minor="8" revision="0" build="700"/>
     <region id="ClassDescriptions">
@@ -331,7 +331,7 @@ class TestDiagnosticsConflictDetection(unittest.TestCase):
             # Create colliding Feats
             f_dir = m / "Public" / m.name / "Feats"
             f_dir.mkdir(parents=True)
-            (f_dir / "Feats.lsx").write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
+            (f_dir / "Feats.lsx").write_text("""<?xml version="1.0" encoding="UTF-8"?>
 <save>
     <version major="4" minor="8" revision="0" build="700"/>
     <region id="Feats">

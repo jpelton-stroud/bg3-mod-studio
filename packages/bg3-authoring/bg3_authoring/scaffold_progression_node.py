@@ -9,7 +9,6 @@ XML schema and preventing level-up screen engine crashes.
 
 import argparse
 import json
-import os
 import sys
 import uuid
 import xml.etree.ElementTree as ET
@@ -18,7 +17,7 @@ from xml.dom import minidom
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MY_MODS_DIR, resolve_mod_dir
+from bg3_core.env_paths import resolve_mod_dir
 from bg3_core.larian_parsers import split_larian_items
 
 # Standard Vanilla Class Table UUIDs
@@ -184,7 +183,7 @@ def add_or_merge_progression(
     action = "merged" if existing_node is not None else "created"
     node = existing_node if existing_node is not None else ET.SubElement(children, "node", id="Progression")
 
-    def set_or_update_attr(attr_id: str, attr_type: str, new_value: str, delimiter: str = ";"):
+    def set_or_update_attr(attr_id: str, attr_type: str, new_value: str, delimiter: str = ";") -> None:
         cur = node.find(f"attribute[@id='{attr_id}']")
         if cur is None:
             ET.SubElement(node, "attribute", id=attr_id, type=attr_type, value=new_value)
@@ -242,7 +241,7 @@ def add_or_merge_progression(
     }
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Scaffold or merge Larian XML Progression and SpellList nodes into BG3 mods."
     )

@@ -10,9 +10,10 @@ Validates compliance with Antigravity specifications and industry best practices
 """
 
 import os
-from pathlib import Path
 import re
 import unittest
+from pathlib import Path
+
 import yaml
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
@@ -82,7 +83,7 @@ class TestAgentSkills(unittest.TestCase):
             elif len(desc.strip()) < 40:
                 errors.append(f"{sf.parent.name}: description is too short ({len(desc.strip())} chars)")
 
-        self.assertEqual(errors, [], f"Frontmatter errors found:\n" + "\n".join(errors))
+        self.assertEqual(errors, [], "Frontmatter errors found:\n" + "\n".join(errors))
 
     def test_skill_path_portability(self):
         """Verify that skills do not contain user-specific absolute paths (/home/ or C:\\Users\\)."""
@@ -95,7 +96,7 @@ class TestAgentSkills(unittest.TestCase):
         self.assertEqual(
             violations,
             [],
-            f"Hardcoded user paths detected in skills:\n" + "\n".join(violations)
+            "Hardcoded user paths detected in skills:\n" + "\n".join(violations)
         )
 
     def test_skill_link_integrity(self):
@@ -121,7 +122,7 @@ class TestAgentSkills(unittest.TestCase):
                 if not resolved.exists():
                     broken_links.append(f"{rel_path}: broken link [{text}]({target}) -> {resolved}")
 
-        self.assertEqual(broken_links, [], f"Broken links detected in skills:\n" + "\n".join(broken_links))
+        self.assertEqual(broken_links, [], "Broken links detected in skills:\n" + "\n".join(broken_links))
 
     def test_subagent_model_inheritance(self):
         """Verify that subagent launch payloads specify Model: 'inherit' per AGY guidelines."""
@@ -136,7 +137,7 @@ class TestAgentSkills(unittest.TestCase):
         self.assertEqual(
             illegal_models,
             [],
-            f"Non-inherited subagent models found:\n" + "\n".join(illegal_models)
+            "Non-inherited subagent models found:\n" + "\n".join(illegal_models)
         )
 
     def test_skill_discovery_guidance(self):
@@ -185,7 +186,7 @@ class TestAgentSkills(unittest.TestCase):
         self.assertEqual(
             failures,
             [],
-            f"Skills failed canonical pre-flight validation:\n" + "\n".join(failures)
+            "Skills failed canonical pre-flight validation:\n" + "\n".join(failures)
         )
 
 

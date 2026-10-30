@@ -11,7 +11,6 @@ Generates:
 
 import argparse
 import json
-import os
 import sys
 import uuid
 import xml.etree.ElementTree as ET
@@ -22,7 +21,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import resolve_mod_dir
 from bg3_core.larian_parsers import (
-    PATCH_8_VERSION,
     generate_larian_handle,
     update_localization_xml,
 )
@@ -390,7 +388,7 @@ def scaffold_class_description(
     }
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Scaffold Patch 8 Class & Subclass descriptions with atomic localization and companion schemas.")
     parser.add_argument("--mod", required=True, help="Target mod name or path in my_mods/")
     parser.add_argument("--name", required=True, help="Internal class/subclass name (e.g. ShadowStalker)")
@@ -440,7 +438,7 @@ def main():
             print(f"    Table UUID: {res['progression_table_uuid']}")
             print(f"    Subclass: {res['is_subclass']} (Parent GUID: {res['parent_guid']})")
             if res["parent_registered"]:
-                print(f"    Parent Progressions SubClass registration: Injected")
+                print("    Parent Progressions SubClass registration: Injected")
             print(f"    Files: {res['class_descriptions_file']}, {res['progression_descriptions_file']}")
         return ExitCode.SUCCESS
 

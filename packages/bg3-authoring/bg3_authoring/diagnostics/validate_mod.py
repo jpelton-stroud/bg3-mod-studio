@@ -18,7 +18,6 @@ Exits with 0 if valid, 1 if any errors are encountered.
 
 import argparse
 import json
-import os
 import re
 import struct
 import sys
@@ -28,8 +27,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import (
-    MY_MODS_DIR,
-    REPO_ROOT as WORKSPACE_ROOT,
     get_authored_mods_dir,
     resolve_mod_dir,
 )
@@ -58,13 +55,13 @@ class ModValidator:
         self.defined_spells: set[str] = set()
         self.defined_root_templates: set[str] = set()
 
-    def add_error(self, msg: str):
+    def add_error(self, msg: str) -> None:
         self.errors.append(msg)
 
-    def add_warning(self, msg: str):
+    def add_warning(self, msg: str) -> None:
         self.warnings.append(msg)
 
-    def validate_directory_structure(self):
+    def validate_directory_structure(self) -> None:
         proj_dir = self.mod_dir / "Projects"
         mods_dir = self.mod_dir / "Mods"
         pub_dir = self.mod_dir / "Public"
@@ -79,7 +76,7 @@ class ModValidator:
         if not loc_dir.is_dir():
             self.add_warning("Missing 'Localization/' directory.")
 
-    def validate_xml_syntax(self):
+    def validate_xml_syntax(self) -> None:
         for p in self.mod_dir.rglob("*"):
             if p.is_file() and p.suffix.lower() in (".xml", ".lsx"):
                 try:
@@ -142,7 +139,7 @@ class ModValidator:
             self.add_error(f"Failed to read metadata from {meta_file.name}: {e}")
         return data
 
-    def validate_metadata_parity(self):
+    def validate_metadata_parity(self) -> None:
         proj_metas = list(self.mod_dir.glob("Projects/*/meta.lsx"))
         mods_metas = list(self.mod_dir.glob("Mods/*/meta.lsx"))
 
@@ -196,7 +193,7 @@ class ModValidator:
             if not self.meta_projects["name"]:
                 self.add_error("Mod Name in Projects meta.lsx is empty.")
 
-    def validate_localization_handles(self):
+    def validate_localization_handles(self) -> None:
         # 1. Collect all defined handles from Localization/English/*.xml
         loc_dir = self.mod_dir / "Localization" / "English"
         if loc_dir.is_dir():
@@ -263,7 +260,7 @@ class ModValidator:
                 f"(run 'sync_localization.py --mod {self.mod_dir.name} --prune' to clean)."
             )
 
-    def validate_stats_and_templates(self):
+    def validate_stats_and_templates(self) -> None:
         # 1. Collect defined RootTemplate MapKey UUIDs in Public/*/RootTemplates/*.lsx
         for rt_file in self.mod_dir.glob("Public/*/RootTemplates/*.lsx"):
             try:
@@ -309,7 +306,7 @@ class ModValidator:
                 except Exception:
                     pass
 
-    def validate_spell_references(self):
+    def validate_spell_references(self) -> None:
         # 1. Collect spells defined in Stats/Generated/Data/Spell_*.txt
         stats_dirs = list(self.mod_dir.glob("Public/*/Stats/Generated/Data"))
         if stats_dirs:
@@ -341,7 +338,7 @@ class ModValidator:
             except Exception as e:
                 self.add_error(f"Error parsing SpellLists.lsx: {e}")
 
-    def validate_image_asset(self, img_path: Path, label: str):
+    def validate_image_asset(self, img_path: Path, label: str) -> None:
         if not img_path.is_file():
             self.add_warning(f"Missing {label} asset at {img_path.relative_to(self.mod_dir)}")
             return
@@ -361,7 +358,7 @@ class ModValidator:
         except Exception as e:
             self.add_error(f"Failed to validate PNG {img_path.name}: {e}")
 
-    def validate_assets(self):
+    def validate_assets(self) -> None:
         # Larian standard:
         # Projects/<ModFolder>/thumbnail.png (512x512 or 1024x1024)
         # Mods/<ModFolder>/mod_publish_logo.png (512x512 or 1024x1024)
@@ -373,7 +370,7 @@ class ModValidator:
             if d.is_dir():
                 self.validate_image_asset(d / "mod_publish_logo.png", "Mods publish logo")
 
-    def validate_companion_schemas(self):
+    def validate_companion_schemas(self) -> None:
         # 1. Feats.lsx vs Feats/FeatDescriptions.lsx
         feat_files = list(self.mod_dir.glob("Public/*/Feats/Feats.lsx"))
         feat_desc_files = list(self.mod_dir.glob("Public/*/Feats/FeatDescriptions.lsx"))
@@ -493,7 +490,7 @@ def check_uuid_uniqueness(mod_dirs: list[Path]) -> list[str]:
     return dupes
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Deterministic static validator and linter for BG3 mods.")
     parser.add_argument("mod_pos", nargs="?", help="Specific mod name, slug, or directory path to validate (positional)")
     parser.add_argument("--mod", help="Specific mod name, slug, or directory path to validate")

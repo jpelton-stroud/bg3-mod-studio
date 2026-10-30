@@ -116,7 +116,7 @@ flowchart LR
     Remote["mod.io REST API\n(v1/games/6715)"] -->|bg3 modio search\n(bg3_core.modio_search)| SearchResults["Candidate Mod\n(Platform Filtered)"]
     SearchResults -->|bg3 modio extract\n(bg3_core.modio_extract)| DL["Download Archive\n(.pak / .zip)"]
     DL --> Extract["Pure-Python Unpacker\n(bg3_core.lspk)"]
-    Extract --> Parse["Larian Engine Parsers\n(bg3_core.parsers)"]
+    Extract --> Parse["Larian Engine Parsers\n(bg3_core.larian_parsers)"]
     Parse --> Specs["Mods/subscribed/<slug>/README.md\n(Rich Markdown Spec)"]
     Parse --> Index["Master Catalog\n(Mods/subscribed/library.md: six columns)"]
     Index --> FastDB["bg3 query\n(bg3_core.query_mod_database)"]
@@ -158,7 +158,7 @@ BG3_Mod_Studio/Mods/authored/<mod-slug>/
 
 ### Larian 64-bit Version Encoding (`Version64`)
 
-Larian's engine encodes semantic versioning into an unsigned 64-bit integer (`Version64`) using bitwise shifts. The formula implemented by `bg3_core.parsers` and utilized by `bg3_authoring.create_mod_scaffold` (`bg3 mod scaffold`) and `bg3_authoring.bump_mod_version` (`bg3 mod bump-version`) is:
+Larian's engine encodes semantic versioning into an unsigned 64-bit integer (`Version64`) using bitwise shifts. The formula implemented by `bg3_core.larian_parsers` and utilized by `bg3_authoring.create_mod_scaffold` (`bg3 mod scaffold`) and `bg3_authoring.bump_mod_version` (`bg3 mod bump-version`) is:
 
 $$\text{Version64} = (\text{major} \ll 55) \mid (\text{minor} \ll 47) \mid (\text{revision} \ll 31) \mid \text{build}$$
 
@@ -172,7 +172,7 @@ $$\text{Version64} = (\text{major} \ll 55) \mid (\text{minor} \ll 47) \mid (\tex
 
 ### Pure-Python LSPK v18 Binary Packaging (`pack_mod_pak.py` / `lspk.py`)
 
-Rather than relying on Windows-exclusive binaries (`LSLib/divine.exe`) or running through `wine`, the workspace implements a pure Python packager for Larian's **LSPK v18** format in `packages/bg3-authoring/bg3_authoring/pack_mod_pak.py` and `packages/bg3-core/bg3_core/lspk.py` (`bg3 mod pack`):
+Rather than relying on Windows-exclusive binaries (`LSLib/divine.exe`) or running through `wine`, the workspace implements a pure Python packager for Larian's **LSPK v18** format in `packages/bg3-authoring/bg3_authoring/packaging/pack_mod_pak.py` and `packages/bg3-core/bg3_core/lspk.py` (`bg3 mod pack`):
 
 - **Zero External Dependencies**: Implemented strictly with Python's standard library `struct`, `zlib`, and `hashlib`.
 - **Package Header**: Writes standard 128-byte LSPK v18 signature (`LSPK`), file version, and file table metadata offset.
@@ -186,7 +186,7 @@ Rather than relying on Windows-exclusive binaries (`LSLib/divine.exe`) or runnin
 
 ### Idempotent Selective Synchronization (`sync_game_data.py`)
 
-The live synchronization system (`packages/bg3-authoring/bg3_authoring/sync_game_data.py` / `bg3 mod sync-game`) mirrors source files from `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/<mod-slug>/` into the game installation directory (`Baldurs Gate 3/Data/`) for in-engine testing:
+The live synchronization system (`packages/bg3-authoring/bg3_authoring/packaging/sync_game_data.py` / `bg3 mod sync-game`) mirrors source files from `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/<mod-slug>/` into the game installation directory (`Baldurs Gate 3/Data/`) for in-engine testing:
 
 1. **Selective Root Mapping**:
    - `Mods/authored/<mod-slug>/Mods/<ModName>_<UUID>/` $\to$ `Data/Mods/<ModName>_<UUID>/`

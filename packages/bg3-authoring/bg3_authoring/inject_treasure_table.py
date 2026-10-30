@@ -9,7 +9,6 @@ script extender hooks.
 
 import argparse
 import json
-import os
 import re
 import sys
 from pathlib import Path
@@ -58,7 +57,7 @@ STANDARD_HEADER = 'treasure itemtypes "Common","Uncommon","Rare","Epic","Legenda
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MY_MODS_DIR, resolve_mod_dir
+from bg3_core.env_paths import resolve_mod_dir
 
 
 def resolve_mod_stats_dir(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, str]:
@@ -157,7 +156,7 @@ def inject_into_treasure_table(
     }
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Inject custom mod items into BG3 treasure tables and vendor inventories."
     )

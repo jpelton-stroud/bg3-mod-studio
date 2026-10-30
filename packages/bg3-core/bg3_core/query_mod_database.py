@@ -9,7 +9,6 @@ Uses directory mtime caching ($XDG_CACHE_HOME/bg3/mod_database.json) for sub-10m
 
 import argparse
 import json
-import os
 import re
 import sys
 import time
@@ -20,8 +19,8 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MODS_DIR, REPO_ROOT, get_cache_dir
+from bg3_core.cli_common import ExitCode
+from bg3_core.env_paths import get_cache_dir
 from bg3_core.larian_parsers import parse_loca_bytes
 
 # Files to scan within mod directories
@@ -402,7 +401,7 @@ def filter_entries(
     return results
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="High-speed BiS gear, spell, and mechanics database query engine."
     )

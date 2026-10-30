@@ -1,6 +1,7 @@
 """bg3-theorycraft CLI entrypoint."""
 
 import sys
+
 from bg3_theorycraft import simulate_build_synergy
 
 

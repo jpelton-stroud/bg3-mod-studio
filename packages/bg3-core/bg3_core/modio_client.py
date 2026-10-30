@@ -1,6 +1,7 @@
 """Shared mod.io REST API client, credentials lookup, and mod query/download utilities."""
 
 import json
+import random
 import re
 import time
 import urllib.error
@@ -32,12 +33,18 @@ class ModioClient:
         cache_ttl_seconds: int = 300,
         enable_cache: bool = False,
         cache_path: Optional[Path] = None,
+        max_retries: int = 3,
+        backoff_factor: float = 0.5,
+        jitter: bool = True,
     ) -> None:
         self.token = token
         self.opener = opener
         self.cache_ttl_seconds = cache_ttl_seconds
         self.enable_cache = enable_cache
         self._cache_path = cache_path
+        self.max_retries = max_retries
+        self.backoff_factor = backoff_factor
+        self.jitter = jitter
 
     def get_cache_path(self) -> Path:
         """Resolve path to local mod.io response cache."""
@@ -140,21 +147,44 @@ class ModioClient:
                 body = urllib.parse.urlencode(fields).encode("utf-8")
         request = urllib.request.Request(url, data=body, headers=headers, method=method)
 
-        try:
-            with self.opener(request, timeout=30) as response:
-                response_body = response.read()
-        except urllib.error.HTTPError as error:
-            detail = error.read().decode("utf-8", errors="replace").strip()
-            if self.token:
-                detail = detail.replace(self.token, "[REDACTED]")
-            raise ModioError(
-                f"mod.io API returned HTTP {error.code} {error.reason}"
-                + (f": {detail}" if detail else "")
-            ) from None
-        except urllib.error.URLError as error:
-            raise ModioError(f"Could not connect to mod.io: {error.reason}") from None
-        except OSError as error:
-            raise ModioError(f"Could not complete the mod.io request: {error}") from None
+        retries = 0
+        while True:
+            try:
+                with self.opener(request, timeout=30) as response:
+                    response_body = response.read()
+                break
+            except urllib.error.HTTPError as error:
+                try:
+                    detail = error.read().decode("utf-8", errors="replace").strip()
+                finally:
+                    error.close()
+                if self.token:
+                    detail = detail.replace(self.token, "[REDACTED]")
+
+                if error.code in (429, 500, 502, 503, 504) and retries < self.max_retries:
+                    retries += 1
+                    retry_after = error.headers.get("Retry-After") if hasattr(error, "headers") and error.headers else None
+                    sleep_time = 0.0
+                    if retry_after:
+                        try:
+                            sleep_time = float(retry_after)
+                        except (ValueError, TypeError):
+                            sleep_time = 0.0
+                    if sleep_time <= 0.0:
+                        sleep_time = self.backoff_factor * (2 ** (retries - 1))
+                        if self.jitter:
+                            sleep_time += random.uniform(0.0, 0.25)
+                    time.sleep(sleep_time)
+                    continue
+
+                raise ModioError(
+                    f"mod.io API returned HTTP {error.code} {error.reason}"
+                    + (f": {detail}" if detail else "")
+                ) from None
+            except urllib.error.URLError as error:
+                raise ModioError(f"Could not connect to mod.io: {error.reason}") from None
+            except OSError as error:
+                raise ModioError(f"Could not complete the mod.io request: {error}") from None
 
         if not response_body:
             return {}

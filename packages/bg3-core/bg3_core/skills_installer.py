@@ -10,7 +10,6 @@ Discovers and deploys agent skills bundled in BG3 Mod Studio domain packages
 import argparse
 import importlib.resources as pkg_resources
 import json
-import os
 import shutil
 import sys
 from pathlib import Path
@@ -172,7 +171,7 @@ def install_agent_skills(
     }
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Install BG3 Mod Studio domain agent skills into the user studio workspace."
     )

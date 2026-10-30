@@ -6,7 +6,6 @@ Unit and integration tests for bg3_authoring.add_mod_dependency.
 """
 
 import json
-import os
 import shutil
 import subprocess
 import sys
@@ -20,9 +19,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from bg3_authoring.add_mod_dependency import (
     add_permanent_dependencies,
-    add_permanent_dependency,
     add_test_dependencies,
-    add_test_dependency,
     parse_slug_list,
     resolve_cli_targets,
 )
