@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import struct
 import sys
 import xml.etree.ElementTree as ET
@@ -19,7 +20,7 @@ from typing import Any
 
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import detect_bg3_appdata_dirs
-from bg3_core.lspk import LspkArchive
+from bg3_core.lspk import LspkArchive, build_lspk_archive
 
 
 def get_save_search_paths() -> list[Path]:
@@ -270,6 +271,120 @@ def audit_against_modsettings(save_mods: list[dict[str, Any]], workspace_root: P
     }
 
 
+def prune_missing_mods_from_save(
+    save_path: Path,
+    output_path: Path | None = None,
+    target_uuids: list[str] | None = None,
+    dry_run: bool = False,
+) -> tuple[bool, list[str]]:
+    """Prunes missing or uninstalled mod records from a .lsv save file.
+
+    Extracts meta.lsf / meta.lsx, removes ModuleShortDesc / Mod entries matching
+    missing mods (or explicit target_uuids), re-serializes the binary LSF AST,
+    and repacks the .lsv archive without corrupting the savegame.
+
+    Returns:
+        (success, list_of_pruned_mod_names_or_uuids)
+    """
+    save_path = Path(save_path).resolve()
+    if not save_path.is_file():
+        raise FileNotFoundError(f"Save file not found: '{save_path}'")
+
+    if LspkArchive is None:
+        raise ImportError("LspkArchive unpacker not available in environment.")
+
+    meta = extract_save_metadata(save_path)
+    save_mods = meta.get("mods", [])
+
+    if target_uuids is not None:
+        uuids_to_remove = {u.strip().lower() for u in target_uuids if u.strip()}
+    else:
+        audit_result = audit_against_modsettings(save_mods)
+        uuids_to_remove = {m["uuid"].strip().lower() for m in audit_result.get("missing_mods", []) if m.get("uuid")}
+
+    if not uuids_to_remove:
+        return True, []
+
+    # Map matched mods for informative return
+    pruned_mods: list[str] = []
+    for m in save_mods:
+        m_uuid = m.get("uuid", "").strip().lower()
+        if m_uuid in uuids_to_remove:
+            label = m.get("name") or m.get("folder") or m_uuid
+            pruned_mods.append(label)
+
+    for u in uuids_to_remove:
+        if not any(m.get("uuid", "").strip().lower() == u for m in save_mods):
+            pruned_mods.append(u)
+
+    if dry_run:
+        return True, pruned_mods
+
+    dest_path = Path(output_path).resolve() if output_path else save_path
+    if dest_path == save_path:
+        backup_path = save_path.with_name(save_path.name + ".bak")
+        if not backup_path.exists():
+            shutil.copy2(save_path, backup_path)
+
+    archive_files: list[tuple[str, bytes]] = []
+    with LspkArchive.open(save_path, use_mmap=False) as archive:
+        for entry in archive.files:
+            name = entry["name"]
+            norm = name.replace("\\", "/").lower()
+            raw = archive.extract_file(entry)
+
+            if norm.endswith("meta.lsf"):
+                from bg3_core.lsf import LsfDocument, LsfNode
+
+                doc = LsfDocument.from_bytes(raw)
+
+                def _prune_lsf_node(node: LsfNode) -> None:
+                    kept_children: list[LsfNode] = []
+                    for child in node.children:
+                        if child.name in ("ModuleShortDesc", "Mod"):
+                            c_uuid = str(child.get_attr_value("UUID") or "").strip().lower()
+                            if c_uuid and c_uuid in uuids_to_remove:
+                                continue
+                        _prune_lsf_node(child)
+                        kept_children.append(child)
+                    node.children = kept_children
+
+                new_roots: list[LsfNode] = []
+                for r in doc.root_nodes:
+                    if r.name in ("ModuleShortDesc", "Mod"):
+                        r_uuid = str(r.get_attr_value("UUID") or "").strip().lower()
+                        if r_uuid and r_uuid in uuids_to_remove:
+                            continue
+                    _prune_lsf_node(r)
+                    new_roots.append(r)
+                doc.root_nodes = new_roots
+                archive_files.append((name, doc.to_bytes(compress=True)))
+
+            elif norm.endswith("meta.lsx"):
+                tree = ET.fromstring(raw)
+                for parent in tree.iter():
+                    to_remove = []
+                    for child in list(parent):
+                        if child.tag == "node" and child.get("id") in ("Mod", "ModuleShortDesc"):
+                            u_attr = child.find("attribute[@id='UUID']")
+                            if u_attr is not None:
+                                val = (u_attr.get("value") or "").strip().lower()
+                                if val in uuids_to_remove:
+                                    to_remove.append(child)
+                    for child in to_remove:
+                        parent.remove(child)
+                archive_files.append((name, ET.tostring(tree, encoding="utf-8")))
+
+            else:
+                archive_files.append((name, raw))
+
+    repacked_bytes = build_lspk_archive(archive_files, compress=True)
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+    dest_path.write_bytes(repacked_bytes)
+
+    return True, pruned_mods
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Inspect BG3 .lsv save files and audit them against active mod load orders."
@@ -278,6 +393,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--save", dest="save_flag", help="Path to .lsv save file, or 'latest' to automatically discover.")
     parser.add_argument("--save-dir", help="Custom directory containing .lsv save files.")
     parser.add_argument("--audit", action="store_true", help="Compare save mod list against active modsettings.lsx.")
+    parser.add_argument("--clean-missing", action="store_true", help="Prune missing mods from save game.")
+    parser.add_argument("--out", help="Output path for cleaned save file.")
+    parser.add_argument("--dry-run", "-n", action="store_true", help="Simulate pruning without modifying files.")
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON.")
 
     args = parser.parse_args(argv)
@@ -291,9 +409,29 @@ def main(argv: list[str] | None = None) -> int:
         meta = extract_save_metadata(save_file)
 
         audit_result = None
-        if args.audit:
+        if args.audit or args.clean_missing:
             audit_result = audit_against_modsettings(meta["mods"])
             meta["audit"] = audit_result
+
+        if args.clean_missing:
+            out_p = Path(args.out) if args.out else None
+            ok, pruned = prune_missing_mods_from_save(save_file, output_path=out_p, dry_run=args.dry_run)
+            if args.json:
+                print(json.dumps({
+                    "save_file": str(save_file),
+                    "output_file": str(out_p or save_file),
+                    "dry_run": args.dry_run,
+                    "pruned_mods": pruned,
+                    "success": ok,
+                }, indent=2))
+            else:
+                action = "Previewed pruning" if args.dry_run else "Successfully pruned"
+                print(f"{color.green('[✓]')} {action} {len(pruned)} missing mod(s).")
+                for p in pruned:
+                    print(f"    - {p}")
+                if not args.dry_run:
+                    print(f"    Target output: {out_p or save_file}")
+            return ExitCode.OK
 
         if args.json:
             print(json.dumps(meta, indent=2))

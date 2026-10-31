@@ -11,7 +11,6 @@ import argparse
 import json
 import os
 import re
-import struct
 import sys
 from pathlib import Path
 from typing import Sequence
@@ -19,7 +18,8 @@ from typing import Sequence
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.env_paths import DIST_DIR, detect_bg3_appdata_dirs, get_env_var, resolve_mod_dir
 from bg3_core.larian_parsers import compile_xml_bytes_to_loca
-from bg3_core.lspk import LspkArchive, lz4_block_compress
+from bg3_core.lspk import LspkArchive
+from bg3_core.lspk import build_lspk_archive as build_pak_archive
 
 EXCLUDED_FILENAMES = {
     ".gitignore",
@@ -111,92 +111,6 @@ def collect_mod_files(mod_dir: Path, include_projects: bool = False) -> list[tup
     return sorted(entries_map.items(), key=lambda x: x[0])
 
 
-def build_pak_archive(
-    files: Sequence[tuple[str, bytes | Path]],
-    compress: bool = True,
-) -> bytes:
-    """Constructs the LSPK v18 binary package with LZ4 compression."""
-    header_size = 40
-    data_offset = header_size
-
-    file_data_blocks = []
-    file_records = []
-
-    curr_offset = data_offset
-
-    for archive_name, item in files:
-        data = item.read_bytes() if isinstance(item, Path) else item
-        uncomp_size = len(data)
-
-        if compress:
-            compressed = lz4_block_compress(data)
-            payload = compressed
-            # Flags: 0x42 = (LSCompressionLevel.Fast << 4) | CompressionMethod.LZ4
-            file_flags = 0x42
-            disk_size = len(compressed)
-            # uncomp_size is preserved as len(data)
-        else:
-            payload = data
-            file_flags = 0
-            disk_size = uncomp_size
-            # In FileEntry18, uncompressed files store 0 in UncompressedSize
-            uncomp_size = 0
-
-        file_data_blocks.append(payload)
-
-        # 256 bytes null-padded name
-        name_bytes = archive_name.encode("utf-8")
-        if len(name_bytes) > 255:
-            raise ValueError(f"Archive file path too long (>255 bytes): {archive_name}")
-        name_padded = name_bytes.ljust(256, b"\x00")
-
-        offset_low = curr_offset & 0xFFFFFFFF
-        offset_high = (curr_offset >> 32) & 0xFFFF
-        part = 0
-
-        record = name_padded + struct.pack(
-            "<IHBBII",
-            offset_low,
-            offset_high,
-            part,
-            file_flags,
-            disk_size,
-            uncomp_size,
-        )
-        file_records.append(record)
-        curr_offset += disk_size
-
-    file_list_offset = curr_offset
-    file_list_payload = b"".join(file_records)
-    num_files = len(file_records)
-    compressed_file_list = lz4_block_compress(file_list_payload)
-    comp_size = len(compressed_file_list)
-
-    file_list_block = struct.pack("<II", num_files, comp_size) + compressed_file_list
-    file_list_size = len(file_list_block)
-
-    # 40-byte LSPK Header:
-    # 4s (magic: b"LSPK")
-    # I  (version: 18)
-    # Q  (file_list_offset)
-    # I  (file_list_size)
-    # B  (flags: 2 -> PackageFlags.AllowMemoryMapping)
-    # B  (priority: 0)
-    # 16s (md5: 16 null bytes)
-    # H  (num_parts: 1 -> Single-part archive)
-    header = struct.pack(
-        "<4sIQIBB16sH",
-        b"LSPK",
-        18,
-        file_list_offset,
-        file_list_size,
-        2,
-        0,
-        b"\x00" * 16,
-        1,
-    )
-
-    return header + b"".join(file_data_blocks) + file_list_block
 
 
 def verify_pak_archive(pak_bytes: bytes, original_files: Sequence[tuple[str, bytes | Path]]) -> bool:

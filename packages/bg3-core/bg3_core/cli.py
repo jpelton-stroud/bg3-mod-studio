@@ -1048,6 +1048,19 @@ def build_parser() -> JsonCompliantArgumentParser:
     save_purge_p.add_argument("-n", "--dry-run", action="store_true", help="Simulate purge without modifying files")
     save_purge_p.add_argument("-y", "--yes", action="store_true", help="Confirm deletion non-interactively")
 
+    # bg3 save clean-missing
+    save_clean_p = save_subparsers.add_parser(
+        "clean-missing",
+        aliases=["clean_missing", "rescue"],
+        help="Prune missing or uninstalled mods from a save game to rescue corrupted saves",
+        parents=[common_parser],
+    )
+    save_clean_p.add_argument("save", nargs="?", help="Path or name of .lsv save file, or 'latest'")
+    save_clean_p.add_argument("--save-dir", help="Custom directory containing .lsv save files")
+    save_clean_p.add_argument("--out", help="Output path for cleaned .lsv file")
+    save_clean_p.add_argument("-n", "--dry-run", action="store_true", help="Simulate pruning without modifying files")
+    save_clean_p.add_argument("-y", "--yes", action="store_true", help="Confirm rescue operation non-interactively")
+
     return parser
 
 
@@ -1902,12 +1915,14 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
         if sub:
             target_args.append(str(sub))
         if getattr(args, "save", None):
-            if sub == "inspect":
+            if sub in ("inspect", "clean-missing", "clean_missing", "rescue"):
                 target_args.append(args.save)
             else:
                 target_args.extend(["--save", args.save])
         if getattr(args, "save_dir", None):
             target_args.extend(["--save-dir", args.save_dir])
+        if getattr(args, "out", None):
+            target_args.extend(["--out", args.out])
         if getattr(args, "audit", False):
             target_args.append("--audit")
         if getattr(args, "dest", None):
@@ -1979,6 +1994,10 @@ def main() -> None:
         sys.exit(ExitCode.USAGE)
 
     args = parser.parse_args()
+    if "--json" in sys.argv:
+        args.json = True
+    if "--no-color" in sys.argv:
+        args.no_color = True
 
     color = ConsoleColor(stream=sys.stderr, force_color=False)
     emitter = OutputEmitter(json_mode=args.json, color=color)
