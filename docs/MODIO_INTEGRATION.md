@@ -42,6 +42,16 @@ To enable mod.io discovery and download capabilities, configure your credentials
 
 ---
 
+## 1.5 Official Larian Mod Publishing Requirements
+
+> [!IMPORTANT]
+> **Official Larian Mod.io Publishing Protocol**:
+> Baldur's Gate 3 mod packages (`.pak`) **cannot** be uploaded via generic mod.io REST APIs or third-party automated HTTP scripts. Larian Studios explicitly mandates that all community mods must be validated, packaged, and published to mod.io directly through the official **Baldur's Gate 3 Toolkit (`Glasses.exe`)**.
+> 
+> The BG3 Mod Studio manages local staging, metadata synchronization (`bg3 modio update-metadata`), tagging, and collection curation, while binary packaging and store release are completed via the official Toolkit publisher interface. Automated headless binary upload endpoints are not supported by Larian's backend and must not be proposed.
+
+---
+
 ## 2. Discovering Community Mods (`/bg3-search-mods`)
 
 Finding mods on mod.io can be handled directly through natural language. The `/bg3-search-mods` skill translates your search queries, applies console or platform constraints, and automatically cross-checks results against already tracked mods in your library catalog (`Mods/subscribed/library.md`).

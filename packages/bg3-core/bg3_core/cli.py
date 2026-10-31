@@ -664,6 +664,16 @@ def build_parser() -> JsonCompliantArgumentParser:
     )
     lo_val_parser.add_argument("--path", help="Explicit path to modsettings.lsx")
 
+    # bg3 loadorder auto-sort
+    lo_sort_parser = lo_subparsers.add_parser(
+        "auto-sort",
+        aliases=["sort"],
+        help="Topologically auto-sort active mods based on dependencies",
+        parents=[common_parser],
+    )
+    lo_sort_parser.add_argument("--path", help="Explicit path to modsettings.lsx")
+    lo_sort_parser.add_argument("--dry-run", action="store_true", help="Preview modifications without saving")
+
     # bg3 loadorder isolate
     lo_iso_parser = lo_subparsers.add_parser(
         "isolate",
@@ -1624,6 +1634,12 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             target_args.append("--validate")
             if getattr(args, "path", None):
                 target_args.extend(["--path", args.path])
+        elif sub in ("auto-sort", "sort"):
+            target_args.append("--auto-sort")
+            if getattr(args, "path", None):
+                target_args.extend(["--path", args.path])
+            if getattr(args, "dry_run", False):
+                target_args.append("--dry-run")
         elif sub == "isolate":
             if not getattr(args, "dry_run", False):
                 try:

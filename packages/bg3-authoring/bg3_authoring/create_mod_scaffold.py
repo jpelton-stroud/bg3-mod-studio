@@ -1,9 +1,3 @@
-import sys
-from pathlib import Path
-
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
 #!/usr/bin/env python3
 """
 create_mod_scaffold.py
@@ -19,6 +13,13 @@ Features:
 - Generates clean 512x512 placeholder PNG thumbnail and logo assets (pure stdlib)
 - Emits structured JSON summary for subagent consumption
 """
+
+import sys
+from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 import argparse
 import json

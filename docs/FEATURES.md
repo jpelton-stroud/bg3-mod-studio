@@ -34,7 +34,7 @@ The workspace combines autonomous AI orchestration with deterministic Python aut
   - Clean-room load order isolation (`bg3 loadorder isolate <slug>`) temporarily disables unrelated mods in `modsettings.lsx` during verification.
   - Theorycrafting generators stream progression matrices directly to disk (`build_guides/`) outside Git.
 - **Cost & Token Optimization Protocols**:
-  - Background subagent workers run on lightweight models (`"Model": "flash"`) to reduce token costs by 80%–90%.
+  - Background subagent workers strictly inherit the parent model (`"Model": "inherit"`) preserving complete tool and reasoning compatibility across complex workflows.
   - High-speed discovery hub (`bg3 tools`) emits compact manifests (`--json`) saving up to 83.5% tokens during automated AI routing.
 
 ---

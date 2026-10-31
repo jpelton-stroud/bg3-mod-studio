@@ -9,7 +9,6 @@ Coordinates concurrent worker subagents to check and update *Baldur's Gate 3* mo
 
 Refer to specifications:
 - Subagent Template: [Update Subagent Template](./resources/update_subagent_template.json)
-- Sync & Status Reference: [Catalog Sync Flow](./references/catalog_sync_flow.md)
 
 ---
 
@@ -29,19 +28,15 @@ flowchart TD
 
 ### 1. Batch Resolution & Subagent Dispatch
 Accept targeted slugs or inspect all tracked mods:
-```bash
-uv run bg3 modio update --list-tracked --json
-```
-Launch one worker subagent per mod using the schema in [Update Subagent Template](./resources/update_subagent_template.json), following [`bg3-update-single-mod`](../bg3-update-single-mod/SKILL.md).
+- List tracked mods: `uv run bg3 modio update --list-tracked --json`
+- Launch one worker subagent per mod using the schema in [Update Subagent Template](./resources/update_subagent_template.json), following [`bg3-update-single-mod`](../bg3-update-single-mod/SKILL.md). Ensure all subagents inherit model configuration (`Model: "inherit"`).
 
 Stop calling tools and await reactive completion notifications without polling.
 
 ### 2. Catalog & Table Compilation
 When any mod is updated, refresh the catalog:
-```bash
-uv run bg3 library update-catalog --write
-```
-Render the consolidated update status table with status indicators (`🟢 Up-to-date`, `🔄 Updated`, `⚠️ Not Tracked`, `❌ Failed`).
+- Update master catalog: `uv run bg3 modio update-catalog --write --json`
+- Render the consolidated update status table with status indicators (`🟢 Up-to-date`, `🔄 Updated`, `⚠️ Not Tracked`, `❌ Failed`).
 
 ---
 

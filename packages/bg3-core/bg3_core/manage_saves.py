@@ -31,12 +31,6 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from bg3_authoring.diagnostics.inspect_save_game import (
-    extract_save_metadata,
-    find_save_file,
-    get_save_search_paths,
-)
-
 from bg3_core.cli_common import (
     ConsoleColor,
     ExitCode,
@@ -45,6 +39,11 @@ from bg3_core.cli_common import (
     format_json_response,
 )
 from bg3_core.env_paths import get_xdg_data_home
+from bg3_core.save_inspector import (
+    extract_save_metadata,
+    find_save_file,
+    get_save_search_paths,
+)
 
 
 def discover_save_games(search_dirs: Optional[Sequence[Path]] = None) -> List[Dict[str, Any]]:

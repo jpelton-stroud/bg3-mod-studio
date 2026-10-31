@@ -28,19 +28,14 @@ flowchart TD
 ```
 
 ### 1. Query Resolution & Subagent Dispatch
-Resolve mod titles, slugs, or numeric IDs. Launch one worker subagent per mod in parallel using the schema defined in [Subagent Launch Template](./resources/document_subagent_template.json), directing each worker to follow [`bg3-document-single-mod`](../bg3-document-single-mod/SKILL.md).
+Resolve mod titles, slugs, or numeric IDs. Launch one worker subagent per mod in parallel using the schema defined in [Subagent Launch Template](./resources/document_subagent_template.json), directing each worker to follow [`bg3-document-single-mod`](../bg3-document-single-mod/SKILL.md). Ensure all subagents inherit model configuration (`Model: "inherit"`).
 
 Stop calling tools and await reactive completion notifications without polling.
 
 ### 2. Catalog & Reindex
 Once all subagents report status, update the centralized catalog and warm the query cache:
-```bash
-# Update mods/library.md
-uv run bg3 library update-catalog --write
-
-# Reindex high-speed query database
-uv run bg3 query --reindex
-```
+- Update master catalog: `uv run bg3 modio update-catalog --write --json`
+- Reindex high-speed query database: `uv run bg3 query --reindex --json`
 
 ### 3. Summary Presentation
 Deliver an executive summary table detailing mod name, status (Success/Failed), category, and relative spec link.

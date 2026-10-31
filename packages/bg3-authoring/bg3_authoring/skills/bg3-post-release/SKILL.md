@@ -29,23 +29,17 @@ flowchart TD
 
 ### 1. Pre-Flight Assertion & Tag Preview
 Assert mod has been published via the official Toolkit (`Glasses.exe`). Require `MODIO_PAT` in environment. Fetch allowed tags and preview changes:
-```bash
-uv run bg3 modio update-metadata --mod "<slug>" --json
-```
+- Execute `uv run bg3 modio update-metadata --mod "<slug>" --json`
 
 ### 2. User Approval & Live API Writes
 Present tag recommendations and profile changes. Upon explicit user confirmation, execute writes with `--confirm`:
-```bash
-uv run bg3 modio update-metadata --mod "<slug>" --tags "<approved-tags>" --confirm --json
-```
+- Execute `uv run bg3 modio update-metadata --mod "<slug>" --tags "<approved-tags>" --confirm --json`
 
 ### 3. Mandatory Teardown
 Clean loose authoring assets per [Storefront Guide](./references/storefront_metadata_guide.md) before launching the game:
-```bash
-uv run bg3 mod sync-data --clean-mod <mod-slug> --json
-uv run bg3 mod pack --mod <mod-slug> --clean-local --json
-uv run bg3 loadorder --disable <mod-slug> --json
-```
+- Clean loose development files: `uv run bg3 mod sync-game --clean-mod <mod-slug> --json`
+- Clean local test package: `uv run bg3 mod pack <mod-slug> --clean-local --json`
+- Disable authoring mod in load order: `uv run bg3 loadorder disable <mod-slug> --json`
 
 ---
 
