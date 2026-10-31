@@ -442,6 +442,14 @@ def resolve_all_dependencies(
             or get_mod_metadata_from_workspace(dep.get("Name", ""))
             or get_mod_metadata_from_workspace(dep.get("Folder", ""))
         )
+        if not installed:
+            try:
+                from .mod_resolver import resolve_dependency_metadata
+                resolved_info = resolve_dependency_metadata(dep_uuid or dep.get("Name", ""), auto_document=False)
+                if resolved_info and resolved_info.get("UUID"):
+                    installed = resolved_info
+            except Exception:
+                pass
         if installed:
             actual_meta = installed
             sub_resolved, sub_missing = resolve_all_dependencies(actual_meta, visited)
@@ -599,11 +607,17 @@ def _ensure_base_module(root: ET.Element, mods_children: ET.Element, mod_order_c
     return modified
 
 
-def enable_mod(path: Path, mod_meta: dict, order_index: int | None = None, dry_run: bool = False) -> tuple[bool, str]:
+def enable_mod(path: Path, mod_meta: dict | str, order_index: int | None = None, dry_run: bool = False) -> tuple[bool, str]:
     """
     Enables or reorders a mod in modsettings.lsx.
     Returns (changed, action_status) where action_status is 'enabled', 'reordered', or 'already_active'.
     """
+    if isinstance(mod_meta, str):
+        meta_lookup = get_mod_metadata_from_workspace(mod_meta)
+        if not meta_lookup:
+            return False, f"Mod metadata not found for {mod_meta}"
+        mod_meta = meta_lookup
+
     if not path.is_file():
         if not dry_run:
             create_default_modsettings(path)
@@ -1127,10 +1141,20 @@ def auto_sort_load_order(path: Path, dry_run: bool = False) -> tuple[bool, list[
     dep_graph: dict[str, list[str]] = {}
     for u, m in active_mods.items():
         dep_graph[u] = []
-        deps = m.get("Dependencies") or []
-        for d in deps:
+        meta = (
+            get_mod_metadata_from_workspace(u)
+            or get_mod_metadata_from_workspace(m.get("Name", ""))
+            or get_mod_metadata_from_workspace(m.get("Folder", ""))
+            or {}
+        )
+        if not m.get("Name") and meta.get("Name"):
+            m["Name"] = meta["Name"]
+        raw_deps = meta.get("Dependencies") or m.get("Dependencies") or []
+        for d in raw_deps:
             if isinstance(d, dict) and "UUID" in d:
-                dep_graph[u].append(d["UUID"])
+                dep_uuid = str(d["UUID"]).strip()
+                if dep_uuid and dep_uuid.lower() != u.lower():
+                    dep_graph[u].append(dep_uuid)
 
     sorted_order = topological_sort_mods(active_mods, dep_graph)
 
@@ -1151,7 +1175,21 @@ def auto_sort_load_order(path: Path, dry_run: bool = False) -> tuple[bool, list[
                 if node is not None:
                     mods_children.append(node)
 
-            save_modsettings(path, tree)
+        mod_order_children = root.find(".//node[@id='ModOrder']/children")
+        if mod_order_children is not None:
+            modules_by_uuid: dict[str, ET.Element] = {}
+            for m_node in list(mod_order_children.findall("node[@id='Module']")):
+                u_attr = m_node.find("attribute[@id='UUID']")
+                if u_attr is not None:
+                    modules_by_uuid[u_attr.get("value", "").lower()] = m_node
+                    mod_order_children.remove(m_node)
+
+            for u in sorted_order:
+                matched_node = modules_by_uuid.get(u.lower())
+                if matched_node is not None:
+                    mod_order_children.append(matched_node)
+
+        save_modsettings(path, tree)
 
     return True, sorted_order, {"total_sorted": len(sorted_order), "dry_run": dry_run}
 

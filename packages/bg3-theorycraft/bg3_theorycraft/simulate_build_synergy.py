@@ -188,7 +188,7 @@ def load_gear_boosts(gear_items: list[str], _workspace_root: Path) -> tuple[dict
                 eff_stats: dict[str, int] = eff.get("stats", {})
                 for s, val in eff_stats.items():
                     combined_stats[s] = max(combined_stats.get(s, 0), val)
-    except Exception:
+    except (OSError, json.JSONDecodeError, KeyError, ValueError):
         pass
 
     return combined_effects, gear_data

@@ -20,7 +20,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from bg3_core.cli_common import ExitCode
-from bg3_core.env_paths import get_cache_dir
+from bg3_core.env_paths import get_cache_dir, get_subscribed_mods_dir
 from bg3_core.larian_parsers import parse_loca_bytes
 
 # Files to scan within mod directories
@@ -136,7 +136,7 @@ def parse_mod_stat_entries(mod_dir: Path, mod_slug: str) -> list[dict]:
 
         try:
             content = txt_path.read_text(encoding="utf-8", errors="replace")
-        except Exception:
+        except OSError:
             continue
 
         current_entry = None
@@ -265,8 +265,15 @@ def finalize_entry(entry: dict, loc_map: dict[str, str]) -> None:
     )
 
 
-def get_mods_directory(workspace_root: Path) -> Path:
-    return workspace_root / "mods"
+def get_mods_directory(workspace_root: Optional[Path] = None) -> Path:
+    subscribed = get_subscribed_mods_dir()
+    if subscribed.is_dir():
+        return subscribed
+    if workspace_root:
+        ws_mods = workspace_root / "mods"
+        if ws_mods.is_dir():
+            return ws_mods
+    return subscribed
 
 
 def get_cache_path(_workspace_root: Optional[Path] = None) -> Path:
@@ -293,7 +300,7 @@ def build_or_load_index(workspace_root: Path, force_reindex: bool = False) -> li
     if not force_reindex and cache_file.exists():
         try:
             cached_data = json.loads(cache_file.read_text(encoding="utf-8"))
-        except Exception:
+        except (OSError, json.JSONDecodeError):
             cached_data = None
 
     if cached_data and "mod_mtimes" in cached_data and "entries" in cached_data:
@@ -419,7 +426,7 @@ def main() -> int:
 
     args = parser.parse_args()
 
-    workspace_root = Path(__file__).resolve().parents[2]
+    workspace_root = Path(__file__).resolve().parents[3]
 
     t0 = time.perf_counter()
     entries = build_or_load_index(workspace_root, force_reindex=args.reindex)

@@ -6,7 +6,7 @@ import mmap
 import struct
 import zlib
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 _LIBZSTD = None
 for _libname in ("libzstd.so.1", "libzstd.so", "libzstd.dylib", "libzstd.dll"):
@@ -299,3 +299,89 @@ class LspkArchive:
             entry["uncomp_size"],
             entry["flags"],
         )
+
+
+def build_lspk_archive(
+    files: Sequence[tuple[str, bytes | Path]],
+    compress: bool = True,
+) -> bytes:
+    """Constructs an LSPK v18 binary package (.pak or .lsv) with LZ4 compression."""
+    header_size = 40
+    data_offset = header_size
+
+    file_data_blocks: list[bytes] = []
+    file_records: list[bytes] = []
+
+    curr_offset = data_offset
+
+    for archive_name, item in files:
+        data = item.read_bytes() if isinstance(item, Path) else item
+        uncomp_size = len(data)
+
+        if compress:
+            compressed = lz4_block_compress(data)
+            payload = compressed
+            file_flags = 0x42
+            disk_size = len(compressed)
+        else:
+            payload = data
+            file_flags = 0
+            disk_size = uncomp_size
+            uncomp_size = 0
+
+        file_data_blocks.append(payload)
+
+        # 256 bytes null-padded name
+        name_bytes = archive_name.encode("utf-8")
+        if len(name_bytes) > 255:
+            raise ValueError(f"Archive file path too long (>255 bytes): {archive_name}")
+        name_padded = name_bytes.ljust(256, b"\x00")
+
+        offset_low = curr_offset & 0xFFFFFFFF
+        offset_high = (curr_offset >> 32) & 0xFFFF
+        part = 0
+
+        record = name_padded + struct.pack(
+            "<IHBBII",
+            offset_low,
+            offset_high,
+            part,
+            file_flags,
+            disk_size,
+            uncomp_size,
+        )
+        file_records.append(record)
+        curr_offset += disk_size
+
+    file_list_offset = curr_offset
+    file_list_payload = b"".join(file_records)
+    num_files = len(file_records)
+    compressed_file_list = lz4_block_compress(file_list_payload)
+    comp_size = len(compressed_file_list)
+
+    file_list_block = struct.pack("<II", num_files, comp_size) + compressed_file_list
+    file_list_size = len(file_list_block)
+
+    # 40-byte LSPK Header:
+    # 4s (magic: b"LSPK")
+    # I  (version: 18)
+    # Q  (file_list_offset)
+    # I  (file_list_size)
+    # B  (flags: 2 -> PackageFlags.AllowMemoryMapping)
+    # B  (priority: 0)
+    # 16s (md5: 16 null bytes)
+    # H  (num_parts: 1 -> Single-part archive)
+    header = struct.pack(
+        "<4sIQIBB16sH",
+        b"LSPK",
+        18,
+        file_list_offset,
+        file_list_size,
+        2,
+        0,
+        b"\x00" * 16,
+        1,
+    )
+
+    return header + b"".join(file_data_blocks) + file_list_block
+

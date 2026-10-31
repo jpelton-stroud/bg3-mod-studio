@@ -29,6 +29,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.env_paths import (
+    detect_bg3_appdata_dirs,
     detect_data_dir,
     get_authored_mods_dir,
     get_env_var,
@@ -93,15 +94,6 @@ def copy_file_if_different(src: Path, dst: Path, dry_run: bool = False) -> str:
 
 BUILTIN_MODULES = {"Gustav", "GustavDev", "GustavX", "Shared", "SharedDev", "Engine", "PhotoMode"}
 
-CUSTOM_STUDIO_MODS = [
-    "ArcaneProgression",
-    "EldritchApotheosis",
-    "EldritchAscension",
-    "FontAndFlourish",
-    "PaladinsCall",
-]
-
-
 def check_mod_dependencies(mod_path: Path, data_dir: Path) -> list:
     """
     Validates that all dependencies declared in meta.lsx are resolvable in the game environment.
@@ -112,7 +104,11 @@ def check_mod_dependencies(mod_path: Path, data_dir: Path) -> list:
     if not meta_files:
         return missing
 
-    appdata_mods = Path(os.environ.get("BG3_USER_MODS_DIR") or "/mnt/c/Users/jpstr/AppData/Local/Larian Studios/Baldur's Gate 3/Mods")
+    user_mods_env = os.environ.get("BG3_USER_MODS_DIR")
+    if user_mods_env:
+        appdata_mods_dirs = [Path(user_mods_env)]
+    else:
+        appdata_mods_dirs = [d / "Mods" for d in detect_bg3_appdata_dirs()]
 
     for meta_file in meta_files:
         try:
@@ -137,15 +133,18 @@ def check_mod_dependencies(mod_path: Path, data_dir: Path) -> list:
                     or (data_dir / "Mods" / f"{dep_folder}.pak").is_file()
                 )
                 in_appdata_pak = False
-                if appdata_mods.is_dir():
-                    norm_folder = normalize_mod_key(dep_folder)
-                    norm_name = normalize_mod_key(dep_name)
-                    for p in appdata_mods.glob("*.pak"):
-                        p_stem = p.stem
-                        p_norm = normalize_mod_key(p_stem)
-                        if (dep_uuid and dep_uuid in p_stem.lower()) or p_norm == norm_folder or p_norm == norm_name:
-                            in_appdata_pak = True
-                            break
+                for appdata_mods in appdata_mods_dirs:
+                    if appdata_mods.is_dir():
+                        norm_folder = normalize_mod_key(dep_folder)
+                        norm_name = normalize_mod_key(dep_name)
+                        for p in appdata_mods.glob("*.pak"):
+                            p_stem = p.stem
+                            p_norm = normalize_mod_key(p_stem)
+                            if (dep_uuid and dep_uuid in p_stem.lower()) or p_norm == norm_folder or p_norm == norm_name:
+                                in_appdata_pak = True
+                                break
+                    if in_appdata_pak:
+                        break
 
                 if not (in_data_mods or in_data_pak or in_appdata_pak):
                     missing.append(f"{dep_name} (folder: {dep_folder})")
@@ -352,7 +351,7 @@ def clean_legacy(data_dir: Path, dry_run: bool = False, quiet: bool = False) -> 
 
 def get_custom_mod_prefixes(source_dir: Path | None = None) -> list[str]:
     """Dynamically collects mod directory and folder prefixes from my_mods/."""
-    prefixes = list(CUSTOM_STUDIO_MODS)
+    prefixes: list[str] = []
     root = source_dir or Path(get_env_var("BG3_MODS_DIR") or get_authored_mods_dir())
     if root.is_dir():
         for mod_folder in root.iterdir():

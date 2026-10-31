@@ -43,6 +43,7 @@ from bg3_core.save_inspector import (
     extract_save_metadata,
     find_save_file,
     get_save_search_paths,
+    prune_missing_mods_from_save,
 )
 
 
@@ -500,6 +501,77 @@ def handle_purge(args: argparse.Namespace) -> int:
     return ExitCode.OK if purge_result["failed_count"] == 0 else ExitCode.GENERAL
 
 
+def handle_clean_missing(args: argparse.Namespace) -> int:
+    """Clean/prune missing or uninstalled mods from a save game."""
+    color = ConsoleColor()
+    try:
+        save_file = find_save_file(args.save, args.save_dir)
+    except FileNotFoundError as err:
+        if args.json:
+            print(json.dumps(format_json_response(status="error", error={"message": str(err)}), indent=2))
+        else:
+            print(f"{color.red('Error:')} {err}", file=sys.stderr)
+        return ExitCode.DATAERR
+
+    out_path = Path(args.out).resolve() if getattr(args, "out", None) else None
+
+    # If not dry run and in-place replacement, confirm unless --yes
+    if not args.dry_run and out_path is None:
+        try:
+            confirm_action(
+                f"Prune missing mods from save '{save_file.name}'? (A .bak backup will be preserved)",
+                default=False,
+                non_interactive_yes=getattr(args, "yes", False),
+                force_non_interactive=args.json,
+            )
+        except NonInteractiveConfirmationError as err:
+            if args.json:
+                print(json.dumps(format_json_response(status="error", error={"message": str(err)}), indent=2))
+            else:
+                print(f"{color.red('Confirmation required:')} {err}", file=sys.stderr)
+            return ExitCode.DATAERR
+
+    try:
+        ok, pruned = prune_missing_mods_from_save(
+            save_path=save_file,
+            output_path=out_path,
+            dry_run=args.dry_run,
+        )
+    except Exception as err:
+        if args.json:
+            print(json.dumps(format_json_response(status="error", error={"message": str(err)}), indent=2))
+        else:
+            print(f"{color.red('Error pruning save:')} {err}", file=sys.stderr)
+        return ExitCode.GENERAL
+
+    target_destination = str(out_path if out_path else save_file)
+    data = {
+        "save_file": str(save_file),
+        "target_output": target_destination,
+        "dry_run": args.dry_run,
+        "pruned_mods": pruned,
+        "pruned_count": len(pruned),
+    }
+
+    if args.json:
+        print(json.dumps(format_json_response(status="success" if ok else "error", data=data), indent=2))
+    else:
+        status_label = "[DRY-RUN] Would prune" if args.dry_run else "Successfully pruned"
+        print(f"\n{color.bold('BG3 Save Game Rescue / Mod Pruning:')} ({status_label})")
+        print(f"  Source Save:     {save_file}")
+        print(f"  Output Save:     {target_destination}")
+        print(f"  Pruned Mods:     {len(pruned)}")
+        if pruned:
+            print(f"\n{color.bold('Pruned Entries:')}")
+            for m in pruned:
+                print(f"  {color.green('✓')} {m}")
+        else:
+            print(f"  {color.cyan('ℹ')} No missing mods were detected in this save file.")
+        print("")
+
+    return ExitCode.OK
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         prog="manage_saves.py",
@@ -543,6 +615,15 @@ def main() -> int:
     p_purge.add_argument("--yes", "-y", action="store_true", help="Confirm deletion non-interactively")
     p_purge.add_argument("--json", action="store_true", help="Emit JSON output")
 
+    # clean-missing
+    p_clean = subparsers.add_parser("clean-missing", aliases=["clean_missing", "rescue"], help="Prune missing mods from a save game")
+    p_clean.add_argument("save", nargs="?", help="Path or name of .lsv save file, or 'latest'")
+    p_clean.add_argument("--save-dir", help="Custom directory containing .lsv save files")
+    p_clean.add_argument("--out", help="Output path for cleaned .lsv file")
+    p_clean.add_argument("--dry-run", "-n", action="store_true", help="Simulate pruning without modifying files")
+    p_clean.add_argument("--yes", "-y", action="store_true", help="Confirm modification non-interactively")
+    p_clean.add_argument("--json", action="store_true", help="Emit JSON output")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -557,6 +638,8 @@ def main() -> int:
         return handle_backup(args)
     elif args.command == "purge":
         return handle_purge(args)
+    elif args.command in ("clean-missing", "clean_missing", "rescue"):
+        return handle_clean_missing(args)
 
     return ExitCode.USAGE
 
