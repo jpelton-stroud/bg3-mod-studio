@@ -26,13 +26,13 @@ The workspace combines autonomous AI orchestration with deterministic Python aut
 - **Sub-10ms Mod Database Query Engine (`bg3 query`)**:
   Indexes over 2,200 cataloged community mod items, passives, spells, and boosts. Provides fuzzy search, slot filtering, and handle lookups in milliseconds (`bg3 query`).
 - **Idempotent Differential Game Synchronization (`bg3 mod sync-game`)**:
-  Selectively mirrors source mod files from `my_mods/<ModSlug>/` to your `Baldurs Gate 3/.../Data/` directory. Features SHA/timestamp caching to prevent redundant disk I/O, an optional file watcher (`--watch`), and clean-up modes (`--clean-mod`).
+  Selectively mirrors source mod files from `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/<ModSlug>/` to your `Baldurs Gate 3/.../Data/` directory. Features SHA/timestamp caching to prevent redundant disk I/O, an optional file watcher (`--watch`), and clean-up modes (`--clean-mod`).
 - **Mod.io REST Integration Suite (`bg3 modio`)**:
   Automates mod discovery, platform-tag filtering (`windows`, `mac`, `playstation_5`, `xboxseries`), archive extraction, collection creation, and catalog synchronization using personal mod.io API keys and access tokens (`bg3 modio`).
 - **Safe Sandboxing & Clean-Room Testing**:
   - Test dependencies are declared cleanly in `.test_deps.json` without contaminating production `meta.lsx` (`bg3 mod add-dependency <slug> --test`).
   - Clean-room load order isolation (`bg3 loadorder isolate <slug>`) temporarily disables unrelated mods in `modsettings.lsx` during verification.
-  - Theorycrafting generators stream progression matrices directly to disk (`build_guides/`) outside Git.
+  - Theorycrafting generators stream progression matrices directly to disk (`$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Build_Guides/`) outside Git.
 - **Cost & Token Optimization Protocols**:
   - Background subagent workers strictly inherit the parent model (`"Model": "inherit"`) preserving complete tool and reasoning compatibility across complex workflows.
   - High-speed discovery hub (`bg3 tools`) emits compact manifests (`--json`) saving up to 83.5% tokens during automated AI routing.
@@ -68,7 +68,7 @@ Autonomous skills residing in [`.agents/skills/`](../.agents/skills/) allow deve
 
 #### 1. `/bg3-create-mod` (Stage 1: Creation)
 
-Orchestrates mod authoring in `my_mods/<ModSlug>/`. Conducts an interactive `/grill-me` interview to resolve design decisions, generates directories and metadata (`Version64`, UUIDv4), dispatches specialized concurrent subagents to author stats, progressions, and RootTemplates, and executes comprehensive read-only static verification (LSX/XML schema integrity, string handle parity, and library conflict pre-check) without touching external game directories or `AppData/`.
+Orchestrates mod authoring in `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/<ModSlug>/`. Conducts an interactive `/grill-me` interview to resolve design decisions, generates directories and metadata (`Version64`, UUIDv4), dispatches specialized concurrent subagents to author stats, progressions, and RootTemplates, and executes comprehensive read-only static verification (LSX/XML schema integrity, string handle parity, and library conflict pre-check) without touching external game directories or `AppData/`.
 
 - **Example Prompt**:
   ```text
@@ -77,11 +77,11 @@ Orchestrates mod authoring in `my_mods/<ModSlug>/`. Conducts an interactive `/gr
 
 #### 2. `/bg3-diagnose-mod` (Stage 2: Diagnostics & Toolkit Staging)
 
-Acts as an autonomous mod doctor managing **User-Action Gate 1 (Toolkit Diagnostics)**: Phase 2A asserts static workspace cleanliness, stages unpacked assets and compiled binary `.loca` into `<Game>/Data/`, and directs the author to launch the official Baldur's Gate 3 Toolkit (`Glasses.exe`); Phase 2B triages runtime logs (`messages.log`), applies targeted source fixes to `my_mods/<ModSlug>/`, and loops back to Phase 2A until clean before offering Stage 3 testing.
+Acts as an autonomous mod doctor managing **User-Action Gate 1 (Toolkit Diagnostics)**: Phase 2A asserts static workspace cleanliness, stages unpacked assets and compiled binary `.loca` into `<Game>/Data/`, and directs the author to launch the official Baldur's Gate 3 Toolkit (`Glasses.exe`); Phase 2B triages runtime logs (`messages.log`), applies targeted source fixes to `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/<ModSlug>/`, and loops back to Phase 2A until clean before offering Stage 3 testing.
 
 - **Example Prompt**:
   ```text
-  /bg3-diagnose-mod Diagnose my_mods/shadowblade and check for any Toolkit log errors.
+  /bg3-diagnose-mod Diagnose shadowblade and check for any Toolkit log errors.
   ```
 
 #### 3. `/bg3-test-mod` (Stage 3: Clean-Room In-Game Testing)
@@ -344,12 +344,6 @@ Every tool supports dual-mode execution:
 - **Module Location**: `packages/bg3-authoring/bg3_authoring/diagnostics/diagnose_toolkit_logs.py`
 - **Purpose**: Parses BG3 Toolkit (`Glasses.exe`) message logs, filters by subsystem (Boosts, Stats, Thoth, Osiris), correlates errors to workspace mods, or streams active sessions with `--follow`.
 
-#### `bg3 mod inspect-save` (`packages/bg3-authoring/bg3_authoring/diagnostics/inspect_save_game.py`)
-- **Command Alias**: `inspect-save`
-- **Primary CLI**: `bg3 mod inspect-save [--audit] [--save-file <Path>] [--json]`
-- **Module Location**: `packages/bg3-authoring/bg3_authoring/diagnostics/inspect_save_game.py`
-- **Purpose**: Extracts active mod UUIDs and load orders from `.lsv` save files (Zstandard and LSOF v7 LZ4-frame decoding) and audits them against the player's active `modsettings.lsx`.
-
 ---
 
 ### 3.4 Packaging & Deployment Tools (`packages/bg3-authoring/`)
@@ -358,17 +352,29 @@ Every tool supports dual-mode execution:
 - **Command Alias**: `pack-pak`
 - **Primary CLI**: `bg3 mod pack <ModSlug> [--output dist/<ModSlug>.pak] [--publish-local] [--json]`
 - **Module Location**: `packages/bg3-authoring/bg3_authoring/packaging/pack_mod_pak.py`
-- **Purpose**: Pure-Python LSPK v18 packager. Compresses mod files using zlib, auto-compiles binary `.loca`, and writes binary headers directly to `.pak` format without third-party dependencies.
+- **Purpose**: Pure-Python LSPK v18 packager. Compresses mod files using raw LZ4 block compression (LSPK v18), auto-compiles binary `.loca`, and writes binary headers directly to `.pak` format without third-party dependencies.
 
 #### `bg3 mod sync-game` (`packages/bg3-authoring/bg3_authoring/packaging/sync_game_data.py`)
 - **Command Alias**: `sync-game`
-- **Primary CLI**: `bg3 mod sync-game <ModSlug> [--watch] [--clean-mod] [--json]`
+- **Primary CLI**: `bg3 mod sync-game --mods <ModSlug> [--watch] [--clean-mod <slug>] [--json]`
 - **Module Location**: `packages/bg3-authoring/bg3_authoring/packaging/sync_game_data.py`
 - **Purpose**: Performs idempotent synchronization of mod source trees from `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/` to Steam `Baldurs Gate 3/Data/`. Supports continuous file watching with `--watch` and targeted loose data cleanup with `--clean-mod`.
 
 ---
 
 ### 3.5 Management & Load Order Tools (`packages/bg3-core/`)
+
+#### `bg3 save` (`packages/bg3-core/bg3_core/manage_saves.py` & `bg3_core/save_inspector.py`)
+- **Command Alias**: `saves`
+- **Primary CLI**: `bg3 save [list|inspect|clean-missing|backup|purge] [flags...]`
+- **Module Location**: `packages/bg3-core/bg3_core/manage_saves.py` & `packages/bg3-core/bg3_core/save_inspector.py`
+- **Purpose**: Discovers, inspects, audits, backups, purges, and rescues Baldur's Gate 3 `.lsv` save files.
+- **Key Actions**:
+  - `bg3 save inspect [save|latest] [--audit]`: Extracts active mod UUIDs from binary LSF AST and audits against `modsettings.lsx`.
+  - `bg3 save clean-missing [save|latest] [--out <path>] [--dry-run] [--yes]`: Strips missing or uninstalled mods from save AST to rescue unopenable or corrupted saves, preserving a `.bak` backup.
+  - `bg3 save list`: Discovers all save games across Proton, WSL, and native paths.
+  - `bg3 save backup [--save <name>] [--dest <dir>]`: Safely archives saves to timestamped ZIP packages.
+  - `bg3 save purge [--keep 5] [--days 14] [--dry-run] [--yes]`: Prunes old save games with retention rules while protecting the latest save.
 
 #### `bg3 loadorder` (`packages/bg3-core/bg3_core/manage_load_order.py`)
 - **Command Alias**: `load-order`
