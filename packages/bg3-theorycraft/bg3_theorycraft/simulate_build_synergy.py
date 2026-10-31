@@ -15,7 +15,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import get_cache_dir
 
@@ -152,7 +151,7 @@ def parse_boost_effects(boost_str: str) -> dict[str, Any]:
     return effects
 
 
-def load_gear_boosts(gear_items: list[str], _workspace_root: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+def load_gear_boosts(gear_items: list[str], _workspace_root: Path | None = None) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     cache_file = get_cache_dir() / "mod_database.json"
     gear_data: list[dict[str, Any]] = []
     combined_stats: dict[str, int] = {}
@@ -294,7 +293,6 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON.")
 
     args = parser.parse_args()
-    workspace_root = Path(__file__).resolve().parents[2]
 
     try:
         # Parse classes
@@ -316,7 +314,7 @@ def main() -> int:
                 stats[k.strip().capitalize()] = int(v.strip())
 
         gear_list = [g.strip() for g in args.gear.split(",") if g.strip()] if args.gear else []
-        gear_effects, gear_items = load_gear_boosts(gear_list, workspace_root)
+        gear_effects, gear_items = load_gear_boosts(gear_list)
 
         # Apply stat overrides from gear (e.g. Amulet of Greater Health -> Con 23)
         for stat_name, min_val in gear_effects["stats"].items():

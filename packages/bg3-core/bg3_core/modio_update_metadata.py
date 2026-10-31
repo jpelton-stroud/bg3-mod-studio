@@ -11,10 +11,6 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import MY_MODS_DIR, REPO_ROOT, normalize_mod_key, resolve_mod_dir
 from bg3_core.modio_client import (

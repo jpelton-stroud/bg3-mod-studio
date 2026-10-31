@@ -9,10 +9,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, TextIO, Tuple
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import REPO_ROOT, get_library_catalog_path
 from bg3_core.library_catalog import parse_library_rows

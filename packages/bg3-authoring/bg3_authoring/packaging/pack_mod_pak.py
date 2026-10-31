@@ -15,7 +15,6 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.env_paths import DIST_DIR, detect_bg3_appdata_dirs, get_env_var, resolve_mod_dir
 from bg3_core.larian_parsers import compile_xml_bytes_to_loca
 from bg3_core.lspk import LspkArchive

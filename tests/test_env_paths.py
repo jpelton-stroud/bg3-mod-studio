@@ -205,6 +205,24 @@ class TestXDGPaths(unittest.TestCase):
                 self.assertEqual(sub, empty_studio / "Mods" / "subscribed")
                 self.assertEqual(auth, empty_studio / "Mods" / "authored")
 
+    def test_zero_parents_traversal_in_packages(self):
+        """Assert zero fragile parents traversal or _REPO_ROOT assignments exist across packages."""
+        repo_root = Path(__file__).resolve().parent.parent
+        packages_dir = repo_root / "packages"
+        forbidden_patterns = [
+            "_REPO_ROOT = Path(__file__).resolve().parents",
+            "sys.path.insert(0, str(Path(__file__).resolve().parents[2]))",
+            "workspace_root = Path(__file__).resolve().parents[2]",
+        ]
+        leaks = []
+        for py_file in packages_dir.rglob("*.py"):
+            text = py_file.read_text(encoding="utf-8", errors="replace")
+            for pattern in forbidden_patterns:
+                if pattern in text:
+                    leaks.append(f"{py_file.relative_to(repo_root)}: contains '{pattern}'")
+
+        self.assertEqual(leaks, [], f"Found forbidden path traversal patterns: {leaks}")
+
 
 if __name__ == "__main__":
     unittest.main()

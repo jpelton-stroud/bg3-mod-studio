@@ -20,10 +20,6 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 from bg3_core.env_paths import MY_MODS_DIR, REPO_ROOT, resolve_mod_dir
 from bg3_core.larian_parsers import (
     calculate_version64,

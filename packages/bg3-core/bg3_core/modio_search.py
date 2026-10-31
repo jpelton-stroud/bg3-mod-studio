@@ -16,10 +16,6 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Optional
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 from bg3_core.library_catalog import get_tracked_mod_identifiers
 from bg3_core.modio_client import BG3_GAME_ID, MODIO_API_HOST, get_api_key
 

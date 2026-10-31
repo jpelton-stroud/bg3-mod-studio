@@ -23,9 +23,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-_REPO_ROOT = Path(__file__).resolve().parents[3]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
+from bg3_core.env_paths import REPO_ROOT, get_studio_dir
 
 CATEGORIES: Dict[str, str] = {
     "authoring": "Mod authoring, stat generation, progression curves, and asset scaffolding",
@@ -360,8 +358,13 @@ def verify_registry(registry: Dict[str, Any]) -> Dict[str, Any]:
 def audit_skills(registry: Dict[str, Any], skills_dir: Optional[Path] = None) -> Dict[str, Any]:
     """Audit agent skills in .agents/skills/ for registry compliance, portability, and best practices."""
     if skills_dir is None:
-        workspace_dir = _REPO_ROOT
-        skills_dir = workspace_dir / ".agents" / "skills"
+        studio_skills = get_studio_dir() / ".agents" / "skills"
+        if studio_skills.is_dir():
+            skills_dir = studio_skills
+        elif REPO_ROOT.is_dir():
+            skills_dir = REPO_ROOT / ".agents" / "skills"
+        else:
+            skills_dir = studio_skills
 
     if not skills_dir.is_dir():
         return {

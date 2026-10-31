@@ -15,7 +15,6 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.dom import minidom
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 
 VISUAL_PRESETS = {
@@ -112,7 +111,7 @@ EMPTY_ROOT_TEMPLATES_LSX = """<?xml version="1.0" encoding="utf-8"?>
 from bg3_core.env_paths import resolve_mod_dir
 
 
-def resolve_mod_directories(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, Path, str]:
+def resolve_mod_directories(mod_path_or_slug: str, workspace_root: Path | None = None) -> tuple[Path, Path, str]:
     candidate = resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
     if candidate is None or not candidate.is_dir():
         raise FileNotFoundError(f"Mod directory not found: '{mod_path_or_slug}'")
@@ -321,10 +320,8 @@ def main() -> int:
                 print(f"  {k:<14} -> {v['uuid']} ({v['description']})")
         return 0
 
-    workspace_root = Path(__file__).resolve().parents[2]
-
     try:
-        mod_dir, public_mod_dir, mod_slug = resolve_mod_directories(args.mod, workspace_root)
+        mod_dir, public_mod_dir, mod_slug = resolve_mod_directories(args.mod)
         templates_file = public_mod_dir / "RootTemplates" / "_merged.lsx"
 
         # Determine ParentTemplate UUID and Icon

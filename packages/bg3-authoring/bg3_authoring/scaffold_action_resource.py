@@ -15,7 +15,6 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.dom import minidom
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import resolve_mod_dir
 from bg3_core.larian_parsers import (
@@ -43,7 +42,7 @@ def prettify_xml(element: ET.Element) -> str:
     return clean + "\n"
 
 
-def resolve_mod_paths(mod_name_or_path: str, workspace_root: Path) -> tuple[Path, Path, Path, str]:
+def resolve_mod_paths(mod_name_or_path: str, workspace_root: Path | None = None) -> tuple[Path, Path, Path, str]:
     candidate = resolve_mod_dir(mod_name_or_path, prefer_my_mods=True)
     if candidate is None or not candidate.is_dir():
         raise FileNotFoundError(f"Mod directory not found: '{mod_name_or_path}'")
@@ -80,8 +79,7 @@ def scaffold_action_resource(
     resource_uuid: str | None = None,
     dry_run: bool = False,
 ) -> dict:
-    workspace_root = Path(__file__).resolve().parents[2]
-    mod_root, mod_folder_dir, loc_file, mod_slug = resolve_mod_paths(mod_name_or_path, workspace_root)
+    mod_root, mod_folder_dir, loc_file, mod_slug = resolve_mod_paths(mod_name_or_path)
 
     res_dir = mod_folder_dir / "ActionResourceDefinitions"
     res_file = res_dir / "ActionResourceDefinitions.lsx"
