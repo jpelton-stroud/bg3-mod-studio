@@ -14,7 +14,7 @@ Refer to domain specifications:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
+> Query the studio tool registry with `bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -28,19 +28,12 @@ flowchart TD
 
 ### 1. Hybrid Conflict Inspection
 Run deterministic inspection against cataloged workspace mods or candidate pairs:
-```bash
-# Check candidate against tracked library
-uv run bg3 mod conflict "<MOD_SLUG>" --against-library --json
-
-# Compare two candidate mods
-uv run bg3 mod conflict "<MOD1>" --mod2 "<MOD2>" --json
-```
+- **Candidate vs Tracked Library**: Execute `bg3 mod conflict "<MOD_SLUG>" --against-library --json`
+- **Candidate vs Candidate**: Execute `bg3 mod conflict "<MOD1>" --mod2 "<MOD2>" --json`
 
 ### 2. Remediation & Patch Generation
 When actionable stat collisions occur, offer automated patch generation:
-```bash
-uv run bg3 mod compat-patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json
-```
+- Execute `bg3 mod patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json`
 
 ---
 

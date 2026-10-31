@@ -88,7 +88,7 @@ def load_localization_strings(mod_dir: Path) -> dict[str, str]:
         try:
             entries = parse_loca_bytes(loca_file.read_bytes())
             strings.update(entries)
-        except Exception:
+        except (OSError, ValueError, KeyError):
             pass
 
     # 2. Parse XML localization files
@@ -114,7 +114,7 @@ def load_localization_strings(mod_dir: Path) -> dict[str, str]:
                     .replace("&quot;", '"')
                 )
                 strings[uid] = text
-        except Exception:
+        except (OSError, UnicodeDecodeError):
             continue
     return strings
 

@@ -3,18 +3,19 @@ name: bg3-test-mod
 description: Deploy local .pak, manage modsettings.lsx load order, audit save game compatibility, and verify in-game behavior (Stage 3). Use on /bg3-test-mod or after diagnostics.
 ---
 
-# BG3 Mod In-Game Testing & Verification (Stage 3) (`bg3-test-mod`)
+# BG3 Mod In-Game Testing (`bg3-test-mod`)
 
-Stage 3 playtesting workflow governing User-Action Gate 2. Deploys test `.pak` to `AppData/Mods/` and isolates load order.
+Drives Stage 3 clean-room in-game playtesting: purging loose `Data/` development assets, packaging a local `.pak` to `AppData/Mods/`, configuring an isolated `modsettings.lsx` profile, and routing defects via dual-track resolution.
 
-Refer to specifications:
-- Smoke Testing: [Smoke Runbook](./references/smoke_testing_runbook.md)
-- Campaign Saves: [Save Audit](./references/save_audit_runbook.md)
+Refer to companion resources:
+- Clean-Room Protocol: [Smoke Testing Runbook](./references/smoke_testing_runbook.md)
+- Save Audit Protocol: [Campaign Save Audit](./references/save_audit_runbook.md)
+- Lifecycle Gates: [Mod Creation Workflow](../../../../../docs/MOD_CREATION_WORKFLOW.md)
 
 ---
 
 > [!TIP]
-> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
+> Query the studio tool registry with `bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -33,16 +34,12 @@ flowchart TD
 
 ### 1. Clean Data & Deploy Local `.pak`
 Purge loose files and package `.pak`:
-```bash
-uv run bg3 mod sync-data --clean-mod <mod-slug> --json
-uv run bg3 mod pack --mod <mod-slug> --publish-local --json
-```
+- Clean loose development files: `bg3 mod clean-game <mod-slug> --json` (or `bg3 mod sync-game --clean-mod <mod-slug> --json`)
+- Package and deploy locally: `bg3 mod pack <mod-slug> --publish-local --json`
 
 ### 2. Configure Clean-Room Load Order (Phase 3A)
 Enable target mod with dependencies per [Smoke Runbook](./references/smoke_testing_runbook.md):
-```bash
-uv run bg3 loadorder --enable <mod-slug> --with-deps --isolate --json
-```
+- Execute `bg3 loadorder enable <mod-slug> --with-deps --isolate --yes --json`
 
 ### 3. Guided Playtesting & Routing
 Instruct user to launch game and test acquisitions, tooltips, and mechanics:
@@ -56,7 +53,6 @@ Instruct user to launch game and test acquisitions, tooltips, and mechanics:
 ## Verification Gate
 
 Verify local deployment state before concluding:
-1. Verify `sync-data --clean-mod` and `mod pack --publish-local` exit with code 0.
+1. Verify `bg3 mod pack <mod-slug> --publish-local` exits with code 0.
 2. Confirm `.pak` exists in user `AppData/Mods/`.
-3. Confirm load order reports 0 missing dependencies.
-4. User confirms in-game playtesting or save persistence.
+3. Confirm `modsettings.lsx` lists the mod and declared dependencies.

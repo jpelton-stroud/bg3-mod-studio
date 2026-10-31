@@ -1055,6 +1055,107 @@ def restore_quarantined_paks(
     return restored
 
 
+def topological_sort_mods(
+    active_mods: dict[str, dict[str, Any]],
+    dependency_graph: dict[str, list[str]],
+) -> list[str]:
+    """
+    Kahn's algorithm for topological sorting of active mods by dependency constraints.
+    Returns ordered list of UUIDs, with core system modules pinned first.
+    """
+    core_uuids: list[str] = []
+    custom_uuids: list[str] = []
+
+    for u in active_mods:
+        u_norm = u.lower()
+        if u_norm in CORE_SYSTEM_UUIDS:
+            core_uuids.append(u)
+        else:
+            custom_uuids.append(u)
+
+    in_degree: dict[str, int] = {u: 0 for u in custom_uuids}
+    adj: dict[str, list[str]] = {u: [] for u in custom_uuids}
+    uuid_map = {u.lower(): u for u in custom_uuids}
+
+    for u in custom_uuids:
+        deps = dependency_graph.get(u, []) or dependency_graph.get(u.lower(), [])
+        for dep in deps:
+            dep_norm = dep.lower()
+            if dep_norm in uuid_map:
+                dep_actual = uuid_map[dep_norm]
+                adj[dep_actual].append(u)
+                in_degree[u] += 1
+
+    def priority_key(u: str) -> tuple[int, str]:
+        name = (active_mods.get(u, {}).get("Name") or "").lower()
+        if "communitylibrary" in name:
+            return (0, name)
+        if "compatibilityframework" in name:
+            return (1, name)
+        return (2, name)
+
+    queue = [u for u, deg in in_degree.items() if deg == 0]
+    queue.sort(key=priority_key)
+
+    sorted_custom: list[str] = []
+    while queue:
+        curr = queue.pop(0)
+        sorted_custom.append(curr)
+        for neighbor in adj[curr]:
+            in_degree[neighbor] -= 1
+            if in_degree[neighbor] == 0:
+                queue.append(neighbor)
+                queue.sort(key=priority_key)
+
+    if len(sorted_custom) < len(custom_uuids):
+        remaining = [u for u in custom_uuids if u not in sorted_custom]
+        sorted_custom.extend(remaining)
+
+    return core_uuids + sorted_custom
+
+
+def auto_sort_load_order(path: Path, dry_run: bool = False) -> tuple[bool, list[str], dict[str, Any]]:
+    """Sorts active mods in modsettings.lsx according to dependencies using topological sort."""
+    if not path.is_file():
+        return False, [], {"error": "modsettings.lsx not found"}
+
+    parsed = parse_modsettings(path)
+    active_mods = parsed.get("mods", {})
+    if not active_mods:
+        return False, [], {"error": "No active mods in modsettings.lsx"}
+
+    dep_graph: dict[str, list[str]] = {}
+    for u, m in active_mods.items():
+        dep_graph[u] = []
+        deps = m.get("Dependencies") or []
+        for d in deps:
+            if isinstance(d, dict) and "UUID" in d:
+                dep_graph[u].append(d["UUID"])
+
+    sorted_order = topological_sort_mods(active_mods, dep_graph)
+
+    if not dry_run:
+        tree = ET.parse(path)
+        root = tree.getroot()
+        mods_children = root.find(".//node[@id='Mods']/children")
+        if mods_children is not None:
+            descs_by_uuid: dict[str, ET.Element] = {}
+            for d in list(mods_children.findall("node[@id='ModuleShortDesc']")):
+                u_attr = d.find("attribute[@id='UUID']")
+                if u_attr is not None:
+                    descs_by_uuid[u_attr.get("value", "").lower()] = d
+                    mods_children.remove(d)
+
+            for u in sorted_order:
+                node = descs_by_uuid.get(u.lower())
+                if node is not None:
+                    mods_children.append(node)
+
+            save_modsettings(path, tree)
+
+    return True, sorted_order, {"total_sorted": len(sorted_order), "dry_run": dry_run}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Inspect, activate, reorder, and validate Baldur's Gate 3 modsettings.lsx load order."
@@ -1072,6 +1173,7 @@ def main() -> None:
     parser.add_argument("--restore", action="store_true", help="Restore quarantined mods from Mods_Disabled/ back to active Mods directory")
     parser.add_argument("--dedup", "--deduplicate", dest="dedup", action="store_true", help="Deduplicate installed .pak files in AppData Mods")
     parser.add_argument("--validate", action="store_true", help="Validate current load order rules")
+    parser.add_argument("--auto-sort", "--sort", dest="auto_sort", action="store_true", help="Topologically auto-sort active mods based on dependencies")
     parser.add_argument("--create-default", action="store_true", help="Create default modsettings.lsx if missing")
     parser.add_argument("--dry-run", action="store_true", help="Preview modifications without writing to disk")
     parser.add_argument("--json", action="store_true", help="Output result as JSON")
@@ -1111,10 +1213,21 @@ def main() -> None:
         sys.exit(0)
 
     # Default to --list when --json is passed without an explicit action
-    if args.json and not (args.list or args.enable or args.disable or args.validate):
+    if args.json and not (args.list or args.enable or args.disable or args.validate or args.auto_sort):
         args.list = True
 
     action_result: dict[str, Any] = {}
+
+    if args.auto_sort:
+        success, sorted_order, meta_sort = auto_sort_load_order(modsettings_path, dry_run=args.dry_run)
+        action_result["auto_sort"] = {
+            "success": success,
+            "sorted_order": sorted_order,
+            **meta_sort,
+        }
+        if not args.json:
+            verb = "[DRY-RUN] Would reorder" if args.dry_run else "Reordered"
+            print(f"✓ {verb} {len(sorted_order)} active mod(s) via topological dependency sorting.")
 
     if args.restore:
         mods_dir = get_appdata_mods_dir(modsettings_path)
@@ -1367,7 +1480,7 @@ def main() -> None:
     if args.validate and action_result.get("validation", {}).get("issues"):
         sys.exit(1)
 
-    if args.list or args.enable or args.disable or args.validate:
+    if args.list or args.enable or args.disable or args.validate or args.auto_sort:
         sys.exit(0)
 
     parser.print_help()

@@ -1,6 +1,15 @@
-"""Shared mod.io REST API client, credentials lookup, and mod query/download utilities."""
+#!/usr/bin/env python3
+"""
+modio_client.py - Reusable client for the mod.io REST API v1.
+
+Provides ModioClient with bearer token auth, pagination, atomic caching,
+exponential backoff retry with jitter, and helper functions for CLI scripts.
+"""
+
+from __future__ import annotations
 
 import json
+import logging
 import random
 import re
 import time
@@ -13,6 +22,8 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from .env_paths import get_env_var, get_xdg_cache_home
 
+logger = logging.getLogger(__name__)
+
 BG3_GAME_ID = 6715
 MODIO_API_HOST = f"g-{BG3_GAME_ID}.modapi.io"
 API_ROOT = f"https://{MODIO_API_HOST}/v1"
@@ -22,13 +33,23 @@ USER_AGENT = "BG3ModStudio/1.0"
 class ModioError(RuntimeError):
     """Raised for an invalid target, preflight failure, or mod.io API error."""
 
+    def __init__(
+        self,
+        message: str,
+        status_code: Optional[int] = None,
+        response_body: Optional[str] = None,
+    ) -> None:
+        super().__init__(message)
+        self.status_code = status_code
+        self.response_body = response_body
+
 
 class ModioClient:
     """Authenticated mod.io v1 REST client supporting GET, form-urlencoded, and multipart POST/PUT."""
 
     def __init__(
         self,
-        token: str,
+        token: Optional[str] = None,
         opener: Any = urllib.request.urlopen,
         cache_ttl_seconds: int = 300,
         enable_cache: bool = False,
@@ -37,7 +58,7 @@ class ModioClient:
         backoff_factor: float = 0.5,
         jitter: bool = True,
     ) -> None:
-        self.token = token
+        self.token = token or ""
         self.opener = opener
         self.cache_ttl_seconds = cache_ttl_seconds
         self.enable_cache = enable_cache
@@ -65,8 +86,8 @@ class ModioClient:
                     ts = entry.get("timestamp", 0)
                     if time.time() - ts < self.cache_ttl_seconds:
                         return entry.get("data")
-        except Exception:
-            pass
+        except (OSError, ValueError, KeyError) as err:
+            logger.debug("Failed to read mod.io cache: %s", err)
         return None
 
     def _write_cache(self, key: str, data: Dict[str, Any]) -> None:
@@ -77,7 +98,7 @@ class ModioClient:
                 try:
                     with open(path, "r", encoding="utf-8") as f:
                         cache = json.load(f)
-                except Exception:
+                except (OSError, ValueError):
                     cache = {}
             cache[key] = {
                 "timestamp": time.time(),
@@ -87,8 +108,8 @@ class ModioClient:
             with open(tmp, "w", encoding="utf-8") as f:
                 json.dump(cache, f, indent=2)
             tmp.replace(path)
-        except Exception:
-            pass
+        except OSError as err:
+            logger.debug("Failed to write mod.io cache: %s", err)
 
     def clear_cache(self) -> None:
         """Clear local mod.io response cache."""
@@ -96,8 +117,8 @@ class ModioClient:
             path = self.get_cache_path()
             if path.exists():
                 path.unlink()
-        except Exception:
-            pass
+        except OSError as err:
+            logger.debug("Failed to clear mod.io cache: %s", err)
 
     def request(
         self,
@@ -121,12 +142,15 @@ class ModioClient:
             cached = self._read_cache(cache_key)
             if cached is not None:
                 return cached
-        auth_header = "Auth" + "orization"
+
+        auth_header = "Authorization"
         headers = {
             "Accept": "application/json",
             "User-Agent": USER_AGENT,
         }
-        headers[auth_header] = f"Bearer {self.token}"
+        if self.token:
+            headers[auth_header] = f"Bearer {self.token}"
+
         body = None
         if fields is not None:
             if multipart:
@@ -182,16 +206,20 @@ class ModioClient:
                     + (f": {detail}" if detail else "")
                 ) from None
             except urllib.error.URLError as error:
-                raise ModioError(f"Could not connect to mod.io: {error.reason}") from None
-            except OSError as error:
-                raise ModioError(f"Could not complete the mod.io request: {error}") from None
+                if retries < self.max_retries:
+                    retries += 1
+                    sleep_time = self.backoff_factor * (2 ** (retries - 1))
+                    if self.jitter:
+                        sleep_time += random.uniform(0.0, 0.25)
+                    time.sleep(sleep_time)
+                    continue
+                raise ModioError(f"Network error contacting mod.io: {error.reason}") from None
 
-        if not response_body:
-            return {}
         try:
             payload = json.loads(response_body.decode("utf-8"))
-        except (UnicodeDecodeError, json.JSONDecodeError):
-            raise ModioError("mod.io returned an invalid JSON response.") from None
+        except (ValueError, UnicodeDecodeError) as error:
+            raise ModioError("mod.io returned non-JSON content.") from error
+
         if not isinstance(payload, dict):
             raise ModioError("mod.io returned an unexpected response shape.")
 
@@ -201,6 +229,52 @@ class ModioClient:
             self.clear_cache()
 
         return payload
+
+    def download_file(self, url: str, destination: Path | None = None, chunk_size: int = 65536) -> bytes:
+        """Download binary content from URL with chunking and retries."""
+        headers = {"User-Agent": USER_AGENT}
+        if self.token:
+            headers["Authorization"] = f"Bearer {self.token}"
+
+        req = urllib.request.Request(url, headers=headers)
+        retries = 0
+        while True:
+            try:
+                with self.opener(req, timeout=60) as resp:
+                    if destination:
+                        tmp_dst = destination.with_suffix(f"{destination.suffix}.part")
+                        destination.parent.mkdir(parents=True, exist_ok=True)
+                        with open(tmp_dst, "wb") as f_out:
+                            while True:
+                                chunk = resp.read(chunk_size)
+                                if not chunk:
+                                    break
+                                f_out.write(chunk)
+                        tmp_dst.replace(destination)
+                        return b""
+                    else:
+                        buffer = bytearray()
+                        while True:
+                            chunk = resp.read(chunk_size)
+                            if not chunk:
+                                break
+                            buffer.extend(chunk)
+                        return bytes(buffer)
+            except urllib.error.HTTPError as error:
+                is_transient = error.code in (429, 500, 502, 503, 504)
+                if is_transient and retries < self.max_retries:
+                    retries += 1
+                    sleep_time = self.backoff_factor * (2 ** (retries - 1))
+                    time.sleep(sleep_time)
+                    continue
+                raise ModioError(f"HTTP {error.code} downloading file: {error.reason}") from error
+            except urllib.error.URLError as error:
+                if retries < self.max_retries:
+                    retries += 1
+                    sleep_time = self.backoff_factor * (2 ** (retries - 1))
+                    time.sleep(sleep_time)
+                    continue
+                raise ModioError(f"Network error downloading file: {error.reason}") from error
 
     def get_paged(
         self,
@@ -234,12 +308,12 @@ class ModioClient:
 
 
 def get_api_key() -> Optional[str]:
-    """Retrieve MODIO_API_KEY from environment or .env files."""
+    """Retrieve MODIO_API_KEY from environment or config files."""
     return get_env_var("MODIO_API_KEY")
 
 
 def get_oauth_token(cli_token: Optional[str] = None) -> Optional[str]:
-    """Retrieve OAuth2 token / PAT from CLI flag, environment, or .env files."""
+    """Retrieve OAuth2 token / PAT from CLI flag, environment, or config files."""
     if cli_token and cli_token.strip():
         return cli_token.strip()
     for key in ("MODIO_OAUTH_TOKEN", "MODIO_PAT", "MODIO_TOKEN"):
@@ -250,12 +324,13 @@ def get_oauth_token(cli_token: Optional[str] = None) -> Optional[str]:
 
 
 def query_modio(query_or_slug: str, api_key: str) -> Dict[str, Any]:
-    """Search mod.io for a BG3 mod by name, slug, URL, or numeric ID."""
+    """Search mod.io for a BG3 mod by name, slug, URL, or numeric ID using ModioClient."""
     clean_query = query_or_slug.strip()
-
     if "mod.io" in clean_query:
         parts = clean_query.rstrip("/").split("/")
         clean_query = parts[-1]
+
+    client = ModioClient()
 
     if clean_query.isdigit():
         slug_candidates = [clean_query]
@@ -273,41 +348,34 @@ def query_modio(query_or_slug: str, api_key: str) -> Dict[str, Any]:
                 slug_candidates.append(c)
 
     for cand in slug_candidates:
-        params = {"api_key": api_key}
+        params: dict[str, Any] = {"api_key": api_key}
         if is_id:
             params["id"] = cand
         else:
             params["name_id"] = cand
 
-        url = f"https://{MODIO_API_HOST}/v1/games/{BG3_GAME_ID}/mods?{urllib.parse.urlencode(params)}"
-        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         try:
-            with urllib.request.urlopen(req) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                if data.get("data") and len(data["data"]) > 0:
-                    return data["data"][0]
-        except Exception:
-            pass
+            data = client.request("GET", f"/games/{BG3_GAME_ID}/mods", params=params)
+            if data.get("data") and len(data["data"]) > 0:
+                return data["data"][0]
+        except Exception as err:
+            logger.debug("Candidate query failed: %s", err)
 
     clean_q_alpha = re.sub(r"[^a-z0-9]", "", clean_query.lower())
     search_queries = [clean_query]
     if clean_q_alpha and clean_q_alpha != clean_query.lower():
         search_queries.append(clean_q_alpha)
 
-    results = []
+    results: list[dict[str, Any]] = []
     for q_term in search_queries:
         params = {"api_key": api_key, "_q": q_term}
-        url = f"https://{MODIO_API_HOST}/v1/games/{BG3_GAME_ID}/mods?{urllib.parse.urlencode(params)}"
-        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-
         try:
-            with urllib.request.urlopen(req) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                batch = data.get("data", [])
-                if batch:
-                    results.extend(batch)
-        except Exception:
-            pass
+            data = client.request("GET", f"/games/{BG3_GAME_ID}/mods", params=params)
+            batch = data.get("data", [])
+            if batch:
+                results.extend(batch)
+        except Exception as err:
+            logger.debug("Search query term failed: %s", err)
 
         for m in results:
             m_name = m.get("name", "").lower()
@@ -345,8 +413,8 @@ def query_modio(query_or_slug: str, api_key: str) -> Dict[str, Any]:
     return results[0]
 
 
-def download_mod_file(mod_metadata: Dict[str, Any], api_key: str) -> bytes:
-    """Download mod archive (.zip or .pak) from mod.io."""
+def download_mod_file(mod_metadata: Dict[str, Any], api_key: str, destination: Path | None = None) -> bytes:
+    """Download mod archive (.zip or .pak) from mod.io using resilient ModioClient."""
     modfile = mod_metadata.get("modfile")
     if not modfile or not modfile.get("download", {}).get("binary_url"):
         raise RuntimeError(
@@ -357,6 +425,5 @@ def download_mod_file(mod_metadata: Dict[str, Any], api_key: str) -> bytes:
     sep = "&" if "?" in download_url else "?"
     signed_url = f"{download_url}{sep}api_key={api_key}"
 
-    req = urllib.request.Request(signed_url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req) as resp:
-        return resp.read()
+    client = ModioClient()
+    return client.download_file(signed_url, destination=destination)

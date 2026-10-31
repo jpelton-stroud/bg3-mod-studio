@@ -23,6 +23,7 @@ import struct
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
@@ -43,13 +44,13 @@ RESET = "\033[0m" if _color.enabled else ""
 
 
 class ModValidator:
-    def __init__(self, mod_dir: Path, strict: bool = False):
+    def __init__(self, mod_dir: Path, strict: bool = False) -> None:
         self.mod_dir = mod_dir
         self.strict = strict
         self.errors: list[str] = []
         self.warnings: list[str] = []
-        self.meta_projects: dict = {}
-        self.meta_mods: dict = {}
+        self.meta_projects: dict[str, Any] = {}
+        self.meta_mods: dict[str, Any] = {}
         self.defined_handles: set[str] = set()
         self.referenced_handles: set[str] = set()
         self.defined_spells: set[str] = set()
@@ -85,8 +86,8 @@ class ModValidator:
                     rel = p.relative_to(self.mod_dir)
                     self.add_error(f"Malformed XML in '{rel}': line {e.position[0]}, col {e.position[1]}: {e}")
 
-    def parse_meta(self, meta_file: Path) -> dict:
-        data = {
+    def parse_meta(self, meta_file: Path) -> dict[str, Any]:
+        data: dict[str, Any] = {
             "uuid": "",
             "version64": 0,
             "name": "",
