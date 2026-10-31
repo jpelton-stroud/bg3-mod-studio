@@ -836,7 +836,7 @@ def build_parser() -> JsonCompliantArgumentParser:
         help="Generate or update public mod.io collection from library.md",
         parents=[common_parser],
     )
-    modio_coll_parser.add_argument("--library", default="mods/library.md", help="Path to library.md")
+    modio_coll_parser.add_argument("--library", default=None, help="Path to library.md (defaults to $BG3_SUBSCRIBED_MODS_DIR/library.md)")
     modio_coll_parser.add_argument("--dry-run", action="store_true", help="Preview collection payload")
 
     # bg3 modio purge
@@ -855,7 +855,7 @@ def build_parser() -> JsonCompliantArgumentParser:
     modio_cat_parser = modio_subparsers.add_parser(
         "update-catalog",
         aliases=["update_catalog"],
-        help="Regenerate mods/library.md catalog from mods/ README files",
+        help="Regenerate library.md catalog from subscribed mods README files",
         parents=[common_parser],
     )
     modio_cat_parser.add_argument("--write", action="store_true", help="Write regenerated catalog to library.md")

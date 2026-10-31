@@ -1,6 +1,6 @@
 # Library Catalog Specification & Categories
 
-## 1. Six-Column Schema (`mods/library.md`)
+## 1. Six-Column Schema (`library.md`)
 
 Each cataloged mod row contains:
 1. **Mod Id**: Verified numeric mod.io ID.
@@ -8,7 +8,7 @@ Each cataloged mod row contains:
 3. **Mod Slug**: Workspace folder slug.
 4. **Description**: Concise summary of mod features.
 5. **Features Documented**: Quantified count of implemented features.
-6. **Spec Link**: Relative markdown link to `mods/<slug>/README.md`.
+6. **Spec Link**: Relative markdown link to `<slug>/README.md`.
 
 ---
 

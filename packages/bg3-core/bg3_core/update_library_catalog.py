@@ -29,11 +29,11 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import REPO_ROOT, get_subscribed_mods_dir
+from bg3_core.env_paths import REPO_ROOT, get_library_catalog_path, get_subscribed_mods_dir
 from bg3_core.library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
 
 WORKSPACE_ROOT = REPO_ROOT
-LIBRARY_FILE = get_subscribed_mods_dir() / "library.md"
+LIBRARY_FILE = get_library_catalog_path()
 
 CATEGORY_ORDER = [
     "Gear",
@@ -239,7 +239,7 @@ def write_library_catalog(
     mods_dir: Optional[Path] = None, library_file: Optional[Path] = None
 ) -> list[dict]:
     active_mods_dir = mods_dir if mods_dir is not None else get_subscribed_mods_dir()
-    active_library_file = library_file if library_file is not None else (active_mods_dir / "library.md")
+    active_library_file = library_file if library_file is not None else get_library_catalog_path()
     current_content = (
         active_library_file.read_text(encoding="utf-8") if active_library_file.is_file() else ""
     )
@@ -251,10 +251,10 @@ def write_library_catalog(
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Update or check master catalog in mods/library.md from mods/*/README.md."
+        description="Update or check master catalog in library.md from subscribed mods README files."
     )
-    parser.add_argument("--write", action="store_true", help="Write changes to mods/library.md")
-    parser.add_argument("--check", action="store_true", help="Check if mods/library.md is up to date without modifying")
+    parser.add_argument("--write", action="store_true", help="Write changes to library.md")
+    parser.add_argument("--check", action="store_true", help="Check if library.md is up to date without modifying")
     parser.add_argument("--stdout", action="store_true", help="Output generated catalog to stdout")
     parser.add_argument("--json", action="store_true", help="Emit catalog status as JSON")
 
@@ -264,7 +264,7 @@ def main() -> int:
     err_color = ConsoleColor(stream=sys.stderr)
 
     target_mods_dir = get_subscribed_mods_dir()
-    target_library_file = target_mods_dir / "library.md"
+    target_library_file = get_library_catalog_path()
 
     if not target_mods_dir.exists():
         print(f"{err_color.red('[ERROR]')} {target_mods_dir} does not exist.", file=sys.stderr)
@@ -287,7 +287,7 @@ def main() -> int:
 
     if args.json:
         result = {
-            "catalog_file": str(LIBRARY_FILE.relative_to(WORKSPACE_ROOT)),
+            "catalog_file": str(LIBRARY_FILE),
             "mod_count": len(mods_data),
             "up_to_date": is_identical,
             "written": bool(args.write),
@@ -297,16 +297,16 @@ def main() -> int:
 
     if args.check:
         if is_identical:
-            print(f"{color.green('✓')} mods/library.md is fully up to date ({len(mods_data)} mods cataloged).")
+            print(f"{color.green('✓')} library.md is fully up to date ({len(mods_data)} mods cataloged).")
             sys.exit(ExitCode.OK)
         else:
-            print(f"{err_color.red('✗')} mods/library.md is out of date. Run with --write to regenerate.", file=sys.stderr)
+            print(f"{err_color.red('✗')} library.md is out of date. Run with --write to regenerate.", file=sys.stderr)
             sys.exit(ExitCode.GENERAL)
 
     if args.write:
-        print(f"{color.green('✓')} Successfully regenerated {LIBRARY_FILE.relative_to(WORKSPACE_ROOT)} with {len(mods_data)} cataloged mods.")
+        print(f"{color.green('✓')} Successfully regenerated {LIBRARY_FILE} with {len(mods_data)} cataloged mods.")
     else:
-        print(f"Scanned {len(mods_data)} mods. Use --write to update mods/library.md or --stdout to inspect.")
+        print(f"Scanned {len(mods_data)} mods. Use --write to update library.md or --stdout to inspect.")
     return ExitCode.OK
 
 

@@ -22,7 +22,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import REPO_ROOT
+from bg3_core.env_paths import REPO_ROOT, get_subscribed_mods_dir
 from bg3_core.library_catalog import get_tracked_mods as _get_tracked_mods
 from bg3_core.modio_client import get_api_key, query_modio
 from bg3_core.modio_extract import process_mod
@@ -32,13 +32,12 @@ WORKSPACE_ROOT = str(REPO_ROOT)
 
 def get_tracked_mods(library_path: Optional[str | Path] = None) -> dict[str, dict[str, str]]:
     """
-    Parses mods/library.md and existing mod directories to identify tracked mods.
+    Parses library.md and existing mod directories to identify tracked mods.
     Returns a dict mapping lowercase slug to mod details.
     """
     return _get_tracked_mods(
         library_path=library_path,
         include_filesystem=True,
-        workspace_root=WORKSPACE_ROOT,
     )
 
 
@@ -47,7 +46,7 @@ def get_local_mod_state(slug: str, mods_dir: Optional[str | Path] = None) -> dic
     Inspects local files for a mod to extract MD5 hash, version, and features.
     """
     if mods_dir is None:
-        mods_dir = os.path.join(WORKSPACE_ROOT, "mods")
+        mods_dir = str(get_subscribed_mods_dir())
 
     mod_dir = os.path.join(mods_dir, slug)
     state: dict[str, Any] = {

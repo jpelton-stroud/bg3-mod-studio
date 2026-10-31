@@ -1,6 +1,6 @@
 ---
 name: bg3-create-modio-collection
-description: Create or update a public Baldur's Gate 3 mod.io collection from mods documented in mods/library.md. Use on /bg3-create-modio-collection or when creating a mod.io collection.
+description: Create or update a public Baldur's Gate 3 mod.io collection from mods documented in library.md. Use on /bg3-create-modio-collection or when creating a mod.io collection.
 ---
 
 # Create a BG3 mod.io Collection (`bg3-create-modio-collection`)

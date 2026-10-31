@@ -6,7 +6,7 @@ Appends community or core mod dependencies and test dependencies to an existing 
 
 Features:
 - Resolves dependency metadata (UUID, Version64, MD5, Folder, Name, PublishHandle)
-  via local mods/library.md before falling back to mod.io.
+  via the mod library catalog before falling back to mod.io.
 - Injects standard Larian v4.8 ModuleShortDesc nodes into Mods/*/meta.lsx.
 - Updates mod README.md under ## Dependencies.
 - Supports adding both permanent dependencies and test dependencies in a single invocation.
@@ -24,7 +24,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+_core_pkg = Path(__file__).resolve().parents[2] / "bg3-core"
+if _core_pkg.is_dir() and str(_core_pkg) not in sys.path:
+    sys.path.insert(0, str(_core_pkg))
 from bg3_core.env_paths import MY_MODS_DIR, resolve_mod_dir
 from bg3_core.mod_resolver import resolve_dependency_metadata
 

@@ -1,6 +1,6 @@
 ---
 name: bg3-query-gear
-description: Recommend BiS equipment, stat boosts, spells, and passives from cataloged BG3 community mods in mods/library.md. Use on /bg3-query-gear or when requesting gear advice.
+description: Recommend BiS equipment, stat boosts, spells, and passives from cataloged BG3 community mods in library.md. Use on /bg3-query-gear or when requesting gear advice.
 ---
 
 # BG3 Mod Equipment & Mechanics Advisor (`bg3-query-gear`)

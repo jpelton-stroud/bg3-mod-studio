@@ -1,6 +1,6 @@
 ---
 name: bg3-update-mod-documentation
-description: Orchestrate concurrent subagents to check and update BG3 mod docs from mod.io, refreshing READMEs and catalogs in mods/library.md. Use on /bg3-update-mod-documentation.
+description: Orchestrate concurrent subagents to check and update BG3 mod docs from mod.io, refreshing READMEs and catalogs in library.md. Use on /bg3-update-mod-documentation.
 ---
 
 # BG3 Mod Documentation Update Orchestrator (`bg3-update-mod-documentation`)
@@ -22,7 +22,7 @@ flowchart TD
     Start["User triggers /bg3-update-mod-documentation"] --> Resolve["1. Resolve Batch (or all tracked mods)"]
     Resolve --> Dispatch["2. Launch Concurrent Subagents in Parallel"]
     Dispatch --> Wait["3. Reactive Wait for Notifications"]
-    Wait --> Catalog["4. Re-catalog mods/library.md if updated"]
+    Wait --> Catalog["4. Re-catalog library.md if updated"]
     Catalog --> Present["5. Present Summary Status Table"]
 ```
 

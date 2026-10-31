@@ -84,7 +84,7 @@ STOP_WORDS = {
 
 def get_tracked_mods(workspace_root: Optional[Path | str] = None) -> tuple[set[str], set[str]]:
     """
-    Parse mods/library.md to collect names and slugs of already tracked mods.
+    Parse library.md to collect names and slugs of already tracked mods.
     """
     return get_tracked_mod_identifiers(workspace_root=workspace_root)
 
