@@ -1,6 +1,6 @@
 [project]
 name = "bg3-theorycraft"
-version = "1.0.0"
+version = "1.0.0b1"
 description = "Baldur's Gate 3 Mod Studio Theorycrafting and Build Guide Generator"
 readme = "README.md"
 requires-python = ">=3.10"
