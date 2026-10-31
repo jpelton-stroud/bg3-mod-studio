@@ -50,7 +50,7 @@ flowchart TD
     AuthoringPkg -->|Mirrors source & compiled .loca| GameData
     AuthoringPkg -->|Compiles package| Distribution
     AuthoringPkg -->|Linters & audits| MyMods
-    AuthoringPkg -->|Inspects load order & saves| ProfileSettings
+    CorePkg -->|Inspects load order & saves| ProfileSettings
     CorePkg -->|Queries & updates metadata| ModioRemote
     CorePkg -->|Extracts & indexes| ModsLib
     CorePkg -->|Fuzzy search / BiS| ModsLib

@@ -22,7 +22,9 @@ graph TD
 | Module | Core Responsibility | Key Exported Symbols |
 | :--- | :--- | :--- |
 | `bg3_core.larian_parsers` | Larian binary formats, version encoding, and localization | `encode_version64()`, `decode_version64()`, `parse_loca_bytes()`, `compile_xml_bytes_to_loca()`, `split_larian_items()` |
-| `bg3_core.lspk` | Pure-Python LSPK v18 archive reader and unpacker | `LspkArchive`, `lz4_block_decompress()`, `lz4_frame_or_block_decompress()`, `decompress_pak_file_data()` |
+| `bg3_core.lspk` | Pure-Python LSPK v18 archive reader, builder, and unpacker | `LspkArchive`, `build_lspk_archive()`, `lz4_block_decompress()`, `lz4_frame_or_block_decompress()`, `decompress_pak_file_data()` |
+| `bg3_core.save_inspector` | Save game metadata extraction, AST audit, and mod pruning | `extract_save_metadata()`, `audit_against_modsettings()`, `prune_missing_mods_from_save()` |
+| `bg3_core.manage_saves` | Savegame discovery, backup, retention purging, and rescue | `discover_save_games()`, `handle_clean_missing()` |
 | `bg3_core.env_paths` | Cross-platform state, cache, config, and game path detection | `get_xdg_config_home()`, `get_xdg_cache_home()`, `get_xdg_data_home()`, `detect_bg3_appdata_dirs()`, `detect_bg3_install_dir()` |
 | `bg3_core.cli_common` | Stream separation, POSIX exit codes, and JSON envelopes | `OutputEmitter`, `ConsoleColor`, `ExitCode`, `format_json_response()`, `confirm_action()` |
 | `bg3_core.modio_client` | Authenticated mod.io v1 REST client | `ModioClient`, `ModioError`, `resolve_modio_token()` |
@@ -48,6 +50,8 @@ bg3 = "bg3_core.cli:main"
 - `bg3 modio search <query>` — Search remote community mods on mod.io.
 - `bg3 modio sync` — Synchronize subscribed mods and download `.pak` packages.
 - `bg3 loadorder list` — Inspect active `modsettings.lsx` load order.
+- `bg3 save inspect latest` — Inspect save metadata and audit mod requirements.
+- `bg3 save clean-missing` — Prune missing mods to rescue corrupted saves.
 
 ---
 
@@ -55,7 +59,7 @@ bg3 = "bg3_core.cli:main"
 
 All state directories comply strictly with the XDG Base Directory specification on Linux/macOS and APPDATA specifications on Windows:
 
-- **Configuration**: `$XDG_CONFIG_HOME/BG3_Mod_Studio` (or `%APPDATA%\BG3_Mod_Studio`)
-- **Cache**: `$XDG_CACHE_HOME/BG3_Mod_Studio` (or `%LOCALAPPDATA%\BG3_Mod_Studio`)
+- **Configuration**: `$XDG_CONFIG_HOME/bg3/env` (or `%APPDATA%\bg3\env`)
+- **Cache**: `$XDG_CACHE_HOME/bg3/` (or `%LOCALAPPDATA%\bg3\`)
 - **User Content**: `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/`
 - **Game VFS**: Automatically detects Steam Native, Proton (`compatdata/1086940/pfx`), WSL, and Windows installations.

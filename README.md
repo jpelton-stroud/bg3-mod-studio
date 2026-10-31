@@ -25,7 +25,7 @@ For a deep-dive into feature & functionality specifics, as well as example agent
 
 - **Smart mod.io Search & Filtering**: Discover community mods across PC, PS5, and Xbox Series X|S using natural language queries and compatibility filters (`/bg3-search-mods`, `bg3 modio search`).
 - **Automated Unpacking & Asset Extraction**: Download and decompress PAK/ZIP archives on demand, extracting engine XMLs, localization tables, and game stats into human-readable markdown (`/bg3-document-mods`, `bg3 modio extract`).
-- **Master Mod Catalog**: Track mods centrally in `mods/library.md` using Mod Id, Mod Name, Mod Slug, Description, Features Documented, and Spec Link; unverified IDs remain blank.
+- **Master Mod Catalog**: Track mods centrally in your externalized User Content Studio (`$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/subscribed/library.md`) using Mod Id, Mod Name, Mod Slug, Description, Features Documented, and Spec Link; unverified IDs remain blank.
 - **Conflict & Load Order Analysis**: Proactively audit candidate mods for stat collisions, duplicate UUIDs, and console load order dependencies before installing (`/bg3-check-mod-conflicts`).
 - **Upstream Update Tracking**: Check for upstream patches and updates across tracked mods, refreshing documentation without manual data re-entry (`/bg3-update-mod-documentation`, `bg3 modio update`).
 
@@ -130,23 +130,25 @@ bg3 query --slot Weapon --limit 5 --json
 bg3 mod create "ArcaneProgression" --json
 
 # Stage 2: Pre-flight validation & game sync
-bg3 mod validate --mod arcane-progression --json
+bg3 mod validate arcane-progression --json
 bg3 mod sync-game --mods arcane-progression --json
 bg3 mod diagnose-logs --mod arcane-progression --severity warning --json
 
 # Stage 3: In-game testing & load order
 bg3 mod sync-game --clean-mod arcane-progression --json
-bg3 mod pack --mod arcane-progression --publish-local --json
-bg3 loadorder enable arcane-progression --validate --json
+bg3 mod pack arcane-progression --publish-local --json
+bg3 loadorder enable arcane-progression --json
+bg3 loadorder validate --json
 bg3 save inspect --audit --json
+bg3 save clean-missing --dry-run --json
 
 # Stage 4: Version bump & release prep
-bg3 mod bump-version --mod arcane-progression --patch --json
-bg3 mod render-desc --mod arcane-progression --write --json
-bg3 mod pack --mod arcane-progression --out dist/arcane-progression.pak --json
+bg3 mod bump-version arcane-progression --patch --json
+bg3 mod render-desc arcane-progression --write --json
+bg3 mod pack arcane-progression --out dist/arcane-progression.pak --json
 
 # Stage 5: Post-release metadata & tags
-bg3 modio update-metadata --mod arcane-progression --tags "Classes,Spells" --json
+bg3 modio update-metadata --mod arcane-progression --tags Classes Spells --json
 ```
 
 ---

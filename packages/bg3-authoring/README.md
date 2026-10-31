@@ -37,10 +37,9 @@ flowchart TD
 - `validate_mod.py`: Deep static validation checking XML/LSX syntax, UUID collisions, missing string handles, and required folder layouts.
 - `check_mod_conflicts.py`: Cross-mod progression collision detector auditing vanilla and community mod overrides.
 - `diagnose_toolkit_logs.py`: Automated triage of Larian Toolkit and engine runtime crash logs with actionable fix recommendations.
-- `inspect_save_game.py`: Unpacks `.lsv` save files and audits required mod manifests against active `modsettings.lsx`.
 
 ### 3. Packaging & Synchronization (`bg3_authoring.packaging`)
-- `pack_mod_pak.py`: Pure-Python LSPK v18 binary compiler that writes 128-byte headers, compresses files with zlib, compiles XML localization into binary `.loca`, and outputs deployable `.pak` archives.
+- `pack_mod_pak.py`: Pure-Python LSPK v18 binary compiler that writes 40-byte headers, compresses files using LZ4 block compression (LSPK v18), compiles XML localization into binary `.loca`, and outputs deployable `.pak` archives.
 - `sync_game_data.py`: Idempotent differential file synchronizer that mirrors mod assets into the game's `Data/` directory for live in-engine playtesting.
 
 ---
@@ -57,7 +56,7 @@ bg3-mod = "bg3_authoring.cli:main"
 ### Common Commands:
 - `bg3 mod scaffold <asset-type> --mod <ModSlug> ...` — Scaffold new game assets.
 - `bg3 mod validate <ModSlug>` — Run strict pre-commit validation.
-- `bg3 mod conflict --candidate <path> --against-library` — Check progression collisions.
+- `bg3 mod conflict <path> --against-library` — Check progression collisions.
 - `bg3 mod pack <ModSlug> --publish-local` — Compile LSPK `.pak` and deploy to local mods folder.
-- `bg3 mod sync-game <ModSlug> [--watch]` — Hot-reload source files into the game runtime.
+- `bg3 mod sync-game --mods <ModSlug> [--watch]` — Hot-reload source files into the game runtime.
 - `bg3 save inspect latest` — Audit save-game mod dependencies before launching the game.

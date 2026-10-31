@@ -67,7 +67,7 @@ When authoring custom mods:
 - **Localization**: Never hardcode user-facing strings into stats or progression entries. Use generated handles linked to `Localization/English/<mod_name>.xml`.
 - **Validation**: Validate mod schemas before testing or packaging:
   ```bash
-  bg3 mod validate --mod my-mod
+  bg3 mod validate my-mod
   ```
 
 ---
@@ -81,7 +81,7 @@ When adding or updating reference mod specifications in your subscribed mod libr
   - In-Game Items & Stat Definitions
   - Spells, Passives & Status Effects
   - Progression Trees & Unlocks
-- Run `bg3 modio update-catalog --write` to register or refresh the mod under the relevant category in `mods/library.md`. Each row uses Mod Id, Mod Name, Mod Slug, Description, Features Documented, and Spec Link; unknown IDs stay blank until verified.
+- Run `bg3 modio update-catalog --write` to register or refresh the mod under the relevant category in your externalized library catalog (`$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/subscribed/library.md`). Each row uses Mod Id, Mod Name, Mod Slug, Description, Features Documented, and Spec Link; unknown IDs stay blank until verified.
 
 ---
 
