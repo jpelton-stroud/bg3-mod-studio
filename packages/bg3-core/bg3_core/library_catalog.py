@@ -5,7 +5,11 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
-from .env_paths import REPO_ROOT, get_subscribed_mods_dir, normalize_mod_key
+from .env_paths import (
+    get_library_catalog_path,
+    get_subscribed_mods_dir,
+    normalize_mod_key,
+)
 
 LIBRARY_COLUMNS = (
     "Mod Id",
@@ -85,13 +89,16 @@ def get_tracked_mods(
     workspace_root: Optional[Any] = None,
 ) -> Dict[str, Dict[str, Any]]:
     """
-    Parses mods/library.md directly to identify mods currently tracked in the catalog.
-    If include_filesystem is True, also discovers undocumented directories in mods/ containing a README.md.
+    Parses library.md directly to identify mods currently tracked in the catalog.
+    If include_filesystem is True, also discovers undocumented directories containing a README.md.
     Returns a dict mapping lowercase slug to mod details dictionary.
     """
-    root_path = Path(workspace_root) if workspace_root else REPO_ROOT
     if library_path is None:
-        lib_file = root_path / "mods" / "library.md"
+        lib_file = (
+            Path(workspace_root) / "mods" / "library.md"
+            if workspace_root
+            else get_library_catalog_path()
+        )
     else:
         lib_file = Path(library_path)
 
@@ -108,6 +115,7 @@ def get_tracked_mods(
                 raise ValueError(
                     f"Invalid Features Documented value for library entry '{slug}'."
                 )
+            spec_file = lib_file.parent / slug / "README.md"
             tracked[slug.lower()] = {
                 "mod_id": row["mod_id"],
                 "name": row["name"],
@@ -115,11 +123,15 @@ def get_tracked_mods(
                 "category": row["category"],
                 "description": row["description"],
                 "features_count": int(feature_match.group(1)),
-                "spec_path": str(root_path / "mods" / slug / "README.md"),
+                "spec_path": str(spec_file),
             }
 
     if include_filesystem:
-        mods_dir = root_path / "mods"
+        mods_dir = (
+            Path(workspace_root) / "mods"
+            if workspace_root
+            else get_subscribed_mods_dir()
+        )
         if mods_dir.is_dir():
             for entry in sorted(mods_dir.iterdir()):
                 if entry.is_dir() and not entry.name.startswith(".") and entry.name.lower() not in tracked:
@@ -142,14 +154,17 @@ def get_tracked_mod_identifiers(
     workspace_root: Optional[Any] = None,
 ) -> Tuple[Set[str], Set[str]]:
     """
-    Parse mods/library.md to collect sets of already tracked mod slugs and lowercase names.
+    Parse library.md to collect sets of already tracked mod slugs and lowercase names.
     Returns (tracked_slugs, tracked_names).
     """
     tracked_slugs: Set[str] = set()
     tracked_names: Set[str] = set()
-    root_path = Path(workspace_root) if workspace_root else REPO_ROOT
     if library_path is None:
-        lib_file = root_path / "mods" / "library.md"
+        lib_file = (
+            Path(workspace_root) / "mods" / "library.md"
+            if workspace_root
+            else get_library_catalog_path()
+        )
     else:
         lib_file = Path(library_path)
 
@@ -342,7 +357,7 @@ def purge_library_mods(
     """
     mods_path = Path(mods_dir).resolve() if mods_dir else get_subscribed_mods_dir().resolve()
     if library_path is None:
-        lib_file = (mods_path / "library.md").resolve()
+        lib_file = (mods_path / "library.md").resolve() if mods_dir else get_library_catalog_path().resolve()
     else:
         lib_file = Path(library_path).resolve()
 

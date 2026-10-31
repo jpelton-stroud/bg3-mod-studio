@@ -21,6 +21,7 @@ from .env_paths import (
     detect_bg3_appdata_dirs,
     detect_data_dir,
     get_authored_mods_dir,
+    get_library_catalog_path,
     get_subscribed_mods_dir,
     normalize_mod_key,
 )
@@ -64,12 +65,11 @@ CORE_GAME_UUIDS = {
 
 def parse_library_catalog() -> Dict[str, Dict[str, Any]]:
     """
-    Parses mods/library.md for documented mod slugs, display titles, and mod.io IDs.
+    Parses library.md for documented mod slugs, display titles, and mod.io IDs.
     Returns mapping keyed by normalized mod key -> {name, slug, modio_id, path}.
     """
     catalog: Dict[str, Dict[str, Any]] = {}
-    subscribed_dir = get_subscribed_mods_dir()
-    library_md = subscribed_dir / "library.md"
+    library_md = get_library_catalog_path()
     if not library_md.is_file():
         return catalog
 
@@ -86,7 +86,7 @@ def parse_library_catalog() -> Dict[str, Dict[str, Any]]:
             "Name": name,
             "Slug": slug,
             "ModioID": mid,
-            "Path": subscribed_dir / slug,
+            "Path": library_md.parent / slug,
         }
         catalog[normalize_mod_key(slug)] = entry
         catalog[normalize_mod_key(name)] = entry

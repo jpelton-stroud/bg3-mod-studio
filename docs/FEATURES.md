@@ -52,7 +52,7 @@ Autonomous skills residing in [`.agents/skills/`](../.agents/skills/) allow deve
 | `/bg3-post-release`             | [`bg3-post-release`](../.agents/skills/bg3-post-release/SKILL.md)                         | Stage 5        | Storefront governance: mod.io REST API metadata/tags, dev teardown, subscriber test. |
 | `/bg3-manage-load-order`        | [`bg3-manage-load-order`](../.agents/skills/bg3-manage-load-order/SKILL.md)               | Management     | Natural language inspection, ordering, and activation in `modsettings.lsx`.|
 | `/bg3-check-mod-conflicts`      | [`bg3-check-mod-conflicts`](../.agents/skills/bg3-check-mod-conflicts/SKILL.md)           | Compatibility  | Evaluates stat collisions and console load order compatibility.            |
-| `/bg3-create-modio-collection`  | [`bg3-create-modio-collection`](../.agents/skills/bg3-create-modio-collection/SKILL.md)   | Community      | Creates or updates public mod.io collections from `mods/library.md`.       |
+| `/bg3-create-modio-collection`  | [`bg3-create-modio-collection`](../.agents/skills/bg3-create-modio-collection/SKILL.md)   | Community      | Creates or updates public mod.io collections from the mod library catalog. |
 | `/bg3-query-gear`               | [`bg3-query-gear`](../.agents/skills/bg3-query-gear/SKILL.md)                             | Library        | Interactive advisor querying cataloged BiS mod items and spells.           |
 | `/bg3-search-mods`              | [`bg3-search-mods`](../.agents/skills/bg3-search-mods/SKILL.md)                           | Discovery      | Searches mod.io with platform filters and checks for conflicts.            |
 | `/bg3-document-mods`            | [`bg3-document-mods`](../.agents/skills/bg3-document-mods/SKILL.md)                       | Documentation  | Concurrently downloads, unpacks, and catalogs mod batches.                 |
@@ -126,12 +126,12 @@ Performs static conflict and collision analysis between candidate mods and exist
 
 - **Example Prompt**:
   ```text
-  /bg3-check-mod-conflicts Check if candidate mod 51234 conflicts with any of my installed mods in mods/library.md.
+  /bg3-check-mod-conflicts Check if candidate mod 51234 conflicts with any of my installed mods.
   ```
 
 #### 8. `/bg3-create-modio-collection`
 
-Creates or updates public mod.io collections from cataloged mods in `mods/library.md`, verifying numeric mod IDs and game ID `6715` with dry-run previews before writing.
+Creates or updates public mod.io collections from cataloged mods in the user's mod library, verifying numeric mod IDs and game ID `6715` with dry-run previews before writing.
 
 - **Example Prompt**:
   ```text
@@ -158,7 +158,7 @@ Searches mod.io with natural language and platform filters (PC, PlayStation 5, X
 
 #### 11. `/bg3-document-mods`
 
-Orchestrates concurrent subagents to download, unpack, validate, and document a batch of community mods from mod.io into `mods/<mod_name>/README.md` and updates `mods/library.md`.
+Orchestrates concurrent subagents to download, unpack, validate, and document a batch of community mods from mod.io into `$BG3_SUBSCRIBED_MODS_DIR/<mod_name>/README.md` and updates `library.md`.
 
 - **Example Prompt**:
   ```text

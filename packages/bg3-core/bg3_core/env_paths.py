@@ -175,10 +175,7 @@ def get_subscribed_mods_dir(env_path: Optional[Path] = None) -> Path:
     if custom and custom.strip():
         return Path(os.path.expandvars(os.path.expanduser(custom.strip())))
     studio_dir = get_studio_dir(env_path=env_path)
-    studio_subscribed = studio_dir / "Mods" / "subscribed"
-    if not studio_subscribed.exists() and (REPO_ROOT / "mods").is_dir():
-        return REPO_ROOT / "mods"
-    return studio_subscribed
+    return studio_dir / "Mods" / "subscribed"
 
 
 def get_authored_mods_dir(env_path: Optional[Path] = None) -> Path:
@@ -189,16 +186,25 @@ def get_authored_mods_dir(env_path: Optional[Path] = None) -> Path:
     if custom and custom.strip():
         return Path(os.path.expandvars(os.path.expanduser(custom.strip())))
     studio_dir = get_studio_dir(env_path=env_path)
-    studio_authored = studio_dir / "Mods" / "authored"
-    if not studio_authored.exists() and (REPO_ROOT / "my_mods").is_dir():
-        return REPO_ROOT / "my_mods"
-    return studio_authored
+    return studio_dir / "Mods" / "authored"
+
+
+def get_library_catalog_path(env_path: Optional[Path] = None) -> Path:
+    """Resolve active BG3 mod library catalog markdown file."""
+    custom = get_env_var("BG3_LIBRARY_CATALOG_PATH", env_path=env_path) or get_env_var(
+        "BG3_LIBRARY_PATH", env_path=env_path
+    )
+    if custom and custom.strip():
+        return Path(os.path.expandvars(os.path.expanduser(custom.strip())))
+    subscribed_dir = get_subscribed_mods_dir(env_path=env_path)
+    return subscribed_dir / "library.md"
 
 
 STUDIO_DIR = get_studio_dir()
 MY_MODS_DIR = get_authored_mods_dir()
 MODS_DIR = get_subscribed_mods_dir()
 BUILD_GUIDES_DIR = get_build_guides_dir()
+LIBRARY_CATALOG_PATH = get_library_catalog_path()
 
 
 def normalize_mod_key(value: str) -> str:

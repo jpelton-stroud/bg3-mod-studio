@@ -14,7 +14,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import MODS_DIR, REPO_ROOT
+from bg3_core.env_paths import REPO_ROOT, get_library_catalog_path
 from bg3_core.library_catalog import parse_library_rows
 from bg3_core.modio_client import (
     BG3_GAME_ID,
@@ -24,7 +24,7 @@ from bg3_core.modio_client import (
 )
 
 WORKSPACE_ROOT = REPO_ROOT
-LIBRARY_PATH = MODS_DIR / "library.md"
+LIBRARY_PATH = get_library_catalog_path()
 PAGE_SIZE = 100
 
 

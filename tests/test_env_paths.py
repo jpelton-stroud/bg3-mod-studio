@@ -18,6 +18,7 @@ from bg3_core.env_paths import (
     get_cache_dir,
     get_env_source,
     get_env_var,
+    get_library_catalog_path,
     get_studio_dir,
     get_subscribed_mods_dir,
     get_xdg_cache_home,
@@ -176,6 +177,33 @@ class TestXDGPaths(unittest.TestCase):
                 self.assertEqual(get_build_guides_dir(), Path(tmp) / "guides")
                 self.assertEqual(get_subscribed_mods_dir(), Path(tmp) / "sub")
                 self.assertEqual(get_authored_mods_dir(), Path(tmp) / "auth")
+
+    def test_library_catalog_path_resolution(self):
+        """Test library catalog path resolution and environment overrides."""
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_docs = Path(tmp) / "Documents"
+            with patch.dict(os.environ, {"XDG_DOCUMENTS_DIR": str(tmp_docs), "BG3_STUDIO_DIR": "", "BG3_LIBRARY_CATALOG_PATH": "", "BG3_LIBRARY_PATH": ""}):
+                expected_default = tmp_docs / "BG3_Mod_Studio" / "Mods" / "subscribed" / "library.md"
+                self.assertEqual(get_library_catalog_path(), expected_default)
+
+            # Override via BG3_LIBRARY_CATALOG_PATH
+            custom_catalog = Path(tmp) / "custom_library.md"
+            with patch.dict(os.environ, {"BG3_LIBRARY_CATALOG_PATH": str(custom_catalog)}):
+                self.assertEqual(get_library_catalog_path(), custom_catalog)
+
+            # Override via BG3_LIBRARY_PATH
+            with patch.dict(os.environ, {"BG3_LIBRARY_CATALOG_PATH": "", "BG3_LIBRARY_PATH": str(custom_catalog)}):
+                self.assertEqual(get_library_catalog_path(), custom_catalog)
+
+    def test_zero_repo_root_fallbacks(self):
+        """Verify get_subscribed_mods_dir and get_authored_mods_dir never fall back to REPO_ROOT."""
+        with tempfile.TemporaryDirectory() as tmp:
+            empty_studio = Path(tmp) / "empty_studio"
+            with patch.dict(os.environ, {"BG3_STUDIO_DIR": str(empty_studio)}):
+                sub = get_subscribed_mods_dir()
+                auth = get_authored_mods_dir()
+                self.assertEqual(sub, empty_studio / "Mods" / "subscribed")
+                self.assertEqual(auth, empty_studio / "Mods" / "authored")
 
 
 if __name__ == "__main__":

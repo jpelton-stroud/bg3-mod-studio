@@ -1,6 +1,6 @@
 ---
 name: bg3-check-mod-conflicts
-description: Evaluate BG3 mod compatibility and conflicts against mods/library.md or between candidates with console load order rules. Use on /check_conflicts or when searching mods.
+description: Evaluate BG3 mod compatibility and conflicts against library.md or between candidates with console load order rules. Use on /check_conflicts or when searching mods.
 ---
 
 # BG3 Mod Conflict & Compatibility Checker (`bg3-check-mod-conflicts`)
@@ -20,7 +20,7 @@ Refer to domain specifications:
 
 ```mermaid
 flowchart TD
-    Start["Receive Query & Platform"] --> CheckLib["Check Tracked mods/library.md"]
+    Start["Receive Query & Platform"] --> CheckLib["Check Tracked library.md"]
     CheckLib --> Inspect["Inspect Metadata & Subsystems"]
     Inspect --> Detect["Run Deterministic Conflict Detection"]
     Detect --> Format["Format Standardized Return Message"]

@@ -23,7 +23,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from bg3_core.env_paths import REPO_ROOT, get_subscribed_mods_dir
+from bg3_core.env_paths import REPO_ROOT, get_library_catalog_path, get_subscribed_mods_dir
 from bg3_core.library_catalog import (
     find_mod_folder,
     find_orphaned_folders,
@@ -88,10 +88,12 @@ def sync_library(
     """
     if mods_dir is None:
         mods_dir = get_subscribed_mods_dir()
+        if library_path is None:
+            library_path = str(get_library_catalog_path())
     else:
         mods_dir = Path(mods_dir)
-    if library_path is None:
-        library_path = str(mods_dir / "library.md")
+        if library_path is None:
+            library_path = str(mods_dir / "library.md")
 
     tracked_mods = get_tracked_mods_from_library(library_path)
 
