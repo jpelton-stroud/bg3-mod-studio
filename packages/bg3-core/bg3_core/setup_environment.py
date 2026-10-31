@@ -27,11 +27,6 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
-
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 from typing import Optional
 
 from bg3_core.env_paths import (

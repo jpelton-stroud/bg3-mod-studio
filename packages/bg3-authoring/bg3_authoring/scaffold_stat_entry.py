@@ -14,7 +14,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import resolve_mod_dir
 from bg3_core.larian_parsers import (
@@ -246,7 +245,7 @@ TYPE_CONFIG: dict[str, dict[str, Any]] = {
 }
 
 
-def resolve_mod_directories(mod_name_or_path: str, workspace_root: Path) -> tuple[Path, Path, Path, str]:
+def resolve_mod_directories(mod_name_or_path: str, workspace_root: Path | None = None) -> tuple[Path, Path, Path, str]:
     """
     Resolves:
     - mod root
@@ -291,7 +290,6 @@ def scaffold_entry(
     props: dict[str, str] | None = None,
     dry_run: bool = False,
 ) -> dict:
-    workspace_root = Path(__file__).resolve().parents[2]
     type_key = entry_type.strip().lower()
     if type_key not in TYPE_CONFIG:
         raise ValueError(
@@ -299,7 +297,7 @@ def scaffold_entry(
         )
 
     config = TYPE_CONFIG[type_key]
-    mod_dir, stats_dir, loc_file, resolved_name = resolve_mod_directories(mod_name_or_path, workspace_root)
+    mod_dir, stats_dir, loc_file, resolved_name = resolve_mod_directories(mod_name_or_path)
     stat_file = stats_dir / config["file"]
 
     # Check for duplicate

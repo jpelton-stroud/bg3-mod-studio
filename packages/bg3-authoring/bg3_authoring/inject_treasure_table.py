@@ -55,12 +55,11 @@ CONTAINER_ALIASES = {
 STANDARD_HEADER = 'treasure itemtypes "Common","Uncommon","Rare","Epic","Legendary","Divine","Unique"\n'
 
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import resolve_mod_dir
 
 
-def resolve_mod_stats_dir(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, str]:
+def resolve_mod_stats_dir(mod_path_or_slug: str, workspace_root: Path | None = None) -> tuple[Path, str]:
     """Resolves target mod and its Public/<ModFolder>/Stats/Generated/Data directory."""
     candidate = resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
     if candidate is None or not candidate.is_dir():
@@ -226,10 +225,8 @@ def main() -> int:
     container_key = (args.container or "tutorial_chest").lower()
     table_id = CONTAINER_ALIASES.get(container_key, {}).get("table", args.container or "TUT_Chest_Potions")
 
-    workspace_root = Path(__file__).resolve().parents[2]
-
     try:
-        data_dir, mod_name = resolve_mod_stats_dir(args.mod, workspace_root)
+        data_dir, mod_name = resolve_mod_stats_dir(args.mod)
         table_file = data_dir / "TreasureTable.txt"
         formatted_item = format_item_name(args.item, ensure_prefix=not args.raw_item_name)
 

@@ -24,7 +24,6 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import (
     ConsoleColor,
     ExitCode,

@@ -15,10 +15,6 @@ import time
 from pathlib import Path
 from typing import Optional
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 from bg3_core.cli_common import ExitCode
 from bg3_core.env_paths import get_cache_dir, get_subscribed_mods_dir
 from bg3_core.larian_parsers import parse_loca_bytes
@@ -282,7 +278,7 @@ def get_cache_path(_workspace_root: Optional[Path] = None) -> Path:
     return cache_dir / "mod_database.json"
 
 
-def build_or_load_index(workspace_root: Path, force_reindex: bool = False) -> list[dict]:
+def build_or_load_index(workspace_root: Optional[Path] = None, force_reindex: bool = False) -> list[dict]:
     """Loads database from cache, or incrementally updates cache based on directory mtime."""
     mods_dir = get_mods_directory(workspace_root)
     cache_file = get_cache_path(workspace_root)
@@ -426,10 +422,8 @@ def main() -> int:
 
     args = parser.parse_args()
 
-    workspace_root = Path(__file__).resolve().parents[3]
-
     t0 = time.perf_counter()
-    entries = build_or_load_index(workspace_root, force_reindex=args.reindex)
+    entries = build_or_load_index(force_reindex=args.reindex)
     load_time_ms = (time.perf_counter() - t0) * 1000
 
     search_query = args.search_flag or args.search_pos

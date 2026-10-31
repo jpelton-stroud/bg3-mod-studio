@@ -14,7 +14,22 @@ import re
 import unittest
 from pathlib import Path
 
-import yaml
+try:
+    import yaml  # type: ignore
+
+    def load_frontmatter(raw: str) -> dict:
+        return yaml.safe_load(raw)
+except ImportError:
+    def load_frontmatter(raw: str) -> dict:
+        data = {}
+        for line in raw.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if ":" in line:
+                k, v = line.split(":", 1)
+                data[k.strip()] = v.strip().strip("'\"")
+        return data
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 SKILLS_DIR = WORKSPACE_ROOT / ".agents" / "skills"
@@ -61,7 +76,7 @@ class TestAgentSkills(unittest.TestCase):
                 errors.append(f"{sf.parent.name}: missing YAML frontmatter delimited by '---'")
                 continue
             try:
-                fm = yaml.safe_load(match.group(1))
+                fm = load_frontmatter(match.group(1))
             except Exception as e:
                 errors.append(f"{sf.parent.name}: YAML parse error: {e}")
                 continue

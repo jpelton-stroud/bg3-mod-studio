@@ -167,6 +167,44 @@ class TestBg3CliIntegration(unittest.TestCase):
         payload = json.loads(proc.stdout)
         self.assertIn(payload["status"], ("success", "error"))
 
+    def test_missing_authoring_package_gating(self):
+        code = """
+import sys
+sys.modules['bg3_authoring'] = None
+from bg3_core.cli import build_parser, dispatch_command
+from bg3_core.cli_common import OutputEmitter
+
+parser = build_parser()
+args = parser.parse_args(['mod', 'validate', 'fake-mod', '--json'])
+emitter = OutputEmitter(json_mode=True)
+sys.exit(dispatch_command(args, emitter))
+"""
+        proc = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 69)
+        payload = json.loads(proc.stdout)
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["error"]["code"], "PACKAGE_NOT_INSTALLED")
+        self.assertIn("bg3-authoring", payload["error"]["message"])
+
+    def test_missing_theorycraft_package_gating(self):
+        code = """
+import sys
+sys.modules['bg3_theorycraft'] = None
+from bg3_core.cli import build_parser, dispatch_command
+from bg3_core.cli_common import OutputEmitter
+
+parser = build_parser()
+args = parser.parse_args(['build', 'sim', '--classes', 'Fighter=1', '--json'])
+emitter = OutputEmitter(json_mode=True)
+sys.exit(dispatch_command(args, emitter))
+"""
+        proc = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 69)
+        payload = json.loads(proc.stdout)
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["error"]["code"], "PACKAGE_NOT_INSTALLED")
+        self.assertIn("bg3-theorycraft", payload["error"]["message"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -18,10 +18,6 @@ import sys
 from pathlib import Path
 from typing import Any, List, NoReturn, Optional
 
-_REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 import bg3_core
 from bg3_core.cli_common import (
     ConsoleColor,
@@ -44,10 +40,14 @@ except ImportError:
     bg3_authoring = None
 
 CORE_DIR = Path(bg3_core.__file__).resolve().parent
-THEORYCRAFTING_DIR = Path(bg3_theorycraft.__file__).resolve().parent if bg3_theorycraft else CORE_DIR.parent.parent / "bg3-theorycraft" / "bg3_theorycraft"
-AUTHORING_DIR = Path(bg3_authoring.__file__).resolve().parent if bg3_authoring else CORE_DIR.parent.parent / "bg3-authoring" / "bg3_authoring"
-DIAGNOSTICS_DIR = AUTHORING_DIR / "diagnostics"
-PACKAGING_DIR = AUTHORING_DIR / "packaging"
+THEORYCRAFTING_DIR: Optional[Path] = (
+    Path(bg3_theorycraft.__file__).resolve().parent if bg3_theorycraft else None
+)
+AUTHORING_DIR: Optional[Path] = (
+    Path(bg3_authoring.__file__).resolve().parent if bg3_authoring else None
+)
+DIAGNOSTICS_DIR: Optional[Path] = AUTHORING_DIR / "diagnostics" if AUTHORING_DIR else None
+PACKAGING_DIR: Optional[Path] = AUTHORING_DIR / "packaging" if AUTHORING_DIR else None
 
 
 class JsonCompliantArgumentParser(argparse.ArgumentParser):
@@ -1091,6 +1091,26 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
         )
         return ExitCode.USAGE
 
+    # Guard against invocation of optional package commands when the package is not installed
+    full_cmd = f"bg3 {cmd} {sub or ''}".strip()
+    if (cmd == "scaffold" or (cmd == "mod" and sub not in ("bump-version", "render-desc"))) and not AUTHORING_DIR:
+        emitter.error(
+            message=f"Command '{full_cmd}' requires the 'bg3-authoring' package (install via 'pip install bg3-authoring' or 'pip install bg3-mod-studio').",
+            code="PACKAGE_NOT_INSTALLED",
+            exit_code=ExitCode.UNAVAILABLE,
+            exit_process=False,
+        )
+        return ExitCode.UNAVAILABLE
+
+    if cmd in ("build", "sim", "build-synergy") and not THEORYCRAFTING_DIR:
+        emitter.error(
+            message=f"Command '{full_cmd}' requires the 'bg3-theorycraft' package (install via 'pip install bg3-theorycraft' or 'pip install bg3-mod-studio').",
+            code="PACKAGE_NOT_INSTALLED",
+            exit_code=ExitCode.UNAVAILABLE,
+            exit_process=False,
+        )
+        return ExitCode.UNAVAILABLE
+
     # Build underlying invocation
     script_target: Optional[Path] = None
     target_args: List[str] = []
@@ -1843,7 +1863,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             target_args.append("--reindex")
 
     elif cmd in ("build", "sim"):
-        script_target = THEORYCRAFTING_DIR / "simulate_build_synergy.py"
+        script_target = THEORYCRAFTING_DIR / "simulate_build_synergy.py" if THEORYCRAFTING_DIR else None
         if getattr(args, "classes", None):
             target_args.extend(["--classes", args.classes])
         if getattr(args, "stats", None):

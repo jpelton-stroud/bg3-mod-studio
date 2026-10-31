@@ -14,12 +14,11 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.dom import minidom
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import resolve_mod_dir
 
 
-def resolve_mod_public_dir(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, str]:
+def resolve_mod_public_dir(mod_path_or_slug: str, workspace_root: Path | None = None) -> tuple[Path, str]:
     candidate = resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
     if candidate is None or not candidate.is_dir():
         raise FileNotFoundError(f"Mod directory not found: '{mod_path_or_slug}'")
@@ -144,10 +143,9 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON summary.")
 
     args = parser.parse_args()
-    workspace_root = Path(__file__).resolve().parents[2]
 
     try:
-        mod_public_dir, mod_slug = resolve_mod_public_dir(args.mod, workspace_root)
+        mod_public_dir, mod_slug = resolve_mod_public_dir(args.mod)
         gui_dir = mod_public_dir / "GUI"
         icons_lsx_file = gui_dir / "Icons.lsx"
 

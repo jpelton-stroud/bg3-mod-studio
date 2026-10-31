@@ -15,7 +15,6 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.dom import minidom
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import resolve_mod_dir
 from bg3_core.larian_parsers import split_larian_items
@@ -80,7 +79,7 @@ EMPTY_SPELLLISTS_LSX = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
-def resolve_mod_public_dir(mod_path_or_slug: str, workspace_root: Path) -> tuple[Path, str]:
+def resolve_mod_public_dir(mod_path_or_slug: str, workspace_root: Path | None = None) -> tuple[Path, str]:
     """Finds mod's Public/<ModFolder> directory."""
     candidate = resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
     if candidate is None or not candidate.is_dir():
@@ -264,10 +263,8 @@ def main() -> int:
     if args.level < 1 or args.level > 20:
         parser.error("Level must be between 1 and 20.")
 
-    workspace_root = Path(__file__).resolve().parents[2]
-
     try:
-        mod_public_dir, mod_slug = resolve_mod_public_dir(args.mod, workspace_root)
+        mod_public_dir, mod_slug = resolve_mod_public_dir(args.mod)
         progressions_file = mod_public_dir / "Progressions" / "Progressions.lsx"
         spell_lists_file = mod_public_dir / "Lists" / "SpellLists.lsx"
 

@@ -27,10 +27,6 @@ import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 from bg3_core.cli_common import (
     ConsoleColor,
     ExitCode,
@@ -40,6 +36,7 @@ from bg3_core.cli_common import (
 )
 from bg3_core.env_paths import get_xdg_data_home
 from bg3_core.save_inspector import (
+    audit_against_modsettings,
     extract_save_metadata,
     find_save_file,
     get_save_search_paths,
@@ -339,8 +336,7 @@ def handle_inspect(args: argparse.Namespace) -> int:
         meta = extract_save_metadata(save_file)
 
         if getattr(args, "audit", False):
-            from bg3_authoring.diagnostics.inspect_save_game import audit_against_modsettings
-            audit_result = audit_against_modsettings(meta["mods"], _REPO_ROOT)
+            audit_result = audit_against_modsettings(meta["mods"])
             meta["audit"] = audit_result
 
         if args.json:

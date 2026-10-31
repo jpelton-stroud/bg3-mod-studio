@@ -18,10 +18,6 @@ import zipfile
 from pathlib import Path
 from typing import Any, Optional
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import get_subscribed_mods_dir, normalize_mod_key
 from bg3_core.larian_parsers import (

@@ -14,19 +14,11 @@ Features:
 - Emits structured JSON summary for subagent consumption
 """
 
-import sys
-from pathlib import Path
-
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 import argparse
 import json
 import os
 import re
 import struct
-import sys
 import uuid
 import zlib
 from pathlib import Path

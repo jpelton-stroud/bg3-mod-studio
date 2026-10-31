@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Any
 from xml.dom import minidom
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from bg3_core.env_paths import get_authored_mods_dir
 from bg3_core.env_paths import resolve_mod_dir as _resolve_mod_dir
 from bg3_core.larian_parsers import find_mod_meta_files, find_mod_progression_files
 
@@ -224,11 +224,10 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON summary.")
 
     args = parser.parse_args()
-    workspace_root = Path(__file__).resolve().parents[2]
 
     try:
-        mod1_dir = resolve_mod_dir(args.mod1, workspace_root)
-        mod2_dir = resolve_mod_dir(args.mod2, workspace_root)
+        mod1_dir = resolve_mod_dir(args.mod1)
+        mod2_dir = resolve_mod_dir(args.mod2)
 
         meta1 = extract_mod_meta(mod1_dir)
         meta2 = extract_mod_meta(mod2_dir)
@@ -250,7 +249,7 @@ def main() -> int:
         patch_uuid = str(uuid.uuid4())
         project_uuid = str(uuid.uuid4())
         folder_name = f"{patch_name}_{patch_uuid}"
-        patch_dir = workspace_root / "my_mods" / patch_slug
+        patch_dir = get_authored_mods_dir() / patch_slug
 
         merged_nodes: list[dict[str, Any]] = []
         for (c_name, lvl), (node1, node2) in collisions.items():

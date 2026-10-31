@@ -24,10 +24,6 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import REPO_ROOT, get_library_catalog_path, get_subscribed_mods_dir
 from bg3_core.library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row

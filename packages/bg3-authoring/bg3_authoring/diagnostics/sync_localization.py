@@ -17,7 +17,6 @@ from pathlib import Path
 from typing import Any
 from xml.dom import minidom
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from bg3_core.env_paths import resolve_mod_dir as _resolve_mod_dir
 from bg3_core.larian_parsers import HANDLE_PATTERN, compile_xml_to_loca
 
@@ -183,10 +182,9 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON summary.")
 
     args = parser.parse_args()
-    workspace_root = Path(__file__).resolve().parents[2]
 
     try:
-        mod_dir = resolve_mod_dir(args.mod, workspace_root)
+        mod_dir = resolve_mod_dir(args.mod)
         xml_file, declared_handles, _ = load_english_xml(mod_dir)
         referenced_handles = collect_referenced_handles(mod_dir)
 
