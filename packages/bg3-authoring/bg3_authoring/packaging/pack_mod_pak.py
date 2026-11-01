@@ -232,7 +232,7 @@ def clean_local_pak(mod_dir: Path, dry_run: bool = False) -> dict:
                 try:
                     pak_path.unlink()
                 except OSError as e:
-                    raise OSError(f"Failed to delete local .pak at '{pak_path}': {e}")
+                    raise OSError(f"Failed to delete local .pak at '{pak_path}': {e}") from e
 
     return {
         "status": "success",

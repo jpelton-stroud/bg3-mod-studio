@@ -6,6 +6,7 @@ Unit and integration tests for environment wizard prompts, subscription sync,
 custom mod purge, and non-interactive safety guards in bg3_core.setup_environment.
 """
 
+import io
 import subprocess
 import sys
 import tempfile
@@ -22,6 +23,12 @@ from bg3_core.setup_environment import (
 
 
 class SetupEnvironmentQATests(unittest.TestCase):
+    def setUp(self):
+        self._stdout_patcher = patch("sys.stdout", new_callable=io.StringIO)
+        self.mock_stdout = self._stdout_patcher.start()
+
+    def tearDown(self):
+        self._stdout_patcher.stop()
     def test_prompt_subscription_sync_non_interactive(self):
         # Non-interactive mode must return option "3" (continue without sync)
         choice = prompt_subscription_sync(non_interactive=True)

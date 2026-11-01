@@ -178,7 +178,7 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False, quiet: bool 
             continue
         dst_sub = data_dir / subdir
 
-        for root, dirs, files in os.walk(src_sub):
+        for root, _dirs, files in os.walk(src_sub):
             rel_root = Path(root).relative_to(src_sub)
             for file in files:
                 if file in EXCLUDED_FILENAMES or any(file.endswith(ext) for ext in EXCLUDED_EXTENSIONS):
@@ -213,7 +213,7 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False, quiet: bool 
             for mod_uuid_dir in src_mods.iterdir():
                 if mod_uuid_dir.is_dir():
                     dst_loc_mod = data_dir / "Mods" / mod_uuid_dir.name / "Localization"
-                    for root, dirs, files in os.walk(src_loc):
+                    for root, _dirs, files in os.walk(src_loc):
                         rel_root = Path(root).relative_to(src_loc)
                         files_set = set(files)
                         for file in sorted(files):

@@ -70,9 +70,9 @@ class JsonCompliantArgumentParser(argparse.ArgumentParser):
             sc_idx = raw_tokens.index("scaffold")
             if sc_idx + 1 < len(raw_tokens) and not raw_tokens[sc_idx + 1].startswith("-"):
                 sub = f"scaffold {raw_tokens[sc_idx + 1]}"
-                setattr(res, "subcommand", sub)
+                res.subcommand = sub
         target_tokens = _extract_target_args(raw_tokens, cmd, sub.split()[0] if " " in sub else sub)
-        setattr(res, "args", target_tokens)
+        res.args = target_tokens
         return res
 
 

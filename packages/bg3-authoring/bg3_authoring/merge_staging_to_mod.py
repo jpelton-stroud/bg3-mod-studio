@@ -24,7 +24,7 @@ def merge_localization(staging_data: dict[str, Any], xml_path: Path) -> None:
     existing_uids = {c.get("contentuid") for c in root.findall("content")}
 
     added = 0
-    for file_name, d in staging_data.items():
+    for _file_name, d in staging_data.items():
         loc = d.get("localization", [])
         if isinstance(loc, list):
             for item in loc:
@@ -104,7 +104,7 @@ def merge_stats(staging_data: dict[str, Any]) -> None:
     zones_text = ""
     projectiles_text = ""
 
-    for fname, d in staging_data.items():
+    for _fname, d in staging_data.items():
         # Passives
         for p in d.get("passives", []):
             if "raw" in p and p["raw"]:
@@ -205,7 +205,7 @@ def merge_lsx(staging_data: dict[str, Any]) -> None:
             existing_uuids.add(a.get("value"))
 
     added_progs = 0
-    for fname, d in staging_data.items():
+    for _fname, d in staging_data.items():
         for p in d.get("progressions", []):
             puuid = p.get("UUID")
             if "raw_xml" in p and p["raw_xml"]:
@@ -248,7 +248,7 @@ def merge_lsx(staging_data: dict[str, Any]) -> None:
             existing_desc_uuids.add(a.get("value"))
 
     added_descs = 0
-    for fname, d in staging_data.items():
+    for _fname, d in staging_data.items():
         for pd in d.get("progression_descriptions", []):
             duuid = pd.get("UUID")
             if "raw_xml" in pd and pd["raw_xml"]:

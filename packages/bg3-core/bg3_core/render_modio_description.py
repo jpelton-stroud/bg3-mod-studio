@@ -82,7 +82,7 @@ def markdown_to_html(markdown: str, title_fallback: str) -> str:
                 for line in paragraph
             ]
             paragraph_html = ""
-            for index, (line, rendered) in enumerate(zip(paragraph, rendered_lines)):
+            for index, (_line, rendered) in enumerate(zip(paragraph, rendered_lines, strict=False)):
                 if index:
                     paragraph_html += "<br>\n" if paragraph[index - 1].endswith("  ") else " "
                 paragraph_html += rendered
