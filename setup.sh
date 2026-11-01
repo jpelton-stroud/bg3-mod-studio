@@ -29,8 +29,6 @@ echo "Synchronizing workspace packages..."
 # 4. Install standalone tools outside repo into ~/.local/bin via uv tool
 echo "Installing standalone tools into ${BIN_DIR}..."
 uv tool install --editable "${SCRIPT_DIR}/packages/bg3-core" --force
-uv tool install --editable "${SCRIPT_DIR}/packages/bg3-theorycraft" --force
-uv tool install --editable "${SCRIPT_DIR}/packages/bg3-authoring" --force
 
 # 5. Deploy bundled agent skills into studio workspace
 echo "Installing agent skills into studio workspace..."

@@ -24,8 +24,6 @@ try {
     # 4. Install standalone tools outside repo
     Write-Host "Installing standalone tools into user environment..."
     uv tool install --editable .\packages\bg3-core --force
-    uv tool install --editable .\packages\bg3-theorycraft --force
-    uv tool install --editable .\packages\bg3-authoring --force
 
     # 5. Launch interactive setup wizard
     uv run python -m bg3_core.setup_environment @args

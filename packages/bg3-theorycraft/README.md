@@ -33,16 +33,12 @@ Interfaces with `bg3_core.query_mod_database` to analyze cataloged equipment fro
 
 ---
 
-## CLI Console Entrypoint
+## CLI Integration
 
-This package registers the `bg3-build` console script (also routed via the main `bg3` router):
-
-```toml
-[project.scripts]
-bg3-build = "bg3_theorycraft.cli:main"
-```
+Theorycrafting commands are routed through the unified `bg3` CLI:
 
 ### Common Commands:
-- `bg3 build simulate --class paladin:6,sorcerer:14` — Generate level 1–20 multiclass synergy table.
-- `bg3 build simulate --class fighter:12 --gear "GWM,Balduran Greatsword" --dpr` — Calculate DPR across AC 10–25.
-- `bg3 query "SpellSaveDC"` — Query cataloged mod items providing Spell Save DC bonuses.
+- `bg3 build simulate --classes "Paladin=6,Sorcerer=14"` — Generate level 1–20 multiclass synergy table.
+- `bg3 build simulate --classes "Fighter=12" --gear "GWM,Balduran Greatsword" --dpr-sequence melee_burst` — Calculate DPR across AC 10–25.
+- `bg3 sim --classes "Wizard=20"` — Top-level shorthand alias for build simulation.
+- `bg3 query --boost "SpellSaveDC"` — Query cataloged mod items providing Spell Save DC bonuses.

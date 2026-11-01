@@ -8,9 +8,6 @@ dependencies = [
     "bg3-core",
 ]
 
-[project.scripts]
-bg3-mod = "bg3_authoring.cli:main"
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

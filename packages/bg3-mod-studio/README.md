@@ -17,6 +17,4 @@ uv tool install bg3-mod-studio
 
 ```bash
 bg3 --help
-bg3-mod --help
-bg3-build --help
 ```

@@ -44,19 +44,14 @@ flowchart TD
 
 ---
 
-## CLI Console Entrypoint
+## CLI Integration
 
-This package registers the `bg3-mod` console script (also routed via the main `bg3` router):
-
-```toml
-[project.scripts]
-bg3-mod = "bg3_authoring.cli:main"
-```
+Authoring commands are routed through the unified `bg3` CLI:
 
 ### Common Commands:
+- `bg3 mod create <Name> --type Standard` — Create a new mod scaffold.
 - `bg3 mod scaffold <asset-type> --mod <ModSlug> ...` — Scaffold new game assets.
 - `bg3 mod validate <ModSlug>` — Run strict pre-commit validation.
-- `bg3 mod conflict <path> --against-library` — Check progression collisions.
 - `bg3 mod pack <ModSlug> --publish-local` — Compile LSPK `.pak` and deploy to local mods folder.
 - `bg3 mod sync-game --mods <ModSlug> [--watch]` — Hot-reload source files into the game runtime.
-- `bg3 save inspect latest` — Audit save-game mod dependencies before launching the game.
+- `bg3 mod patch --mod1 <ModA> --mod2 <ModB>` — Generate compatibility patches.

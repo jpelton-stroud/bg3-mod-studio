@@ -268,7 +268,8 @@ def resolve_cli_targets(args: argparse.Namespace) -> Tuple[List[str], List[str]]
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Add community or core mod dependencies and test dependencies to an existing custom mod in my_mods/."
+        prog="bg3 mod add-dependency",
+        description="Add community or core mod dependencies and test dependencies to an existing custom mod in my_mods/.",
     )
     parser.add_argument("pos_mod", nargs="?", default=None, help="Target mod name or slug (optional if --mod is specified)")
     parser.add_argument("--mod", default=None, help="Custom mod name, slug, or folder in my_mods/")
