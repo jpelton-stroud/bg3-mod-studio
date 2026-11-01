@@ -23,6 +23,8 @@ from bg3_core.env_paths import get_authored_mods_dir
 from bg3_core.env_paths import resolve_mod_dir as _resolve_mod_dir
 from bg3_core.larian_parsers import find_mod_meta_files, find_mod_progression_files
 
+from bg3_authoring.scaffold_common import generate_placeholder_png, prettify_xml
+
 
 def resolve_mod_dir(mod_name_or_path: str, workspace_root: Path | None = None) -> Path:
     res = _resolve_mod_dir(mod_name_or_path, prefer_my_mods=True)
@@ -186,34 +188,6 @@ def build_projects_meta_lsx(patch_name: str, patch_uuid: str, project_uuid: str)
 """
 
 
-def generate_512_png(r: int = 35, g: int = 25, b: int = 55) -> bytes:
-    width, height = 512, 512
-    raw_row = b"\x00" + bytes([r, g, b, 255]) * width
-    raw_image = raw_row * height
-    compressed = zlib.compress(raw_image, 9)
-
-    def make_chunk(chunk_type: bytes, data: bytes) -> bytes:
-        chunk = chunk_type + data
-        crc = zlib.crc32(chunk) & 0xFFFFFFFF
-        return struct.pack(">I", len(data)) + chunk + struct.pack(">I", crc)
-
-    ihdr = struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0)
-    return (
-        b"\x89PNG\r\n\x1a\n"
-        + make_chunk(b"IHDR", ihdr)
-        + make_chunk(b"IDAT", compressed)
-        + make_chunk(b"IEND", b"")
-    )
-
-
-def prettify_xml_element(elem: ET.Element) -> str:
-    rough_string = ET.tostring(elem, encoding="utf-8")
-    reparsed = minidom.parseString(rough_string)
-    pretty = reparsed.toprettyxml(indent="    ", encoding="utf-8").decode("utf-8")
-    lines = [line for line in pretty.splitlines() if line.strip()]
-    return "\n".join(lines) + "\n"
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Scaffold compatibility patches or Compatibility Framework configs for colliding BG3 mods."
@@ -299,7 +273,7 @@ def main() -> int:
             # 1. Projects & Mods meta.lsx + PNG assets
             mods_meta_content = build_mods_meta_lsx(patch_name, patch_uuid, folder_name, [meta1, meta2], author=args.author)
             proj_meta_content = build_projects_meta_lsx(patch_name, patch_uuid, project_uuid)
-            png_bytes = generate_512_png()
+            png_bytes = generate_placeholder_png(512, 512, 35, 25, 55)
 
             proj_folder = patch_dir / "Projects" / folder_name
             mods_folder = patch_dir / "Mods" / folder_name
@@ -347,7 +321,7 @@ def main() -> int:
 
                 prog_file = pub_folder / "Progressions" / "Progressions.lsx"
                 prog_file.parent.mkdir(parents=True, exist_ok=True)
-                prog_file.write_text(prettify_xml_element(root_tree), encoding="utf-8")
+                prog_file.write_text(prettify_xml(root_tree), encoding="utf-8")
 
             # 3. CF Config if mode == cf
             if cf_config:

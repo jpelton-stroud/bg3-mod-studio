@@ -28,7 +28,39 @@ from bg3_core.env_paths import get_authored_mods_dir, load_env_file
 from bg3_core.larian_parsers import calculate_version64, generate_larian_handle
 from bg3_core.mod_resolver import KNOWN_DEPENDENCIES, resolve_dependency_metadata
 
-README_TEMPLATE_PATH = Path(__file__).resolve().parent / "templates" / "custom_mod_readme.md"
+from bg3_authoring.scaffold_common import generate_placeholder_png
+
+DEFAULT_MOD_README_TEMPLATE = """# {{MOD_NAME}}
+
+- **Mod slug:** `{{MOD_SLUG}}`
+- **Module UUID:** `{{MOD_UUID}}`
+- **Larian folder:** `{{LARIAN_FOLDER}}`
+- **Version:** `{{VERSION}}`
+- **Author:** {{AUTHOR}}
+
+## Overview
+
+{{DESCRIPTION}}
+
+## Features
+
+_Fill in the features below before publishing._
+
+- [Describe each feature, item, spell, progression change, or other addition.]
+
+## Dependencies
+
+{{DEPENDENCIES}}
+
+## Compatibility
+
+- **Game version:** [Specify supported game version or patch.]
+- **Known conflicts:** [List known conflicts or state "None known."]
+
+## Additional Credits
+
+[Add contributors, asset sources, or state "None."]
+"""
 
 
 def sanitize_mod_name(name: str) -> str:
@@ -62,26 +94,6 @@ def generate_uuid() -> str:
 def generate_handle() -> str:
     """Generates a standard Larian localization handle (h...g...g...g...g...)."""
     return generate_larian_handle()
-
-
-def generate_png_bytes(width: int = 512, height: int = 512, r: int = 45, g: int = 52, b: int = 64) -> bytes:
-    """Generates a minimal valid uncompressed RGB PNG using standard library zlib."""
-    def make_chunk(chunk_type: bytes, data: bytes) -> bytes:
-        length = struct.pack(">I", len(data))
-        crc = struct.pack(">I", zlib.crc32(chunk_type + data) & 0xFFFFFFFF)
-        return length + chunk_type + data + crc
-
-    header = b"\x89PNG\r\n\x1a\n"
-    ihdr = make_chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
-
-    # Raw scanlines: each line starts with filter byte 0 (None) followed by RGB bytes
-    row = b"\x00" + bytes([r, g, b]) * width
-    raw_data = row * height
-    compressed = zlib.compress(raw_data, level=6)
-    idat = make_chunk(b"IDAT", compressed)
-    iend = make_chunk(b"IEND", b"")
-
-    return header + ihdr + idat + iend
 
 
 def build_project_meta_lsx_content(
@@ -212,7 +224,7 @@ def build_readme_content(
     dependencies: list,
     version: str,
 ) -> str:
-    template = README_TEMPLATE_PATH.read_text(encoding="utf-8")
+    template = DEFAULT_MOD_README_TEMPLATE
     dependency_lines = "\n".join(
         f"- `{dependency.get('Name')}` (`{dependency.get('UUID')}`)"
         for dependency in dependencies
@@ -342,7 +354,7 @@ def scaffold_mod(
         resolved_deps,
         version_str,
     )
-    png_data = generate_png_bytes(512, 512, 45, 52, 64)
+    png_data = generate_placeholder_png(512, 512, 45, 52, 64)
 
     files_to_write = {
         projects_dir / "meta.lsx": project_meta_xml.encode("utf-8"),

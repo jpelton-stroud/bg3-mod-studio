@@ -456,6 +456,71 @@ class TestTheorycraftCLI(unittest.TestCase):
         self.assertIn("ac_curve", result)
         self.assertEqual(len(result["ac_curve"]), 16)
 
+    def test_typed_domain_models(self) -> None:
+        from bg3_theorycraft.models import (
+            ActionBudget,
+            CombatSequence,
+            ResourcePools,
+            SimulationResult,
+        )
+
+        result = simulate_build(
+            classes={"fighter": 11, "paladin": 2, "sorcerer": 7},
+            stats={"Str": 20, "Dex": 10, "Con": 14, "Int": 10, "Wis": 10, "Cha": 16},
+            dpr_sequence="melee_burst",
+            roll_mode="normal",
+            savage_attacker=True,
+            include_ac_curve=False,
+        )
+        self.assertIsInstance(result, SimulationResult)
+        self.assertEqual(result.total_level, 20)
+        self.assertIsInstance(result.action_economy, ActionBudget)
+        self.assertIsInstance(result.resource_pools, ResourcePools)
+        self.assertIsInstance(result.turn_1_dpr, CombatSequence)
+        self.assertEqual(result.action_economy.attacks_per_action, 3)
+        self.assertEqual(result.action_economy.turn_1_weapon_attacks, 6)
+        self.assertTrue(result.action_economy.has_action_surge)
+        self.assertGreater(result.turn_1_dpr.expected_dpr, 50.0)
+        self.assertIsNotNone(result.turn_1_dpr.damage_breakdown)
+        d = result.to_dict()
+        self.assertIsInstance(d, dict)
+        self.assertEqual(d["total_level"], 20)
+
+    def test_ranged_burst_sequence_and_weapon_damage_override(self) -> None:
+        from bg3_theorycraft.models import CombatSequence
+
+        stats = {"Str": 10, "Dex": 20, "Con": 14, "Int": 10, "Wis": 10, "Cha": 10}
+        gear: dict[str, int] = {}
+
+        # 1. Ranged Burst sequence with Heavy Crossbow (1d10 default)
+        ranged_res = simulate_turn_1_dpr(
+            "ranged_burst",
+            classes={"fighter": 11, "rogue": 9},
+            stats=stats,
+            gear_effects=gear,
+            prof=6,
+            target_ac=18,
+        )
+        self.assertIsInstance(ranged_res, CombatSequence)
+        self.assertEqual(ranged_res.sequence_type, "ranged_burst")
+        self.assertEqual(ranged_res.beams_or_attacks, 6)
+        self.assertIn("Action Surge", ranged_res.actions_used)
+        self.assertIn("Sneak Attack", ranged_res.actions_used)
+        self.assertEqual(ranged_res.damage_breakdown.weapon_base_avg, 5.5)  # 1d10 avg = 5.5
+        self.assertEqual(ranged_res.damage_breakdown.sneak_attack_avg, 5 * 3.5)  # ceil(9/2) = 5d6
+
+        # 2. Parameterized weapon damage override (1d12 Greataxe for melee)
+        melee_res = simulate_turn_1_dpr(
+            "melee_burst",
+            classes={"fighter": 5},
+            stats={"Str": 18, "Dex": 10, "Con": 14, "Int": 10, "Wis": 10, "Cha": 10},
+            gear_effects=gear,
+            prof=3,
+            target_ac=15,
+            weapon_damage="1d12",
+        )
+        self.assertEqual(melee_res.damage_breakdown.weapon_base_avg, 6.5)
+
 
 if __name__ == "__main__":
     unittest.main()

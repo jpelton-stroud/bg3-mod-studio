@@ -37,31 +37,11 @@ from bg3_core.env_paths import (
 )
 from bg3_core.larian_parsers import compile_xml_bytes_to_loca
 
-EXCLUDED_FILENAMES = {
-    ".gitignore",
-    ".gitkeep",
-    "desktop.ini",
-    ".ds_store",
-    "thumbs.db",
-    "readme.md",
-    "task.md",
-    "modio_description.md",
-    "modio_description.html",
-}
-
-EXCLUDED_EXTENSIONS = {
-    ".tmp",
-    ".bak",
-    ".py",
-    ".pyc",
-}
-
-EXCLUDED_DIRECTORIES = {
-    "__pycache__",
-    ".git",
-    "dist",
-    "metadata",
-}
+from bg3_authoring.packaging.common import (
+    EXCLUDED_DIRECTORIES,
+    EXCLUDED_EXTENSIONS,
+    EXCLUDED_FILENAMES,
+)
 
 
 def get_default_data_dir() -> Path:

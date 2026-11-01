@@ -21,6 +21,14 @@ from typing import Any, Dict, List, Optional, Tuple
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.query_mod_database import build_or_load_index
 
+from bg3_theorycraft.models import (
+    ActionBudget,
+    CombatSequence,
+    DamageBreakdown,
+    ResourcePools,
+    SimulationResult,
+)
+
 # Caster classification for multiclass spell slot calculation
 CASTER_WEIGHTS: Dict[str, float] = {
     "bard": 1.0,
@@ -154,18 +162,18 @@ def calculate_action_economy(classes: Dict[str, int]) -> Dict[str, Any]:
 
     total_turn_1_attacks = attacks_per_action * turn_1_actions
 
-    return {
-        "base_actions": base_actions,
-        "turn_1_actions": turn_1_actions,
-        "has_action_surge": has_action_surge,
-        "bonus_actions": bonus_actions,
-        "reactions": reactions,
-        "attacks_per_action": attacks_per_action,
-        "turn_1_weapon_attacks": total_turn_1_attacks,
-    }
+    return ActionBudget(
+        base_actions=base_actions,
+        turn_1_actions=turn_1_actions,
+        has_action_surge=has_action_surge,
+        bonus_actions=bonus_actions,
+        reactions=reactions,
+        attacks_per_action=attacks_per_action,
+        turn_1_weapon_attacks=total_turn_1_attacks,
+    )
 
 
-def calculate_resource_pools(classes: Dict[str, int]) -> Dict[str, Any]:
+def calculate_resource_pools(classes: Dict[str, int]) -> ResourcePools:
     """Calculates specific class action resources:
 
     Ki (Monk), Sorcery Points (Sorcerer), Superiority Dice (Fighter),
@@ -216,16 +224,16 @@ def calculate_resource_pools(classes: Dict[str, int]) -> Dict[str, Any]:
     else:
         rage_charges = 0
 
-    return {
-        "ki_points": ki_points,
-        "sorcery_points": sorcery_points,
-        "superiority_dice": {
+    return ResourcePools(
+        ki_points=ki_points,
+        sorcery_points=sorcery_points,
+        superiority_dice={
             "count": superiority_count,
             "die": superiority_die,
         },
-        "channel_oath_charges": channel_oath,
-        "rage_charges": rage_charges,
-    }
+        channel_oath_charges=channel_oath,
+        rage_charges=rage_charges,
+    )
 
 
 def calculate_savage_attacker_average(dice_count: int, die_sides: int) -> float:
@@ -400,6 +408,17 @@ def load_gear_boosts(
     return combined_effects, gear_data
 
 
+def _parse_weapon_dice(
+    weapon_str: str | None, default: tuple[int, int] = (2, 6)
+) -> tuple[int, int]:
+    if not weapon_str:
+        return default
+    m = re.match(r"^(\d+)[dD](\d+)$", str(weapon_str).strip())
+    if m:
+        return int(m.group(1)), int(m.group(2))
+    return default
+
+
 def simulate_turn_1_dpr(
     sequence_type: str,
     classes: Dict[str, int],
@@ -409,7 +428,8 @@ def simulate_turn_1_dpr(
     target_ac: int = 18,
     roll_mode: str = "normal",
     savage_attacker: bool = False,
-) -> Dict[str, Any]:
+    weapon_damage: str | None = None,
+) -> CombatSequence:
     """Calculates Turn 1 Damage Per Round factoring in class abilities, resources,
 
     roll state (Advantage/Disadvantage), and Savage Attacker dice math.
@@ -455,17 +475,98 @@ def simulate_turn_1_dpr(
         total_dpr = total_beams * per_beam_expected
         max_crit_burst = total_beams * ((5.5 * 2) + cha_mod + dmg_bonus)
 
-        return {
-            "sequence": f"Eldritch Blast ({total_beams} Beams, Agonizing Blast)",
-            "actions_used": " + ".join(actions_desc),
-            "beams_or_attacks": total_beams,
-            "hit_chance_pct": round(p_hit * 100, 1),
-            "crit_chance_pct": round(p_crit * 100, 1),
-            "expected_dpr": round(total_dpr, 1),
-            "max_crit_burst": round(max_crit_burst, 1),
-            "roll_mode": roll_mode,
-            "savage_attacker": savage_attacker,
-        }
+        return CombatSequence(
+            sequence=f"Eldritch Blast ({total_beams} Beams, Agonizing Blast)",
+            actions_used=" + ".join(actions_desc),
+            beams_or_attacks=total_beams,
+            hit_chance_pct=round(p_hit * 100, 1),
+            crit_chance_pct=round(p_crit * 100, 1),
+            expected_dpr=round(total_dpr, 1),
+            max_crit_burst=round(max_crit_burst, 1),
+            roll_mode=roll_mode,
+            savage_attacker=savage_attacker,
+            sequence_type=sequence_type,
+            damage_breakdown=DamageBreakdown(
+                weapon_base_avg=5.5,
+                ability_mod=cha_mod,
+                gear_damage_bonus=dmg_bonus,
+                hit_damage_per_attack=beam_avg,
+                crit_damage_per_attack=beam_crit_extra,
+            ),
+        )
+
+    if sequence_type == "ranged_burst":
+        total_attacks = action_econ["turn_1_weapon_attacks"]
+        dex_mod = parse_ability_modifier(stats.get("Dex", 10))
+        attack_roll_bonus = prof + dex_mod + gear_effects.get("attack_bonus", 0)
+
+        hit_info = calculate_hit_probability(target_ac, attack_roll_bonus, crit_threshold, roll_mode)
+        p_hit = hit_info["hit_chance"]
+        p_crit = hit_info["crit_chance"]
+
+        w_spec = weapon_damage or gear_effects.get("weapon_damage", "1d10")
+        w_count, w_sides = _parse_weapon_dice(w_spec, default=(1, 10))
+        if savage_attacker:
+            weapon_base_die = calculate_savage_attacker_average(w_count, w_sides)
+        else:
+            weapon_base_die = w_count * (w_sides + 1) / 2.0
+
+        dmg_bonus = gear_effects.get("damage_bonus", 0)
+        rogue_lvl = classes.get("rogue", 0)
+        sneak_attack_avg = math.ceil(rogue_lvl / 2) * 3.5 if rogue_lvl >= 1 else 0.0
+
+        superiority_avg = 0.0
+        if resources["superiority_dice"]["count"] > 0:
+            superiority_avg = 5.5 if resources["superiority_dice"]["die"] == "d10" else 4.5
+
+        action_notes = [f"{action_econ['turn_1_actions']} Action(s)"]
+        if action_econ["has_action_surge"]:
+            action_notes.append("Action Surge")
+        if rogue_lvl >= 1:
+            action_notes.append("Sneak Attack")
+
+        attack_flat = dex_mod + dmg_bonus
+        per_attack_base = weapon_base_die + attack_flat
+        per_attack_crit_extra = (
+            weapon_base_die * 2 if savage_attacker else (w_count * (w_sides + 1) / 2.0)
+        )
+
+        total_dpr = (
+            total_attacks * ((p_hit * per_attack_base) + (p_crit * per_attack_crit_extra))
+            + (p_hit * sneak_attack_avg)
+            + (p_crit * sneak_attack_avg)
+            + (p_hit * superiority_avg)
+        )
+
+        max_crit_burst = (
+            total_attacks * (((weapon_base_die) * 2) + attack_flat)
+            + (sneak_attack_avg * 2)
+            + (superiority_avg * 2)
+        )
+
+        return CombatSequence(
+            sequence=f"Ranged Burst ({total_attacks} Attacks)",
+            actions_used=" + ".join(action_notes),
+            beams_or_attacks=total_attacks,
+            hit_chance_pct=round(p_hit * 100, 1),
+            crit_chance_pct=round(p_crit * 100, 1),
+            expected_dpr=round(total_dpr, 1),
+            max_crit_burst=round(max_crit_burst, 1),
+            roll_mode=roll_mode,
+            savage_attacker=savage_attacker,
+            sequence_type=sequence_type,
+            damage_breakdown=DamageBreakdown(
+                weapon_base_avg=weapon_base_die,
+                ability_mod=dex_mod,
+                smite_avg=0.0,
+                sneak_attack_avg=sneak_attack_avg,
+                rage_bonus=0,
+                gear_damage_bonus=dmg_bonus,
+                superiority_avg=superiority_avg,
+                hit_damage_per_attack=per_attack_base,
+                crit_damage_per_attack=per_attack_crit_extra,
+            ),
+        )
 
     # Default Melee Burst
     total_attacks = action_econ["turn_1_weapon_attacks"]
@@ -478,12 +579,13 @@ def simulate_turn_1_dpr(
     p_hit = hit_info["hit_chance"]
     p_crit = hit_info["crit_chance"]
 
-    # Base Weapon: Greatsword (2d6) or equipped gear weapon
-    weapon_dice_count, weapon_die_sides = 2, 6
+    # Base Weapon: parameterized weapon_damage or gear weapon or Greatsword (2d6)
+    w_spec = weapon_damage or gear_effects.get("weapon_damage", "2d6")
+    weapon_dice_count, weapon_die_sides = _parse_weapon_dice(w_spec, default=(2, 6))
     if savage_attacker:
         weapon_base_die = calculate_savage_attacker_average(weapon_dice_count, weapon_die_sides)
     else:
-        weapon_base_die = 7.0
+        weapon_base_die = weapon_dice_count * (weapon_die_sides + 1) / 2.0
 
     dmg_bonus = gear_effects.get("damage_bonus", 0)
 
@@ -537,7 +639,8 @@ def simulate_turn_1_dpr(
     attack_flat = main_mod + dmg_bonus + rage_bonus
     per_attack_base = weapon_base_die + attack_flat + smite_dice_avg
     per_attack_crit_extra = (
-        (weapon_base_die * 2 if savage_attacker else 7.0) + smite_dice_avg
+        (weapon_base_die * 2 if savage_attacker else (weapon_dice_count * (weapon_die_sides + 1) / 2.0))
+        + smite_dice_avg
     )  # Extra dice on crit
 
     total_dpr = (
@@ -553,17 +656,29 @@ def simulate_turn_1_dpr(
         + (superiority_avg * 2)
     )
 
-    return {
-        "sequence": f"Melee Burst ({total_attacks} Attacks)",
-        "actions_used": " + ".join(action_notes),
-        "beams_or_attacks": total_attacks,
-        "hit_chance_pct": round(p_hit * 100, 1),
-        "crit_chance_pct": round(p_crit * 100, 1),
-        "expected_dpr": round(total_dpr, 1),
-        "max_crit_burst": round(max_crit_burst, 1),
-        "roll_mode": roll_mode,
-        "savage_attacker": savage_attacker,
-    }
+    return CombatSequence(
+        sequence=f"Melee Burst ({total_attacks} Attacks)",
+        actions_used=" + ".join(action_notes),
+        beams_or_attacks=total_attacks,
+        hit_chance_pct=round(p_hit * 100, 1),
+        crit_chance_pct=round(p_crit * 100, 1),
+        expected_dpr=round(total_dpr, 1),
+        max_crit_burst=round(max_crit_burst, 1),
+        roll_mode=roll_mode,
+        savage_attacker=savage_attacker,
+        sequence_type=sequence_type,
+        damage_breakdown=DamageBreakdown(
+            weapon_base_avg=weapon_base_die,
+            ability_mod=main_mod,
+            smite_avg=smite_dice_avg,
+            sneak_attack_avg=sneak_attack_avg,
+            rage_bonus=rage_bonus,
+            gear_damage_bonus=dmg_bonus,
+            superiority_avg=superiority_avg,
+            hit_damage_per_attack=per_attack_base,
+            crit_damage_per_attack=per_attack_crit_extra,
+        ),
+    )
 
 
 def calculate_ac_curve(
@@ -654,35 +769,9 @@ def simulate_build(
         savage_attacker=savage_attacker,
     )
 
-    result: Dict[str, Any] = {
-        "total_level": total_level,
-        "classes": classes,
-        "proficiency_bonus": prof,
-        "final_stats": final_stats,
-        "primary_casting_stat": cast_stat_name,
-        "effective_spell_save_dc": spell_dc,
-        "armor_class": base_ac,
-        "spell_slots": {f"Level {i+1}": spell_slots[i] for i in range(9) if spell_slots[i] > 0},
-        "pact_magic": {
-            "slots": pact_count,
-            "slot_level": pact_level,
-        }
-        if pact_count > 0
-        else None,
-        "action_economy": action_econ,
-        "resource_pools": resources,
-        "gear_applied": [g.get("display_name", g.get("id")) for g in loaded_gear],
-        "gear_bonuses": {
-            "dc_bonus": gear_effects.get("dc", 0),
-            "ac_bonus": gear_effects.get("ac", 0),
-            "attack_bonus": gear_effects.get("attack_bonus", 0),
-            "damage_bonus": gear_effects.get("damage_bonus", 0),
-        },
-        "turn_1_dpr": dpr_sim,
-    }
-
+    ac_curve_data: list[dict[str, Any]] = []
     if include_ac_curve:
-        result["ac_curve"] = calculate_ac_curve(
+        ac_curve_data = calculate_ac_curve(
             sequence_type=dpr_sequence,
             classes=classes,
             stats=final_stats,
@@ -692,7 +781,33 @@ def simulate_build(
             savage_attacker=savage_attacker,
         )
 
-    return result
+    return SimulationResult(
+        total_level=total_level,
+        classes=classes,
+        proficiency_bonus=prof,
+        final_stats=final_stats,
+        primary_casting_stat=cast_stat_name,
+        effective_spell_save_dc=spell_dc,
+        armor_class=base_ac,
+        spell_slots={f"Level {i+1}": spell_slots[i] for i in range(9) if spell_slots[i] > 0},
+        pact_magic={
+            "slots": pact_count,
+            "slot_level": pact_level,
+        }
+        if pact_count > 0
+        else None,
+        action_economy=action_econ,
+        resource_pools=resources,
+        gear_applied=[g.get("display_name", g.get("id")) for g in loaded_gear],
+        gear_bonuses={
+            "dc_bonus": gear_effects.get("dc", 0),
+            "ac_bonus": gear_effects.get("ac", 0),
+            "attack_bonus": gear_effects.get("attack_bonus", 0),
+            "damage_bonus": gear_effects.get("damage_bonus", 0),
+        },
+        turn_1_dpr=dpr_sim,
+        ac_curve=ac_curve_data,
+    )
 
 
 def main() -> int:
@@ -716,7 +831,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--dpr-sequence",
-        choices=["melee_burst", "eldritch_blast"],
+        choices=["melee_burst", "eldritch_blast", "ranged_burst"],
         default="melee_burst",
         help="Turn 1 combat sequence to simulate (default: melee_burst).",
     )
@@ -791,7 +906,7 @@ def main() -> int:
         )
 
         if args.json:
-            print(json.dumps(res, indent=2))
+            print(json.dumps(res.to_dict(), indent=2))
         else:
             color = ConsoleColor(stream=sys.stdout)
             class_str = " / ".join(f"{c.capitalize()} {lvl}" for c, lvl in classes.items())
