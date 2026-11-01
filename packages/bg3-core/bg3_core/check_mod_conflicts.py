@@ -30,6 +30,10 @@ from bg3_core.env_paths import (
     normalize_mod_key,
     resolve_mod_dir,
 )
+from bg3_core.larian_parsers import (
+    parse_progressions_lsx,
+    parse_stats_txt,
+)
 
 # Zero-dependency ANSI Terminal Colors honoring NO_COLOR
 _color = ConsoleColor(stream=sys.stderr)
@@ -64,7 +68,7 @@ def resolve_mod_path(query: str) -> Path:
 
 def extract_stats_entries(mod_dir: Path) -> dict[str, dict]:
     """
-    Extracts all 'new entry \"<Name>\"' from any .txt files in the mod.
+    Extracts all 'new entry "<Name>"' from any .txt files in the mod.
     Handles both my_mods (Public/*/Stats/Generated/Data) and mods (data/).
     """
     entries = {}
@@ -75,20 +79,13 @@ def extract_stats_entries(mod_dir: Path) -> dict[str, dict]:
         if f.name.lower() in ("readme.txt", "task.txt", "license.txt"):
             continue
         try:
-            content = f.read_text(encoding="utf-8", errors="replace")
-            current_entry = ""
-            for line in content.splitlines():
-                line = line.strip()
-                if not line or line.startswith("//"):
-                    continue
-                m = re.match(r'^new\s+entry\s+"([^"]+)"', line)
-                if m:
-                    current_entry = m.group(1)
-                    entries[current_entry] = {
-                        "entry": current_entry,
-                        "file": f.name,
-                        "rel_path": str(f.relative_to(mod_dir)),
-                    }
+            parsed = parse_stats_txt(f.read_bytes())
+            for current_entry in parsed.keys():
+                entries[current_entry] = {
+                    "entry": current_entry,
+                    "file": f.name,
+                    "rel_path": str(f.relative_to(mod_dir)),
+                }
         except Exception:
             pass
     return entries
@@ -104,21 +101,11 @@ def extract_progressions(mod_dir: Path) -> dict[tuple[str, str], dict]:
 
     for f in lsx_files:
         try:
-            tree = ET.parse(f)
-            for node in tree.findall(".//node[@id='Progression']"):
-                p_name = ""
-                p_level = ""
-                p_uuid = ""
-                for attr in node.findall("attribute"):
-                    aid = attr.get("id")
-                    val = attr.get("value", "")
-                    if aid == "Name":
-                        p_name = val
-                    elif aid == "Level":
-                        p_level = val
-                    elif aid == "UUID":
-                        p_uuid = val
-
+            nodes = parse_progressions_lsx(f.read_bytes())
+            for p in nodes:
+                p_name = p.get("Name", "")
+                p_level = p.get("Level", "")
+                p_uuid = p.get("UUID", "")
                 if p_name and p_level:
                     key = (p_name, p_level)
                     progressions[key] = {

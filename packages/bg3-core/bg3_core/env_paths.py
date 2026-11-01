@@ -6,7 +6,28 @@ import re
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+def get_workspace_root() -> Path:
+    """Dynamically discover workspace root via environment, marker files (.git, pyproject.toml), or cwd."""
+    env_root = os.environ.get("BG3_WORKSPACE_ROOT") or os.environ.get("BG3_REPO_ROOT")
+    if env_root and Path(env_root).is_dir():
+        return Path(env_root).resolve()
+
+    # Search upwards from current working directory
+    cwd = Path.cwd().resolve()
+    for p in [cwd, *cwd.parents]:
+        if (p / ".git").is_dir() or (p / "pyproject.toml").is_file():
+            return p
+
+    # Search upwards from current file location
+    here = Path(__file__).resolve()
+    for p in here.parents:
+        if (p / ".git").is_dir() or (p / "pyproject.toml").is_file():
+            return p
+
+    return cwd
+
+
+REPO_ROOT = get_workspace_root()
 SCRIPTS_DIR = Path(__file__).resolve().parent
 DIST_DIR = REPO_ROOT / "dist"
 

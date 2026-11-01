@@ -11,13 +11,11 @@ import argparse
 import json
 import re
 import sys
-import urllib.parse
-import urllib.request
 from pathlib import Path
 from typing import Any, Optional
 
 from bg3_core.library_catalog import get_tracked_mod_identifiers
-from bg3_core.modio_client import BG3_GAME_ID, MODIO_API_HOST, get_api_key
+from bg3_core.modio_client import BG3_GAME_ID, ModioClient, get_api_key
 
 # Pre-mapped domain terms to mod.io tags
 TAG_MAPPINGS = {
@@ -140,6 +138,7 @@ def fetch_mods_from_modio(
     """
     collected = []
     seen_ids = set()
+    client = ModioClient()
 
     # Check exact slug lookup if search_text resembles a slug
     clean_q = search_text.strip().lower() if search_text else ""
@@ -153,15 +152,12 @@ def fetch_mods_from_modio(
 
     for cand in candidate_slugs:
         slug_params = {"api_key": api_key, "name_id": cand}
-        url = f"https://{MODIO_API_HOST}/v1/games/{BG3_GAME_ID}/mods?{urllib.parse.urlencode(slug_params)}"
-        req = urllib.request.Request(url, headers={"User-Agent": "BG3ModSearchPipeline/1.0"})
         try:
-            with urllib.request.urlopen(req) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                for item in data.get("data", []):
-                    if item["id"] not in seen_ids:
-                        seen_ids.add(item["id"])
-                        collected.append(item)
+            data = client.request("GET", f"/games/{BG3_GAME_ID}/mods", params=slug_params)
+            for item in data.get("data", []):
+                if item["id"] not in seen_ids:
+                    seen_ids.add(item["id"])
+                    collected.append(item)
         except Exception:
             pass
 
@@ -183,31 +179,24 @@ def fetch_mods_from_modio(
         # mod.io tags filter format: tags-in=tag1,tag2
         params["tags-in"] = ",".join(tags)
 
-    url = f"https://{MODIO_API_HOST}/v1/games/{BG3_GAME_ID}/mods?{urllib.parse.urlencode(params)}"
-    req = urllib.request.Request(url, headers={"User-Agent": "BG3ModSearchPipeline/1.0"})
-
     try:
-        with urllib.request.urlopen(req) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            for item in data.get("data", []):
-                if item["id"] not in seen_ids:
-                    seen_ids.add(item["id"])
-                    collected.append(item)
-            return collected
+        data = client.request("GET", f"/games/{BG3_GAME_ID}/mods", params=params)
+        for item in data.get("data", []):
+            if item["id"] not in seen_ids:
+                seen_ids.add(item["id"])
+                collected.append(item)
+        return collected
     except Exception as e:
         # Fallback without tags-in if tag filtering fails
         if "tags-in" in params:
             params.pop("tags-in")
-            url = f"https://{MODIO_API_HOST}/v1/games/{BG3_GAME_ID}/mods?{urllib.parse.urlencode(params)}"
-            req = urllib.request.Request(url, headers={"User-Agent": "BG3ModSearchPipeline/1.0"})
             try:
-                with urllib.request.urlopen(req) as resp:
-                    data = json.loads(resp.read().decode("utf-8"))
-                    for item in data.get("data", []):
-                        if item["id"] not in seen_ids:
-                            seen_ids.add(item["id"])
-                            collected.append(item)
-                    return collected
+                data = client.request("GET", f"/games/{BG3_GAME_ID}/mods", params=params)
+                for item in data.get("data", []):
+                    if item["id"] not in seen_ids:
+                        seen_ids.add(item["id"])
+                        collected.append(item)
+                return collected
             except Exception:
                 pass
         if collected:

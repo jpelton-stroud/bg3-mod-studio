@@ -134,28 +134,28 @@ COMMAND_REGISTRY: Dict[Tuple[str, str], CommandSpec] = {
     ("env", "setup"): CommandSpec("bg3_core.setup_environment", "Run interactive setup wizard for BG3 Mod Studio environment", "management"),
 }
 
-# Scaffold asset types forwarded from scaffold <asset> and mod scaffold <asset>
-SCAFFOLD_ASSETS = {
-    "class": "scaffold_class_description",
-    "progression": "scaffold_progression_node",
-    "feat": "scaffold_feat",
-    "action-resource": "scaffold_action_resource",
-    "spell-list": "scaffold_spell_list",
-    "level-map": "scaffold_level_map",
-    "default-values": "scaffold_default_values",
-    "stat": "scaffold_stat_entry",
-    "root-template": "scaffold_root_template",
-    "icon-uvs": "scaffold_icon_uvs",
-    "race": "scaffold_race",
-    "origin": "scaffold_origin",
-    "appearance": "scaffold_appearance_visual",
-    "appearance-visual": "scaffold_appearance_visual",
-    "tag": "scaffold_tag",
-}
+# Scaffold asset types forwarded to bg3_authoring.scaffold_asset
+SCAFFOLD_ASSETS = [
+    "class",
+    "progression",
+    "feat",
+    "action-resource",
+    "spell-list",
+    "level-map",
+    "default-values",
+    "stat",
+    "root-template",
+    "icon-uvs",
+    "race",
+    "origin",
+    "appearance",
+    "appearance-visual",
+    "tag",
+]
 
-for asset, mod_suffix in SCAFFOLD_ASSETS.items():
+for asset in SCAFFOLD_ASSETS:
     spec = CommandSpec(
-        f"bg3_authoring.{mod_suffix}",
+        "bg3_authoring.scaffold_asset",
         f"Scaffold {asset} definition LSX/XML assets",
         "authoring",
         "bg3_authoring",
@@ -358,6 +358,18 @@ def dispatch_command(args: Any, emitter: OutputEmitter) -> int:
         return _execute_env_paths(json_mode, emitter)
 
     is_help = any(a in target_args for a in ("-h", "--help"))
+
+    # Argument translation for scaffold_asset
+    if spec.target_module == "bg3_authoring.scaffold_asset":
+        asset_name = None
+        if cmd == "scaffold":
+            asset_name = sub
+        elif cmd == "mod" and sub.startswith("scaffold "):
+            asset_name = sub.split()[1]
+        elif cmd == "mod" and sub == "scaffold" and target_args:
+            asset_name = target_args.pop(0)
+        if asset_name and (not target_args or target_args[0] != asset_name):
+            target_args = [asset_name] + target_args
 
     # Argument translation for save noun-verb syntax (manage_saves expects subcommand as first positional)
     if cmd == "save" and sub:

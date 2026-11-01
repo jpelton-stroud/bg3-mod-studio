@@ -101,7 +101,9 @@ def merge_progression_attributes(node1: ET.Element, node2: ET.Element) -> dict[s
     return res
 
 
-def build_mods_meta_lsx(patch_name: str, patch_uuid: str, folder_name: str, deps: list[dict]) -> str:
+def build_mods_meta_lsx(
+    patch_name: str, patch_uuid: str, folder_name: str, deps: list[dict], author: str = "Community Patch"
+) -> str:
     dep_nodes = []
     for d in deps:
         dep_nodes.append(f"""                        <node id="ModuleShortDesc">
@@ -127,7 +129,7 @@ def build_mods_meta_lsx(patch_name: str, patch_uuid: str, folder_name: str, deps
                     </children>
                 </node>
                 <node id="ModuleInfo">
-                    <attribute id="Author" type="LSString" value="MTGHillGiant"/>
+                    <attribute id="Author" type="LSString" value="{author}"/>
                     <attribute id="CharacterCreationLevelName" type="FixedString" value=""/>
                     <attribute id="Description" type="LSString" value="Compatibility Patch for {deps[0]['Name']} and {deps[1]['Name']}"/>
                     <attribute id="Folder" type="LSString" value="{folder_name}"/>
@@ -219,6 +221,7 @@ def main() -> int:
     parser.add_argument("--mod1", required=True, help="First mod name or directory path.")
     parser.add_argument("--mod2", required=True, help="Second mod name or directory path.")
     parser.add_argument("--name", help="Custom patch mod name (default: <Mod1><Mod2>Patch).")
+    parser.add_argument("--author", default="Community Patch", help="Author metadata for the patch mod (default: Community Patch).")
     parser.add_argument("--mode", choices=["standalone", "cf"], default="standalone", help="Patch mode: 'standalone' or 'cf' (Compatibility Framework).")
     parser.add_argument("--dry-run", action="store_true", help="Preview patch generation without writing.")
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON summary.")
@@ -277,7 +280,7 @@ def main() -> int:
         if args.mode == "cf":
             # Generate CF JSON payload
             cf_config = {
-                "Author": "MTGHillGiant",
+                "Author": args.author,
                 "Mod": patch_name,
                 "UUID": patch_uuid,
                 "Injections": [
@@ -294,7 +297,7 @@ def main() -> int:
 
         if not args.dry_run:
             # 1. Projects & Mods meta.lsx + PNG assets
-            mods_meta_content = build_mods_meta_lsx(patch_name, patch_uuid, folder_name, [meta1, meta2])
+            mods_meta_content = build_mods_meta_lsx(patch_name, patch_uuid, folder_name, [meta1, meta2], author=args.author)
             proj_meta_content = build_projects_meta_lsx(patch_name, patch_uuid, project_uuid)
             png_bytes = generate_512_png()
 

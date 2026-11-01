@@ -21,6 +21,7 @@ from bg3_core.env_paths import (
     get_library_catalog_path,
     get_studio_dir,
     get_subscribed_mods_dir,
+    get_workspace_root,
     get_xdg_cache_home,
     get_xdg_config_home,
     get_xdg_data_home,
@@ -204,6 +205,15 @@ class TestXDGPaths(unittest.TestCase):
                 auth = get_authored_mods_dir()
                 self.assertEqual(sub, empty_studio / "Mods" / "subscribed")
                 self.assertEqual(auth, empty_studio / "Mods" / "authored")
+
+    def test_get_workspace_root(self):
+        """Verify dynamic workspace root discovery."""
+        root = get_workspace_root()
+        self.assertTrue((root / "pyproject.toml").is_file() or (root / ".git").is_dir())
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.dict(os.environ, {"BG3_WORKSPACE_ROOT": tmp}):
+                self.assertEqual(get_workspace_root(), Path(tmp).resolve())
 
     def test_zero_parents_traversal_in_packages(self):
         """Assert zero fragile parents traversal or _REPO_ROOT assignments exist across packages."""
