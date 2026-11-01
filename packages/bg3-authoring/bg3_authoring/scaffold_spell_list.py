@@ -143,8 +143,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Scaffold Patch 8 SpellLists.lsx and PassiveLists.lsx selector lists.")
     parser.add_argument("--mod", required=True, help="Target mod name or path in my_mods/")
     parser.add_argument("--comment", help="Documentation label/comment for the list")
-    parser.add_argument("--spells", help="Comma- or semicolon-separated spell names (creates/updates SpellLists.lsx)")
-    parser.add_argument("--passives", help="Comma- or semicolon-separated passive names (creates/updates PassiveLists.lsx)")
+    parser.add_argument("--spells", nargs="+", help="Comma- or semicolon-separated spell names (creates/updates SpellLists.lsx)")
+    parser.add_argument("--passives", nargs="+", help="Comma- or semicolon-separated passive names (creates/updates PassiveLists.lsx)")
     parser.add_argument("--uuid", help="Explicit UUID for this list")
     parser.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON")
@@ -154,10 +154,10 @@ def main() -> int:
     try:
         if args.passives and not args.spells:
             list_type = "passives"
-            items = args.passives
+            items = ",".join(args.passives) if isinstance(args.passives, list) else args.passives
         else:
             list_type = "spells"
-            items = args.spells
+            items = ",".join(args.spells) if isinstance(args.spells, list) else args.spells
 
         res = scaffold_list(
             mod_name_or_path=args.mod,
