@@ -21,6 +21,17 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from bg3_authoring.diagnostics.validate_mod import ModValidator
+from bg3_authoring.scaffold_asset import (
+    scaffold_action_resource,
+    scaffold_class,
+    scaffold_feat,
+    scaffold_level_map,
+    scaffold_progression,
+    scaffold_root_template,
+    scaffold_spell_list,
+    scaffold_stat,
+    scaffold_tag,
+)
 from bg3_core.check_mod_conflicts import compare_two_mods
 from bg3_core.larian_parsers import (
     PATCH_8_VERSION,
@@ -352,6 +363,116 @@ class TestDiagnosticsConflictDetection(unittest.TestCase):
         self.assertEqual(res["class_collisions"][0]["name"], "CollidingClass")
         self.assertEqual(len(res["feat_collisions"]), 1)
         self.assertEqual(res["feat_collisions"][0]["name"], "CollidingFeat")
+
+
+class TestUnifiedScaffoldAssetAPI(unittest.TestCase):
+    """Direct unit tests for unified scaffold_asset programmatic API."""
+
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp(prefix="bg3_unified_scaffold_")
+        self.mod_dir = Path(self.test_dir) / "test-mod"
+        folder_uuid = "11111111-2222-3333-4444-555555555555"
+        pub_folder = self.mod_dir / "Public" / f"TestMod_{folder_uuid}"
+        mods_folder = self.mod_dir / "Mods" / f"TestMod_{folder_uuid}"
+        pub_folder.mkdir(parents=True)
+        mods_folder.mkdir(parents=True)
+        (mods_folder / "meta.lsx").write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="8" revision="0" build="700"/>
+    <region id="Config">
+        <node id="root">
+            <children>
+                <node id="ModuleInfo">
+                    <attribute id="Folder" type="LSString" value="TestMod_{folder_uuid}"/>
+                    <attribute id="Name" type="LSString" value="TestMod"/>
+                    <attribute id="UUID" type="FixedString" value="{folder_uuid}"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>""", encoding="utf-8")
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def test_scaffold_stat_direct(self):
+        res = scaffold_stat(
+            mod_name_or_path=str(self.mod_dir),
+            entry_type="weapon",
+            name="DirectTestBlade",
+            dry_run=True,
+        )
+        self.assertTrue(res["success"])
+        self.assertEqual(res["status"], "created")
+        self.assertEqual(res["entry_name"], "DirectTestBlade")
+
+    def test_scaffold_feat_direct(self):
+        res = scaffold_feat(
+            mod_name_or_path=str(self.mod_dir),
+            name="DirectTestFeat",
+            passives="Test_Passive",
+            dry_run=True,
+        )
+        self.assertTrue(res["success"])
+        self.assertEqual(res["feat_name"], "DirectTestFeat")
+
+    def test_scaffold_action_resource_direct(self):
+        res = scaffold_action_resource(
+            mod_name_or_path=str(self.mod_dir),
+            name="DirectResource",
+            dry_run=True,
+        )
+        self.assertTrue(res["success"])
+
+    def test_scaffold_spell_list_direct(self):
+        res = scaffold_spell_list(
+            mod_name_or_path=str(self.mod_dir),
+            items="Spell_A,Spell_B",
+            dry_run=True,
+        )
+        self.assertTrue(res["success"])
+
+    def test_scaffold_level_map_direct(self):
+        res = scaffold_level_map(
+            mod_name_or_path=str(self.mod_dir),
+            name="DirectMap",
+            levels="1=1d6,5=1d8",
+            dry_run=True,
+        )
+        self.assertTrue(res["success"])
+
+    def test_scaffold_tag_direct(self):
+        res = scaffold_tag(
+            mod_name_or_path=str(self.mod_dir),
+            name="DIRECT_TAG",
+            dry_run=True,
+        )
+        self.assertTrue(res["success"])
+
+    def test_scaffold_root_template_direct(self):
+        res = scaffold_root_template(
+            mod_name_or_path=str(self.mod_dir),
+            name="DirectTemplate",
+            dry_run=True,
+        )
+        self.assertTrue(res["success"])
+
+    def test_scaffold_progression_direct(self):
+        res = scaffold_progression(
+            mod_name_or_path=str(self.mod_dir),
+            name="Fighter",
+            level=1,
+            dry_run=True,
+        )
+        self.assertTrue(res["success"])
+
+    def test_scaffold_class_direct(self):
+        res = scaffold_class(
+            mod_name_or_path=str(self.mod_dir),
+            name="DirectClass",
+            dry_run=True,
+        )
+        self.assertTrue(res["success"])
 
 
 if __name__ == "__main__":

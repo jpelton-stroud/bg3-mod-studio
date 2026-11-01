@@ -141,7 +141,8 @@ class ModLifecycleTests(unittest.TestCase):
 
         # 1.2 Scaffold stat entry (Weapon)
         code, out, data = self.run_script(
-            "scaffold_stat_entry.py",
+            "scaffold_asset.py",
+            "stat",
             "--mod", mod_slug,
             "--type", "Weapon",
             "--name", "LIFECYCLE_Sword",
@@ -156,7 +157,8 @@ class ModLifecycleTests(unittest.TestCase):
 
         # 1.3 Scaffold RootTemplate
         code, out, data = self.run_script(
-            "scaffold_root_template.py",
+            "scaffold_asset.py",
+            "root-template",
             "--mod", mod_slug,
             "--item", "LIFECYCLE_Sword",
             "--visual-preset", "longsword",
@@ -168,7 +170,8 @@ class ModLifecycleTests(unittest.TestCase):
 
         # 1.4 Scaffold progression node
         code, out, data = self.run_script(
-            "scaffold_progression_node.py",
+            "scaffold_asset.py",
+            "progression",
             "--mod", mod_slug,
             "--class", "Rogue",
             "--level", "3",
@@ -194,7 +197,8 @@ class ModLifecycleTests(unittest.TestCase):
 
         # 1.6 Scaffold Icon UVs
         code, out, data = self.run_script(
-            "scaffold_icon_uvs.py",
+            "scaffold_asset.py",
+            "icon-uvs",
             "--mod", mod_slug,
             "--atlas-size", "1024",
             "--icon-size", "64",

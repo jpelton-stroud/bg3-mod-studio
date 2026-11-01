@@ -43,6 +43,7 @@ class TestSkillsInstaller(unittest.TestCase):
             "bg3-check-mod-conflicts",
             "bg3-create-modio-collection",
             "bg3-manage-load-order",
+            "bg3-query-gear",
             "bg3-search-mods",
             "bg3-sync-mod-docs",
             "bg3-sync-single-mod",
@@ -56,7 +57,6 @@ class TestSkillsInstaller(unittest.TestCase):
         }
         expected_theorycraft = {
             "bg3-create-build-guide",
-            "bg3-query-gear",
         }
 
         self.assertEqual(core_skills, expected_core)

@@ -87,7 +87,7 @@ def extract_flags_from_subparser(subp: argparse.ArgumentParser) -> List[Dict[str
         if isinstance(action, (argparse._HelpAction, argparse._SubParsersAction)):
             continue
         dest = action.dest
-        if dest in ("help", "version") or dest in seen:
+        if dest in ("help", "version") or dest in seen or action.help == argparse.SUPPRESS:
             continue
         seen.add(dest)
 
@@ -113,6 +113,42 @@ def extract_flags_from_subparser(subp: argparse.ArgumentParser) -> List[Dict[str
         flags.append(flag_entry)
 
     return flags
+
+
+def _resolve_target_module_flags(group_name: str, subcmd_name: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Inspect target module for build_parser() or parser attribute to extract real flags."""
+    try:
+        import importlib
+        from bg3_core.cli import COMMAND_REGISTRY, DIRECT_COMMANDS
+
+        spec = None
+        if subcmd_name:
+            spec = COMMAND_REGISTRY.get((group_name, subcmd_name))
+        if not spec:
+            spec = DIRECT_COMMANDS.get(group_name) or COMMAND_REGISTRY.get((group_name, ""))
+        if not spec or not spec.target_module:
+            return []
+
+        mod = importlib.import_module(spec.target_module)
+        target_parser = None
+        if hasattr(mod, "build_parser") and callable(mod.build_parser):
+            target_parser = mod.build_parser()
+        elif hasattr(mod, "parser") and isinstance(mod.parser, argparse.ArgumentParser):
+            target_parser = mod.parser
+
+        if target_parser is None:
+            return []
+
+        # If the target parser has subparsers (e.g. scaffold_asset), drill down
+        for action in target_parser._actions:
+            if isinstance(action, argparse._SubParsersAction) and action.choices:
+                target_key = subcmd_name.split()[-1] if subcmd_name else ""
+                if target_key in action.choices:
+                    return extract_flags_from_subparser(action.choices[target_key])
+
+        return extract_flags_from_subparser(target_parser)
+    except Exception:
+        return []
 
 
 def generate_intents(group: str, subcmd: str, summary: str, aliases: List[str]) -> List[str]:
@@ -168,6 +204,10 @@ def extract_registry_from_parser(parser: Optional[argparse.ArgumentParser] = Non
                     category = determine_category(group_name, subcmd_name)
                     cmd_line = f"bg3 {group_name} {subcmd_name}"
                     flags = extract_flags_from_subparser(leaf_subp)
+                    if not flags or any(f.get("name") == "<args>" for f in flags):
+                        target_flags = _resolve_target_module_flags(group_name, subcmd_name)
+                        if target_flags:
+                            flags = target_flags
 
                     all_aliases: List[str] = []
                     for alias_name, alias_subp in sub_a.choices.items():
@@ -195,6 +235,10 @@ def extract_registry_from_parser(parser: Optional[argparse.ArgumentParser] = Non
                 summary = group_summary or group_subp.description or ""
                 description = group_subp.description or summary or f"{cmd_line} command"
                 flags = extract_flags_from_subparser(group_subp)
+                if not flags or any(f.get("name") == "<args>" for f in flags):
+                    target_flags = _resolve_target_module_flags(group_name)
+                    if target_flags:
+                        flags = target_flags
 
                 all_aliases = []
                 for alias_name, alias_subp in action.choices.items():

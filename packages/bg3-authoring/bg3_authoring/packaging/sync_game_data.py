@@ -38,19 +38,29 @@ from bg3_core.env_paths import (
 from bg3_core.larian_parsers import compile_xml_bytes_to_loca
 
 EXCLUDED_FILENAMES = {
-    "README.md",
+    ".gitignore",
+    ".gitkeep",
+    "desktop.ini",
+    ".ds_store",
+    "thumbs.db",
+    "readme.md",
     "task.md",
     "modio_description.md",
     "modio_description.html",
-    ".gitignore",
-    ".gitkeep",
-    ".DS_Store",
-    "Thumbs.db",
 }
 
 EXCLUDED_EXTENSIONS = {
-    ".bak",
     ".tmp",
+    ".bak",
+    ".py",
+    ".pyc",
+}
+
+EXCLUDED_DIRECTORIES = {
+    "__pycache__",
+    ".git",
+    "dist",
+    "metadata",
 }
 
 
@@ -178,10 +188,12 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False, quiet: bool 
             continue
         dst_sub = data_dir / subdir
 
-        for root, _dirs, files in os.walk(src_sub):
+        for root, dirs, files in os.walk(src_sub):
+            dirs[:] = [d for d in dirs if d.lower() not in EXCLUDED_DIRECTORIES and not d.startswith(".")]
             rel_root = Path(root).relative_to(src_sub)
             for file in files:
-                if file in EXCLUDED_FILENAMES or any(file.endswith(ext) for ext in EXCLUDED_EXTENSIONS):
+                file_lower = file.lower()
+                if file_lower in EXCLUDED_FILENAMES or any(file_lower.endswith(ext) for ext in EXCLUDED_EXTENSIONS):
                     stats["skipped"] += 1
                     continue
 
@@ -610,7 +622,7 @@ def run_sync(
     # Auto-bump build number if requested
     if bump_build:
         try:
-            from bump_mod_version import bump_version
+            from bg3_core.bump_mod_version import bump_version
             for mod_path in sorted(mod_folders):
                 bump_version(mod_path.name, action="build", dry_run=dry_run)
         except Exception as e:

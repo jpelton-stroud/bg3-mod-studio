@@ -17,7 +17,11 @@ from typing import Optional
 
 from bg3_core.cli_common import ExitCode
 from bg3_core.env_paths import get_cache_dir, get_subscribed_mods_dir
-from bg3_core.larian_parsers import parse_loca_bytes
+from bg3_core.larian_parsers import (
+    parse_loca_bytes,
+    parse_localization_xml,
+    parse_stats_txt,
+)
 
 # Files to scan within mod directories
 TARGET_STAT_FILES = {
@@ -39,10 +43,6 @@ TARGET_STAT_FILES = {
 }
 
 HANDLE_REGEX = re.compile(r'(h[0-9a-fA-F]{32}|h[a-zA-Z0-9_]{30,40})(?:;\d+)?')
-ENTRY_REGEX = re.compile(r'^new\s+entry\s+"([^"]+)"', re.IGNORECASE)
-DATA_REGEX = re.compile(r'^data\s+"([^"]+)"\s+"([^"]*)"', re.IGNORECASE)
-USING_REGEX = re.compile(r'^using\s+"([^"]+)"', re.IGNORECASE)
-TYPE_REGEX = re.compile(r'^type\s+"([^"]+)"', re.IGNORECASE)
 
 
 def infer_slot(entry_type: str, slot_val: str, using_val: str, entry_name: str) -> str:
@@ -93,23 +93,8 @@ def load_localization_strings(mod_dir: Path) -> dict[str, str]:
         if "meta.lsx" in xml_file.name.lower() or xml_file.name.endswith(".lsx"):
             continue
         try:
-            content = xml_file.read_text(encoding="utf-8", errors="replace")
-            # Fast regex extraction for <content contentuid="h...">Text</content>
-            for match in re.finditer(
-                r'<content\s+contentuid="([^"]+)"[^>]*>(.*?)</content>',
-                content,
-                re.DOTALL,
-            ):
-                uid = match.group(1).strip()
-                text = match.group(2).strip()
-                # Clean up xml entities
-                text = (
-                    text.replace("&amp;", "&")
-                    .replace("&lt;", "<")
-                    .replace("&gt;", ">")
-                    .replace("&quot;", '"')
-                )
-                strings[uid] = text
+            entries = parse_localization_xml(xml_file.read_bytes())
+            strings.update(entries)
         except (OSError, UnicodeDecodeError):
             continue
     return strings
@@ -131,92 +116,61 @@ def parse_mod_stat_entries(mod_dir: Path, mod_slug: str) -> list[dict]:
             continue
 
         try:
-            content = txt_path.read_text(encoding="utf-8", errors="replace")
+            parsed = parse_stats_txt(txt_path.read_bytes())
         except OSError:
             continue
 
-        current_entry = None
+        for name, p_entry in parsed.items():
+            data = p_entry.get("data", {})
+            entry = {
+                "id": name,
+                "mod": mod_slug,
+                "category": category,
+                "type": p_entry.get("type") or category,
+                "using": p_entry.get("using", ""),
+                "display_name": "",
+                "description": "",
+                "slot": "",
+                "rarity": "Common",
+                "boosts": "",
+                "passives": "",
+                "damage": "",
+                "damage_type": "",
+                "ac": "",
+                "source_file": str(txt_path.name),
+            }
 
-        for line in content.splitlines():
-            line = line.strip()
-            if not line or line.startswith("//"):
-                continue
-
-            entry_match = ENTRY_REGEX.match(line)
-            if entry_match:
-                if current_entry:
-                    finalize_entry(current_entry, loc_map)
-                    entries.append(current_entry)
-
-                name = entry_match.group(1)
-                current_entry = {
-                    "id": name,
-                    "mod": mod_slug,
-                    "category": category,
-                    "type": category,
-                    "using": "",
-                    "display_name": "",
-                    "description": "",
-                    "slot": "",
-                    "rarity": "Common",
-                    "boosts": "",
-                    "passives": "",
-                    "damage": "",
-                    "damage_type": "",
-                    "ac": "",
-                    "source_file": str(txt_path.name),
-                }
-                continue
-
-            if not current_entry:
-                continue
-
-            using_match = USING_REGEX.match(line)
-            if using_match:
-                current_entry["using"] = using_match.group(1)
-                continue
-
-            type_match = TYPE_REGEX.match(line)
-            if type_match:
-                current_entry["type"] = type_match.group(1)
-                continue
-
-            data_match = DATA_REGEX.match(line)
-            if data_match:
-                prop = data_match.group(1)
-                val = data_match.group(2)
-
+            for prop, val in data.items():
                 prop_lower = prop.lower()
                 if prop_lower == "displayname":
-                    current_entry["_raw_display"] = val
+                    entry["_raw_display"] = val
                 elif prop_lower == "description":
-                    current_entry["_raw_desc"] = val
+                    entry["_raw_desc"] = val
                 elif prop_lower == "slot":
-                    current_entry["slot"] = val
+                    entry["slot"] = val
                 elif prop_lower == "rarity":
-                    current_entry["rarity"] = val
+                    entry["rarity"] = val
                 elif prop_lower in ("boosts", "defaultboosts"):
-                    current_entry["boosts"] = (
-                        (current_entry["boosts"] + ";" + val).strip(";")
-                        if current_entry["boosts"]
+                    entry["boosts"] = (
+                        (entry["boosts"] + ";" + val).strip(";")
+                        if entry["boosts"]
                         else val
                     )
                 elif prop_lower in ("passivesonequip", "passives"):
-                    current_entry["passives"] = (
-                        (current_entry["passives"] + ";" + val).strip(";")
-                        if current_entry["passives"]
+                    entry["passives"] = (
+                        (entry["passives"] + ";" + val).strip(";")
+                        if entry["passives"]
                         else val
                     )
                 elif prop_lower == "damage":
-                    current_entry["damage"] = val
+                    entry["damage"] = val
                 elif prop_lower == "damage type":
-                    current_entry["damage_type"] = val
+                    entry["damage_type"] = val
                 elif prop_lower == "armorclass":
-                    current_entry["ac"] = val
+                    entry["ac"] = val
 
-        if current_entry:
-            finalize_entry(current_entry, loc_map)
-            entries.append(current_entry)
+            finalize_entry(entry, loc_map)
+            entries.append(entry)
 
     return entries
 
