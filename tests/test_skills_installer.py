@@ -35,7 +35,7 @@ class TestSkillsInstaller(unittest.TestCase):
 
     def test_skills_package_allocations(self):
         skills = discover_bundled_skills()
-        core_skills = {k for k, v in skills.items() if v["package"] == "bg3-core"}
+        core_skills = {k for k, v in skills.items() if v["package"] == "bg3"}
         authoring_skills = {k for k, v in skills.items() if v["package"] == "bg3-authoring"}
         theorycraft_skills = {k for k, v in skills.items() if v["package"] == "bg3-theorycraft"}
 

@@ -15,10 +15,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import contextlib
+import io
 import json
 import os
 import re
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -361,10 +362,14 @@ def list_tools(registry: Dict[str, Any], category: Optional[str] = None) -> List
 
 
 def verify_registry(registry: Dict[str, Any]) -> Dict[str, Any]:
-    """Verify that all registered CLI commands are valid, documented, and executable."""
+    """Verify that all registered CLI commands are valid, documented, and executable in-process."""
+    from bg3_core.cli import build_parser
+
+    parser = build_parser()
     tools = registry.get("tools", [])
     missing_docs = []
     help_errors = []
+    buf = io.StringIO()
 
     for tool in tools:
         cmd_name = tool.get("command", "")
@@ -375,17 +380,14 @@ def verify_registry(registry: Dict[str, Any]) -> Dict[str, Any]:
         if parts and parts[0] == "bg3":
             cmd_args = parts[1:] + ["--help"]
             try:
-                res = subprocess.run(
-                    [sys.executable, "-m", "bg3_core.cli"] + cmd_args,
-                    capture_output=True,
-                    text=True,
-                    timeout=5,
-                )
-                if res.returncode != 0:
+                with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+                    parser.parse_args(cmd_args)
+            except SystemExit as exc:
+                if exc.code != 0:
                     help_errors.append({
                         "command": cmd_name,
-                        "returncode": res.returncode,
-                        "stderr": res.stderr.strip()[:200],
+                        "returncode": exc.code,
+                        "stderr": buf.getvalue().strip()[-200:],
                     })
             except Exception as e:
                 help_errors.append({"command": cmd_name, "error": str(e)})

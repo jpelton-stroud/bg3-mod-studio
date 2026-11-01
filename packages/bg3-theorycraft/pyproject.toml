@@ -5,7 +5,7 @@ description = "Baldur's Gate 3 Mod Studio Theorycrafting and Build Guide Generat
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "bg3-core",
+    "bg3",
 ]
 
 [build-system]

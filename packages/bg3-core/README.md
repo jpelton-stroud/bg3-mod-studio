@@ -1,6 +1,6 @@
-# bg3-core
+# bg3 (Core Runtime & CLI Dispatcher)
 
-Foundational runtime, binary parsers, cross-platform path resolution, and mod.io REST API client for the **Baldur's Gate 3 Mod Studio** workspace.
+Foundational runtime, in-process CLI dispatcher, binary parsers, cross-platform path resolution, and mod.io REST API client for the **Baldur's Gate 3 Mod Studio** workspace. Distributed as the `bg3` package on PyPI.
 
 ---
 
@@ -34,9 +34,16 @@ graph TD
 
 ---
 
-## CLI Console Entrypoint
+## Distribution & CLI Console Entrypoint
 
-This package registers the primary console script for the entire studio:
+This package is distributed as `bg3` and provides the primary console script for the entire studio, with optional extras for domain toolsets:
+
+```bash
+uv tool install "bg3[all]"          # Complete studio suite
+uv tool install "bg3[authoring]"    # Mod authoring and packaging
+uv tool install "bg3[theorycraft]"  # Theorycrafting and DPR simulation
+uv tool install bg3                 # Core runtime, load order, and mod.io client
+```
 
 ```toml
 [project.scripts]

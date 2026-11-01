@@ -60,11 +60,18 @@ For a deep-dive into feature & functionality specifics, as well as example agent
 ### 2. Installation & Setup
 
 #### User Package Installation (Recommended)
-Install the standalone `bg3-mod-studio` suite globally using `uv`:
+Install the standalone `bg3` suite with all authoring and theorycrafting capabilities globally using `uv`:
 
 ```bash
-uv tool install bg3-mod-studio
+uv tool install "bg3[all]"
 bg3 env setup
+```
+
+You can also install specific domain subsets:
+```bash
+uv tool install "bg3[authoring]"    # Mod authoring, diagnostics, and packaging
+uv tool install "bg3[theorycraft]"  # Theorycrafting and DPR simulation
+uv tool install bg3                 # Core runtime, load order, and mod.io client
 ```
 
 #### Contributor Setup (From Source Repository)

@@ -35,11 +35,9 @@ class TestCliDispatchModuleFallback(unittest.TestCase):
         mod = resolve_module_fallback(p)
         self.assertIsNone(mod)
 
-    @patch("subprocess.run")
-    def test_dispatch_fallback_when_forced(self, mock_run):
-        mock_proc = Mock()
-        mock_proc.returncode = 0
-        mock_run.return_value = mock_proc
+    @patch("bg3_core.cli._invoke_in_process")
+    def test_dispatch_in_process_execution(self, mock_invoke):
+        mock_invoke.return_value = 0
 
         parser = build_parser()
         args = parser.parse_args(["tools", "list", "--json"])
@@ -47,37 +45,26 @@ class TestCliDispatchModuleFallback(unittest.TestCase):
         emitter.log = Mock()
         emitter.error = Mock()
 
-        with patch.dict(os.environ, {"_BG3_FORCE_MODULE_DISPATCH": "1"}):
-            ret = dispatch_command(args, emitter)
+        ret = dispatch_command(args, emitter)
 
         self.assertEqual(ret, 0)
-        self.assertTrue(mock_run.called)
-        cmd_called = mock_run.call_args[0][0]
-        self.assertEqual(cmd_called[1], "-m")
-        self.assertEqual(cmd_called[2], "bg3_core.tools")
-        self.assertIn("--list", cmd_called)
-        self.assertIn("--json", cmd_called)
+        self.assertTrue(mock_invoke.called)
+        target_mod, target_args = mock_invoke.call_args[0]
+        self.assertEqual(target_mod, "bg3_core.tools")
+        self.assertIn("--list", target_args)
+        self.assertIn("--json", target_args)
 
-    @patch("subprocess.run")
-    def test_dispatch_normal_when_file_exists(self, mock_run):
-        mock_proc = Mock()
-        mock_proc.returncode = 0
-        mock_run.return_value = mock_proc
+    def test_invoke_in_process_captures_system_exit(self):
+        import contextlib
+        import io
+        from bg3_core.cli import _invoke_in_process
+        from bg3_core.cli_common import ExitCode
 
-        parser = build_parser()
-        args = parser.parse_args(["tools", "list", "--json"])
-        emitter = Mock(spec=OutputEmitter)
-        emitter.log = Mock()
-        emitter.error = Mock()
-
-        with patch.dict(os.environ, {"_BG3_FORCE_MODULE_DISPATCH": "0"}):
-            ret = dispatch_command(args, emitter)
-
-        self.assertEqual(ret, 0)
-        self.assertTrue(mock_run.called)
-        cmd_called = mock_run.call_args[0][0]
-        # In editable workspace, target exists on disk so directly invoked by path
-        self.assertTrue(cmd_called[1].endswith("tools.py"))
+        # Test in-process invocation with --help on a known core module
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+            ret = _invoke_in_process("bg3_core.tools", ["--help"])
+        self.assertEqual(ret, ExitCode.OK)
 
 
 if __name__ == "__main__":

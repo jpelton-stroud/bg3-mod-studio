@@ -9,10 +9,9 @@ dev = [
 members = ["packages/*"]
 
 [tool.uv.sources]
-bg3-core = { workspace = true }
+bg3 = { workspace = true }
 bg3-theorycraft = { workspace = true }
 bg3-authoring = { workspace = true }
-bg3-mod-studio = { workspace = true }
 
 [tool.ruff]
 line-length = 100

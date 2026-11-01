@@ -9,6 +9,7 @@ Discovers and deploys agent skills bundled in BG3 Mod Studio domain packages
 
 import argparse
 import importlib.resources as pkg_resources
+import importlib.util
 import json
 import shutil
 import sys
@@ -17,11 +18,11 @@ from typing import Any, Dict, List, Optional
 
 from bg3_core.env_paths import REPO_ROOT, get_studio_dir
 
-# Domain package definitions: (import_module_name, display_package_name, in_repo_relative_path)
+# Domain package definitions: (import_module_name, display_package_name)
 PACKAGED_SKILL_SOURCES = [
-    ("bg3_core", "bg3-core", "packages/bg3-core/bg3_core/skills"),
-    ("bg3_authoring", "bg3-authoring", "packages/bg3-authoring/bg3_authoring/skills"),
-    ("bg3_theorycraft", "bg3-theorycraft", "packages/bg3-theorycraft/bg3_theorycraft/skills"),
+    ("bg3_core", "bg3"),
+    ("bg3_authoring", "bg3-authoring"),
+    ("bg3_theorycraft", "bg3-theorycraft"),
 ]
 
 # ANSI Terminal Colors
@@ -46,24 +47,30 @@ def discover_bundled_skills() -> Dict[str, Dict[str, Any]]:
     """
     discovered: Dict[str, Dict[str, Any]] = {}
 
-    for module_name, pkg_name, rel_repo_path in PACKAGED_SKILL_SOURCES:
+    for module_name, pkg_name in PACKAGED_SKILL_SOURCES:
         source_dir: Optional[Path] = None
 
-        # 1. Try resolving via importlib.resources (works for wheels, installed packages, and editable installs)
+        # 1. Try resolving via importlib.resources (wheels, installed packages, and editable installs)
         try:
             ref = pkg_resources.files(module_name) / "skills"
-            # ref can be a Traversable or Path
             cand = Path(str(ref))
             if cand.is_dir():
                 source_dir = cand
         except Exception:
             pass
 
-        # 2. Fallback to workspace repository root relative path
-        if (source_dir is None or not source_dir.is_dir()) and REPO_ROOT.is_dir():
-            cand = REPO_ROOT / rel_repo_path
-            if cand.is_dir():
-                source_dir = cand
+        # 2. Try resolving via module spec location
+        if source_dir is None or not source_dir.is_dir():
+            try:
+                spec = importlib.util.find_spec(module_name)
+                if spec and spec.submodule_search_locations:
+                    for loc in spec.submodule_search_locations:
+                        cand = Path(loc) / "skills"
+                        if cand.is_dir():
+                            source_dir = cand
+                            break
+            except Exception:
+                pass
 
         if source_dir is None or not source_dir.is_dir():
             continue
@@ -91,22 +98,6 @@ def discover_bundled_skills() -> Dict[str, Dict[str, Any]]:
                         "source_path": item.resolve(),
                         "skill_md": skill_md.resolve(),
                         "description": desc,
-                    }
-
-    # 3. Fallback to in-repo .agents/skills if packages don't resolve
-    if not discovered and REPO_ROOT.is_dir():
-        repo_skills = REPO_ROOT / ".agents" / "skills"
-        if repo_skills.is_dir():
-            for item in sorted(repo_skills.iterdir()):
-                skill_md = item / "SKILL.md"
-                if skill_md.is_file():
-                    discovered[item.name] = {
-                        "name": item.name,
-                        "package": "repo-fallback",
-                        "module": "repo",
-                        "source_path": item.resolve(),
-                        "skill_md": skill_md.resolve(),
-                        "description": "",
                     }
 
     return discovered
