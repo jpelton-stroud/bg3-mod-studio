@@ -8,7 +8,7 @@ import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from bg3_authoring.packaging.pack_mod_pak import build_pak_archive
+from bg3_core.lspk import build_lspk_archive as build_pak_archive
 from bg3_core.manage_load_order import (
     CORE_SYSTEM_MODULES,
     _ensure_base_module,

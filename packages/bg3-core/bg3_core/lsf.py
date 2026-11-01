@@ -15,26 +15,13 @@ from bg3_core.lspk import lz4_block_compress, lz4_block_decompress
 # Magic identifier for LSF files
 LSF_MAGIC = b"LSOF"
 
-# Attribute Type IDs
+# Attribute Type IDs (active save/mod metadata types)
 TYPE_NONE = 0
 TYPE_UINT8 = 1
 TYPE_INT16 = 2
 TYPE_UINT16 = 3
 TYPE_INT32 = 4
 TYPE_UINT32 = 5
-TYPE_FLOAT = 6
-TYPE_DOUBLE = 7
-TYPE_IVEC2 = 8
-TYPE_IVEC3 = 9
-TYPE_IVEC4 = 10
-TYPE_VEC2 = 11
-TYPE_VEC3 = 12
-TYPE_VEC4 = 13
-TYPE_MAT2 = 14
-TYPE_MAT3 = 15
-TYPE_MAT3X4 = 16
-TYPE_MAT4X3 = 17
-TYPE_MAT4 = 18
 TYPE_BOOL = 19
 TYPE_STRING = 20
 TYPE_PATH = 21
@@ -379,10 +366,6 @@ def _parse_attribute_value(values_chunk: bytes, offset: int, length: int, type_i
             return struct.unpack("<q", raw[:8])[0]
         elif type_id == TYPE_UINT64:
             return struct.unpack("<Q", raw[:8])[0]
-        elif type_id == TYPE_FLOAT:
-            return struct.unpack("<f", raw[:4])[0]
-        elif type_id == TYPE_DOUBLE:
-            return struct.unpack("<d", raw[:8])[0]
         elif type_id == TYPE_BOOL:
             return raw[0] != 0 if raw else False
         elif type_id in (TYPE_STRING, TYPE_FIXED_STRING, TYPE_LS_STRING, TYPE_PATH):
@@ -414,10 +397,6 @@ def _serialize_attribute_value(val: Any, type_id: int) -> bytes:
         return struct.pack("<q", int(val))
     elif type_id == TYPE_UINT64:
         return struct.pack("<Q", int(val))
-    elif type_id == TYPE_FLOAT:
-        return struct.pack("<f", float(val))
-    elif type_id == TYPE_DOUBLE:
-        return struct.pack("<d", float(val))
     elif type_id == TYPE_BOOL:
         return b"\x01" if val else b"\x00"
     elif type_id in (TYPE_STRING, TYPE_FIXED_STRING, TYPE_LS_STRING, TYPE_PATH):

@@ -36,7 +36,7 @@ from bg3_core.env_paths import (
     normalize_mod_key,
     resolve_mod_dir,
 )
-from bg3_core.larian_parsers import find_mod_meta_files
+from bg3_core.larian_parsers import find_mod_meta_files, parse_meta_lsx
 from bg3_core.lspk import LspkArchive
 from bg3_core.mod_resolver import ensure_dependency_paks, resolve_dependency_metadata
 
@@ -267,30 +267,23 @@ def parse_modsettings(path: Path) -> dict:
 def _extract_dependencies_from_xml_text(content: str) -> list[dict]:
     """Extract list of dependency module metadata dicts from meta.lsx XML text."""
     deps = []
-    try:
-        root = ET.fromstring(content)
-        for node in root.iter("node"):
-            if node.get("id") == "Dependencies":
-                for sub in node.iter("node"):
-                    if sub.get("id") == "ModuleShortDesc":
-                        attrs = {a.get("id"): a.get("value", "") for a in sub.findall("attribute")}
-                        u_str = attrs.get("UUID", "")
-                        n_str = attrs.get("Name", "")
-                        f_str = attrs.get("Folder", "")
-                        if not u_str:
-                            continue
-                        if u_str == GUSTAV_DEV["UUID"] or n_str.lower() in CORE_GUSTAV_NAMES or f_str.lower() in CORE_GUSTAV_NAMES:
-                            continue
-                        deps.append({
-                            "Folder": f_str,
-                            "MD5": attrs.get("MD5", ""),
-                            "Name": n_str,
-                            "PublishHandle": attrs.get("PublishHandle", "0"),
-                            "UUID": u_str,
-                            "Version64": attrs.get("Version64", "36028797018963968"),
-                        })
-    except Exception:
-        pass
+    meta = parse_meta_lsx(content.encode("utf-8") if isinstance(content, str) else content)
+    for attrs in meta.get("dependencies", []):
+        u_str = attrs.get("UUID", "")
+        n_str = attrs.get("Name", "")
+        f_str = attrs.get("Folder", "")
+        if not u_str:
+            continue
+        if u_str == GUSTAV_DEV["UUID"] or n_str.lower() in CORE_GUSTAV_NAMES or f_str.lower() in CORE_GUSTAV_NAMES:
+            continue
+        deps.append({
+            "Folder": f_str,
+            "MD5": attrs.get("MD5", ""),
+            "Name": n_str,
+            "PublishHandle": attrs.get("PublishHandle", "0"),
+            "UUID": u_str,
+            "Version64": attrs.get("Version64", "36028797018963968"),
+        })
     return deps
 
 

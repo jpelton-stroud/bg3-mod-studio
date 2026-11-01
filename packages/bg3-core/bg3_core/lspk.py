@@ -37,6 +37,13 @@ for _libname in ("liblz4.so.1", "liblz4.so", "liblz4.dylib", "liblz4.dll"):
         _lib.LZ4_compress_default.restype = ctypes.c_int
         _lib.LZ4_compressBound.argtypes = [ctypes.c_int]
         _lib.LZ4_compressBound.restype = ctypes.c_int
+        _lib.LZ4_decompress_safe.argtypes = [
+            ctypes.c_char_p,
+            ctypes.c_char_p,
+            ctypes.c_int,
+            ctypes.c_int,
+        ]
+        _lib.LZ4_decompress_safe.restype = ctypes.c_int
         _LIBLZ4 = _lib
         break
     except Exception:
@@ -86,7 +93,16 @@ def zstd_decompress(compressed_data: bytes, uncompressed_size: int) -> bytes:
 
 
 def lz4_block_decompress(compressed_data: bytes, uncompressed_size: int) -> bytes:
-    """Decompress standard LZ4 raw block data without external C libraries."""
+    """Decompress standard LZ4 raw block data.
+    
+    Uses system liblz4 via ctypes if available, otherwise falls back to pure-Python decompressor.
+    """
+    if _LIBLZ4 is not None and uncompressed_size > 0 and len(compressed_data) > 0:
+        dst = ctypes.create_string_buffer(uncompressed_size)
+        res = _LIBLZ4.LZ4_decompress_safe(compressed_data, dst, len(compressed_data), uncompressed_size)
+        if res == uncompressed_size:
+            return dst.raw[:res]
+
     src = io.BytesIO(compressed_data)
     dst = bytearray()
 

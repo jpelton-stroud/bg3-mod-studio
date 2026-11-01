@@ -9,8 +9,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bg3_authoring.packaging.pack_mod_pak import build_pak_archive
-from bg3_core.lspk import LspkArchive
+from bg3_core.lspk import LspkArchive, build_lspk_archive as build_pak_archive
 
 
 class TestLspkMmap(unittest.TestCase):
