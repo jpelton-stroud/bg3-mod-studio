@@ -103,13 +103,12 @@ bg3 env check
 
 ```text
 BaldursGate3/
-├── .agents/skills/            # Autonomous AI agent workflows (15 specialized skills)
 ├── docs/                      # Technical documentation & guides
 │   ├── ARCHITECTURE.md        # System architecture and design
 │   ├── FEATURES.md            # Features, workflows, and example agent prompts
 │   ├── MOD_CREATION_WORKFLOW.md # Step-by-step mod authoring guide
 │   └── MODIO_INTEGRATION.md   # mod.io API and library reference
-├── packages/                  # Modular Python workspace packages
+├── packages/                  # Modular Python workspace packages (with bundled skills)
 │   ├── bg3-core/              # Shared core runtime, XDG path resolvers, and mod.io client
 │   ├── bg3-theorycraft/       # Theorycrafting, progression, and gear optimization tools
 │   └── bg3-authoring/         # Mod scaffolding, packaging, and diagnostic toolchain
@@ -121,13 +120,13 @@ BaldursGate3/
 └── README.md                  # Project overview
 ```
 
-> **User Content Studio**: All user-generated content (build guides, subscribed mods, and custom authored mods) is stored externally in `XDG_DOCUMENTS_DIR/BG3_Mod_Studio` (defaults to `~/Documents/BG3_Mod_Studio`), keeping this codebase completely decoupled from user data.
+> **User Content Studio & Packaged Skills**: All user-generated content (build guides, subscribed mods, and custom authored mods) is stored externally in `XDG_DOCUMENTS_DIR/BG3_Mod_Studio` (defaults to `~/Documents/BG3_Mod_Studio`), keeping this codebase completely decoupled from user data. 13 autonomous AI agent workflows are bundled inside `packages/*/skills/` and deployed dynamically into `BG3_Mod_Studio/.agents/skills/` via `bg3_core.skills_installer`.
 
 ---
 
 ## CLI Reference & Tool Hub
 
-Explore, query, and run any of the 59 registered automation tools via the centralized discovery hub:
+Explore, query, and run any of the 65 registered automation tools via the centralized discovery hub:
 
 ```bash
 # Discover tools by natural language query

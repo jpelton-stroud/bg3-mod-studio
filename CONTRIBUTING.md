@@ -37,7 +37,7 @@ All contributors are expected to uphold our [Code of Conduct](CODE_OF_CONDUCT.md
    This will prompt you for your `MODIO_API_KEY`, optional `MODIO_PAT`, your BG3 `Data` directory, default author handle, and your Studio Document workspace directory.
 3. **Run Automated Test Suite & Verification**:
    ```bash
-   uv run python -m unittest discover tests
+   uv run pytest
    uv run bg3 tools verify --audit-skills
    ```
 
@@ -48,7 +48,7 @@ All contributors are expected to uphold our [Code of Conduct](CODE_OF_CONDUCT.md
 - `packages/bg3-core/`: Core runtime, unified CLI router, pure Python LSPK packager, mod.io REST client, and XDG environment resolution.
 - `packages/bg3-authoring/`: Mod scaffolding, XML/LSX AST parsers, binary localization compilers, conflict analysis, and diagnostics.
 - `packages/bg3-theorycraft/`: Level 1–20 multiclass simulation, spell slot calculations, and combat DPR sequence theorycrafting.
-- `.agents/skills/`: 15 Antigravity agent skills symlinked from package resources for autonomous workflows.
+- `packages/*/skills/`: 13 Antigravity agent skills bundled inside domain packages and deployed dynamically via `bg3_core.skills_installer`.
 - `tests/`: Comprehensive integration and unit test suite across all workspace packages.
 
 User-authored mods, subscribed mod archives, and build guides reside in your externalized Studio directory (`$XDG_DOCUMENTS_DIR/BG3_Mod_Studio`), keeping git history clean.
@@ -97,7 +97,7 @@ We adhere to the [Conventional Commits](https://www.conventionalcommits.org/) sp
 
 ### Submitting a Pull Request
 1. Fork the repo and create a feature branch (`git checkout -b feat/my-new-feature`).
-2. Run the test suite: `uv run python -m unittest discover tests`.
+2. Run the test suite: `uv run pytest`.
 3. Verify tool registry integrity: `uv run bg3 tools verify --audit-skills`.
 4. Fill out the pull request template completely.
 5. Ensure your PR description links any relevant issues.

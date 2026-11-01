@@ -10,7 +10,7 @@ Drives Stage 3 clean-room in-game playtesting: purging loose `Data/` development
 Refer to companion resources:
 - Clean-Room Protocol: [Smoke Testing Runbook](./references/smoke_testing_runbook.md)
 - Save Audit Protocol: [Campaign Save Audit](./references/save_audit_runbook.md)
-- Lifecycle Gates: [Mod Creation Workflow](../../../../../docs/MOD_CREATION_WORKFLOW.md)
+- Lifecycle Gates: 5-Stage mod creation workflow and dual-track defect routing (docs/MOD_CREATION_WORKFLOW.md)
 
 ---
 

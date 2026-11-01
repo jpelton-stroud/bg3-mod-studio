@@ -10,7 +10,7 @@ Top-level orchestration skill for Stage 1 of the BG3 mod creation lifecycle. Tra
 Refer to companion resources:
 - Interview Protocol: [Design Interview Protocol](./references/grill_me_interview_protocol.md)
 - Subagent Prompts: [Subagent Launch Templates](./resources/subagent_templates.md)
-- Shift-Left Rules: [Mod Architecture Rules](../../../../../docs/ARCHITECTURE.md)
+- Shift-Left Rules: 5-Stage shift-left lifecycle & static verification (docs/ARCHITECTURE.md)
 
 ---
 

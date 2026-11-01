@@ -62,7 +62,7 @@ Trigger mod creation conversationally by describing your concept or invoking the
 /bg3-create-mod "A finesse longsword for Eldritch Knights scaling with INT"
 ```
 
-The [`bg3-create-mod`](../.agents/skills/bg3-create-mod/SKILL.md) skill orchestrates the entire creation pipeline across five distinct phases:
+The `bg3-create-mod` skill orchestrates the entire creation pipeline across five distinct phases:
 
 ### Step 1: Design Interview (`grill-me` Protocol)
 The orchestrator immediately initiates a structured interview to resolve design branches:
@@ -140,7 +140,7 @@ Stage 2 acts as the autonomous mod doctor and governs **User-Action Gate 1 (Tool
 /bg3-diagnose-mod arcane-blade
 ```
 
-The [`bg3-diagnose-mod`](../.agents/skills/bg3-diagnose-mod/SKILL.md) skill operates in two synchronized phases:
+The `bg3-diagnose-mod` skill operates in two synchronized phases:
 
 ### Phase 2A: Workspace Assertion, Game Sync & Toolkit Launch Gate
 1. **Workspace Static Assertion**: Runs a rapid deterministic validation check (`bg3 mod validate <slug>`) to assert that workspace files in `Mods/authored/<ModSlug>/` remain structurally sound.
@@ -164,7 +164,7 @@ Deploy and test your mod in an actual game session:
 /bg3-test-mod arcane-blade
 ```
 
-The [`bg3-test-mod`](../.agents/skills/bg3-test-mod/SKILL.md) skill governs **User-Action Gate 2 (In-Game Playtesting)** with a progressive two-tier testing protocol:
+The `bg3-test-mod` skill governs **User-Action Gate 2 (In-Game Playtesting)** with a progressive two-tier testing protocol:
 
 ### Phase 3A: Clean-Room / Smoke Testing (Default Fast Path)
 1. **Loose Data Purge & Local .pak Deployment**: Purges loose development files from `<Game>/Data/` using `bg3 mod sync-game <slug> --clean-mod` to prevent Larian Virtual File System (VFS) loose-file shadowing and engine locks, then builds an uncorrupted test `.pak` archive deployed directly to `AppData/Mods/` via `bg3 mod pack <slug> --publish-local`.
@@ -200,7 +200,7 @@ When in-game testing is complete and verified, prepare the mod for publication:
 /bg3-release-prep arcane-blade
 ```
 
-The [`bg3-release-prep`](../.agents/skills/bg3-release-prep/SKILL.md) skill automates all release checks and prepares staging for **User-Action Gate 3 (Toolkit Publishing)**:
+The `bg3-release-prep` skill automates all release checks and prepares staging for **User-Action Gate 3 (Toolkit Publishing)**:
 
 1. **Atomic Semantic Version64 Bumping**: Increments version numbers and atomically encodes the 64-bit integer across `Mods/<UUID>/meta.lsx`, `Projects/<UUID>/meta.lsx`, and synchronizes the version in `Mods/authored/<slug>/README.md` via `bg3 mod bump-version <slug> patch`.
 2. **Localization Pruning & Binary Compilation**: Prunes unused string handles and compiles `English/<ModName>.xml` into a binary `.loca` file via `bg3 mod sync-loca <slug> --prune --compile`.
@@ -223,7 +223,7 @@ After publishing through the Toolkit (**User-Action Gate 3**), manage storefront
 /bg3-post-release arcane-blade
 ```
 
-The [`bg3-post-release`](../.agents/skills/bg3-post-release/SKILL.md) skill governs post-release operations across two critical phases:
+The `bg3-post-release` skill governs post-release operations across two critical phases:
 
 ### Phase 5A: Storefront Governance via REST API
 1. **Pre-Flight Publication Check**: Asserts that the mod has been published via `Glasses.exe` (User-Action Gate 3) before making API calls, as the mod.io REST API updates metadata for existing profiles but cannot create new mod entries or upload `.pak` binaries.
@@ -257,9 +257,9 @@ The autonomous agent skills invoke deterministic Python automation tools from th
 
 | Lifecycle Stage | Autonomous Skill | Underlying CLI Commands & Modules | Documentation |
 | :--- | :--- | :--- | :--- |
-| **Stage 1: Creation** | [`bg3-create-mod`](../.agents/skills/bg3-create-mod/SKILL.md) | `bg3 mod scaffold` (`bg3_authoring.create_mod_scaffold`)<br>`bg3 scaffold stat` (`bg3_authoring.scaffold_stat_entry`)<br>`bg3 scaffold progression` (`bg3_authoring.scaffold_progression_node`)<br>`bg3 scaffold root-template` (`bg3_authoring.scaffold_root_template`)<br>`bg3 mod inject-treasure` (`bg3_authoring.inject_treasure_table`)<br>`bg3 mod add-dependency` (`bg3_authoring.add_mod_dependency`)<br>`bg3 mod validate` (`bg3_authoring.diagnostics.validate_mod`)<br>`bg3 mod sync-loca --check` (`bg3_authoring.diagnostics.sync_localization`)<br>`bg3 mod conflict --against-library` (`bg3_authoring.diagnostics.check_mod_conflicts`) | [FEATURES.md § 3.2](FEATURES.md#32-authoring--scaffolding-tools-packagesbg3-authoring) |
-| **Stage 2: Diagnostics & Toolkit Staging** | [`bg3-diagnose-mod`](../.agents/skills/bg3-diagnose-mod/SKILL.md) | `bg3 mod validate` (`bg3_authoring.diagnostics.validate_mod`)<br>`bg3 mod sync-game` (`bg3_authoring.packaging.sync_game_data`)<br>`bg3 mod diagnose-logs` (`bg3_authoring.diagnostics.diagnose_toolkit_logs`) | [FEATURES.md § 3.3](FEATURES.md#33-diagnostics--auditing-tools-packagesbg3-authoring) |
-| **Stage 3: Testing** | [`bg3-test-mod`](../.agents/skills/bg3-test-mod/SKILL.md) | `bg3 mod sync-game --clean-mod` (`bg3_authoring.packaging.sync_game_data`)<br>`bg3 mod pack --publish-local` (`bg3_authoring.packaging.pack_mod_pak`)<br>`bg3 loadorder enable --with-deps --isolate` (`bg3_core.manage_load_order`)<br>`bg3 save inspect` (`bg3_core.save_inspector`) | [FEATURES.md § 3.4–3.5](FEATURES.md#34-packaging--deployment-tools-packagesbg3-authoring) |
-| **Stage 4: Release Prep** | [`bg3-release-prep`](../.agents/skills/bg3-release-prep/SKILL.md) | `bg3 mod bump-version` (`bg3_authoring.packaging.bump_mod_version`)<br>`bg3 mod sync-loca --prune --compile` (`bg3_authoring.diagnostics.sync_localization`)<br>`bg3 mod validate --strict` (`bg3_authoring.diagnostics.validate_mod`)<br>`bg3 mod conflict --against-library` (`bg3_authoring.diagnostics.check_mod_conflicts`)<br>`bg3 mod render-desc` (`bg3_core.render_modio_description`)<br>`bg3 mod sync-game` (`bg3_authoring.packaging.sync_game_data`)<br>`bg3 mod pack --output dist/<slug>.pak` (`bg3_authoring.packaging.pack_mod_pak`) | [FEATURES.md § 3.3–3.5](FEATURES.md#35-management--load-order-tools-packagesbg3-core) |
-| **Stage 5: Post-Release & Teardown** | [`bg3-post-release`](../.agents/skills/bg3-post-release/SKILL.md) | `bg3 modio update-metadata` (`bg3_core.modio_update_metadata`)<br>`bg3 mod render-desc` (`bg3_core.render_modio_description`)<br>`bg3 mod sync-game --clean-mod` (`bg3_authoring.packaging.sync_game_data`)<br>`bg3 mod pack --clean-local` (`bg3_authoring.packaging.pack_mod_pak`)<br>`bg3 loadorder disable` (`bg3_core.manage_load_order`) | [FEATURES.md § 3.5](FEATURES.md#35-management--load-order-tools-packagesbg3-core) |
+| **Stage 1: Creation** | `bg3-create-mod` | `bg3 mod create` (`bg3_authoring.create_mod_scaffold`)<br>`bg3 scaffold stat` (`bg3_authoring.scaffold_mechanics`)<br>`bg3 scaffold progression` (`bg3_authoring.scaffold_mechanics`)<br>`bg3 scaffold root-template` (`bg3_authoring.scaffold_visuals`)<br>`bg3 mod inject-treasure` (`bg3_authoring.inject_treasure_table`)<br>`bg3 mod add-dependency` (`bg3_authoring.add_mod_dependency`)<br>`bg3 mod validate` (`bg3_authoring.diagnostics.validate_mod`)<br>`bg3 mod sync-loca --check` (`bg3_authoring.diagnostics.sync_localization`)<br>`bg3 mod conflict --against-library` (`bg3_core.check_mod_conflicts`) | [FEATURES.md § 3.2](FEATURES.md#32-authoring--scaffolding-tools-packagesbg3-authoring) |
+| **Stage 2: Diagnostics & Toolkit Staging** | `bg3-diagnose-mod` | `bg3 mod validate` (`bg3_authoring.diagnostics.validate_mod`)<br>`bg3 mod sync-game` (`bg3_authoring.packaging.sync_game_data`)<br>`bg3 mod diagnose-logs` (`bg3_authoring.diagnostics.diagnose_toolkit_logs`) | [FEATURES.md § 3.3](FEATURES.md#33-diagnostics--auditing-tools-packagesbg3-authoring) |
+| **Stage 3: Testing** | `bg3-test-mod` | `bg3 mod sync-game --clean-mod` (`bg3_authoring.packaging.sync_game_data`)<br>`bg3 mod pack --publish-local` (`bg3_authoring.packaging.pack_mod_pak`)<br>`bg3 loadorder enable --with-deps --isolate` (`bg3_core.manage_load_order`)<br>`bg3 save inspect` (`bg3_core.save_inspector`) | [FEATURES.md § 3.4–3.5](FEATURES.md#34-packaging--deployment-tools-packagesbg3-authoring) |
+| **Stage 4: Release Prep** | `bg3-release-prep` | `bg3 mod bump-version` (`bg3_core.bump_mod_version`)<br>`bg3 mod sync-loca --prune --compile` (`bg3_authoring.diagnostics.sync_localization`)<br>`bg3 mod validate --strict` (`bg3_authoring.diagnostics.validate_mod`)<br>`bg3 mod conflict --against-library` (`bg3_core.check_mod_conflicts`)<br>`bg3 mod render-desc` (`bg3_core.render_modio_description`)<br>`bg3 mod sync-game` (`bg3_authoring.packaging.sync_game_data`)<br>`bg3 mod pack --output dist/<slug>.pak` (`bg3_authoring.packaging.pack_mod_pak`) | [FEATURES.md § 3.3–3.5](FEATURES.md#35-management--load-order-tools-packagesbg3-core) |
+| **Stage 5: Post-Release & Teardown** | `bg3-post-release` | `bg3 modio update-metadata` (`bg3_core.modio_update_metadata`)<br>`bg3 mod render-desc` (`bg3_core.render_modio_description`)<br>`bg3 mod sync-game --clean-mod` (`bg3_authoring.packaging.sync_game_data`)<br>`bg3 mod pack --clean-local` (`bg3_authoring.packaging.pack_mod_pak`)<br>`bg3 loadorder disable` (`bg3_core.manage_load_order`) | [FEATURES.md § 3.5](FEATURES.md#35-management--load-order-tools-packagesbg3-core) |
 
