@@ -20,6 +20,13 @@ class TestLegacyReferencesRegressionGate(unittest.TestCase):
         self.assertFalse(legacy_registry.exists(), f"Found legacy file: {legacy_registry}")
         self.assertFalse(legacy_builder.exists(), f"Found legacy file: {legacy_builder}")
 
+    def test_no_setup_shell_scripts(self):
+        """Assert that setup.sh and setup.ps1 do not exist in the repository root."""
+        setup_sh = REPO_ROOT / "setup.sh"
+        setup_ps1 = REPO_ROOT / "setup.ps1"
+        self.assertFalse(setup_sh.exists(), f"Found legacy shell script: {setup_sh}")
+        self.assertFalse(setup_ps1.exists(), f"Found legacy PowerShell script: {setup_ps1}")
+
     def test_no_scripts_directory(self):
         """Assert that root scripts/ directory does not exist."""
         scripts_dir = REPO_ROOT / "scripts"
@@ -40,8 +47,6 @@ class TestLegacyReferencesRegressionGate(unittest.TestCase):
             ".py",
             ".md",
             ".json",
-            ".sh",
-            ".ps1",
             ".toml",
             ".yaml",
             ".yml",
@@ -99,8 +104,6 @@ class TestLegacyReferencesRegressionGate(unittest.TestCase):
             ".py",
             ".md",
             ".json",
-            ".sh",
-            ".ps1",
             ".toml",
             ".yaml",
             ".yml",

@@ -5,6 +5,9 @@
 [![Platform: Cross-Platform](https://img.shields.io/badge/platform-Linux%20%7C%20WSL%20%7C%20Windows-brightgreen.svg)](#prerequisites)
 [![mod.io API](https://img.shields.io/badge/mod.io-REST%20v1-orange.svg)](https://mod.io/g/baldursgate3)
 
+> [!IMPORTANT]
+> This project is an "AI Vibe-coding" test case, primarily intended to help me learn how Agents work, and how to work with them.
+
 An all-in-one workspace for authoring, cataloging, synchronizing, and testing **Baldur's Gate 3** mods on **mod.io**, backed by autonomous AI development workflows.
 
 I started this with the intention of learning how to use AI by helping me keep track of what all the different BG3 mods I had installed actually did, then I started using it to help me theorycraft modded character builds. _Then_ I decided I wanted to make my _own_ mods that built on top of other mods without conflicts.
@@ -24,10 +27,10 @@ For a deep-dive into feature & functionality specifics, as well as example agent
 ### Mod Discovery & Cataloging
 
 - **Smart mod.io Search & Filtering**: Discover community mods across PC, PS5, and Xbox Series X|S using natural language queries and compatibility filters (`/bg3-search-mods`, `bg3 modio search`).
-- **Automated Unpacking & Asset Extraction**: Download and decompress PAK/ZIP archives on demand, extracting engine XMLs, localization tables, and game stats into human-readable markdown (`/bg3-document-mods`, `bg3 modio extract`).
+- **Automated Unpacking & Asset Extraction**: Download and decompress PAK/ZIP archives on demand, extracting engine XMLs, localization tables, and game stats into human-readable markdown (`/bg3-sync-mod-docs`, `bg3 modio extract`).
 - **Master Mod Catalog**: Track mods centrally in your externalized User Content Studio (`$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/subscribed/library.md`) using Mod Id, Mod Name, Mod Slug, Description, Features Documented, and Spec Link; unverified IDs remain blank.
 - **Conflict & Load Order Analysis**: Proactively audit candidate mods for stat collisions, duplicate UUIDs, and console load order dependencies before installing (`/bg3-check-mod-conflicts`).
-- **Upstream Update Tracking**: Check for upstream patches and updates across tracked mods, refreshing documentation without manual data re-entry (`/bg3-update-mod-documentation`, `bg3 modio update`).
+- **Upstream Update Tracking**: Check for upstream patches and updates across tracked mods, refreshing documentation without manual data re-entry (`/bg3-sync-mod-docs`, `bg3 modio update`).
 
 ### Build Crafting
 
@@ -50,16 +53,26 @@ For a deep-dive into feature & functionality specifics, as well as example agent
 
 ### 1. Prerequisites
 
-- **Python 3.10+** with the **[uv](https://docs.astral.sh/uv/)** workspace package manager (automatically bootstrapped by `./setup.sh`) and `pyyaml>=6.0`.
+- **Python 3.10+** with the **[uv](https://docs.astral.sh/uv/)** workspace package manager.
 - **Baldur's Gate 3** (installed via Steam on WSL, Linux, or Windows).
 - **mod.io Account** (API Key & Personal Access Token from [mod.io/me/access](https://mod.io/me/access)).
 
-### 2. Run the Interactive Setup Wizard
+### 2. Installation & Setup
 
-Run the setup script to configure your environment variables:
+#### User Package Installation (Recommended)
+Install the standalone `bg3-mod-studio` suite globally using `uv`:
 
 ```bash
-./setup.sh
+uv tool install bg3-mod-studio
+bg3 env setup
+```
+
+#### Contributor Setup (From Source Repository)
+```bash
+git clone https://github.com/jpelton-stroud/bg3-mod-studio.git
+cd bg3-mod-studio
+uv sync
+uv run bg3 env setup
 ```
 
 The wizard will:
@@ -74,7 +87,7 @@ The wizard will:
 You can review your configuration anytime with:
 
 ```bash
-./setup.sh --check
+bg3 env check
 ```
 
 ---
@@ -95,7 +108,6 @@ BaldursGate3/
 │   └── bg3-authoring/         # Mod scaffolding, packaging, and diagnostic toolchain
 ├── tests/                     # Automated test suites
 ├── .gitignore                 # Production-grade gitignore
-├── setup.sh                   # Setup wizard launcher
 ├── CONTRIBUTING.md            # Contribution guidelines
 ├── CODE_OF_CONDUCT.md         # Contributor Covenant v2.1
 ├── LICENSE                    # MIT License

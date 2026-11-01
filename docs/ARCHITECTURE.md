@@ -215,7 +215,7 @@ The community mod library indexes over 2,200 unique community gear items, passiv
 
 - **Zero-Dependency Philosophy**: All 59 canonical automation tools across the 3 modular workspace packages (`bg3-core`, `bg3-authoring`, `bg3-theorycraft`) and the unified `bg3` CLI entry point use strictly the Python 3.10+ standard library. They run out-of-the-box on Linux, WSL, and Windows without virtual environment setups or `pip install` requirements.
 - **Unified 2026 CLI Suite (`bg3`)**:
-  - Symlinked to `~/.local/bin/bg3` via `setup.sh`.
+  - Installed to `~/.local/bin/bg3` via `uv tool install bg3-mod-studio` (or `uv tool install --editable packages/bg3-mod-studio`).
   - Implements modern Dual-Channel stream discipline: rich, high-signal human-readable formatting in interactive terminals, and pristine, machine-parsable JSON on `stdout` when `--json` is supplied or non-interactive pipes are detected.
   - Standardizes POSIX exit codes, non-interactive confirmation guards (`--yes` / `--confirm`), and dynamic in-memory tool catalog (`bg3 tools`).
 - **Safe Sandboxing & Clean-Room Isolation**:

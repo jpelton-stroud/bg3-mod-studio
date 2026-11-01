@@ -10,7 +10,7 @@ Intelligent gear and build advisor, translating natural language requests into h
 ---
 
 > [!TIP]
-> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
+> Query the studio tool registry with `bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -26,11 +26,11 @@ flowchart TD
 
 | User Intent | CLI Command |
 | :--- | :--- |
-| Boosts specific stat | `uv run bg3 query --boost "SpellSaveDC" --json` |
-| Specific equipment slot | `uv run bg3 query --slot "Amulet" --json` |
-| Specific passive | `uv run bg3 query --passive "ExtraAttack" --json` |
-| Slot + Rarity combination | `uv run bg3 query --slot "Boots" --rarity "Legendary" --json` |
-| Thematic keyword search | `uv run bg3 query --search "necrotic" --json` |
+| Boosts specific stat | `bg3 query --boost "SpellSaveDC" --json` |
+| Specific equipment slot | `bg3 query --slot "Amulet" --json` |
+| Specific passive | `bg3 query --passive "ExtraAttack" --json` |
+| Slot + Rarity combination | `bg3 query --slot "Boots" --rarity "Legendary" --json` |
+| Thematic keyword search | `bg3 query --search "necrotic" --json` |
 
 ### 2. Synthesize Advice
 Structure recommendations with Item Name, Slot, Mod Source, Key Effects, and Build Synergies. Note early-game container drop mechanics via `bg3 mod inject-treasure`.
@@ -41,5 +41,5 @@ Structure recommendations with Item Name, Slot, Mod Source, Key Effects, and Bui
 
 Always verify query results before presenting to user:
 1. Verify `bg3 query` exits with code 0.
-2. If the query database is empty or missing, rebuild it with `uv run bg3 query --reindex`.
+2. If the query database is empty or missing, rebuild it with `bg3 query --reindex`.
 3. Confirm returned items exist in `Mods/subscribed/library.md` or `Mods/subscribed/`.

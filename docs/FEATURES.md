@@ -13,7 +13,7 @@ The workspace combines autonomous AI orchestration with deterministic Python aut
 - **Zero-Dependency Automation Engine (59 Tools across 3 Workspace Packages)**:
   All studio automation tools (and the unified `bg3` CLI entrypoint) are implemented strictly using the **Python 3.10+ Standard Library** (`zlib`, `struct`, `xml.etree.ElementTree`, `urllib.request`, `hashlib`). They require zero virtual environments, third-party packages (`pip`), or external compilers for standard runtime operation.
 - **Unified 2026 CLI Suite (`bg3`)**:
-  The primary entrypoint is installed to `~/.local/bin/bg3` by `setup.sh`. It exposes structured domain commands (`mod`, `loadorder`, `modio`, `scaffold`, `query`, `build`, `tools`, `env`, `run`), standardizes POSIX exit codes, and provides modern **Dual-Channel Stream Discipline**: rich, styled output on interactive terminals, and pristine, machine-parsable JSON on `stdout` when `--json` is supplied or piped.
+  The primary entrypoint is installed to `~/.local/bin/bg3` via `uv tool install bg3-mod-studio`. It exposes structured domain commands (`mod`, `loadorder`, `modio`, `scaffold`, `query`, `build`, `tools`, `env`, `run`), standardizes POSIX exit codes, and provides modern **Dual-Channel Stream Discipline**: rich, styled output on interactive terminals, and pristine, machine-parsable JSON on `stdout` when `--json` is supplied or piped.
 - **XDG Base Directory Specification Compliance**:
   Adheres strictly to the XDG standard via `bg3_core.env_paths`. Secrets and configurations are stored in `$XDG_CONFIG_HOME/bg3/env` (mode `0600`), and caches resolve to `$XDG_CACHE_HOME/bg3/`. In-repo `.env` and `.cache` directories are completely eliminated. Introspectable via `bg3 env paths` and `bg3 env check`.
 - **Pure-Python LSPK v18 Binary Packaging (`bg3 mod pack` / `bg3_core.lspk`)**:
@@ -55,10 +55,8 @@ Autonomous skills residing in [`.agents/skills/`](../.agents/skills/) allow deve
 | `/bg3-create-modio-collection`  | [`bg3-create-modio-collection`](../.agents/skills/bg3-create-modio-collection/SKILL.md)   | Community      | Creates or updates public mod.io collections from the mod library catalog. |
 | `/bg3-query-gear`               | [`bg3-query-gear`](../.agents/skills/bg3-query-gear/SKILL.md)                             | Library        | Interactive advisor querying cataloged BiS mod items and spells.           |
 | `/bg3-search-mods`              | [`bg3-search-mods`](../.agents/skills/bg3-search-mods/SKILL.md)                           | Discovery      | Searches mod.io with platform filters and checks for conflicts.            |
-| `/bg3-document-mods`            | [`bg3-document-mods`](../.agents/skills/bg3-document-mods/SKILL.md)                       | Documentation  | Concurrently downloads, unpacks, and catalogs mod batches.                 |
-| `/bg3-document-single-mod`      | [`bg3-document-single-mod`](../.agents/skills/bg3-document-single-mod/SKILL.md)           | Documentation  | Extracts, inspects, and catalogs a single mod archive.                     |
-| `/bg3-update-mod-documentation` | [`bg3-update-mod-documentation`](../.agents/skills/bg3-update-mod-documentation/SKILL.md) | Maintenance    | Checks tracked mods for upstream updates and refreshes specs.              |
-| `/bg3-update-single-mod`        | [`bg3-update-single-mod`](../.agents/skills/bg3-update-single-mod/SKILL.md)               | Maintenance    | Updates documentation and assets for an individual mod.                    |
+| `/bg3-sync-mod-docs`            | [`bg3-sync-mod-docs`](../.agents/skills/bg3-sync-mod-docs/SKILL.md)                       | Documentation  | Concurrently downloads, unpacks, documents, and updates mod batches.       |
+| `/bg3-sync-single-mod`          | [`bg3-sync-single-mod`](../.agents/skills/bg3-sync-single-mod/SKILL.md)                   | Documentation  | Extracts, inspects, documents, or updates a single mod archive.            |
 | `/bg3-create-build-guide`       | [`bg3-create-build-guide`](../.agents/skills/bg3-create-build-guide/SKILL.md)             | Theorycrafting | Builds high-end Level 20 build guides pairing mod items with vanilla gear. |
 | `/grill-me`                     | `grill-me`                                                                             | Interview      | Interactive design-tree clarification interview before planning/coding.    |
 
@@ -156,43 +154,25 @@ Searches mod.io with natural language and platform filters (PC, PlayStation 5, X
   /bg3-search-mods inventory management mods compatible with console
   ```
 
-#### 11. `/bg3-document-mods`
+#### 11. `/bg3-sync-mod-docs`
 
-Orchestrates concurrent subagents to download, unpack, validate, and document a batch of community mods from mod.io into `$BG3_SUBSCRIBED_MODS_DIR/<mod_name>/README.md` and updates `library.md`.
-
-- **Example Prompt**:
-  ```text
-  /bg3-document-mods 5e-spells unlocklevelcurve extra-gear
-  ```
-
-#### 12. `/bg3-document-single-mod`
-
-Worker skill that fetches, unpacks, validates, and documents a single Baldur's Gate 3 mod from mod.io into `mods/<mod_name>/README.md` using the rich feature schema and static in-game validation.
+Orchestrates concurrent subagents to download, unpack, validate, document, and update community mods from mod.io into `$BG3_SUBSCRIBED_MODS_DIR/<mod_name>/README.md` and updates `library.md`. Supports batch queries, explicit mod slugs, or auditing all tracked subscriptions.
 
 - **Example Prompt**:
   ```text
-  /bg3-document-single-mod 4166963
+  /bg3-sync-mod-docs 5e-spells unlocklevelcurve extra-gear
   ```
 
-#### 13. `/bg3-update-mod-documentation`
+#### 12. `/bg3-sync-single-mod`
 
-Checks tracked community mods against remote mod.io releases and dispatches concurrent workers to refresh outdated documentation and database indexes.
+Worker skill that fetches, unpacks, validates, documents, or updates a single Baldur's Gate 3 mod from mod.io into `mods/<mod_name>/README.md` using the rich feature schema and static in-game validation.
 
 - **Example Prompt**:
   ```text
-  /bg3-update-mod-documentation ancient-armory
+  /bg3-sync-single-mod 4166963
   ```
 
-#### 14. `/bg3-update-single-mod`
-
-Worker skill that fetches the latest release details for an individual mod, re-extracts the `.pak` archive if a new version is detected, and updates the local spec.
-
-- **Example Prompt**:
-  ```text
-  /bg3-update-single-mod 50421
-  ```
-
-#### 15. `/bg3-create-build-guide`
+#### 13. `/bg3-create-build-guide`
 
 Designs Level 1–20 theorycrafted character builds combining `UnlockLevelCurve`, modded BiS gear, feat selections, and mathematical Turn 1 combat sequences (DPR calculation).
 
@@ -212,7 +192,7 @@ Conducts an interactive, branching interview using multiple-choice prompts to cl
 
 ---
 
-## 3. Automation Tools & Packages Reference (`packages/bg3-*` & `setup.sh`)
+## 3. Automation Tools & Packages Reference (`packages/bg3-*`)
 
 All 59 canonical studio automation tools are organized into domain-specific packages within `packages/` (`bg3-core`, `bg3-authoring`, `bg3-theorycraft`) and discoverable dynamically via `bg3 tools`.
 
@@ -222,12 +202,13 @@ Every tool supports dual-mode execution:
 
 ---
 
-### 3.1 Unified CLI Suite & Environment (`setup.sh`, `packages/bg3-core/bg3_core/cli.py`)
+### 3.1 Unified CLI Suite & Environment (`packages/bg3-core/bg3_core/cli.py`, `setup_environment.py`)
 
-#### `setup.sh`
-- **Location**: `setup.sh`
-- **Purpose**: POSIX bootstrap script. Validates Python 3.10+ in `$PATH`, creates symlink `~/.local/bin/bg3 -> packages/bg3-core/bg3_core/cli.py`, and launches the environment configuration wizard.
-- **Usage**: `./setup.sh [--non-interactive] [--skip-steam] [--check]`
+#### `bg3 env` (`packages/bg3-core/bg3_core/setup_environment.py`)
+- **Command Alias**: `env`
+- **Primary CLI**: `bg3 env [setup|check|paths] [flags...]`
+- **Purpose**: Interactive setup wizard, non-interactive status check, and XDG storage path resolution.
+- **Usage**: `bg3 env setup [--non-interactive] [--dry-run]`, `bg3 env check [--json]`, `bg3 env paths`
 
 #### `packages/bg3-core/bg3_core/cli.py`
 - **Command Alias**: `bg3`

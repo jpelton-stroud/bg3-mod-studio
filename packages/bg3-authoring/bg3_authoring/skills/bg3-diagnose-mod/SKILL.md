@@ -13,7 +13,7 @@ Refer to deep triage reference:
 ---
 
 > [!TIP]
-> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
+> Query the studio tool registry with `bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -31,14 +31,14 @@ flowchart TD
 
 ### Phase 2A: Workspace Assertion & Game Data Sync
 1. Run rapid static pre-flight validation on `my_mods/<slug>/`:
-   - Execute `uv run bg3 mod validate <mod-slug> --json`
+   - Execute `bg3 mod validate <mod-slug> --json`
 2. Synchronize unpacked assets and compiled binary `.loca` to `<Game>/Data/`:
-   - Execute `uv run bg3 mod sync-game --mods <mod-slug> --json`
+   - Execute `bg3 mod sync-game --mods <mod-slug> --json`
 3. Instruct user to open `<ModName>` in Baldur's Gate 3 Toolkit (`Glasses.exe`) to generate engine runtime logs.
 
 ### Phase 2B: Runtime Log Diagnosis
 1. Inspect generated Toolkit logs per [Log Triage Reference](./references/runtime_log_triage.md):
-   - Execute `uv run bg3 mod diagnose-logs <mod-slug> --severity warning --json`
+   - Execute `bg3 mod diagnose-logs <mod-slug> --severity warning --json`
 2. Apply targeted fixes in `my_mods/<mod-slug>/`, re-sync, and confirm resolution (bounded by 3-iteration circuit breaker).
 
 ---

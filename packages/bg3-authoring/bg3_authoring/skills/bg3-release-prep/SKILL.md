@@ -10,7 +10,7 @@ Stage 4 pipeline for *Baldur's Gate 3* mods, preparing loose development files a
 ---
 
 > [!TIP]
-> Query the studio tool registry with `uv run bg3 tools search "<intent>" --json`.
+> Query the studio tool registry with `bg3 tools search "<intent>" --json`.
 
 ## Workflow
 
@@ -26,18 +26,18 @@ flowchart TD
 ```
 
 ### 1. Semantic Bump & Localization Compilation
-- Bump semantic version: `uv run bg3 mod bump-version <mod-slug> --patch --json`
-- Prune and compile binary localization: `uv run bg3 mod sync-loca <mod-slug> --prune --compile --json`
+- Bump semantic version: `bg3 mod bump-version <mod-slug> --patch --json`
+- Prune and compile binary localization: `bg3 mod sync-loca <mod-slug> --prune --compile --json`
 
 ### 2. Strict Validation & Description Rendering
-- Strict schema validation: `uv run bg3 mod validate <mod-slug> --strict --json`
-- Library conflict pre-check: `uv run bg3 mod conflict <mod-slug> --against-library --json`
-- Render mod.io storefront HTML description: `uv run bg3 mod render-desc <mod-slug> --write --json`
+- Strict schema validation: `bg3 mod validate <mod-slug> --strict --json`
+- Library conflict pre-check: `bg3 mod conflict <mod-slug> --against-library --json`
+- Render mod.io storefront HTML description: `bg3 mod render-desc <mod-slug> --write --json`
 
 ### 3. Game Data Staging & Packaging
 Sync loose development files and `.loca` to `<Game>/Data/`:
-- Sync assets to game: `uv run bg3 mod sync-game --mods <mod-slug> --json`
-- Optional package for Nexus Mods / distributions: `uv run bg3 mod pack <mod-slug> --out "dist/<mod-slug>.pak" --json`
+- Sync assets to game: `bg3 mod sync-game --mods <mod-slug> --json`
+- Optional package for Nexus Mods / distributions: `bg3 mod pack <mod-slug> --out "dist/<mod-slug>.pak" --json`
 
 *Note: In accordance with official Larian requirements, mod binary publishing to mod.io is performed directly through the Baldur's Gate 3 Toolkit (`Glasses.exe`).*
 

@@ -17,13 +17,13 @@ Before launching the game as a consumer subscriber, local development assets mus
 
 ```bash
 # 1. Purge loose files synced to <Game>/Data/
-uv run bg3 mod sync-data --clean-mod <mod-slug> --json
+bg3 mod sync-game --clean-mod <mod-slug> --json
 
 # 2. Delete local test .pak from AppData/Mods/
-uv run bg3 mod pack --mod <mod-slug> --clean-local --json
+bg3 mod pack <mod-slug> --clean-local --json
 
 # 3. Disable local test entry in modsettings.lsx
-uv run bg3 loadorder --disable <mod-slug> --json
+bg3 loadorder disable "<mod-slug>" --json
 ```
 
 ---

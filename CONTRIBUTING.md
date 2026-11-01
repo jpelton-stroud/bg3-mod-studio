@@ -32,7 +32,7 @@ All contributors are expected to uphold our [Code of Conduct](CODE_OF_CONDUCT.md
    This project is organized as a modular `uv` workspace with zero heavy external runtime dependencies.
    ```bash
    uv sync
-   ./setup.sh
+   uv run bg3 env setup
    ```
    This will prompt you for your `MODIO_API_KEY`, optional `MODIO_PAT`, your BG3 `Data` directory, default author handle, and your Studio Document workspace directory.
 3. **Run Automated Test Suite & Verification**:

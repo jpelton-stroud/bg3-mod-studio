@@ -11,9 +11,8 @@ Autonomous skills in [`.agents/skills/`](../.agents/skills/) allow developers an
 | Category | Intent / Slash Command | Description | Canonical CLI Command & Module |
 | :--- | :--- | :--- | :--- |
 | Discovery | [`/bg3-search-mods`](../.agents/skills/bg3-search-mods/SKILL.md) | Discovers community mods on mod.io with natural language and platform filters, pre-filtering tracked mods. | `bg3 modio search`<br>(`bg3_core.modio_search`) |
-| Documentation | [`/bg3-document-mods`](../.agents/skills/bg3-document-mods/SKILL.md) | Concurrently extracts, validates, and generates markdown specifications for community mods. | `bg3 modio extract`<br>(`bg3_core.modio_extract`) |
-| Maintenance | [`/bg3-update-mod-documentation`](../.agents/skills/bg3-update-mod-documentation/SKILL.md) | Checks tracked mods for upstream mod.io releases and updates local specs and catalogs. | `bg3 modio update`<br>(`bg3_core.modio_update`) |
-| Compatibility | [`/bg3-check-mod-conflicts`](../.agents/skills/bg3-check-mod-conflicts/SKILL.md) | Analyzes mod overrides and stat collisions against cataloged library mods. | `bg3 mod conflict`<br>(`bg3_authoring.diagnostics.check_mod_conflicts`) |
+| Documentation | [`/bg3-sync-mod-docs`](../.agents/skills/bg3-sync-mod-docs/SKILL.md) | Concurrently extracts, validates, documents, and updates markdown specifications for community mods. | `bg3 modio extract` / `bg3 modio update`<br>(`bg3_core.modio_extract`, `bg3_core.modio_update`) |
+| Compatibility | [`/bg3-check-mod-conflicts`](../.agents/skills/bg3-check-mod-conflicts/SKILL.md) | Analyzes mod overrides and stat collisions against cataloged library mods. | `bg3 mod conflict`<br>(`bg3_core.check_mod_conflicts`) |
 | Collections | [`/bg3-create-modio-collection`](../.agents/skills/bg3-create-modio-collection/SKILL.md) | Curates and syncs public mod.io collections directly from library catalog. | `bg3 modio create-collection`<br>(`bg3_core.modio_create_collection`) |
 
 > [!NOTE]
@@ -28,11 +27,10 @@ To enable mod.io discovery and download capabilities, configure your credentials
    - Generate an **API Key** (for public search and downloads).
    - Generate a **Personal Access Token (PAT)** with Read/Write permissions (for profile subscriptions and collection management).
 2. **Configure Credentials (XDG Standard)**:
-   - Run the interactive setup launcher:
+   - Run the interactive setup wizard:
      ```bash
-     ./setup.sh
+     bg3 env setup
      ```
-     *(or run `bg3 env setup`)*
    - The setup wizard stores credentials securely in `$XDG_CONFIG_HOME/bg3/env` (default: `~/.config/bg3/env`) with strict POSIX mode `0600` permissions. Repository-level `.env` files are eliminated to prevent leaking secrets.
    - Verify path and environment configuration anytime:
      ```bash
@@ -80,41 +78,16 @@ uv run -m bg3_core.modio_search "<query>" --platform <platform> --json
 
 ---
 
-## 3. Extracting & Cataloging Mod Specifications (`/bg3-document-mods`)
+## 3. Extracting, Updating & Cataloging Mod Specifications (`/bg3-sync-mod-docs`)
 
-Once candidate mods are selected, the studio automatically downloads, decompresses, and deconstructs community `.pak` files into structured markdown specifications within `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/subscribed/`.
+Once candidate mods are selected, the studio automatically downloads, decompresses, and deconstructs community `.pak` files into structured markdown specifications within `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/subscribed/`, or checks tracked mods for upstream updates.
 
 ### Conversational Examples
 
 - *"Document the mod at https://mod.io/g/baldursgate3/m/unlocklevelcurve."*
-- `"/bg3-document-single-mod 4166963"`
-- `"/bg3-document-mods 5e-spells unlocklevelcurve extra-gear"`
-
-### Under the Hood: Tool Execution
-
-The orchestrator skill coordinates background subagents running pure-Python extraction:
-
-```bash
-# Primary CLI command
-bg3 modio extract --mod-id <id-or-slug> --output-dir Mods/subscribed/<slug>
-
-# Direct module execution
-uv run -m bg3_core.modio_extract --mod-id <id-or-slug> --output-dir Mods/subscribed/<slug>
-```
-
-- **Deconstruction**: Downloads the archive and unpackages Larian XML/LSX and TXT data without external tools (`bg3_core.lspk`).
-- **Cataloging**: Extracts spells, statuses, progression nodes, and passives into a standardized `README.md` and appends an entry to `Mods/subscribed/library.md`.
-- *Detailed reference*: See [FEATURES.md § 3.6](FEATURES.md#36-library--modio-search-tools-packagesbg3-core).
-
----
-
-## 4. Tracking Upstream Updates & Account Synchronization
-
-Keep local documentation and subscribed mods synchronized with upstream authors on mod.io.
-
-### Conversational Examples
-
-- `"/bg3-update-mod-documentation"` *(checks all cataloged mods for upstream updates)*
+- `"/bg3-sync-single-mod 4166963"`
+- `"/bg3-sync-mod-docs 5e-spells unlocklevelcurve extra-gear"`
+- `"/bg3-sync-mod-docs"` *(checks all cataloged mods for upstream updates)*
 - *"Check if 5e-spells or unlocklevelcurve have new versions on mod.io."*
 - *"Synchronize all mods subscribed on my mod.io profile."*
 

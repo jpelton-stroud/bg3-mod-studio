@@ -26,9 +26,9 @@ class TestSkillsInstaller(unittest.TestCase):
         if Path(self.temp_dir).exists():
             shutil.rmtree(self.temp_dir)
 
-    def test_discover_bundled_skills_discovers_all_fifteen(self):
+    def test_discover_bundled_skills_discovers_all_skills(self):
         skills = discover_bundled_skills()
-        self.assertEqual(len(skills), 15, f"Expected 15 skills, found {len(skills)}: {list(skills.keys())}")
+        self.assertEqual(len(skills), 13, f"Expected 13 skills, found {len(skills)}: {list(skills.keys())}")
         for name, meta in skills.items():
             self.assertTrue(meta["source_path"].is_dir(), f"Skill directory missing: {meta['source_path']}")
             self.assertTrue(meta["skill_md"].is_file(), f"SKILL.md missing for {name}")
@@ -42,12 +42,10 @@ class TestSkillsInstaller(unittest.TestCase):
         expected_core = {
             "bg3-check-mod-conflicts",
             "bg3-create-modio-collection",
-            "bg3-document-mods",
-            "bg3-document-single-mod",
             "bg3-manage-load-order",
             "bg3-search-mods",
-            "bg3-update-mod-documentation",
-            "bg3-update-single-mod",
+            "bg3-sync-mod-docs",
+            "bg3-sync-single-mod",
         }
         expected_authoring = {
             "bg3-create-mod",
@@ -68,7 +66,7 @@ class TestSkillsInstaller(unittest.TestCase):
     def test_install_agent_skills_to_target_directory(self):
         res = install_agent_skills(target_dir=self.target_dir, force=True)
         self.assertTrue(res["success"])
-        self.assertEqual(len(res["installed"]), 15)
+        self.assertEqual(len(res["installed"]), 13)
         self.assertEqual(len(res["errors"]), 0)
 
         for skill_name in res["installed"]:
@@ -79,12 +77,12 @@ class TestSkillsInstaller(unittest.TestCase):
     def test_install_agent_skills_idempotent_update(self):
         # Initial install
         first_run = install_agent_skills(target_dir=self.target_dir, force=True)
-        self.assertEqual(len(first_run["installed"]), 15)
+        self.assertEqual(len(first_run["installed"]), 13)
 
         # Subsequent run updates existing folders
         second_run = install_agent_skills(target_dir=self.target_dir, force=True)
         self.assertTrue(second_run["success"])
-        self.assertEqual(len(second_run["updated"]), 15)
+        self.assertEqual(len(second_run["updated"]), 13)
         self.assertEqual(len(second_run["errors"]), 0)
 
     def test_install_preserves_subdirectories(self):
