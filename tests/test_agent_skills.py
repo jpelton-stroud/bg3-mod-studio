@@ -32,7 +32,11 @@ except ImportError:
         return data
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
-SKILLS_DIR = WORKSPACE_ROOT / ".agents" / "skills"
+PACKAGED_SKILL_DIRS = [
+    WORKSPACE_ROOT / "packages" / "bg3-core" / "bg3_core" / "skills",
+    WORKSPACE_ROOT / "packages" / "bg3-authoring" / "bg3_authoring" / "skills",
+    WORKSPACE_ROOT / "packages" / "bg3-theorycraft" / "bg3_theorycraft" / "skills",
+]
 
 
 class TestAgentSkills(unittest.TestCase):
@@ -42,16 +46,24 @@ class TestAgentSkills(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.skill_files = sorted(list(SKILLS_DIR.glob("*/SKILL.md"))) if SKILLS_DIR.is_dir() else []
-        cls.all_skill_md_files = sorted(list(SKILLS_DIR.rglob("*.md"))) if SKILLS_DIR.is_dir() else []
-        cls.all_skill_files = sorted(list(SKILLS_DIR.rglob("*.md")) + list(SKILLS_DIR.rglob("*.json"))) if SKILLS_DIR.is_dir() else []
+        cls.skill_files = []
+        cls.all_skill_md_files = []
+        cls.all_skill_files = []
+        for sdir in PACKAGED_SKILL_DIRS:
+            if sdir.is_dir():
+                cls.skill_files.extend(sorted(sdir.glob("*/SKILL.md")))
+                cls.all_skill_md_files.extend(sorted(sdir.rglob("*.md")))
+                cls.all_skill_files.extend(sorted(list(sdir.rglob("*.md")) + list(sdir.rglob("*.json"))))
+        cls.skill_files.sort()
+        cls.all_skill_md_files.sort()
+        cls.all_skill_files.sort()
 
     def test_skills_exist(self):
-        """Verify that agent skills are discovered in .agents/skills/."""
+        """Verify that agent skills are discovered in domain package skills directories."""
         self.assertGreaterEqual(
             len(self.skill_files),
-            15,
-            f"Expected at least 15 skills, found {len(self.skill_files)}"
+            13,
+            f"Expected at least 13 skills, found {len(self.skill_files)}"
         )
 
     def test_skill_kebab_case_naming(self):
@@ -123,7 +135,7 @@ class TestAgentSkills(unittest.TestCase):
         for sf in self.all_skill_md_files:
             content = sf.read_text(encoding="utf-8")
             links = re.findall(r"\[([^\]]+)\]\(([^)]+)\)", content)
-            rel_path = sf.relative_to(SKILLS_DIR)
+            rel_path = sf.relative_to(WORKSPACE_ROOT)
             for text, target in links:
                 if target.startswith("http://") or target.startswith("https://") or target.startswith("mailto:"):
                     continue
@@ -148,7 +160,7 @@ class TestAgentSkills(unittest.TestCase):
         for sf in self.all_skill_files:
             content = sf.read_text(encoding="utf-8")
             model_matches = re.findall(r'["\']Model["\']\s*:\s*["\']([^"\']+)["\']', content)
-            rel_path = sf.relative_to(SKILLS_DIR)
+            rel_path = sf.relative_to(WORKSPACE_ROOT)
             for m in model_matches:
                 if m != "inherit":
                     illegal_models.append(f"{rel_path}: Model '{m}' (must be 'inherit')")

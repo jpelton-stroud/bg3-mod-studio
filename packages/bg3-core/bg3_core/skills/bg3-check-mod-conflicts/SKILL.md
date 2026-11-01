@@ -31,11 +31,10 @@ Run deterministic inspection against cataloged workspace mods or candidate pairs
 - **Candidate vs Tracked Library**: Execute `bg3 mod conflict "<MOD_SLUG>" --against-library --json`
 - **Candidate vs Candidate**: Execute `bg3 mod conflict "<MOD1>" --mod2 "<MOD2>" --json`
 
-### 2. Remediation & Patch Generation
-When actionable stat or progression collisions occur, compatibility patch scaffolding is available via the `bg3-authoring` toolkit:
-- **Authoring Dependency**: Requires the `bg3-authoring` package (`pip install bg3-authoring` or `pip install bg3-mod-studio`).
-- **Scaffold Patch Mod**: Execute `bg3 mod patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json`
-- **Scaffold CF Integration**: Execute `bg3 mod patch --mod1 <mod1> --mod2 <mod2> --mode cf --json`
+### 2. Remediation & Authoring Handoff
+When actionable stat or progression collisions occur, mitigate them via load order positioning or hand off to authoring tools:
+- **Load Order Placement**: Adjust load order using [`bg3-manage-load-order`](../bg3-manage-load-order/SKILL.md) to ensure high-priority or override mods load after base mods.
+- **Authoring Compatibility Patches**: When hard engine collisions require code or asset overrides, delegate to the `bg3-authoring` toolkit via `/bg3-create-mod` or execute `bg3 mod patch` (provided by `bg3-authoring`).
 
 ---
 

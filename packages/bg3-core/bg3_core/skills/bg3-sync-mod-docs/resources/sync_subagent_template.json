@@ -1,0 +1,11 @@
+{
+  "Subagents": [
+    {
+      "TypeName": "self",
+      "Role": "Mod Documenter - <Mod_Name>",
+      "Prompt": "Document or update the Baldur's Gate 3 mod: <MOD_QUERY>.\n1. Read and follow instructions in worker skill bg3-sync-single-mod.\n2. Run: bg3 modio update \"<MOD_QUERY>\" --json (if tracked) or bg3 modio extract --query \"<MOD_QUERY>\" --write-spec --json (if new).\n3. Confirm mods/<mod_slug>/README.md adheres to the Rich Features Schema.\n4. Return standardized status message per sync_status_messages.md:\n   - Up-to-Date: <mod-slug>: No updates found (current version: v<version>)\n   - Updated: <mod-slug>: Documentation updated to v<version> — <changes>\n   - Created: <mod-slug>: Successfully added to library — <Brief description>\n   - Failed: <mod-slug>: Failed: <reason>",
+      "Workspace": "inherit",
+      "Model": "inherit"
+    }
+  ]
+}

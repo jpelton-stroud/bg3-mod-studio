@@ -34,12 +34,12 @@ flowchart TD
 
 ### 1. Clean Data & Deploy Local `.pak`
 Purge loose files and package `.pak`:
-- Clean loose development files: `bg3 mod clean-game <mod-slug> --json` (or `bg3 mod sync-game --clean-mod <mod-slug> --json`)
+- Clean loose development files: `bg3 mod sync-game --clean-mod <mod-slug> --json`
 - Package and deploy locally: `bg3 mod pack <mod-slug> --publish-local --json`
 
 ### 2. Configure Clean-Room Load Order (Phase 3A)
 Enable target mod with dependencies per [Smoke Runbook](./references/smoke_testing_runbook.md):
-- Execute `bg3 loadorder enable <mod-slug> --with-deps --isolate --yes --json`
+- Execute `bg3 loadorder enable "<mod-slug>" --with-deps --isolate --json`
 
 ### 3. Guided Playtesting & Routing
 Instruct user to launch game and test acquisitions, tooltips, and mechanics:

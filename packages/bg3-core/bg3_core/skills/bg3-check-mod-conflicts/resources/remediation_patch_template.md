@@ -39,8 +39,8 @@
 
 ```bash
 # Generate standalone compatibility override patch mod
-uv run bg3 mod compat-patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json
+bg3 mod patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json
 
 # Generate Compatibility Framework config payload
-uv run bg3 mod compat-patch --mod1 <mod1> --mod2 <mod2> --mode cf --json
+bg3 mod patch --mod1 <mod1> --mod2 <mod2> --mode cf --json
 ```

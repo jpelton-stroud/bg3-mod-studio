@@ -248,7 +248,7 @@ def check_environment_status(as_json: bool = False, config_path: Optional[Path] 
             }, indent=2))
         else:
             print(f"\n{BOLD}=== Environment Configuration Status ==={RESET}")
-            print(f"{YELLOW}[!] No configuration found at {target_env}. Run './setup.sh' to configure.{RESET}")
+            print(f"{YELLOW}[!] No configuration found at {target_env}. Run 'bg3 env setup' to configure.{RESET}")
             print(f"XDG_CONFIG_HOME:  {cfg_home}")
             print(f"XDG_CACHE_HOME:   {cache_home}")
             print(f"XDG_DATA_HOME:    {data_home}")
@@ -653,7 +653,7 @@ def run_wizard(
     handle_custom_mods_purge(purge_choice, dry_run=dry_run)
 
     print(f"\n{BOLD}{GREEN}Setup completed successfully!{RESET}")
-    print("You can run `./setup.sh --check` anytime to review your configuration.")
+    print("You can run 'bg3 env check' anytime to review your configuration.")
     print("Run `bg3 --help` to get started.\n")
 
 

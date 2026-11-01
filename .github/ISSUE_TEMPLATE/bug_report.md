@@ -10,7 +10,7 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **Tool or Component Affected**
-- [ ] `setup.sh` / `bg3 env` (`bg3_core.setup_environment`)
+- [ ] `bg3 env` (`bg3_core.setup_environment`)
 - [ ] `bg3 mod` (`bg3_authoring` / `bg3_core`)
 - [ ] `bg3 scaffold` (`bg3_authoring`)
 - [ ] `bg3 loadorder` (`bg3_core.manage_load_order`)

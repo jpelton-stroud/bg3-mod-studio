@@ -33,7 +33,7 @@ flowchart TD
 
 ### 1. Platform Check & Search
 Ensure target platform is specified (prompt user if missing). Execute search:
-- Execute `bg3 modio search "<QUERY>" --platform "<PLATFORM>" --limit 15 --json`
+- Execute `bg3 modio search --query "<QUERY>" --platform "<PLATFORM>" --limit 15 --json`
 - The tool automatically filters out mods already cataloged in `Mods/subscribed/library.md`.
 
 ### 2. Candidates & Concurrent Subagents

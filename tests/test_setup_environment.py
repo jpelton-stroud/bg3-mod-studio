@@ -103,12 +103,12 @@ class SetupEnvironmentQATests(unittest.TestCase):
                 self.assertTrue(mock_my_mods.is_dir())
                 self.assertEqual(list(mock_my_mods.iterdir()), [])
 
-    def test_setup_sh_cli_integration(self):
+    def test_cli_env_integration(self):
         repo_root = Path(__file__).resolve().parent.parent
 
-        # 1. ./setup.sh --check
+        # 1. bg3 env check (via bg3_core.cli)
         proc_check = subprocess.run(
-            ["./setup.sh", "--check"],
+            [sys.executable, "-m", "bg3_core.cli", "env", "check"],
             cwd=repo_root,
             capture_output=True,
             text=True,
@@ -116,9 +116,9 @@ class SetupEnvironmentQATests(unittest.TestCase):
         )
         self.assertIn("Environment Configuration Status", proc_check.stdout)
 
-        # 2. ./setup.sh --check --json
+        # 2. bg3 env check --json (via bg3_core.cli)
         proc_json = subprocess.run(
-            ["./setup.sh", "--check", "--json"],
+            [sys.executable, "-m", "bg3_core.cli", "env", "check", "--json"],
             cwd=repo_root,
             capture_output=True,
             text=True,
