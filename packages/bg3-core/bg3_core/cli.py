@@ -896,6 +896,34 @@ def build_parser() -> JsonCompliantArgumentParser:
     query_parser.add_argument("--reindex", action="store_true", help="Force rebuild of index")
 
     # -------------------------------------------------------------------------
+    # 'conflict' command (direct alias for 'mod conflict')
+    # -------------------------------------------------------------------------
+    conflict_top_parser = subparsers.add_parser(
+        "conflict",
+        help="Detect stat, progression, or root template collisions between mods",
+        parents=[common_parser],
+    )
+    conflict_top_parser.add_argument(
+        "candidate",
+        nargs="?",
+        help="Candidate mod name, directory, or path to inspect.",
+    )
+    conflict_top_parser.add_argument(
+        "--against-library",
+        action="store_true",
+        help="Compare candidate against all cataloged mods in mods/.",
+    )
+    conflict_top_parser.add_argument(
+        "--mod2",
+        help="Second mod path or identifier to compare against directly.",
+    )
+    conflict_top_parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Cross-check all active mods across my_mods/ and mods/.",
+    )
+
+    # -------------------------------------------------------------------------
     # 'build' command group
     # -------------------------------------------------------------------------
     build_parser = subparsers.add_parser(
@@ -1082,7 +1110,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
     cmd = args.command
     sub = getattr(args, "subcommand", None)
 
-    if not cmd or (cmd != "query" and not sub):
+    if not cmd or (cmd not in ("query", "conflict") and not sub):
         emitter.error(
             message="Missing required command and action. Run 'bg3 --help' for available commands.",
             code="MISSING_COMMAND",
@@ -1093,7 +1121,7 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
 
     # Guard against invocation of optional package commands when the package is not installed
     full_cmd = f"bg3 {cmd} {sub or ''}".strip()
-    if (cmd == "scaffold" or (cmd == "mod" and sub not in ("bump-version", "render-desc"))) and not AUTHORING_DIR:
+    if (cmd == "scaffold" or (cmd == "mod" and sub not in ("bump-version", "render-desc", "conflict"))) and not AUTHORING_DIR:
         emitter.error(
             message=f"Command '{full_cmd}' requires the 'bg3-authoring' package (install via 'pip install bg3-authoring' or 'pip install bg3-mod-studio').",
             code="PACKAGE_NOT_INSTALLED",
@@ -1370,9 +1398,28 @@ def dispatch_command(args: argparse.Namespace, emitter: OutputEmitter) -> int:
             if getattr(args, "dry_run", False):
                 target_args.append("--dry-run")
 
+    elif cmd == "conflict":
+        script_target = CORE_DIR / "check_mod_conflicts.py"
+        if args.all:
+            target_args.append("--all")
+        elif args.mod2 and args.candidate:
+            target_args.extend(["--mod1", args.candidate, "--mod2", args.mod2])
+        elif args.candidate:
+            target_args.extend(["--candidate", args.candidate])
+            if args.against_library:
+                target_args.append("--against-library")
+        else:
+            emitter.error(
+                message="bg3 conflict requires a candidate mod or --all.",
+                code="INVALID_ARGUMENTS",
+                exit_code=ExitCode.USAGE,
+                exit_process=False,
+            )
+            return ExitCode.USAGE
+
     elif cmd == "mod":
         if sub == "conflict":
-            script_target = DIAGNOSTICS_DIR / "check_mod_conflicts.py"
+            script_target = CORE_DIR / "check_mod_conflicts.py"
             if args.all:
                 target_args.append("--all")
             elif args.mod2 and args.candidate:

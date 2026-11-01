@@ -11,7 +11,7 @@ Mod authoring, asset scaffolding, static diagnostics, and packaging toolchain fo
 ```mermaid
 flowchart TD
     Scaffold["14 Asset Generators\n(bg3_authoring.scaffold_*)"] --> ModDir["Mods/authored/<ModSlug>/"]
-    ModDir --> Diagnostics["Static Diagnostics & Linter\n(validate_mod, check_mod_conflicts)"]
+    ModDir --> Diagnostics["Static Diagnostics & Linter\n(validate_mod, diagnose_toolkit_logs)"]
     Diagnostics --> Packaging["LSPK v18 Packager\n(packaging.pack_mod_pak)"]
     Packaging --> VFS["Game VFS Sync\n(packaging.sync_game_data)"]
 ```
@@ -35,7 +35,7 @@ flowchart TD
 
 ### 2. Diagnostics & Compatibility (`bg3_authoring.diagnostics`)
 - `validate_mod.py`: Deep static validation checking XML/LSX syntax, UUID collisions, missing string handles, and required folder layouts.
-- `check_mod_conflicts.py`: Cross-mod progression collision detector auditing vanilla and community mod overrides.
+- `generate_compat_patch.py`: Compatibility override patch and CF payload generator for resolving conflicting mods.
 - `diagnose_toolkit_logs.py`: Automated triage of Larian Toolkit and engine runtime crash logs with actionable fix recommendations.
 
 ### 3. Packaging & Synchronization (`bg3_authoring.packaging`)
