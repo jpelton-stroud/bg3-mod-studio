@@ -34,6 +34,9 @@
 
 ## Automated Patch Generation Commands
 
+> [!NOTE]
+> Patch scaffolding commands require the `bg3-authoring` package (`pip install bg3-authoring`).
+
 ```bash
 # Generate standalone compatibility override patch mod
 uv run bg3 mod compat-patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json

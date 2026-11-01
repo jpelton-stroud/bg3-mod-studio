@@ -40,6 +40,7 @@ class TestSkillsInstaller(unittest.TestCase):
         theorycraft_skills = {k for k, v in skills.items() if v["package"] == "bg3-theorycraft"}
 
         expected_core = {
+            "bg3-check-mod-conflicts",
             "bg3-create-modio-collection",
             "bg3-document-mods",
             "bg3-document-single-mod",
@@ -49,7 +50,6 @@ class TestSkillsInstaller(unittest.TestCase):
             "bg3-update-single-mod",
         }
         expected_authoring = {
-            "bg3-check-mod-conflicts",
             "bg3-create-mod",
             "bg3-diagnose-mod",
             "bg3-post-release",

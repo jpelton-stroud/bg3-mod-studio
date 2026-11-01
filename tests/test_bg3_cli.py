@@ -205,6 +205,26 @@ sys.exit(dispatch_command(args, emitter))
         self.assertEqual(payload["error"]["code"], "PACKAGE_NOT_INSTALLED")
         self.assertIn("bg3-theorycraft", payload["error"]["message"])
 
+    def test_conflict_command_works_without_authoring_package(self):
+        """Assert that 'bg3 mod conflict' and 'bg3 conflict' operate independently of bg3-authoring."""
+        code = """
+import sys
+sys.modules['bg3_authoring'] = None
+from bg3_core.cli import build_parser, dispatch_command
+from bg3_core.cli_common import OutputEmitter
+
+parser = build_parser()
+args = parser.parse_args(['mod', 'conflict', '--all', '--json'])
+emitter = OutputEmitter(json_mode=True)
+ret = dispatch_command(args, emitter)
+sys.exit(ret)
+"""
+        proc = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+        # Should not be PACKAGE_NOT_INSTALLED (exit code 69)
+        self.assertNotEqual(proc.returncode, 69)
+        payload = json.loads(proc.stdout)
+        self.assertIn("total_mods", payload)
+
 
 if __name__ == "__main__":
     unittest.main()

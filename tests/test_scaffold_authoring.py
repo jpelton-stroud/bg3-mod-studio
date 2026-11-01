@@ -20,8 +20,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from bg3_authoring.diagnostics.check_mod_conflicts import compare_two_mods
 from bg3_authoring.diagnostics.validate_mod import ModValidator
+from bg3_core.check_mod_conflicts import compare_two_mods
 from bg3_core.larian_parsers import (
     PATCH_8_VERSION,
     format_patch8_lsx_header,

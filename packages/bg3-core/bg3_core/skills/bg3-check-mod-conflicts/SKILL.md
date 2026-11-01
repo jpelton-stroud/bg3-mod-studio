@@ -32,8 +32,10 @@ Run deterministic inspection against cataloged workspace mods or candidate pairs
 - **Candidate vs Candidate**: Execute `bg3 mod conflict "<MOD1>" --mod2 "<MOD2>" --json`
 
 ### 2. Remediation & Patch Generation
-When actionable stat collisions occur, offer automated patch generation:
-- Execute `bg3 mod patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json`
+When actionable stat or progression collisions occur, compatibility patch scaffolding is available via the `bg3-authoring` toolkit:
+- **Authoring Dependency**: Requires the `bg3-authoring` package (`pip install bg3-authoring` or `pip install bg3-mod-studio`).
+- **Scaffold Patch Mod**: Execute `bg3 mod patch --mod1 <mod1> --mod2 <mod2> --name "<Mod1><Mod2>Patch" --mode standalone --json`
+- **Scaffold CF Integration**: Execute `bg3 mod patch --mod1 <mod1> --mod2 <mod2> --mode cf --json`
 
 ---
 
