@@ -15,7 +15,7 @@ import unittest
 from pathlib import Path
 
 try:
-    import yaml  # type: ignore
+    import yaml
 
     def load_frontmatter(raw: str) -> dict:
         return yaml.safe_load(raw)
@@ -36,6 +36,9 @@ SKILLS_DIR = WORKSPACE_ROOT / ".agents" / "skills"
 
 
 class TestAgentSkills(unittest.TestCase):
+    skill_files: list[Path] = []
+    all_skill_md_files: list[Path] = []
+    all_skill_files: list[Path] = []
 
     @classmethod
     def setUpClass(cls):

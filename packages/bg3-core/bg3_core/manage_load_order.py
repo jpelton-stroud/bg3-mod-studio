@@ -929,14 +929,14 @@ def deduplicate_installed_paks(
         if len(entries) <= 1:
             continue
 
-        def score_entry(item: tuple[Path, dict]) -> tuple[int, int, float]:
+        def score_entry(item: tuple[Path, dict], current_uuid: str = uuid_key) -> tuple[int, int, float]:
             path, meta = item
             stem = path.stem.lower()
-            u_clean = uuid_key.replace("-", "")
+            u_clean = current_uuid.replace("-", "")
             is_canonical = (
-                f"_{uuid_key}" in stem
+                f"_{current_uuid}" in stem
                 or f"_{u_clean}" in stem
-                or (meta.get("Folder", "").lower() in stem and uuid_key in stem)
+                or (meta.get("Folder", "").lower() in stem and current_uuid in stem)
             )
             is_modio_hash = bool(re.search(r"-[0-9a-z]{4}$", stem))
             try:
@@ -951,7 +951,7 @@ def deduplicate_installed_paks(
         winner_path, winner_meta = sorted_entries[0]
         losers = sorted_entries[1:]
 
-        for loser_path, loser_meta in losers:
+        for loser_path, _loser_meta in losers:
             dest = duplicates_dir / loser_path.name
             results.append({
                 "action": "deduplicated",

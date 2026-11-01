@@ -758,7 +758,7 @@ def process_mod(
     roottemplate_files = {}
     all_progressions = []
 
-    for pak_name, pak_data in pak_payloads:
+    for _pak_name, pak_data in pak_payloads:
         archive = LspkArchive(pak_data)
         for f in archive.files:
             fname = f["name"]
@@ -832,7 +832,7 @@ def process_mod(
             roottemplate_names[rt_uuid] = texts[0]
 
     # Resolve inheritance in stats (using entries)
-    for name, entry in all_stats.items():
+    for _name, entry in all_stats.items():
         parent_name = entry.get("using")
         visited = set()
         while parent_name and parent_name in all_stats and parent_name not in visited:

@@ -229,7 +229,7 @@ def sync_library(
 
     # 4. Check & Update Existing Subscribed Mods
     if not skip_updates:
-        for slug, mod_meta, tracked_info in existing_mods:
+        for slug, mod_meta, _tracked_info in existing_mods:
             name = mod_meta.get("name", slug)
             try:
                 update_res = check_and_apply_update(

@@ -212,7 +212,7 @@ def fetch_mods_from_modio(
                 pass
         if collected:
             return collected
-        raise RuntimeError(f"mod.io API request failed: {e}")
+        raise RuntimeError(f"mod.io API request failed: {e}") from e
 
 
 def filter_and_rank_mods(
