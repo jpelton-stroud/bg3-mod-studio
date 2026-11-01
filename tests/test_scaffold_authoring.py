@@ -474,6 +474,47 @@ class TestUnifiedScaffoldAssetAPI(unittest.TestCase):
         )
         self.assertTrue(res["success"])
 
+    def test_scaffold_result_typed_contract(self):
+        from bg3_authoring.scaffold_common import ScaffoldResult
+
+        res = scaffold_stat(
+            mod_name_or_path=str(self.mod_dir),
+            entry_type="weapon",
+            name="TypedBlade",
+            dry_run=True,
+        )
+        self.assertIsInstance(res, ScaffoldResult)
+        self.assertEqual(res.name, "TypedBlade")
+        self.assertEqual(res.asset_type, "stat")
+        self.assertTrue(res.success)
+        self.assertEqual(res.status, "created")
+        self.assertEqual(res["entry_name"], "TypedBlade")
+        self.assertEqual(res["name"], "TypedBlade")
+        self.assertIn("stat_file", res.to_dict())
+
+    def test_subdomain_imports_and_packaging_common(self):
+        from bg3_authoring.packaging.common import (
+            EXCLUDED_DIRECTORIES,
+            EXCLUDED_FILENAMES,
+            should_include_file,
+        )
+        from bg3_authoring.scaffold_atlas import scaffold_icon_uvs
+        from bg3_authoring.scaffold_character import scaffold_race
+        from bg3_authoring.scaffold_mechanics import scaffold_class
+        from bg3_authoring.scaffold_visuals import scaffold_root_template
+
+        self.assertTrue(callable(scaffold_class))
+        self.assertTrue(callable(scaffold_root_template))
+        self.assertTrue(callable(scaffold_icon_uvs))
+        self.assertTrue(callable(scaffold_race))
+
+        self.assertIn(".git", EXCLUDED_DIRECTORIES)
+        self.assertIn(".gitignore", EXCLUDED_FILENAMES)
+        self.assertTrue(should_include_file(Path("Public/Test/ClassDescriptions/ClassDescriptions.lsx")))
+        self.assertFalse(should_include_file(Path("thumbnail.png")))
+        self.assertFalse(should_include_file(Path(".git/HEAD")))
+        self.assertFalse(should_include_file(Path("some_script.py")))
+
 
 if __name__ == "__main__":
     unittest.main()

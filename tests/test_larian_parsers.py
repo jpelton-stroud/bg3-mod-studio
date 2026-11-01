@@ -14,6 +14,7 @@ from bg3_core.larian_parsers import (
     parse_localization_bytes,
     parse_meta_lsx,
     parse_progressions_lsx,
+    parse_root_templates_lsx,
     parse_stats_txt,
     parse_version_str,
     split_larian_items,
@@ -105,6 +106,18 @@ class LarianParsersTests(unittest.TestCase):
     <region id="Config">
         <node id="root">
             <children>
+                <node id="Dependencies">
+                    <children>
+                        <node id="ModuleShortDesc">
+                            <attribute id="Folder" type="LSString" value="DepFolder"/>
+                            <attribute id="MD5" type="LSString" value="depmd5"/>
+                            <attribute id="Name" type="LSString" value="DepMod"/>
+                            <attribute id="PublishHandle" type="uint64" value="12345"/>
+                            <attribute id="UUID" type="FixedString" value="22222222-3333-4444-5555-666666666666"/>
+                            <attribute id="Version64" type="int64" value="36028797018963968"/>
+                        </node>
+                    </children>
+                </node>
                 <node id="ModuleInfo">
                     <attribute id="UUID" type="FixedString" value="11111111-2222-3333-4444-555555555555"/>
                     <attribute id="Name" type="LSString" value="TestMod"/>
@@ -119,6 +132,35 @@ class LarianParsersTests(unittest.TestCase):
         self.assertEqual(meta["UUID"], "11111111-2222-3333-4444-555555555555")
         self.assertEqual(meta["Name"], "TestMod")
         self.assertEqual(meta["Author"], "AuthorName")
+        self.assertIn("dependencies", meta)
+        self.assertEqual(len(meta["dependencies"]), 1)
+        dep = meta["dependencies"][0]
+        self.assertEqual(dep["Name"], "DepMod")
+        self.assertEqual(dep["UUID"], "22222222-3333-4444-5555-666666666666")
+        self.assertEqual(dep["Folder"], "DepFolder")
+
+    def test_parse_root_templates_lsx(self):
+        rt_xml = b"""<?xml version="1.0" encoding="utf-8"?>
+<save>
+    <region id="Templates">
+        <node id="Templates">
+            <children>
+                <node id="GameObjects">
+                    <attribute id="MapKey" type="FixedString" value="99999999-8888-7777-6666-555555555555"/>
+                    <attribute id="Name" type="LSString" value="WPN_TestBlade"/>
+                    <attribute id="Stats" type="FixedString" value="OBJ_Blade"/>
+                    <attribute id="DisplayName" type="TranslatedString" handle="hblade123;1" version="1"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>"""
+        templates = parse_root_templates_lsx(rt_xml)
+        self.assertIn("99999999-8888-7777-6666-555555555555", templates)
+        entry = templates["99999999-8888-7777-6666-555555555555"]
+        self.assertEqual(entry["Name"], "WPN_TestBlade")
+        self.assertEqual(entry["Stats"], "OBJ_Blade")
+        self.assertEqual(entry["DisplayName"], "hblade123;1")
 
     def test_parse_stats_txt(self):
         stats_txt = b"""

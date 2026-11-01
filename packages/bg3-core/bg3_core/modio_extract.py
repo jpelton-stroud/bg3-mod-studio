@@ -25,6 +25,7 @@ from bg3_core.larian_parsers import (
     parse_localization_xml,
     parse_meta_lsx,
     parse_progressions_lsx,
+    parse_root_templates_lsx,
     parse_stats_txt,
 )
 from bg3_core.lspk import LspkArchive
@@ -811,10 +812,8 @@ def process_mod(
     for rt_path, rt_content in roottemplate_files.items():
         if rt_path.lower().endswith(".lsx") or b"<?xml" in rt_content[:100] or b"<save>" in rt_content[:100]:
             try:
-                rt_root = ET.fromstring(rt_content.decode("utf-8", errors="ignore"))
-                for node in rt_root.findall('.//node[@id="GameObjects"]'):
-                    attrs = {child.get("id"): (child.get("value") or child.get("handle")) for child in node.findall("attribute")}
-                    mkey = attrs.get("MapKey")
+                parsed_rts = parse_root_templates_lsx(rt_content)
+                for mkey, attrs in parsed_rts.items():
                     stat_id = attrs.get("Stats")
                     dhandle = (attrs.get("DisplayName") or "").split(";")[0]
                     if dhandle and dhandle in loc_dict:

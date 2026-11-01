@@ -1,10 +1,18 @@
 [project]
-name = "bg3-core"
+name = "bg3"
 version = "1.0.0b1"
 description = "Baldur's Gate 3 Mod Studio Core Runtime, Parsers, and API Client"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
+
+[project.optional-dependencies]
+authoring = ["bg3-authoring"]
+theorycraft = ["bg3-theorycraft"]
+all = [
+    "bg3-authoring",
+    "bg3-theorycraft",
+]
 
 [project.scripts]
 bg3 = "bg3_core.cli:main"

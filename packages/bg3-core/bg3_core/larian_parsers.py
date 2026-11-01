@@ -318,22 +318,61 @@ def parse_stats_txt(txt_bytes: bytes, loc_dict: Optional[Dict[str, str]] = None)
     return entries
 
 
-def parse_meta_lsx(lsx_bytes: bytes) -> Dict[str, str]:
-    """Parse meta.lsx for mod UUID, author, version, and description."""
-    meta: Dict[str, str] = {}
+def parse_meta_lsx(lsx_bytes: bytes) -> Dict[str, Any]:
+    """Parse meta.lsx for mod UUID, author, version, description, and dependencies."""
+    meta: Dict[str, Any] = {}
     if not lsx_bytes:
+        meta["dependencies"] = []
         return meta
     try:
         text = lsx_bytes.decode("utf-8", errors="ignore")
         root = ET.fromstring(text)
-        for node in root.findall(".//node[@id='ModuleInfo']//attribute"):
-            attr_id = node.get("id")
-            val = node.get("value")
-            if attr_id and val is not None:
-                meta[attr_id] = val
+        mod_info = root.find(".//node[@id='ModuleInfo']")
+        if mod_info is not None:
+            for attr in mod_info.findall("./attribute"):
+                attr_id = attr.get("id")
+                val = attr.get("value")
+                if attr_id and val is not None:
+                    meta[attr_id] = val
+
+        deps: List[Dict[str, str]] = []
+        for dep_node in root.findall(".//node[@id='Dependencies']//node[@id='ModuleShortDesc']"):
+            dep_attrs: Dict[str, str] = {}
+            for attr in dep_node.findall("./attribute"):
+                aid = attr.get("id")
+                val = attr.get("value")
+                if aid and val is not None:
+                    dep_attrs[aid] = val
+            if dep_attrs:
+                deps.append(dep_attrs)
+        meta["dependencies"] = deps
+    except Exception:
+        if "dependencies" not in meta:
+            meta["dependencies"] = []
+    return meta
+
+
+def parse_root_templates_lsx(lsx_bytes: bytes) -> Dict[str, Dict[str, str]]:
+    """Parse RootTemplate / GameObjects LSX bytes into a MapKey -> attributes dictionary."""
+    templates: Dict[str, Dict[str, str]] = {}
+    if not lsx_bytes:
+        return templates
+    try:
+        text = lsx_bytes.decode("utf-8", errors="ignore")
+        root = ET.fromstring(text)
+        for node in root.findall(".//node[@id='GameObjects']"):
+            attrs: Dict[str, str] = {}
+            for attr in node.findall("./attribute"):
+                aid = attr.get("id")
+                val = attr.get("value") or attr.get("handle")
+                if aid and val is not None:
+                    attrs[aid] = val
+            map_key = attrs.get("MapKey")
+            if map_key:
+                templates[map_key] = attrs
     except Exception:
         pass
-    return meta
+    return templates
 
 
 def parse_progressions_lsx(lsx_bytes: bytes) -> List[Dict[str, str]]:

@@ -31,7 +31,9 @@ from bg3_core.env_paths import (
     resolve_mod_dir,
 )
 from bg3_core.larian_parsers import (
+    parse_meta_lsx,
     parse_progressions_lsx,
+    parse_root_templates_lsx,
     parse_stats_txt,
 )
 
@@ -130,23 +132,13 @@ def extract_root_templates(mod_dir: Path) -> dict[str, dict]:
     ]
     for f in lsx_files:
         try:
-            tree = ET.parse(f)
-            for node in tree.findall(".//node[@id='GameObjects']"):
-                map_key = ""
-                t_name = ""
-                for attr in node.findall("attribute"):
-                    aid = attr.get("id")
-                    val = attr.get("value", "")
-                    if aid == "MapKey":
-                        map_key = val
-                    elif aid == "Name":
-                        t_name = val
-                if map_key:
-                    templates[map_key] = {
-                        "map_key": map_key,
-                        "name": t_name,
-                        "file": f.name,
-                    }
+            parsed = parse_root_templates_lsx(f.read_bytes())
+            for map_key, attrs in parsed.items():
+                templates[map_key] = {
+                    "map_key": map_key,
+                    "name": attrs.get("Name", ""),
+                    "file": f.name,
+                }
         except Exception:
             pass
     return templates
@@ -169,11 +161,9 @@ def get_mod_dependencies(mod_dir: Path) -> list[str]:
         return deps
     for mf in meta_files:
         try:
-            content = mf.read_text(encoding="utf-8")
-            dep_block = re.search(r'<node\s+id="Dependencies">(.*?)</node>\s*(?:<node\s+id="ModuleInfo"|</children>)', content, re.DOTALL)
-            target = dep_block.group(1) if dep_block else content
-            for m in re.finditer(r'<node\s+id="ModuleShortDesc">.*?<attribute\s+id="Name"\s+type="[^"]*"\s+value="([^"]+)".*?</node>', target, re.DOTALL):
-                dep_name = m.group(1).strip()
+            meta = parse_meta_lsx(mf.read_bytes())
+            for dep_item in meta.get("dependencies", []):
+                dep_name = dep_item.get("Name", "").strip()
                 if dep_name and dep_name.lower() not in BUILTIN_MODULES and not dep_name.lower().startswith("diceset"):
                     if dep_name not in deps:
                         deps.append(dep_name)
@@ -196,9 +186,11 @@ def find_missing_local_dependencies(mod_dir: Path) -> list[str]:
                     known_keys.add(normalize_mod_key(d.name))
                     for mf in d.rglob("meta.lsx"):
                         try:
-                            txt = mf.read_text(encoding="utf-8", errors="ignore")
-                            for m in re.finditer(r'<attribute\s+id="(?:Name|Folder)"\s+type="[^"]*"\s+value="([^"]+)"', txt):
-                                known_keys.add(normalize_mod_key(m.group(1)))
+                            meta = parse_meta_lsx(mf.read_bytes())
+                            for field in ("Name", "Folder"):
+                                val = meta.get(field)
+                                if val:
+                                    known_keys.add(normalize_mod_key(val))
                         except Exception:
                             pass
 

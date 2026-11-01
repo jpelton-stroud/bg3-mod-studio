@@ -8,9 +8,8 @@ resolution-markers = [
 
 [manifest]
 members = [
+    "bg3",
     "bg3-authoring",
-    "bg3-core",
-    "bg3-mod-studio",
     "bg3-theorycraft",
 ]
 
@@ -86,48 +85,52 @@ wheels = [
 ]
 
 [[package]]
-name = "bg3-authoring"
-version = "1.0.0b1"
-source = { editable = "packages/bg3-authoring" }
-dependencies = [
-    { name = "bg3-core" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "bg3-core", editable = "packages/bg3-core" }]
-
-[[package]]
-name = "bg3-core"
+name = "bg3"
 version = "1.0.0b1"
 source = { editable = "packages/bg3-core" }
 
-[[package]]
-name = "bg3-mod-studio"
-version = "1.0.0b1"
-source = { editable = "packages/bg3-mod-studio" }
-dependencies = [
+[package.optional-dependencies]
+all = [
     { name = "bg3-authoring" },
-    { name = "bg3-core" },
+    { name = "bg3-theorycraft" },
+]
+authoring = [
+    { name = "bg3-authoring" },
+]
+theorycraft = [
     { name = "bg3-theorycraft" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "bg3-authoring", editable = "packages/bg3-authoring" },
-    { name = "bg3-core", editable = "packages/bg3-core" },
-    { name = "bg3-theorycraft", editable = "packages/bg3-theorycraft" },
+    { name = "bg3-authoring", marker = "extra == 'all'", editable = "packages/bg3-authoring" },
+    { name = "bg3-authoring", marker = "extra == 'authoring'", editable = "packages/bg3-authoring" },
+    { name = "bg3-theorycraft", marker = "extra == 'all'", editable = "packages/bg3-theorycraft" },
+    { name = "bg3-theorycraft", marker = "extra == 'theorycraft'", editable = "packages/bg3-theorycraft" },
 ]
+provides-extras = ["authoring", "theorycraft", "all"]
+
+[[package]]
+name = "bg3-authoring"
+version = "1.0.0b1"
+source = { editable = "packages/bg3-authoring" }
+dependencies = [
+    { name = "bg3" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "bg3", editable = "packages/bg3-core" }]
 
 [[package]]
 name = "bg3-theorycraft"
 version = "1.0.0b1"
 source = { editable = "packages/bg3-theorycraft" }
 dependencies = [
-    { name = "bg3-core" },
+    { name = "bg3" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "bg3-core", editable = "packages/bg3-core" }]
+requires-dist = [{ name = "bg3", editable = "packages/bg3-core" }]
 
 [[package]]
 name = "colorama"

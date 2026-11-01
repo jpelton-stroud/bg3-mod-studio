@@ -7,6 +7,13 @@ AC 10-25 curves, Savage Attacker dice mathematics, and mod gear synergy analysis
 
 from __future__ import annotations
 
+from bg3_theorycraft.models import (
+    ActionBudget,
+    CombatSequence,
+    DamageBreakdown,
+    ResourcePools,
+    SimulationResult,
+)
 from bg3_theorycraft.simulate_build_synergy import (
     CASTER_WEIGHTS,
     MULTICLASS_SPELL_SLOTS,
@@ -31,6 +38,11 @@ __all__ = [
     "CASTER_WEIGHTS",
     "MULTICLASS_SPELL_SLOTS",
     "PRIMARY_CASTING_STAT",
+    "ActionBudget",
+    "CombatSequence",
+    "DamageBreakdown",
+    "ResourcePools",
+    "SimulationResult",
     "calculate_ac_curve",
     "calculate_action_economy",
     "calculate_hit_probability",

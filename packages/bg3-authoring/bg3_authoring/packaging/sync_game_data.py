@@ -37,31 +37,11 @@ from bg3_core.env_paths import (
 )
 from bg3_core.larian_parsers import compile_xml_bytes_to_loca
 
-EXCLUDED_FILENAMES = {
-    ".gitignore",
-    ".gitkeep",
-    "desktop.ini",
-    ".ds_store",
-    "thumbs.db",
-    "readme.md",
-    "task.md",
-    "modio_description.md",
-    "modio_description.html",
-}
-
-EXCLUDED_EXTENSIONS = {
-    ".tmp",
-    ".bak",
-    ".py",
-    ".pyc",
-}
-
-EXCLUDED_DIRECTORIES = {
-    "__pycache__",
-    ".git",
-    "dist",
-    "metadata",
-}
+from bg3_authoring.packaging.common import (
+    EXCLUDED_DIRECTORIES,
+    EXCLUDED_EXTENSIONS,
+    EXCLUDED_FILENAMES,
+)
 
 
 def get_default_data_dir() -> Path:
@@ -308,27 +288,25 @@ def sync_mod(mod_path: Path, data_dir: Path, dry_run: bool = False, quiet: bool 
     return result
 
 
-LEGACY_PATTERNS = [
-    "PactOfTheBladeUnleashed",
-    "PaladinUnbound",
-    "UnlockLevelCurveExtended",
-]
-
-
-def clean_legacy(data_dir: Path, dry_run: bool = False, quiet: bool = False) -> int:
-    """
-    Finds and removes legacy mod folders and files from Steam Data/ directory.
-    """
+def clean_legacy(
+    data_dir: Path,
+    target_patterns: Sequence[str] = (),
+    dry_run: bool = False,
+    quiet: bool = False,
+) -> int:
+    """Finds and removes legacy or specified mod folders and files from Steam Data/ directory."""
     removed_count = 0
+    if not target_patterns:
+        return removed_count
     if not quiet:
-        print("\n🧹 Scanning for legacy mod folders and files in Data/...")
+        print("\n🧹 Scanning for specified legacy mod folders and files in Data/...")
 
     for subdir_name in ["Projects", "Mods", "Public", "Editor/Mods"]:
         parent = data_dir / subdir_name
         if not parent.exists():
             continue
         for item in parent.iterdir():
-            if any(pat in item.name for pat in LEGACY_PATTERNS):
+            if any(pat in item.name for pat in target_patterns):
                 removed_count += 1
                 if dry_run:
                     if not quiet:
@@ -345,7 +323,7 @@ def clean_legacy(data_dir: Path, dry_run: bool = False, quiet: bool = False) -> 
     loc_dir = data_dir / "Localization" / "English"
     if loc_dir.exists():
         for item in loc_dir.iterdir():
-            if any(pat in item.name for pat in LEGACY_PATTERNS):
+            if any(pat in item.name for pat in target_patterns):
                 removed_count += 1
                 if dry_run:
                     if not quiet:
@@ -602,7 +580,7 @@ def run_sync(
         print(f"Mode:        {'DRY RUN (no files modified)' if dry_run else 'LIVE SYNC'}")
 
     if clean and data_dir.exists():
-        clean_legacy(data_dir, dry_run, quiet=json_mode)
+        clean_legacy(data_dir, dry_run=dry_run, quiet=json_mode)
 
     if clean_custom and data_dir.exists():
         clean_custom_mods(data_dir, dry_run, quiet=json_mode)

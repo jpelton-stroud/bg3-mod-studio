@@ -36,11 +36,12 @@ Interfaces directly with `bg3_core.query_mod_database` to analyze cataloged equi
 
 ## CLI Integration
 
-Theorycrafting commands are routed through the unified `bg3` CLI or run directly via `bg3-theorycraft`:
+Theorycrafting commands are routed through the unified `bg3` CLI suite:
 
 ### Common Commands:
 - `bg3 build simulate --classes "Paladin=6,Sorcerer=14"` — Generate level 1–20 multiclass synergy table.
 - `bg3 build simulate --classes "Fighter=12" --gear "GWM,Balduran Greatsword" --dpr-sequence melee_burst --ac-curve` — Calculate DPR distribution curve across AC 10–25.
+- `bg3 build simulate --classes "Ranger=12" --weapon-damage "1d8+3" --dpr-sequence ranged_burst` — Calculate Turn 1 ranged burst DPR sequence.
 - `bg3 build simulate --classes "Paladin=2,Sorcerer=18" --advantage --savage-attacker` — Calculate burst DPR with Advantage and Savage Attacker dice rerolls.
 - `bg3 sim --classes "Wizard=20" --json` — Top-level shorthand alias emitting machine-readable build metrics.
 
@@ -48,7 +49,8 @@ Theorycrafting commands are routed through the unified `bg3` CLI or run directly
 - `--classes`: Comma-separated class breakdowns (e.g. `"Paladin=6,Sorcerer=14"`).
 - `--stats`: Comma-separated ability scores (e.g. `"Str=16,Dex=14,Con=14,Int=10,Wis=10,Cha=20"`).
 - `--gear`: Comma-separated mod item IDs or display names.
-- `--dpr-sequence`: Sequence to evaluate (`melee_burst` or `eldritch_blast`).
+- `--weapon-damage`: Override base weapon damage dice expression (e.g. `"2d6+2"`, `"1d8+3"`).
+- `--dpr-sequence`: Sequence to evaluate (`melee_burst`, `eldritch_blast`, or `ranged_burst`).
 - `--target-ac`: Single target Armor Class for primary DPR evaluation (default: 18).
 - `--roll-mode`: Roll probability distribution (`normal`, `advantage`, `disadvantage`).
 - `--advantage`: Shorthand for `--roll-mode advantage`.
@@ -61,13 +63,13 @@ Theorycrafting commands are routed through the unified `bg3` CLI or run directly
 
 ## Programmatic Library Usage
 
-`bg3_theorycraft` exposes a typed public API for direct programmatic use:
+`bg3_theorycraft` exposes a strongly-typed domain model API (`models.py`) with full backward-compatible dictionary mapping:
 
 ```python
 import bg3_theorycraft as tc
 
 # Simulate build synergy
-result = tc.simulate_build(
+result: tc.SimulationResult = tc.simulate_build(
     classes={"paladin": 6, "sorcerer": 14},
     stats={"Str": 16, "Dex": 10, "Con": 14, "Int": 10, "Wis": 10, "Cha": 20},
     dpr_sequence="melee_burst",
@@ -76,9 +78,13 @@ result = tc.simulate_build(
     include_ac_curve=True,
 )
 
-print(f"Proficiency Bonus: +{result['proficiency_bonus']}")
-print(f"Effective Spell DC: {result['effective_spell_save_dc']}")
-print(f"Turn 1 Expected DPR: {result['turn_1_dpr']['expected_dpr']} damage")
-print(f"Ki Points: {result['resource_pools']['ki_points']}")
-print(f"Sorcery Points: {result['resource_pools']['sorcery_points']}")
+# Strongly-typed attribute access
+print(f"Proficiency Bonus: +{result.proficiency_bonus}")
+print(f"Effective Spell DC: {result.effective_spell_save_dc}")
+print(f"Turn 1 Expected DPR: {result.turn_1_dpr.expected_dpr:.2f} damage")
+print(f"Action Budget: {result.action_budget.actions} action, {result.action_budget.bonus_actions} bonus")
+print(f"Sorcery Points: {result.resource_pools.sorcery_points}")
+
+# Dictionary subscripting backwards-compatibility
+print(f"Subscript access: {result['effective_spell_save_dc']}")
 ```

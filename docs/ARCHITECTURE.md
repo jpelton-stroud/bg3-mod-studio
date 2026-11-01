@@ -13,15 +13,15 @@ The studio operates across four architectural layers: the **Agent & Orchestratio
 
 ```mermaid
 flowchart TD
-    subgraph Tier1["1. Agent & Orchestration Tier (.agents/skills/)"]
-        Agents["15 Autonomous Subagent Skills\n(/bg3-create-mod, /bg3-diagnose-mod, /bg3-test-mod, etc.)"]
+    subgraph Tier1["1. Agent & Orchestration Tier (packages/*/skills/)"]
+        Agents["13 Autonomous Subagent Skills\n(/bg3-create-mod, /bg3-diagnose-mod, /bg3-test-mod, etc.)"]
         GrillMe["Clarification Engine\n(/grill-me Interactive Trees)"]
     end
 
     subgraph Tier2["2. Automation & Tooling Tier (packages/bg3-*)"]
         CLI["Unified CLI & Router\n(packages/bg3-core: bg3 -> ~/.local/bin/bg3)"]
         Registry["Tooling Catalog & Discovery\n(packages/bg3-core: bg3 tools dynamic inspection)"]
-        CorePkg["bg3-core Engine Package\n(parsers, lspk, env_paths, modio, dynamic tools)"]
+        CorePkg["bg3 Core Engine Package\n(parsers, lspk, env_paths, modio, dynamic tools)"]
         AuthoringPkg["bg3-authoring Studio Package\n(scaffolding, diagnostics, packaging, sync)"]
         TheorycraftPkg["bg3-theorycraft Studio Package\n(character builder, combat simulator, synergies)"]
     end
@@ -175,8 +175,8 @@ $$\text{Version64} = (\text{major} \ll 55) \mid (\text{minor} \ll 47) \mid (\tex
 Rather than relying on Windows-exclusive binaries (`LSLib/divine.exe`) or running through `wine`, the workspace implements a pure Python packager for Larian's **LSPK v18** format in `packages/bg3-authoring/bg3_authoring/packaging/pack_mod_pak.py` and `packages/bg3-core/bg3_core/lspk.py` (`bg3 mod pack`):
 
 - **Zero External Dependencies**: Implemented strictly with Python's standard library `struct`, `zlib`, and `hashlib`.
-- **Package Header**: Writes standard 128-byte LSPK v18 signature (`LSPK`), file version, and file table metadata offset.
-- **File Entry Table**: Compresses individual files with `zlib`, calculates uncompressed and compressed sizes, CRC32/MD5 checksums, and relative archive offsets.
+- **Package Header**: Writes standard 40-byte LSPK v18 header signature (`LSPK`), file version, flags, priority, and file table metadata offset (`<4sIIII16sH`).
+- **File Entry Table**: Compresses individual files using raw LZ4 block compression (`LSPK v18`), calculates uncompressed and compressed sizes, CRC32/MD5 checksums, and relative archive offsets (supports dual LZ4 and zlib decompression on extraction).
 - **Automatic Loca Compilation**: Compiles XML localization entries into binary `.loca` format during packaging.
 - **Cross-Platform Compatibility**: Packages created with `pack_mod_pak.py` mount identically across Linux, macOS, Windows, and game consoles (PlayStation 5, Xbox Series X|S).
 
@@ -213,9 +213,9 @@ The community mod library indexes over 2,200 unique community gear items, passiv
 
 ## 5. Architectural Principles & Isolation
 
-- **Zero-Dependency Philosophy**: All 59 canonical automation tools across the 3 modular workspace packages (`bg3-core`, `bg3-authoring`, `bg3-theorycraft`) and the unified `bg3` CLI entry point use strictly the Python 3.10+ standard library. They run out-of-the-box on Linux, WSL, and Windows without virtual environment setups or `pip install` requirements.
+- **Zero-Dependency Philosophy**: All 65 canonical automation tools across the 3 modular workspace packages (`bg3`, `bg3-authoring`, `bg3-theorycraft`) and the unified `bg3` CLI entry point use strictly the Python 3.10+ standard library. They run out-of-the-box on Linux, WSL, and Windows without virtual environment setups or `pip install` requirements.
 - **Unified 2026 CLI Suite (`bg3`)**:
-  - Installed to `~/.local/bin/bg3` via `uv tool install bg3-mod-studio` (or `uv tool install --editable packages/bg3-mod-studio`).
+  - Installed to `~/.local/bin/bg3` via `uv tool install "bg3[all]"` (or domain extras `bg3[authoring]`, `bg3[theorycraft]`).
   - Implements modern Dual-Channel stream discipline: rich, high-signal human-readable formatting in interactive terminals, and pristine, machine-parsable JSON on `stdout` when `--json` is supplied or non-interactive pipes are detected.
   - Standardizes POSIX exit codes, non-interactive confirmation guards (`--yes` / `--confirm`), and dynamic in-memory tool catalog (`bg3 tools`).
 - **Safe Sandboxing & Clean-Room Isolation**:

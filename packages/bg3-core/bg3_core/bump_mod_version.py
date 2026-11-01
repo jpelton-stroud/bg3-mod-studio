@@ -25,6 +25,7 @@ from bg3_core.larian_parsers import (
     calculate_version64,
     decode_version64,
     format_version_tuple,
+    parse_meta_lsx,
     parse_version_str,
 )
 
@@ -81,20 +82,12 @@ def get_meta_files(mod_dir: Path) -> List[Path]:
 
 def read_mod_version(meta_path: Path) -> Tuple[int, int, int, int, int]:
     """Extract Version64 integer and decoded tuple from a meta.lsx file."""
-    content = meta_path.read_text(encoding="utf-8")
-
-    # Locate ModuleInfo node first to avoid matching dependencies or PublishVersion
-    mod_info_match = re.search(r'<node\s+id="ModuleInfo">(.*?)</node>', content, re.DOTALL)
-    if mod_info_match:
-        target_text = mod_info_match.group(1)
-    else:
-        target_text = content
-
-    ver_match = re.search(r'<attribute\s+id="Version64"\s+type="int64"\s+value="(\d+)"\s*/>', target_text)
-    if not ver_match:
+    meta = parse_meta_lsx(meta_path.read_bytes())
+    ver_str = meta.get("Version64")
+    if not ver_str:
         raise ValueError(f"Could not find Version64 attribute under ModuleInfo in {meta_path}")
 
-    raw_val = int(ver_match.group(1))
+    raw_val = int(ver_str)
     major, minor, rev, bld = decode_version64(raw_val)
     return major, minor, rev, bld, raw_val
 

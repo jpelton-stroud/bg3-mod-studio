@@ -20,27 +20,28 @@ flowchart TD
 
 ## Subpackages & Core Capabilities
 
-### 1. Asset Scaffolding Generators
-14 specialized generator modules creating standard Larian engine structures:
-- `create_mod_scaffold.py`: Generates the canonical 4-root mod directory layout (`Mods/`, `Projects/`, `Public/`, `Localization/`).
-- `scaffold_class_description.py`: Scaffolds classes, subclasses, ProgressionDescriptions, and parent progression wiring.
-- `scaffold_feat.py`: Generates feats, FeatDescriptions, and localization string tables.
-- `scaffold_spell_list.py`: Scaffolds standalone SpellLists and PassiveLists.
-- `scaffold_level_map.py`: Configures LevelMapValues scaling curves across character levels 1–20.
-- `scaffold_action_resource.py`: Creates custom action points, spell slots, and resource replenish conditions.
-- `scaffold_progression_node.py`: Appends level-up progressions into `Progressions.lsx`.
-- `scaffold_root_template.py`: Generates 3D GameObject root templates for items and equipment.
-- `scaffold_stat_entry.py`: Scaffolds Weapons, Armor, Spells, Passives, and StatusData text entries.
-- `scaffold_icon_uvs.py`: Computes texture atlas UV coordinates for custom spell and item icons.
+### 1. Asset Scaffolding Subsystem
+Modular scaffolding engines producing standard Larian engine structures and returning typed `ScaffoldResult` contracts:
+- `create_mod_scaffold.py`: Generates canonical 4-root mod directory layouts (`Mods/`, `Projects/`, `Public/`, `Localization/`) and project thumbnails.
+- `scaffold_asset.py`: Facade router providing unified dispatch across all asset generators.
+- `scaffold_mechanics.py`: Classes, subclasses, progressions, feats, action resources, spell lists, level maps, default values, and stats.
+- `scaffold_visuals.py`: 3D GameObject root templates and appearance visuals.
+- `scaffold_atlas.py`: Texture atlas UV coordinate mapping and `Icons.lsx`.
+- `scaffold_character.py`: Custom races, origins, appearances, and tags.
+- `scaffold_common.py`: Shared XML formatting, path resolution, placeholder PNG generation, and `ScaffoldResult` mapping dataclass.
 
-### 2. Diagnostics & Compatibility (`bg3_authoring.diagnostics`)
-- `validate_mod.py`: Deep static validation checking XML/LSX syntax, UUID collisions, missing string handles, and required folder layouts.
+### 2. Diagnostics & Compatibility
+- `diagnostics/validate_mod.py`: Deep static validation checking XML/LSX syntax, UUID collisions, missing string handles, and required folder layouts.
+- `diagnostics/sync_localization.py`: String handle audit, localization synchronization, and binary `.loca` compilation.
+- `diagnostics/diagnose_toolkit_logs.py`: Automated triage of Larian Toolkit and engine runtime crash logs with actionable fix recommendations.
 - `generate_compat_patch.py`: Compatibility override patch and CF payload generator for resolving conflicting mods.
-- `diagnose_toolkit_logs.py`: Automated triage of Larian Toolkit and engine runtime crash logs with actionable fix recommendations.
+- `inject_treasure_table.py`: Injects custom mod items into standard world drop containers and vendor tables.
+- `add_mod_dependency.py`: Dependency registration in `meta.lsx` and `.test_deps.json`.
 
 ### 3. Packaging & Synchronization (`bg3_authoring.packaging`)
-- `pack_mod_pak.py`: Pure-Python LSPK v18 binary compiler that writes 40-byte headers, compresses files using LZ4 block compression (LSPK v18), compiles XML localization into binary `.loca`, and outputs deployable `.pak` archives.
-- `sync_game_data.py`: Idempotent differential file synchronizer that mirrors mod assets into the game's `Data/` directory for live in-engine playtesting.
+- `packaging/pack_mod_pak.py`: Pure-Python LSPK v18 binary compiler that writes 40-byte headers, compresses files using raw LZ4 block compression (`LSPK v18`), compiles XML localization into binary `.loca`, and outputs deployable `.pak` archives.
+- `packaging/sync_game_data.py`: Idempotent differential file synchronizer that mirrors mod assets into the game's `Data/` directory for live in-engine playtesting.
+- `packaging/common.py`: Centralized exclusion rules and file filtering predicates for distribution builds.
 
 ---
 

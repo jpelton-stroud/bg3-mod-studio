@@ -19,6 +19,7 @@ from typing import Any, Optional
 
 from bg3_core.cli_common import ConsoleColor, ExitCode
 from bg3_core.env_paths import REPO_ROOT, get_subscribed_mods_dir
+from bg3_core.larian_parsers import parse_meta_lsx
 from bg3_core.library_catalog import get_tracked_mods as _get_tracked_mods
 from bg3_core.modio_client import get_api_key, query_modio
 from bg3_core.modio_extract import process_mod
@@ -62,17 +63,14 @@ def get_local_mod_state(slug: str, mods_dir: Optional[str | Path] = None) -> dic
     meta_lsx_path = os.path.join(mod_dir, "data", "meta.lsx")
     if os.path.exists(meta_lsx_path):
         try:
-            tree = ET.parse(meta_lsx_path)
-            root = tree.getroot()
-            for node in root.findall(".//node[@id='ModuleInfo']/attribute"):
-                attr_id = node.get("id")
-                val = node.get("value")
-                if attr_id == "MD5":
-                    state["md5"] = val
-                elif attr_id == "Version64":
-                    state["version64"] = val
-                elif attr_id == "PublishHandle":
-                    state["mod_id"] = val
+            with open(meta_lsx_path, "rb") as f:
+                meta = parse_meta_lsx(f.read())
+            if meta.get("MD5"):
+                state["md5"] = meta["MD5"]
+            if meta.get("Version64"):
+                state["version64"] = meta["Version64"]
+            if meta.get("PublishHandle"):
+                state["mod_id"] = meta["PublishHandle"]
         except Exception:
             pass
 

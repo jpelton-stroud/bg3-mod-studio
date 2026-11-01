@@ -1,6 +1,6 @@
-# bg3-core
+# bg3 (Core Runtime & CLI Dispatcher)
 
-Foundational runtime, binary parsers, cross-platform path resolution, and mod.io REST API client for the **Baldur's Gate 3 Mod Studio** workspace.
+Foundational runtime, in-process CLI dispatcher, binary parsers, cross-platform path resolution, and mod.io REST API client for the **Baldur's Gate 3 Mod Studio** workspace. Distributed as the `bg3` package on PyPI.
 
 ---
 
@@ -27,16 +27,23 @@ graph TD
 | `bg3_core.manage_saves` | Savegame discovery, backup, retention purging, and rescue | `discover_save_games()`, `handle_clean_missing()` |
 | `bg3_core.env_paths` | Cross-platform state, cache, config, and game path detection | `get_xdg_config_home()`, `get_xdg_cache_home()`, `get_xdg_data_home()`, `detect_bg3_appdata_dirs()`, `detect_bg3_install_dir()` |
 | `bg3_core.cli_common` | Stream separation, POSIX exit codes, and JSON envelopes | `OutputEmitter`, `ConsoleColor`, `ExitCode`, `format_json_response()`, `confirm_action()` |
-| `bg3_core.modio_client` | Authenticated mod.io v1 REST client | `ModioClient`, `ModioError`, `resolve_modio_token()` |
+| `bg3_core.modio_client` | Authenticated mod.io v1 REST client | `ModioClient`, `ModioError`, `get_oauth_token()`, `get_api_key()` |
 | `bg3_core.tools` | Dynamic CLI argument parser introspection and registry | `build_parser_ast_registry()`, `search_tools()`, `verify_registry()`, `audit_skills()` |
 | `bg3_core.check_mod_conflicts` | Static conflict detector and cross-mod compatibility analyzer | `compare_two_mods()`, `compare_candidate_against_catalog()`, `check_native_dlls()`, `find_missing_local_dependencies()` |
 | `bg3_core.cli` | Central unified router for all workspace domains | `main()`, `build_parser()`, `dispatch_command()` |
 
 ---
 
-## CLI Console Entrypoint
+## Distribution & CLI Console Entrypoint
 
-This package registers the primary console script for the entire studio:
+This package is distributed as `bg3` and provides the primary console script for the entire studio, with optional extras for domain toolsets:
+
+```bash
+uv tool install "bg3[all]"          # Complete studio suite
+uv tool install "bg3[authoring]"    # Mod authoring and packaging
+uv tool install "bg3[theorycraft]"  # Theorycrafting and DPR simulation
+uv tool install bg3                 # Core runtime, load order, and mod.io client
+```
 
 ```toml
 [project.scripts]
