@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from bg3_core.modio_update_metadata import (
+from bg3_core.modio.modio_update_metadata import (
     BG3_GAME_ID,
     COMMUNITY_OPTIONS,
     ModioError,

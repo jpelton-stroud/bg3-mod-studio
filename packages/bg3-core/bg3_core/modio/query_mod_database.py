@@ -15,13 +15,13 @@ import time
 from pathlib import Path
 from typing import Optional
 
-from bg3_core.cli_common import ExitCode
-from bg3_core.env_paths import get_cache_dir, get_subscribed_mods_dir
-from bg3_core.larian_parsers import (
+from bg3_core.binary.larian_parsers import (
     parse_loca_bytes,
     parse_localization_xml,
     parse_stats_txt,
 )
+from bg3_core.cli.common import ExitCode
+from bg3_core.env_paths import get_cache_dir, get_subscribed_mods_dir
 
 # Files to scan within mod directories
 TARGET_STAT_FILES = {

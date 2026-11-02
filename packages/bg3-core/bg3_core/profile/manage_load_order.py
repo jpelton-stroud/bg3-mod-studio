@@ -26,7 +26,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
-from bg3_core.cli_common import ConsoleColor
+from bg3_core.binary.larian_parsers import find_mod_meta_files, parse_meta_lsx
+from bg3_core.binary.lspk import LspkArchive
+from bg3_core.cli.common import ConsoleColor
 from bg3_core.env_paths import (
     MODS_DIR,
     MY_MODS_DIR,
@@ -36,9 +38,7 @@ from bg3_core.env_paths import (
     normalize_mod_key,
     resolve_mod_dir,
 )
-from bg3_core.larian_parsers import find_mod_meta_files, parse_meta_lsx
-from bg3_core.lspk import LspkArchive
-from bg3_core.mod_resolver import ensure_dependency_paks, resolve_dependency_metadata
+from bg3_core.profile.mod_resolver import ensure_dependency_paks, resolve_dependency_metadata
 
 # Zero-dependency ANSI Terminal Colors honoring NO_COLOR
 _color = ConsoleColor(stream=sys.stderr)
@@ -436,7 +436,7 @@ def resolve_all_dependencies(
         )
         if not installed:
             try:
-                from .mod_resolver import resolve_dependency_metadata
+                from bg3_core.profile.mod_resolver import resolve_dependency_metadata
                 resolved_info = resolve_dependency_metadata(dep_uuid or dep.get("Name", ""), auto_document=False)
                 if resolved_info and resolved_info.get("UUID"):
                     installed = resolved_info
@@ -1207,8 +1207,42 @@ def main() -> None:
     parser.add_argument("--create-default", action="store_true", help="Create default modsettings.lsx if missing")
     parser.add_argument("--dry-run", action="store_true", help="Preview modifications without writing to disk")
     parser.add_argument("--json", action="store_true", help="Output result as JSON")
+    parser.add_argument(
+        "subcommand",
+        nargs="?",
+        choices=[
+            "list", "sync", "clean", "enable", "disable", "validate",
+            "auto-sort", "sort", "isolate", "quarantine", "restore", "dedup", "create-default",
+        ],
+        help="Subcommand action for loadorder",
+    )
+    parser.add_argument("mod_name", nargs="?", help="Mod name or UUID for enable/disable/isolate")
 
     args = parser.parse_args()
+
+    if args.subcommand:
+        if args.subcommand in ("list", "sync"):
+            args.list = True
+        elif args.subcommand in ("enable", "activate"):
+            args.enable = args.mod_name or args.enable
+        elif args.subcommand == "disable":
+            args.disable = args.mod_name or args.disable
+        elif args.subcommand in ("clean", "isolate"):
+            args.isolate = True
+            if args.mod_name:
+                args.enable = args.mod_name
+        elif args.subcommand in ("auto-sort", "sort"):
+            args.auto_sort = True
+        elif args.subcommand == "validate":
+            args.validate = True
+        elif args.subcommand == "quarantine":
+            args.quarantine = True
+        elif args.subcommand == "restore":
+            args.restore = True
+        elif args.subcommand == "dedup":
+            args.dedup = True
+        elif args.subcommand == "create-default":
+            args.create_default = True
 
     modsettings_path = Path(args.path) if args.path else detect_modsettings_path()
 

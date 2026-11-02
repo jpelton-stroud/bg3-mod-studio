@@ -13,16 +13,15 @@ import json
 import os
 import re
 import sys
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Optional
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
+from bg3_core.binary.larian_parsers import parse_meta_lsx
+from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import REPO_ROOT, get_subscribed_mods_dir
-from bg3_core.larian_parsers import parse_meta_lsx
-from bg3_core.library_catalog import get_tracked_mods as _get_tracked_mods
-from bg3_core.modio_client import get_api_key, query_modio
-from bg3_core.modio_extract import process_mod
+from bg3_core.modio.library_catalog import get_tracked_mods as _get_tracked_mods
+from bg3_core.modio.modio_client import get_api_key, query_modio
+from bg3_core.modio.modio_extract import process_mod
 
 WORKSPACE_ROOT = str(REPO_ROOT)
 

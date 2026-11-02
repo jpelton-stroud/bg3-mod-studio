@@ -18,15 +18,13 @@ import argparse
 import json
 import os
 import re
-import struct
 import uuid
-import zlib
 from pathlib import Path
 from typing import Any, Optional
 
+from bg3_core.binary.larian_parsers import calculate_version64, generate_larian_handle
 from bg3_core.env_paths import get_authored_mods_dir, load_env_file
-from bg3_core.larian_parsers import calculate_version64, generate_larian_handle
-from bg3_core.mod_resolver import KNOWN_DEPENDENCIES, resolve_dependency_metadata
+from bg3_core.profile.mod_resolver import KNOWN_DEPENDENCIES, resolve_dependency_metadata
 
 from bg3_authoring.scaffold_common import generate_placeholder_png
 
@@ -405,7 +403,8 @@ def main() -> None:
     default_author = os.environ.get("BG3_MOD_AUTHOR") or env_vars.get("BG3_MOD_AUTHOR") or "MTGHillGiant"
 
     parser = argparse.ArgumentParser(description="Scaffold a new Baldur's Gate 3 mod directory under my_mods/")
-    parser.add_argument("--name", required=True, help="Mod name (PascalCase/CamelCase, e.g. ArcaneProgression)")
+    parser.add_argument("pos_name", nargs="?", default=None, help="Mod name (PascalCase/CamelCase, e.g. ArcaneProgression)")
+    parser.add_argument("--name", default=None, help="Mod name (PascalCase/CamelCase, e.g. ArcaneProgression)")
     parser.add_argument("--slug", default=None, help="Main folder slug under my_mods/ (e.g. arcane-progression; auto-generated if omitted)")
     parser.add_argument("--uuid", default=None, help="Specific UUIDv4 (auto-generated if omitted)")
     parser.add_argument("--author", default=default_author, help=f"Mod author name (default: {default_author})")
@@ -440,12 +439,16 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    mod_name = args.name or args.pos_name
+    if not mod_name:
+        parser.error("Mod name is required (pass positional <name> or --name <name>).")
+
     deps = list(args.dependencies)
     if args.unlock_level_curve and "UnlockLevelCurve" not in deps:
         deps.append("UnlockLevelCurve")
 
     result = scaffold_mod(
-        name=args.name,
+        name=mod_name,
         mod_uuid=args.uuid,
         mod_slug=args.slug,
         author=args.author,

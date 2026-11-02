@@ -10,9 +10,8 @@ from __future__ import annotations
 
 import uuid
 import xml.etree.ElementTree as ET
-from typing import Any
 
-from bg3_core.larian_parsers import generate_larian_handle, update_localization_xml
+from bg3_core.binary.larian_parsers import generate_larian_handle, update_localization_xml
 
 from bg3_authoring.scaffold_common import (
     ScaffoldResult,

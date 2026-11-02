@@ -94,14 +94,14 @@ def zstd_decompress(compressed_data: bytes, uncompressed_size: int) -> bytes:
 
 def lz4_block_decompress(compressed_data: bytes, uncompressed_size: int) -> bytes:
     """Decompress standard LZ4 raw block data.
-    
+
     Uses system liblz4 via ctypes if available, otherwise falls back to pure-Python decompressor.
     """
     if _LIBLZ4 is not None and uncompressed_size > 0 and len(compressed_data) > 0:
-        dst = ctypes.create_string_buffer(uncompressed_size)
-        res = _LIBLZ4.LZ4_decompress_safe(compressed_data, dst, len(compressed_data), uncompressed_size)
+        c_buf = ctypes.create_string_buffer(uncompressed_size)
+        res = _LIBLZ4.LZ4_decompress_safe(compressed_data, c_buf, len(compressed_data), uncompressed_size)
         if res == uncompressed_size:
-            return dst.raw[:res]
+            return c_buf.raw[:res]
 
     src = io.BytesIO(compressed_data)
     dst = bytearray()

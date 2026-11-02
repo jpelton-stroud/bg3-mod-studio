@@ -5,9 +5,9 @@ Centralized dependency metadata resolution and .pak provisioning for Baldur's Ga
 
 Resolution Priority:
 1. Hardcoded known engine dependencies (GustavDev, GustavX, UnlockLevelCurve)
-2. Local catalog lookup via mods/library.md and mods/<slug>/data/meta.lsx
-3. Workspace search in mods/ and my_mods/
-4. Remote fallback to mod.io REST API (with automatic cataloging into mods/<slug>/)
+2. Local catalog lookup via library catalog (Mods/subscribed/library.md) and meta.lsx
+3. Studio workspace search in Mods/authored/ and Mods/subscribed/
+4. Remote fallback to mod.io REST API (with automatic cataloging into Mods/subscribed/<slug>/)
 """
 
 import io
@@ -17,7 +17,9 @@ import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
-from .env_paths import (
+from bg3_core.binary.larian_parsers import find_mod_meta_files, parse_meta_lsx
+from bg3_core.binary.lspk import LspkArchive
+from bg3_core.env_paths import (
     detect_bg3_appdata_dirs,
     detect_data_dir,
     get_authored_mods_dir,
@@ -25,9 +27,7 @@ from .env_paths import (
     get_subscribed_mods_dir,
     normalize_mod_key,
 )
-from .larian_parsers import find_mod_meta_files, parse_meta_lsx
-from .library_catalog import parse_library_rows
-from .lspk import LspkArchive
+from bg3_core.modio.library_catalog import parse_library_rows
 
 # Known common core dependencies
 KNOWN_DEPENDENCIES: Dict[str, Dict[str, Any]] = {
@@ -212,7 +212,7 @@ def resolve_dependency_metadata(
 
     # 4. Remote fallback to mod.io REST API
     try:
-        from .modio_client import get_api_key, query_modio
+        from bg3_core.modio.modio_client import get_api_key, query_modio
 
         api_key = get_api_key()
         if api_key:
@@ -224,7 +224,7 @@ def resolve_dependency_metadata(
 
                 if auto_document:
                     try:
-                        from bg3_core.modio_extract import process_mod
+                        from bg3_core.modio.modio_extract import process_mod
 
                         res = process_mod(
                             query=slug or clean_id,
@@ -383,7 +383,7 @@ def ensure_dependency_paks(
         downloaded = False
 
         try:
-            from .modio_client import download_mod_file, get_api_key, query_modio
+            from bg3_core.modio.modio_client import download_mod_file, get_api_key, query_modio
 
             api_key = get_api_key()
             if api_key:

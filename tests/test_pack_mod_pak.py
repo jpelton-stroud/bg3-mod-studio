@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from bg3_authoring.packaging.pack_mod_pak import build_pak_archive, verify_pak_archive
-from bg3_core.lspk import LspkArchive, lz4_block_compress, lz4_block_decompress
+from bg3_core.binary.lspk import LspkArchive, lz4_block_compress, lz4_block_decompress
 
 
 class TestLspkPackaging(unittest.TestCase):

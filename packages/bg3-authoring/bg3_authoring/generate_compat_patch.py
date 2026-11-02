@@ -10,18 +10,15 @@ Compatibility Framework (CF) integration payload.
 import argparse
 import json
 import re
-import struct
 import sys
 import uuid
 import xml.etree.ElementTree as ET
-import zlib
 from pathlib import Path
 from typing import Any
-from xml.dom import minidom
 
+from bg3_core.binary.larian_parsers import find_mod_meta_files, find_mod_progression_files
 from bg3_core.env_paths import get_authored_mods_dir
 from bg3_core.env_paths import resolve_mod_dir as _resolve_mod_dir
-from bg3_core.larian_parsers import find_mod_meta_files, find_mod_progression_files
 
 from bg3_authoring.scaffold_common import generate_placeholder_png, prettify_xml
 

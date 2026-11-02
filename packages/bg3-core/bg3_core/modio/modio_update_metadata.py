@@ -11,15 +11,15 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
+from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import MY_MODS_DIR, REPO_ROOT, normalize_mod_key, resolve_mod_dir
-from bg3_core.modio_client import (
+from bg3_core.modio.modio_client import (
     BG3_GAME_ID,
     ModioClient,
     ModioError,
     get_oauth_token,
 )
-from bg3_core.render_modio_description import render_mod_description
+from bg3_core.modio.render_modio_description import render_mod_description
 
 WORKSPACE_ROOT = REPO_ROOT
 normalize_name = normalize_mod_key

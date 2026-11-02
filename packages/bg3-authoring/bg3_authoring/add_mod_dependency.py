@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from bg3_core.env_paths import MY_MODS_DIR, resolve_mod_dir
-from bg3_core.mod_resolver import resolve_dependency_metadata
+from bg3_core.profile.mod_resolver import resolve_dependency_metadata
 
 
 def detect_mod_from_cwd() -> Optional[str]:

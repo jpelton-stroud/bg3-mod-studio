@@ -8,8 +8,8 @@ import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from bg3_core.lspk import build_lspk_archive as build_pak_archive
-from bg3_core.manage_load_order import (
+from bg3_core.binary.lspk import build_lspk_archive as build_pak_archive
+from bg3_core.profile.manage_load_order import (
     CORE_SYSTEM_MODULES,
     _ensure_base_module,
     create_default_modsettings,
@@ -238,27 +238,26 @@ class TestManageLoadOrderQuarantine(unittest.TestCase):
     def test_cli_loadorder_commands(self):
         import subprocess
         import sys
-        bg3_cli = Path(__file__).resolve().parent.parent / "packages" / "bg3-core" / "bg3_core" / "cli.py"
 
         # 1. Test bg3 loadorder enable --help shows --isolate and --quarantine
-        proc = subprocess.run([sys.executable, str(bg3_cli), "loadorder", "enable", "--help"], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, "-m", "bg3_core.cli", "loadorder", "enable", "--help"], capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0)
         self.assertIn("--isolate", proc.stdout)
         self.assertIn("--quarantine", proc.stdout)
 
         # 2. Test bg3 loadorder isolate --help shows Clean-room isolation and --quarantine
-        proc = subprocess.run([sys.executable, str(bg3_cli), "loadorder", "isolate", "--help"], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, "-m", "bg3_core.cli", "loadorder", "isolate", "--help"], capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0)
         self.assertIn("Clean-room isolation", proc.stdout)
         self.assertIn("--quarantine", proc.stdout)
 
         # 3. Test bg3 loadorder restore --help
-        proc = subprocess.run([sys.executable, str(bg3_cli), "loadorder", "restore", "--help"], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, "-m", "bg3_core.cli", "loadorder", "restore", "--help"], capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0)
         self.assertIn("Restore quarantined mods", proc.stdout)
 
         # 4. Test bg3 loadorder dedup --help
-        proc = subprocess.run([sys.executable, str(bg3_cli), "loadorder", "dedup", "--help"], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, "-m", "bg3_core.cli", "loadorder", "dedup", "--help"], capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0)
         self.assertIn("Deduplicate installed .pak files", proc.stdout)
 

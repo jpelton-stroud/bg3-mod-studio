@@ -18,9 +18,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
+from bg3_core.binary.lspk import LspkArchive, build_lspk_archive
+from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import detect_bg3_appdata_dirs
-from bg3_core.lspk import LspkArchive, build_lspk_archive
 
 
 def get_save_search_paths() -> list[Path]:
@@ -67,7 +67,7 @@ def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict[str, str]]:
     """Extracts ModuleShortDesc entries from binary LSOF meta.lsf via AST traversal with regex fallback."""
     # 1. Primary path: Pure-Python LSF AST decompiler
     try:
-        from bg3_core.lsf import LsfDocument
+        from bg3_core.binary.lsf import LsfDocument
 
         doc = LsfDocument.from_bytes(lsf_bytes)
         mod_nodes = doc.find_all("ModuleShortDesc")
@@ -91,7 +91,7 @@ def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict[str, str]]:
         pass
 
     # 2. Fallback path: Raw binary payload scanning
-    from bg3_core.lspk import lz4_frame_or_block_decompress
+    from bg3_core.binary.lspk import lz4_frame_or_block_decompress
 
     payload = lsf_bytes
     if len(lsf_bytes) >= 64 and lsf_bytes[:4] == b"LSOF":
@@ -213,7 +213,7 @@ def extract_save_metadata(save_path: Path) -> dict[str, Any]:
 
 def audit_against_modsettings(save_mods: list[dict[str, Any]], workspace_root: Path | None = None) -> dict[str, Any]:
     """Compares save mod list against active modsettings.lsx."""
-    from bg3_core.manage_load_order import (
+    from bg3_core.profile.manage_load_order import (
         CORE_GUSTAV_NAMES,
         detect_modsettings_path,
         parse_modsettings,
@@ -334,7 +334,7 @@ def prune_missing_mods_from_save(
             raw = archive.extract_file(entry)
 
             if norm.endswith("meta.lsf"):
-                from bg3_core.lsf import LsfDocument, LsfNode
+                from bg3_core.binary.lsf import LsfDocument, LsfNode
 
                 doc = LsfDocument.from_bytes(raw)
 

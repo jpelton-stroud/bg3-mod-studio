@@ -5,11 +5,10 @@ Provides machine-readable discovery, search, schema inspection, and verification
 for all studio CLI commands dynamically generated from the unified command parser.
 
 Usage:
-    bg3 tools --list [--category <cat>] [--json]
-    bg3 tools --search "<intent or keyword>" [--json]
-    bg3 tools --info <tool_name> [--json]
-    bg3 tools --verify [--json]
-    bg3 tools --audit-skills [--json]
+    bg3 tools list [--category <cat>] [--json]
+    bg3 tools search "<intent or keyword>" [--json]
+    bg3 tools info <tool_name> [--json]
+    bg3 tools verify [--json] [--audit-skills]
 """
 
 from __future__ import annotations
@@ -120,6 +119,7 @@ def _resolve_target_module_flags(group_name: str, subcmd_name: Optional[str] = N
     """Inspect target module for build_parser() or parser attribute to extract real flags."""
     try:
         import importlib
+
         from bg3_core.cli import COMMAND_REGISTRY, DIRECT_COMMANDS
 
         spec = None

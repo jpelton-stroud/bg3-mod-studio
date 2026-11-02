@@ -3,7 +3,7 @@
 import unittest
 
 from bg3_core.cli import build_parser
-from bg3_core.tools import (
+from bg3_core.cli.tools import (
     find_tool,
     load_registry,
     search_tools,

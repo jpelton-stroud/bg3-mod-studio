@@ -24,9 +24,11 @@ import shutil
 import sys
 import time
 import xml.etree.ElementTree as ET
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
+from bg3_core.binary.larian_parsers import compile_xml_bytes_to_loca
 from bg3_core.env_paths import (
     detect_bg3_appdata_dirs,
     detect_data_dir,
@@ -35,7 +37,6 @@ from bg3_core.env_paths import (
     normalize_mod_key,
     resolve_mod_dir,
 )
-from bg3_core.larian_parsers import compile_xml_bytes_to_loca
 
 from bg3_authoring.packaging.common import (
     EXCLUDED_DIRECTORIES,
@@ -600,7 +601,7 @@ def run_sync(
     # Auto-bump build number if requested
     if bump_build:
         try:
-            from bg3_core.bump_mod_version import bump_version
+            from bg3_core.profile.bump_mod_version import bump_version
             for mod_path in sorted(mod_folders):
                 bump_version(mod_path.name, action="build", dry_run=dry_run)
         except Exception as e:

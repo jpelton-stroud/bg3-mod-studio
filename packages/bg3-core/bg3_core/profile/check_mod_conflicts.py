@@ -18,23 +18,22 @@ Modes:
 
 import argparse
 import json
-import re
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
+from bg3_core.binary.larian_parsers import (
+    parse_meta_lsx,
+    parse_progressions_lsx,
+    parse_root_templates_lsx,
+    parse_stats_txt,
+)
+from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import (
     get_authored_mods_dir,
     get_subscribed_mods_dir,
     normalize_mod_key,
     resolve_mod_dir,
-)
-from bg3_core.larian_parsers import (
-    parse_meta_lsx,
-    parse_progressions_lsx,
-    parse_root_templates_lsx,
-    parse_stats_txt,
 )
 
 # Zero-dependency ANSI Terminal Colors honoring NO_COLOR

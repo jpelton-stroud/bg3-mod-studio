@@ -55,7 +55,7 @@ CONTAINER_ALIASES = {
 STANDARD_HEADER = 'treasure itemtypes "Common","Uncommon","Rare","Epic","Legendary","Divine","Unique"\n'
 
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
+from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import resolve_mod_dir
 
 

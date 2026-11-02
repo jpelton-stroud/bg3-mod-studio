@@ -17,8 +17,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterator
 
+from bg3_core.binary.larian_parsers import PATCH_8_VERSION
 from bg3_core.env_paths import resolve_mod_dir
-from bg3_core.larian_parsers import PATCH_8_VERSION
 
 PATCH_8_VERSION_ATTRIBUTES = {
     "major": str(PATCH_8_VERSION["major"]),
@@ -147,7 +147,7 @@ def resolve_mod_paths(
 def create_empty_lsx(region_id: str, root_node_id: str = "root") -> ET.Element:
     """Creates a standard Larian v4.8 LSX root element with region and empty children."""
     root = ET.Element("save")
-    ET.SubElement(root, "version", **PATCH_8_VERSION_ATTRIBUTES)
+    ET.SubElement(root, "version", attrib=PATCH_8_VERSION_ATTRIBUTES)
     reg = ET.SubElement(root, "region", id=region_id)
     r_node = ET.SubElement(reg, "node", id=root_node_id)
     ET.SubElement(r_node, "children")

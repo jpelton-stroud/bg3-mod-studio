@@ -13,14 +13,11 @@ import json
 import os
 import re
 import sys
-import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 from typing import Any, Optional
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.env_paths import get_subscribed_mods_dir, normalize_mod_key
-from bg3_core.larian_parsers import (
+from bg3_core.binary.larian_parsers import (
     parse_loca_bytes,
     parse_localization_xml,
     parse_meta_lsx,
@@ -28,24 +25,26 @@ from bg3_core.larian_parsers import (
     parse_root_templates_lsx,
     parse_stats_txt,
 )
-from bg3_core.lspk import LspkArchive
-from bg3_core.mod_overrides import (
+from bg3_core.binary.lspk import LspkArchive
+from bg3_core.cli.common import ConsoleColor, ExitCode
+from bg3_core.env_paths import get_subscribed_mods_dir, normalize_mod_key
+from bg3_core.modio.modio_client import (
+    download_mod_file,
+    get_api_key,
+    query_modio,
+)
+from bg3_core.modio.update_library_catalog import write_library_catalog
+from bg3_core.profile.mod_overrides import (
     BASE_GAME_LOCA_HANDLES,
     BASE_GAME_PASSIVES,
     BASE_GAME_SPELLS,
     MOD_SPECIFIC_OVERRIDES,
 )
-from bg3_core.modio_client import (
-    download_mod_file,
-    get_api_key,
-    query_modio,
-)
-from bg3_core.update_library_catalog import write_library_catalog
 
 # ----------------------------------------------------------------------
 # Feature Extraction and In-Game Validation
 # ----------------------------------------------------------------------
-# Reference dictionaries imported from bg3_core.mod_overrides
+# Reference dictionaries imported from bg3_core.profile.mod_overrides
 
 
 def extract_and_verify_features(

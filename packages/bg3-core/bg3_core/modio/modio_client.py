@@ -20,7 +20,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from .env_paths import get_env_var, get_xdg_cache_home
+from bg3_core.env_paths import get_env_var, get_xdg_cache_home
 
 logger = logging.getLogger(__name__)
 

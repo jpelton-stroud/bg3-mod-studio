@@ -2,7 +2,7 @@
 """
 pack_mod_pak.py - Pure-Python LSPK v18 .pak package builder for Baldur's Gate 3 mods.
 
-Packages mod files into standard Larian Package v18 (.pak) format with zlib
+Packages mod files into standard Larian Package v18 (.pak) format with LZ4
 compression, enabling distribution and local Mod Manager installation without
 requiring the official Toolkit or external Windows binaries.
 """
@@ -15,15 +15,12 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
+from bg3_core.binary.larian_parsers import compile_xml_bytes_to_loca
+from bg3_core.binary.lspk import LspkArchive
+from bg3_core.binary.lspk import build_lspk_archive as build_pak_archive
 from bg3_core.env_paths import DIST_DIR, detect_bg3_appdata_dirs, get_env_var, resolve_mod_dir
-from bg3_core.larian_parsers import compile_xml_bytes_to_loca
-from bg3_core.lspk import LspkArchive
-from bg3_core.lspk import build_lspk_archive as build_pak_archive
 
 from bg3_authoring.packaging.common import (
-    EXCLUDED_DIRECTORIES,
-    EXCLUDED_EXTENSIONS,
-    EXCLUDED_FILENAMES,
     should_include_file,
 )
 
@@ -198,7 +195,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Pure-Python LSPK v18 .pak package builder for Baldur's Gate 3 mods."
     )
-    parser.add_argument("--mod", required=True, help="Mod name/slug in my_mods/ or directory path.")
+    parser.add_argument("mod_pos", nargs="?", default=None, help="Mod name/slug in my_mods/ or directory path.")
+    parser.add_argument("--mod", default=None, help="Mod name/slug in my_mods/ or directory path.")
     parser.add_argument("--out", help="Output .pak file path (default: dist/<mod_slug>.pak).")
     parser.add_argument("--output-dir", help="Output directory for generated .pak file.")
     parser.add_argument(
@@ -234,10 +232,14 @@ def main() -> int:
 
     args = parser.parse_args()
 
+    mod_target = args.mod or args.mod_pos
+    if not mod_target:
+        parser.error("Mod target is required (pass positional <mod> or --mod <mod>).")
+
     try:
-        mod_dir = resolve_mod_dir(args.mod, prefer_my_mods=True)
+        mod_dir = resolve_mod_dir(mod_target, prefer_my_mods=True)
         if mod_dir is None:
-            raise FileNotFoundError(f"Mod directory not found: {args.mod}")
+            raise FileNotFoundError(f"Mod directory not found: {mod_target}")
         mod_slug = mod_dir.name
 
         if args.clean_local:

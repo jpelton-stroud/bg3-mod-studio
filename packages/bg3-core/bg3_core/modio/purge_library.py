@@ -18,14 +18,14 @@ import json
 import sys
 from pathlib import Path
 
-from bg3_core.cli_common import (
+from bg3_core.cli.common import (
     ConsoleColor,
     ExitCode,
     NonInteractiveConfirmationError,
     confirm_action,
 )
 from bg3_core.env_paths import get_library_catalog_path, get_subscribed_mods_dir
-from bg3_core.library_catalog import purge_library_mods
+from bg3_core.modio.library_catalog import purge_library_mods
 
 
 def main() -> int:

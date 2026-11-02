@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from bg3_core.manage_load_order import (
+from bg3_core.profile.manage_load_order import (
     auto_sort_load_order,
     create_default_modsettings,
     parse_modsettings,
@@ -103,7 +103,7 @@ class TestManageLoadOrderAutoSort(unittest.TestCase):
         self._create_mod_with_meta("ModA", "ModA", uuid_a, dep_uuids=[uuid_b])
 
         # Inject ModA first, then ModB into modsettings.lsx (reverse order)
-        from bg3_core.manage_load_order import enable_mod
+        from bg3_core.profile.manage_load_order import enable_mod
         with patch.dict(os.environ, {"BG3_MODS_DIR": str(self.workspace_mods)}):
             enable_mod(self.modsettings_path, "ModA")
             enable_mod(self.modsettings_path, "ModB")

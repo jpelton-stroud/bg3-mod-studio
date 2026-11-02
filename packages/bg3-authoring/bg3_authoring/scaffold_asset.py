@@ -11,34 +11,21 @@ import json
 import sys
 from typing import Any
 
-from bg3_core.larian_parsers import split_larian_items
-from bg3_core.cli_common import ConsoleColor, ExitCode
+from bg3_core.binary.larian_parsers import split_larian_items
+from bg3_core.cli.common import ConsoleColor, ExitCode
 
 from bg3_authoring.scaffold_atlas import (
     scaffold_icon_uvs,
 )
 from bg3_authoring.scaffold_character import (
-    VANILLA_PARENT_RACES,
-    VANILLA_RACE_UUIDS,
     scaffold_origin,
     scaffold_race,
     scaffold_tag,
 )
 from bg3_authoring.scaffold_common import (
-    PATCH_8_VERSION_ATTRIBUTES,
     ScaffoldResult,
-    create_empty_lsx,
-    generate_placeholder_png,
-    get_or_create_root_children,
-    prettify_xml,
-    resolve_mod_paths,
 )
 from bg3_authoring.scaffold_mechanics import (
-    CLASS_TABLE_UUIDS,
-    STAT_TYPE_CONFIG,
-    SUBCLASS_TABLE_UUIDS,
-    VANILLA_CLASS_TABLES,
-    VANILLA_PARENT_CLASSES,
     scaffold_action_resource,
     scaffold_class,
     scaffold_default_values,
@@ -49,7 +36,6 @@ from bg3_authoring.scaffold_mechanics import (
     scaffold_stat,
 )
 from bg3_authoring.scaffold_visuals import (
-    VISUAL_PRESETS,
     scaffold_appearance_visual,
     scaffold_root_template,
 )
