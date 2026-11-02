@@ -377,7 +377,7 @@ def _parse_attribute_value(values_chunk: bytes, offset: int, length: int, type_i
             return raw.split(b"\x00")[0].decode("utf-8", errors="replace")
         else:
             return raw
-    except Exception:
+    except (struct.error, UnicodeDecodeError, ValueError):
         return raw
 
 

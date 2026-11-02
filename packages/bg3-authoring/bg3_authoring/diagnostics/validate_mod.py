@@ -135,7 +135,7 @@ class ModValidator:
                     data["version64"] = int(v64.group(1))
                 if folder:
                     data["folder"] = folder.group(1)
-        except Exception as e:
+        except (OSError, UnicodeDecodeError, ValueError) as e:
             self.add_error(f"Failed to read metadata from {meta_file.name}: {e}")
         return data
 
@@ -204,7 +204,7 @@ class ModValidator:
                         h = c.get("contentuid", "").strip()
                         if h:
                             self.defined_handles.add(h)
-                except Exception:
+                except (ET.ParseError, OSError, UnicodeDecodeError):
                     pass
 
         # 2. Extract handles referenced across Stats/*.txt, RootTemplates/*.lsx, and Progressions/*.lsx
@@ -225,7 +225,7 @@ class ModValidator:
                                     self.add_error(
                                         f"Missing localization handle '{h}' in {txt_file.name} (not found in English XML)."
                                     )
-                except Exception as e:
+                except (OSError, UnicodeDecodeError) as e:
                     self.add_warning(f"Could not read {txt_file.name}: {e}")
 
         # Scan all LSX files under Public/ for TranslatedString handles
@@ -240,7 +240,7 @@ class ModValidator:
                         self.add_error(
                             f"Missing localization handle '{h}' in {lsx_file.name} (not found in English XML)."
                         )
-            except Exception as e:
+            except (OSError, UnicodeDecodeError) as e:
                 self.add_warning(f"Could not read {lsx_file.name}: {e}")
 
         # Also collect any handles referenced in Mods/*/meta.lsx or Projects/*/meta.lsx
@@ -249,7 +249,7 @@ class ModValidator:
                 content = meta_file.read_text(encoding="utf-8", errors="replace")
                 for match in HANDLE_PATTERN.finditer(content):
                     self.referenced_handles.add(match.group(1))
-            except Exception:
+            except (OSError, UnicodeDecodeError):
                 pass
 
         # 3. Warn on orphan handles in Localization/English/*.xml
@@ -270,7 +270,7 @@ class ModValidator:
                         val = attr.get("value", "").strip()
                         if val:
                             self.defined_root_templates.add(val)
-            except Exception:
+            except (ET.ParseError, OSError, UnicodeDecodeError):
                 pass
 
         # 2. Validate RootTemplate references & balanced functor parentheses in Stats/*.txt
@@ -303,7 +303,7 @@ class ModValidator:
                                 self.add_warning(
                                     f"RootTemplate '{val}' in {txt_file.name}:{idx} is not defined in local RootTemplates/*.lsx (ensure it is a valid vanilla template)."
                                 )
-                except Exception:
+                except (OSError, UnicodeDecodeError):
                     pass
 
     def validate_spell_references(self) -> None:
@@ -316,7 +316,7 @@ class ModValidator:
                         m = re.match(r'^new\s+entry\s+"([^"]+)"', line.strip())
                         if m:
                             self.defined_spells.add(m.group(1))
-                except Exception:
+                except (OSError, UnicodeDecodeError):
                     pass
 
         # 2. Verify SpellLists.lsx
@@ -335,7 +335,7 @@ class ModValidator:
                                 self.add_warning(
                                     f"Spell '{s}' referenced in SpellLists.lsx is not defined locally in Spell_*.txt."
                                 )
-            except Exception as e:
+            except (ET.ParseError, OSError, UnicodeDecodeError) as e:
                 self.add_error(f"Error parsing SpellLists.lsx: {e}")
 
     def validate_image_asset(self, img_path: Path, label: str) -> None:
@@ -355,7 +355,7 @@ class ModValidator:
                     self.add_error(
                         f"{label} ({img_path.name}) must be square (512x512 or 1024x1024) pixels (found {width}x{height})."
                     )
-        except Exception as e:
+        except (OSError, UnicodeDecodeError, ValueError) as e:
             self.add_error(f"Failed to validate PNG {img_path.name}: {e}")
 
     def validate_assets(self) -> None:
@@ -384,7 +384,7 @@ class ModValidator:
                             val = attr.get("value", "").strip()
                             if val:
                                 feat_uuids.add(val)
-                except Exception as e:
+                except (ET.ParseError, OSError, UnicodeDecodeError) as e:
                     self.add_error(f"Error parsing Feats.lsx: {e}")
 
             if feat_uuids and not feat_desc_files:
@@ -399,7 +399,7 @@ class ModValidator:
                                 val = attr.get("value", "").strip()
                                 if val:
                                     desc_feat_ids.add(val)
-                    except Exception as e:
+                    except (ET.ParseError, OSError, UnicodeDecodeError) as e:
                         self.add_error(f"Error parsing FeatDescriptions.lsx: {e}")
                 missing_descs = feat_uuids - desc_feat_ids
                 if missing_descs:
@@ -420,7 +420,7 @@ class ModValidator:
                             val = attr.get("value", "").strip()
                             if val:
                                 race_uuids.add(val)
-                except Exception as e:
+                except (ET.ParseError, OSError, UnicodeDecodeError) as e:
                     self.add_error(f"Error parsing Races.lsx: {e}")
 
             if race_uuids and not race_desc_files:
@@ -435,7 +435,7 @@ class ModValidator:
                                 val = attr.get("value", "").strip()
                                 if val:
                                     desc_race_ids.add(val)
-                    except Exception as e:
+                    except (ET.ParseError, OSError, UnicodeDecodeError) as e:
                         self.add_error(f"Error parsing RaceDescriptions.lsx: {e}")
                 missing_descs = race_uuids - desc_race_ids
                 if missing_descs:
@@ -485,7 +485,7 @@ def check_uuid_uniqueness(mod_dirs: list[Path]) -> list[str]:
                         dupes.append(f"Duplicate UUID '{u}' shared by '{seen[u]}' and '{md.name}'.")
                     else:
                         seen[u] = md.name
-            except Exception:
+            except (OSError, UnicodeDecodeError):
                 pass
     return dupes
 

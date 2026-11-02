@@ -11,6 +11,8 @@ import os
 import sys
 from typing import Any, Dict, Optional, TextIO
 
+from bg3_core.exceptions import BG3Error
+
 
 class ExitCode(enum.IntEnum):
     """Standardized POSIX / BSD sysexits exit codes."""
@@ -68,7 +70,7 @@ class ConsoleColor:
         return self._style("35", text)
 
 
-class NonInteractiveConfirmationError(Exception):
+class NonInteractiveConfirmationError(BG3Error):
     """Raised when a destructive operation is invoked without --yes non-interactively."""
     pass
 

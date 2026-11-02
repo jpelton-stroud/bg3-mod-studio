@@ -21,8 +21,10 @@ import json
 import os
 import re
 import shutil
+import struct
 import sys
 import xml.etree.ElementTree as ET
+import zlib
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +40,7 @@ from bg3_core.env_paths import (
     normalize_mod_key,
     resolve_mod_dir,
 )
+from bg3_core.exceptions import BG3BinaryError, BG3Error
 from bg3_core.profile.mod_resolver import ensure_dependency_paks, resolve_dependency_metadata
 
 # Zero-dependency ANSI Terminal Colors honoring NO_COLOR
@@ -164,7 +167,7 @@ def get_appdata_mods_dir(modsettings_path: Path | None = None) -> Path | None:
             candidate = modsettings_path.resolve().parents[2] / "Mods"
             if candidate.is_dir() or candidate.parent.is_dir():
                 return candidate
-        except Exception:
+        except (OSError, ValueError):
             pass
 
     for appdata in detect_bg3_appdata_dirs():
@@ -332,7 +335,7 @@ def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
                         parsed = _extract_meta_from_xml_text(mf.read_text(encoding="utf-8", errors="ignore"), d.name)
                         if parsed and parsed.get("UUID", "").lower() == query_raw:
                             return parsed
-                    except Exception:
+                    except (OSError, UnicodeDecodeError, ValueError):
                         pass
 
     # 2. Pass 1: Exact directory name match
@@ -350,7 +353,7 @@ def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
                         parsed = _extract_meta_from_xml_text(mf.read_text(encoding="utf-8", errors="ignore"), d.name)
                         if parsed:
                             return parsed
-                    except Exception:
+                    except (OSError, UnicodeDecodeError, ValueError):
                         pass
 
     # 3. Pass 2: Substring directory name match
@@ -368,7 +371,7 @@ def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
                         parsed = _extract_meta_from_xml_text(mf.read_text(encoding="utf-8", errors="ignore"), d.name)
                         if parsed:
                             return parsed
-                    except Exception:
+                    except (OSError, UnicodeDecodeError, ValueError):
                         pass
 
     # 4. Search AppData/.../Mods/*.pak (exact stem first, then substring)
@@ -387,7 +390,7 @@ def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
                             parsed = _extract_meta_from_xml_text(xml_txt, pak_file.stem)
                             if parsed:
                                 return parsed
-                except Exception:
+                except (OSError, struct.error, zlib.error, BG3BinaryError):
                     pass
         for pak_file in sorted(pak_dir.glob("*.pak")):
             if query_norm in normalize_mod_key(pak_file.stem) or query_raw in pak_file.stem.lower():
@@ -399,7 +402,7 @@ def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
                             parsed = _extract_meta_from_xml_text(xml_txt, pak_file.stem)
                             if parsed:
                                 return parsed
-                except Exception:
+                except (OSError, struct.error, zlib.error, BG3BinaryError):
                     pass
 
     return None
@@ -440,7 +443,7 @@ def resolve_all_dependencies(
                 resolved_info = resolve_dependency_metadata(dep_uuid or dep.get("Name", ""), auto_document=False)
                 if resolved_info and resolved_info.get("UUID"):
                     installed = resolved_info
-            except Exception:
+            except (BG3Error, OSError, ValueError):
                 pass
         if installed:
             actual_meta = installed
@@ -816,7 +819,7 @@ def get_pak_module_info(pak_path: Path) -> dict | None:
             if entry["name"].replace("\\", "/").lower().endswith("meta.lsx"):
                 xml_txt = archive.extract_file(entry).decode("utf-8", errors="ignore")
                 return _extract_meta_from_xml_text(xml_txt, pak_path.stem)
-    except Exception:
+    except (OSError, struct.error, zlib.error, BG3BinaryError):
         pass
     return None
 
@@ -970,7 +973,7 @@ def quarantine_unrelated_paks(
     if manifest_path.is_file():
         try:
             manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
-        except Exception:
+        except (json.JSONDecodeError, OSError):
             manifest_data = {}
 
     for pak_path in sorted(mods_dir.glob("*.pak")):
@@ -1041,7 +1044,7 @@ def restore_quarantined_paks(
     if not dry_run and manifest_path.is_file():
         try:
             manifest_path.unlink()
-        except Exception:
+        except OSError:
             pass
 
     return restored
@@ -1356,7 +1359,7 @@ def main() -> None:
                 for td in cfg.get("test_dependencies", []):
                     if td not in test_dep_queries:
                         test_dep_queries.append(td)
-            except Exception:
+            except (json.JSONDecodeError, OSError):
                 pass
 
         resolved_test_deps: list[dict] = []
@@ -1365,7 +1368,7 @@ def main() -> None:
             if not t_meta:
                 try:
                     t_meta = resolve_dependency_metadata(t_query, auto_document=True)
-                except Exception:
+                except (BG3Error, OSError, ValueError):
                     pass
             if t_meta and t_meta.get("UUID"):
                 resolved_test_deps.append(t_meta)

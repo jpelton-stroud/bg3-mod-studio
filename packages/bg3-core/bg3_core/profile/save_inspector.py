@@ -15,12 +15,14 @@ import shutil
 import struct
 import sys
 import xml.etree.ElementTree as ET
+import zlib
 from pathlib import Path
 from typing import Any
 
 from bg3_core.binary.lspk import LspkArchive, build_lspk_archive
 from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import detect_bg3_appdata_dirs
+from bg3_core.exceptions import BG3BinaryError, BG3PackagingError
 
 
 def get_save_search_paths() -> list[Path]:
@@ -49,7 +51,7 @@ def find_save_file(save_arg: str | None = None, save_dir_arg: str | None = None)
             for f in d.rglob("*.lsv"):
                 try:
                     candidates.append((f.stat().st_mtime, f))
-                except Exception:
+                except OSError:
                     continue
 
     if not candidates:
@@ -87,7 +89,7 @@ def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict[str, str]]:
                     })
             if ast_mods:
                 return ast_mods
-    except Exception:
+    except (struct.error, zlib.error, ValueError, BG3BinaryError):
         pass
 
     # 2. Fallback path: Raw binary payload scanning
@@ -104,7 +106,7 @@ def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict[str, str]]:
                 payload = lz4_frame_or_block_decompress(
                     lsf_bytes[val_off : val_off + val_comp_sz], val_uncomp_sz
                 )
-        except Exception:
+        except (ValueError, struct.error, zlib.error, OSError):
             payload = lsf_bytes
 
     mods: list[dict[str, str]] = []
@@ -138,7 +140,7 @@ def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict[str, str]]:
 def extract_save_metadata(save_path: Path) -> dict[str, Any]:
     """Extracts meta.lsx or meta.lsf + SaveInfo.json from the .lsv LSPK package using mmap."""
     if LspkArchive is None:
-        raise ImportError("LspkArchive unpacker not available in environment.")
+        raise BG3PackagingError("LspkArchive unpacker not available in environment.")
 
     file_size = save_path.stat().st_size
 
@@ -173,7 +175,7 @@ def extract_save_metadata(save_path: Path) -> dict[str, Any]:
                 info_json = json.loads(archive.extract_file(save_info_entry).decode("utf-8", errors="ignore"))
                 save_info["level_name"] = info_json.get("Current Level", "")
                 save_info["version"] = info_json.get("Game Version", "")
-            except Exception:
+            except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
                 pass
 
         if meta_lsx_entry is not None:
@@ -291,7 +293,7 @@ def prune_missing_mods_from_save(
         raise FileNotFoundError(f"Save file not found: '{save_path}'")
 
     if LspkArchive is None:
-        raise ImportError("LspkArchive unpacker not available in environment.")
+        raise BG3PackagingError("LspkArchive unpacker not available in environment.")
 
     meta = extract_save_metadata(save_path)
     save_mods = meta.get("mods", [])

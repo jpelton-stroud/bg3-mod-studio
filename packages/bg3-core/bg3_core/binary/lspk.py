@@ -8,6 +8,8 @@ import zlib
 from pathlib import Path
 from typing import Any, Sequence
 
+from bg3_core.exceptions import BG3BinaryError
+
 _LIBZSTD = None
 for _libname in ("libzstd.so.1", "libzstd.so", "libzstd.dylib", "libzstd.dll"):
     try:
@@ -21,7 +23,7 @@ for _libname in ("libzstd.so.1", "libzstd.so", "libzstd.dylib", "libzstd.dll"):
         _lib.ZSTD_decompress.restype = ctypes.c_size_t
         _LIBZSTD = _lib
         break
-    except Exception:
+    except (OSError, AttributeError):
         continue
 
 _LIBLZ4 = None
@@ -46,7 +48,7 @@ for _libname in ("liblz4.so.1", "liblz4.so", "liblz4.dylib", "liblz4.dll"):
         _lib.LZ4_decompress_safe.restype = ctypes.c_int
         _LIBLZ4 = _lib
         break
-    except Exception:
+    except (OSError, AttributeError):
         continue
 
 
@@ -197,17 +199,17 @@ def decompress_pak_file_data(
     elif method == 2:
         try:
             return lz4_frame_or_block_decompress(raw, uncomp_size)
-        except Exception:
+        except (ValueError, struct.error, zlib.error, OSError, RuntimeError):
             if len(raw) > 4:
                 try:
                     return lz4_block_decompress(raw[4:], uncomp_size)
-                except Exception:
+                except (ValueError, struct.error, zlib.error, OSError, RuntimeError):
                     pass
             return raw
     elif method == 3 or raw[:4] == b"\x28\xb5\x2f\xfd":
         try:
             return zstd_decompress(raw, uncomp_size)
-        except Exception:
+        except (ValueError, struct.error, zlib.error, OSError, RuntimeError):
             return raw
     return raw
 
@@ -227,7 +229,7 @@ class LspkArchive:
                 inst._file_obj = f
                 inst._mmap_obj = mm
                 return inst
-            except Exception:
+            except (OSError, ValueError, struct.error, BG3BinaryError):
                 f.close()
                 raise
         return cls(p.read_bytes())
@@ -244,13 +246,13 @@ class LspkArchive:
         if self._mmap_obj is not None:
             try:
                 self._mmap_obj.close()
-            except Exception:
+            except (OSError, BufferError):
                 pass
             self._mmap_obj = None
         if self._file_obj is not None:
             try:
                 self._file_obj.close()
-            except Exception:
+            except OSError:
                 pass
             self._file_obj = None
 
@@ -262,7 +264,7 @@ class LspkArchive:
 
     def _parse_header_and_filelist(self) -> None:
         if len(self.data) < 40 or self.data[:4] != b"LSPK":
-            raise ValueError("Not a valid LSPK package (magic mismatch)")
+            raise BG3BinaryError("Not a valid LSPK package (magic mismatch)")
 
         version, file_list_offset, file_list_size, flags, priority, md5, num_parts = struct.unpack_from(
             "<IQIBB16sH", self.data, 4
@@ -285,7 +287,7 @@ class LspkArchive:
 
         try:
             decomp = lz4_block_decompress(lz4_payload, expected_size)
-        except Exception:
+        except (ValueError, struct.error, OSError):
             decomp = file_list_raw[8:]
 
         for i in range(num_files):

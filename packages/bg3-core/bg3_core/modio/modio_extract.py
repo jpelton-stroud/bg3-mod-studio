@@ -12,7 +12,9 @@ import io
 import json
 import os
 import re
+import struct
 import sys
+import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 from typing import Any, Optional
@@ -28,6 +30,7 @@ from bg3_core.binary.larian_parsers import (
 from bg3_core.binary.lspk import LspkArchive
 from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import get_subscribed_mods_dir, normalize_mod_key
+from bg3_core.exceptions import BG3CatalogError, BG3Error, BG3PackagingError
 from bg3_core.modio.modio_client import (
     download_mod_file,
     get_api_key,
@@ -720,7 +723,7 @@ def process_mod(
             raise ValueError("Either query or pak_path must be provided.")
         api_key = get_api_key()
         if not api_key:
-            raise RuntimeError("MODIO_API_KEY environment variable is not set. Please export MODIO_API_KEY.")
+            raise BG3CatalogError("MODIO_API_KEY environment variable is not set. Please export MODIO_API_KEY.")
 
         # 1. Query mod.io
         mod_meta = query_modio(query, api_key)
@@ -739,17 +742,20 @@ def process_mod(
     # 3. Extract pak files from zip if zipped
     pak_payloads = []
     if archive_bytes[:2] == b"PK":
-        with zipfile.ZipFile(io.BytesIO(archive_bytes)) as z:
-            for item in z.namelist():
-                if item.lower().endswith(".pak"):
-                    pak_payloads.append((item, z.read(item)))
+        try:
+            with zipfile.ZipFile(io.BytesIO(archive_bytes)) as z:
+                for item in z.namelist():
+                    if item.lower().endswith(".pak"):
+                        pak_payloads.append((item, z.read(item)))
+        except (zipfile.BadZipFile, OSError) as err:
+            raise BG3PackagingError(f"Corrupt zip archive downloaded for '{mod_name}': {err}") from err
     elif archive_bytes[:4] == b"LSPK":
         pak_payloads.append((f"{slug}.pak", archive_bytes))
     else:
-        raise RuntimeError(f"Unrecognized archive format downloaded for '{mod_name}'")
+        raise BG3PackagingError(f"Unrecognized archive format downloaded for '{mod_name}'")
 
     if not pak_payloads:
-        raise RuntimeError(f"No .pak files found inside mod download for '{mod_name}'")
+        raise BG3PackagingError(f"No .pak files found inside mod download for '{mod_name}'")
 
     # 4. Unpack pak files & extract key data files
     all_stats = {}
@@ -782,7 +788,7 @@ def process_mod(
                 elif floc.endswith(".loca"):
                     try:
                         loc_dict.update(parse_loca_bytes(content))
-                    except Exception:
+                    except (ValueError, struct.error, OSError):
                         pass
 
             elif fname.endswith("meta.lsx"):
@@ -821,7 +827,7 @@ def process_mod(
                             roottemplate_names[mkey] = dtext
                         if stat_id:
                             roottemplate_names[stat_id] = dtext
-            except Exception:
+            except (ET.ParseError, ValueError, OSError):
                 pass
         rt_uuid = os.path.splitext(os.path.basename(rt_path))[0]
         handles = [h.decode("ascii") for h in re.findall(rb"h[0-9a-f]{4,8}g[0-9a-f]{4}g[0-9a-f]{4}g[0-9a-f]{4}g[0-9a-f]{10,14}|h[0-9a-f]{32}", rt_content)]
@@ -929,7 +935,7 @@ def main() -> int:
             print(f"    Features documented: {res['features_count']}")
             print(f"    Directory: {res['output_dir']}")
         return ExitCode.OK
-    except Exception as e:
+    except (BG3Error, RuntimeError, OSError, ValueError) as e:
         if args.json:
             print(json.dumps({"error": str(e), "success": False}, indent=2))
         else:

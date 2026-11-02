@@ -26,6 +26,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from bg3_core.binary.larian_parsers import DEFAULT_VERSION64
 from bg3_core.env_paths import MY_MODS_DIR, resolve_mod_dir
+from bg3_core.exceptions import BG3Error
 from bg3_core.profile.mod_resolver import resolve_dependency_metadata
 
 
@@ -37,7 +38,7 @@ def detect_mod_from_cwd() -> Optional[str]:
         rel = cwd.relative_to(my_mods)
         if rel.parts:
             return rel.parts[0]
-    except Exception:
+    except ValueError:
         pass
     return None
 
@@ -67,7 +68,7 @@ def add_test_dependencies(mod_dir: Path, dep_metas: List[Dict[str, Any]], dry_ru
             data = json.loads(config_file.read_text(encoding="utf-8"))
             if "test_dependencies" not in data or not isinstance(data["test_dependencies"], list):
                 data["test_dependencies"] = []
-        except Exception:
+        except (json.JSONDecodeError, OSError):
             data = {"test_dependencies": []}
 
     existing = [str(d).lower() for d in data["test_dependencies"]]
@@ -356,7 +357,7 @@ def main() -> None:
                 elif r.get("config_file") and status != "already_present":
                     print(f"  Updated: {r.get('config_file')}")
 
-    except Exception as e:
+    except (ValueError, FileNotFoundError, OSError, BG3Error) as e:
         if args.json:
             print(json.dumps({"error": str(e), "success": False}, indent=2))
         else:
