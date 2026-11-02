@@ -11,7 +11,7 @@ import unittest
 import urllib.error
 from unittest.mock import Mock, patch
 
-from bg3_core.modio_client import ModioClient, ModioError
+from bg3_core.modio.modio_client import ModioClient, ModioError
 
 
 class ModioClientRetriesTests(unittest.TestCase):

@@ -11,8 +11,8 @@ import json
 import sys
 from typing import Any
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.larian_parsers import split_larian_items
+from bg3_core.binary.larian_parsers import split_larian_items
+from bg3_core.cli.common import ConsoleColor, ExitCode
 
 from bg3_authoring.scaffold_atlas import (
     scaffold_icon_uvs,

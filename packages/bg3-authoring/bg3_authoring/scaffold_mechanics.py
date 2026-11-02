@@ -15,7 +15,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
-from bg3_core.larian_parsers import (
+from bg3_core.binary.larian_parsers import (
     generate_larian_handle,
     split_larian_items,
     update_localization_xml,

@@ -24,9 +24,9 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
+from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import REPO_ROOT, get_library_catalog_path, get_subscribed_mods_dir
-from bg3_core.library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
+from bg3_core.modio.library_catalog import LIBRARY_COLUMNS, parse_library_rows, render_library_row
 
 WORKSPACE_ROOT = REPO_ROOT
 LIBRARY_FILE = get_library_catalog_path()

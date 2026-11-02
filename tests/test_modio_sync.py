@@ -11,7 +11,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from bg3_core.modio_sync import (
+from bg3_core.modio.modio_sync import (
     find_mod_folder,
     find_orphaned_folders,
     safe_batch_delete_folders,
@@ -100,7 +100,7 @@ class ModioSyncTests(unittest.TestCase):
         self.assertTrue(self.mods_dir.exists())
         self.assertTrue(all(r["status"] == "error" for r in res))
 
-    @patch("bg3_core.modio_sync.fetch_subscribed_mods")
+    @patch("bg3_core.modio.modio_sync.fetch_subscribed_mods")
     def test_sync_library_prune_deletes_folder_and_row(self, mock_fetch):
         # Only alpha is subscribed remotely
         mock_fetch.return_value = [
@@ -137,7 +137,7 @@ class ModioSyncTests(unittest.TestCase):
         deleted_names = [d["name"] for d in results["actions"]["deleted_folders"]]
         self.assertIn("beta", deleted_names)
 
-    @patch("bg3_core.modio_sync.fetch_subscribed_mods")
+    @patch("bg3_core.modio.modio_sync.fetch_subscribed_mods")
     def test_sync_library_prune_dry_run_retains_folder_and_row(self, mock_fetch):
         mock_fetch.return_value = [
             {"name_id": "alpha", "name": "Alpha Mod"},
@@ -167,7 +167,7 @@ class ModioSyncTests(unittest.TestCase):
         deleted_statuses = [d["status"] for d in results["actions"]["deleted_folders"]]
         self.assertIn("dry_run_deleted", deleted_statuses)
 
-    @patch("bg3_core.modio_sync.fetch_subscribed_mods")
+    @patch("bg3_core.modio.modio_sync.fetch_subscribed_mods")
     def test_sync_library_prune_deletes_orphaned_folders(self, mock_fetch):
         mock_fetch.return_value = [
             {"name_id": "alpha", "name": "Alpha Mod"},
@@ -198,7 +198,7 @@ class ModioSyncTests(unittest.TestCase):
         deleted_names = [d["name"] for d in results["actions"]["deleted_folders"]]
         self.assertIn("abandoned-orphan", deleted_names)
 
-    @patch("bg3_core.modio_sync.fetch_subscribed_mods")
+    @patch("bg3_core.modio.modio_sync.fetch_subscribed_mods")
     def test_sync_library_without_prune_retains_unsubscribed_and_orphaned(self, mock_fetch):
         mock_fetch.return_value = [
             {"name_id": "alpha", "name": "Alpha Mod"},

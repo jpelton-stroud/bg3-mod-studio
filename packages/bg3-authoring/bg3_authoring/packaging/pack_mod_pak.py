@@ -15,10 +15,10 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
+from bg3_core.binary.larian_parsers import compile_xml_bytes_to_loca
+from bg3_core.binary.lspk import LspkArchive
+from bg3_core.binary.lspk import build_lspk_archive as build_pak_archive
 from bg3_core.env_paths import DIST_DIR, detect_bg3_appdata_dirs, get_env_var, resolve_mod_dir
-from bg3_core.larian_parsers import compile_xml_bytes_to_loca
-from bg3_core.lspk import LspkArchive
-from bg3_core.lspk import build_lspk_archive as build_pak_archive
 
 from bg3_authoring.packaging.common import (
     should_include_file,

@@ -9,10 +9,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, TextIO, Tuple
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
+from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import REPO_ROOT, get_library_catalog_path
-from bg3_core.library_catalog import parse_library_rows
-from bg3_core.modio_client import (
+from bg3_core.modio.library_catalog import parse_library_rows
+from bg3_core.modio.modio_client import (
     BG3_GAME_ID,
     ModioClient,
     ModioError,

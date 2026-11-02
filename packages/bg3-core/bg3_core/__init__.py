@@ -4,7 +4,19 @@ bg3_core - Core runtime, binary engines, environment, and CLI tools for Baldur's
 
 from __future__ import annotations
 
-from bg3_core.cli_common import ConsoleColor, ExitCode, OutputEmitter
+from bg3_core.binary.larian_parsers import (
+    PATCH_8_VERSION,
+    calculate_version64,
+    compile_xml_bytes_to_loca,
+    decode_version64,
+    generate_larian_handle,
+    parse_meta_lsx,
+    split_larian_items,
+)
+from bg3_core.binary.lsf import LsfAttribute, LsfDocument, LsfNode
+from bg3_core.binary.lspk import LspkArchive, build_lspk_archive
+from bg3_core.cli.common import ConsoleColor, ExitCode, OutputEmitter
+from bg3_core.cli.skills_installer import discover_bundled_skills, install_agent_skills
 from bg3_core.env_paths import (
     REPO_ROOT,
     get_authored_mods_dir,
@@ -16,19 +28,7 @@ from bg3_core.env_paths import (
     load_env_file,
     normalize_mod_key,
 )
-from bg3_core.larian_parsers import (
-    PATCH_8_VERSION,
-    calculate_version64,
-    compile_xml_bytes_to_loca,
-    decode_version64,
-    generate_larian_handle,
-    parse_meta_lsx,
-    split_larian_items,
-)
-from bg3_core.lsf import LsfAttribute, LsfDocument, LsfNode
-from bg3_core.lspk import LspkArchive, build_lspk_archive
-from bg3_core.modio_client import ModioClient, ModioError
-from bg3_core.skills_installer import discover_bundled_skills, install_agent_skills
+from bg3_core.modio.modio_client import ModioClient, ModioError
 
 __version__ = "1.0.0"
 

@@ -10,7 +10,7 @@ import struct
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
-from bg3_core.lspk import lz4_block_compress, lz4_block_decompress
+from bg3_core.binary.lspk import lz4_block_compress, lz4_block_decompress
 
 # Magic identifier for LSF files
 LSF_MAGIC = b"LSOF"

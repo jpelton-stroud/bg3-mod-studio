@@ -20,14 +20,14 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
-from bg3_core.env_paths import MY_MODS_DIR, REPO_ROOT, resolve_mod_dir
-from bg3_core.larian_parsers import (
+from bg3_core.binary.larian_parsers import (
     calculate_version64,
     decode_version64,
     format_version_tuple,
     parse_meta_lsx,
     parse_version_str,
 )
+from bg3_core.env_paths import MY_MODS_DIR, REPO_ROOT, resolve_mod_dir
 
 WORKSPACE_ROOT = REPO_ROOT
 

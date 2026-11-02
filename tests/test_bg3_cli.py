@@ -7,17 +7,17 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-BG3_CLI = REPO_ROOT / "packages" / "bg3-core" / "bg3_core" / "cli.py"
 
 
 class TestBg3CliIntegration(unittest.TestCase):
 
     def run_cli(self, args, stdin=None):
         return subprocess.run(
-            [sys.executable, str(BG3_CLI)] + args,
+            [sys.executable, "-m", "bg3_core.cli"] + args,
             capture_output=True,
             text=True,
             input=stdin,
+            cwd=REPO_ROOT,
         )
 
     def test_help_screen(self):
@@ -172,7 +172,7 @@ class TestBg3CliIntegration(unittest.TestCase):
 import sys
 sys.modules['bg3_authoring'] = None
 from bg3_core.cli import build_parser, dispatch_command
-from bg3_core.cli_common import OutputEmitter
+from bg3_core.cli.common import OutputEmitter
 
 parser = build_parser()
 args = parser.parse_args(['mod', 'validate', 'fake-mod', '--json'])
@@ -191,7 +191,7 @@ sys.exit(dispatch_command(args, emitter))
 import sys
 sys.modules['bg3_theorycraft'] = None
 from bg3_core.cli import build_parser, dispatch_command
-from bg3_core.cli_common import OutputEmitter
+from bg3_core.cli.common import OutputEmitter
 
 parser = build_parser()
 args = parser.parse_args(['build', 'sim', '--classes', 'Fighter=1', '--json'])
@@ -211,7 +211,7 @@ sys.exit(dispatch_command(args, emitter))
 import sys
 sys.modules['bg3_authoring'] = None
 from bg3_core.cli import build_parser, dispatch_command
-from bg3_core.cli_common import OutputEmitter
+from bg3_core.cli.common import OutputEmitter
 
 parser = build_parser()
 args = parser.parse_args(['mod', 'conflict', '--all', '--json'])

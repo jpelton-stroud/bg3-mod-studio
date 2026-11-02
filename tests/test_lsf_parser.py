@@ -5,7 +5,7 @@ Unit tests for pure-Python LSF binary decompiler, AST data structures, and save 
 
 import unittest
 
-from bg3_core.lsf import (
+from bg3_core.binary.lsf import (
     TYPE_BOOL,
     TYPE_FIXED_STRING,
     TYPE_INT32,
@@ -16,7 +16,7 @@ from bg3_core.lsf import (
     LsfDocument,
     LsfNode,
 )
-from bg3_core.save_inspector import _parse_lsf_save_mods
+from bg3_core.profile.save_inspector import _parse_lsf_save_mods
 
 
 class TestLsfParser(unittest.TestCase):

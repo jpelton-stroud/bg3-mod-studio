@@ -22,9 +22,9 @@ import uuid
 from pathlib import Path
 from typing import Any, Optional
 
+from bg3_core.binary.larian_parsers import calculate_version64, generate_larian_handle
 from bg3_core.env_paths import get_authored_mods_dir, load_env_file
-from bg3_core.larian_parsers import calculate_version64, generate_larian_handle
-from bg3_core.mod_resolver import KNOWN_DEPENDENCIES, resolve_dependency_metadata
+from bg3_core.profile.mod_resolver import KNOWN_DEPENDENCIES, resolve_dependency_metadata
 
 from bg3_authoring.scaffold_common import generate_placeholder_png
 

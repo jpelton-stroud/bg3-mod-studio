@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
+from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import MY_MODS_DIR, REPO_ROOT, resolve_mod_dir
 
 WORKSPACE_ROOT = REPO_ROOT

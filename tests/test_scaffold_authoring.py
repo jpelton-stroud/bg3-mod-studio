@@ -32,15 +32,13 @@ from bg3_authoring.scaffold_asset import (
     scaffold_stat,
     scaffold_tag,
 )
-from bg3_core.check_mod_conflicts import compare_two_mods
-from bg3_core.larian_parsers import (
+from bg3_core.binary.larian_parsers import (
     PATCH_8_VERSION,
     format_patch8_lsx_header,
     generate_larian_handle,
     update_localization_xml,
 )
-
-BG3_CLI = REPO_ROOT / "packages" / "bg3-core" / "bg3_core" / "cli.py"
+from bg3_core.profile.check_mod_conflicts import compare_two_mods
 
 
 class TestPatch8Primitives(unittest.TestCase):
@@ -92,7 +90,7 @@ class TestScaffoldAuthoringIntegration(unittest.TestCase):
         env = os.environ.copy()
         env["BG3_MODS_DIR"] = str(self.test_path)
         return subprocess.run(
-            [sys.executable, str(BG3_CLI)] + args,
+            [sys.executable, "-m", "bg3_core.cli"] + args,
             capture_output=True,
             text=True,
             env=env,

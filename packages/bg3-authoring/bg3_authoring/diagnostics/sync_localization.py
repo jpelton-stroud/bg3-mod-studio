@@ -17,8 +17,8 @@ from pathlib import Path
 from typing import Any
 from xml.dom import minidom
 
+from bg3_core.binary.larian_parsers import HANDLE_PATTERN, compile_xml_to_loca
 from bg3_core.env_paths import resolve_mod_dir as _resolve_mod_dir
-from bg3_core.larian_parsers import HANDLE_PATTERN, compile_xml_to_loca
 
 LANGUAGE_DIR_MAP = {
     "de": "German",

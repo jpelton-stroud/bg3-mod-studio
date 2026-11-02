@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bg3_core.skills_installer import (
+from bg3_core.cli.skills_installer import (
     discover_bundled_skills,
     get_default_skills_target,
     install_agent_skills,

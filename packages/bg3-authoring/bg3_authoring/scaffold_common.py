@@ -17,8 +17,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterator
 
+from bg3_core.binary.larian_parsers import PATCH_8_VERSION
 from bg3_core.env_paths import resolve_mod_dir
-from bg3_core.larian_parsers import PATCH_8_VERSION
 
 PATCH_8_VERSION_ATTRIBUTES = {
     "major": str(PATCH_8_VERSION["major"]),

@@ -20,22 +20,22 @@ from pathlib import Path
 from typing import Any, Optional
 
 from bg3_core.env_paths import REPO_ROOT, get_library_catalog_path, get_subscribed_mods_dir
-from bg3_core.library_catalog import (
+from bg3_core.modio.library_catalog import (
     find_mod_folder,
     find_orphaned_folders,
     get_tracked_mods,
     prune_mod_from_library,
     safe_batch_delete_folders,
 )
-from bg3_core.modio_client import (
+from bg3_core.modio.modio_client import (
     BG3_GAME_ID,
     ModioClient,
     get_api_key,
     get_oauth_token,
 )
-from bg3_core.modio_extract import process_mod
-from bg3_core.modio_update import check_and_apply_update
-from bg3_core.update_library_catalog import write_library_catalog
+from bg3_core.modio.modio_extract import process_mod
+from bg3_core.modio.modio_update import check_and_apply_update
+from bg3_core.modio.update_library_catalog import write_library_catalog
 
 WORKSPACE_ROOT = str(REPO_ROOT)
 get_tracked_mods_from_library = get_tracked_mods

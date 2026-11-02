@@ -16,9 +16,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
+from bg3_core.binary.larian_parsers import find_mod_meta_files, find_mod_progression_files
 from bg3_core.env_paths import get_authored_mods_dir
 from bg3_core.env_paths import resolve_mod_dir as _resolve_mod_dir
-from bg3_core.larian_parsers import find_mod_meta_files, find_mod_progression_files
 
 from bg3_authoring.scaffold_common import generate_placeholder_png, prettify_xml
 

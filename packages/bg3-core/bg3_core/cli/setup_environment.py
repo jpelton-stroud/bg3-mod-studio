@@ -42,8 +42,8 @@ from bg3_core.env_paths import (
     get_xdg_documents_home,
     get_xdg_state_home,
 )
-from bg3_core.library_catalog import purge_library_mods
-from bg3_core.modio_client import BG3_GAME_ID, MODIO_API_HOST, USER_AGENT
+from bg3_core.modio.library_catalog import purge_library_mods
+from bg3_core.modio.modio_client import BG3_GAME_ID, MODIO_API_HOST, USER_AGENT
 
 WORKSPACE_ROOT = REPO_ROOT
 ENV_PATH = get_xdg_config_home() / "env"
@@ -418,7 +418,7 @@ def handle_subscription_sync(choice: str, dry_run: bool = False) -> None:
     """Execute the selected subscription sync or library purge action."""
     if choice == "1":
         print(f"\n{CYAN}Running subscription sync with pruning (--prune)...{RESET}")
-        cmd = [sys.executable, "-m", "bg3_core.modio_sync", "--prune"]
+        cmd = [sys.executable, "-m", "bg3_core.modio.modio_sync", "--prune"]
         if dry_run:
             print(f"{CYAN}[DRY-RUN] Would run: {' '.join(cmd)}{RESET}")
         else:
@@ -426,7 +426,7 @@ def handle_subscription_sync(choice: str, dry_run: bool = False) -> None:
 
     elif choice == "2":
         print(f"\n{CYAN}Running subscription sync without pruning...{RESET}")
-        cmd = [sys.executable, "-m", "bg3_core.modio_sync"]
+        cmd = [sys.executable, "-m", "bg3_core.modio.modio_sync"]
         if dry_run:
             print(f"{CYAN}[DRY-RUN] Would run: {' '.join(cmd)}{RESET}")
         else:
@@ -634,7 +634,7 @@ def run_wizard(
 
         # Deploy bundled agent skills into studio workspace
         try:
-            from bg3_core.skills_installer import install_agent_skills
+            from bg3_core.cli.skills_installer import install_agent_skills
             skill_res = install_agent_skills(target_dir=studio_path / ".agents" / "skills")
             count = len(skill_res.get("installed", [])) + len(skill_res.get("updated", []))
             print(f"{GREEN}✓ Deployed {count} agent skills to {studio_path / '.agents' / 'skills'}.{RESET}")

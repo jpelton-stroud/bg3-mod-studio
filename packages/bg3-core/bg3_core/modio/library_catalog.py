@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
-from .env_paths import (
+from bg3_core.env_paths import (
     get_library_catalog_path,
     get_subscribed_mods_dir,
     normalize_mod_key,

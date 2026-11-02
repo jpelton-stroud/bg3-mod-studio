@@ -40,6 +40,31 @@ class TestPackageFacades(unittest.TestCase):
         self.assertTrue(callable(bg3_core.get_workspace_root))
         self.assertTrue(callable(bg3_core.get_studio_dir))
 
+    def test_bg3_core_subpackages(self) -> None:
+        import bg3_core.binary
+        import bg3_core.cli
+        import bg3_core.modio
+        import bg3_core.profile
+
+        # Binary subpackage
+        self.assertTrue(hasattr(bg3_core.binary, "__all__"))
+        self.assertIsNotNone(bg3_core.binary.LspkArchive)
+        self.assertIsNotNone(bg3_core.binary.LsfDocument)
+        self.assertTrue(callable(bg3_core.binary.calculate_version64))
+
+        # Modio subpackage
+        self.assertTrue(hasattr(bg3_core.modio, "__all__"))
+        self.assertIsNotNone(bg3_core.modio.ModioClient)
+
+        # Profile subpackage
+        self.assertTrue(hasattr(bg3_core.profile, "__all__"))
+        self.assertTrue(callable(bg3_core.profile.auto_sort_load_order))
+
+        # CLI subpackage
+        self.assertTrue(hasattr(bg3_core.cli, "__all__"))
+        self.assertTrue(callable(bg3_core.cli.main))
+        self.assertTrue(callable(bg3_core.cli.build_parser))
+
     def test_bg3_authoring_public_exports(self) -> None:
         import bg3_authoring
 

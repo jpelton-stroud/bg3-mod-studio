@@ -12,7 +12,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bg3_core.lsf import (
+from bg3_core.binary.lsf import (
     TYPE_FIXED_STRING,
     TYPE_INT64,
     TYPE_LS_STRING,
@@ -21,8 +21,8 @@ from bg3_core.lsf import (
     LsfDocument,
     LsfNode,
 )
-from bg3_core.lspk import LspkArchive, build_lspk_archive
-from bg3_core.save_inspector import (
+from bg3_core.binary.lspk import LspkArchive, build_lspk_archive
+from bg3_core.profile.save_inspector import (
     extract_save_metadata,
     prune_missing_mods_from_save,
 )

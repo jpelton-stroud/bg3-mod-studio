@@ -24,7 +24,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple
 
-from bg3_core.cli_common import (
+from bg3_core.cli.common import (
     ConsoleColor,
     ExitCode,
     NonInteractiveConfirmationError,

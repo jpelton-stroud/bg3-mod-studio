@@ -14,8 +14,8 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
-from bg3_core.library_catalog import get_tracked_mod_identifiers
-from bg3_core.modio_client import BG3_GAME_ID, ModioClient, get_api_key
+from bg3_core.modio.library_catalog import get_tracked_mod_identifiers
+from bg3_core.modio.modio_client import BG3_GAME_ID, ModioClient, get_api_key
 
 # Pre-mapped domain terms to mod.io tags
 TAG_MAPPINGS = {

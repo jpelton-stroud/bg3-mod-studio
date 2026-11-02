@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, NoReturn, Optional, Tuple
 
-from bg3_core.cli_common import (
+from bg3_core.cli.common import (
     ConsoleColor,
     ExitCode,
     NonInteractiveConfirmationError,
@@ -70,56 +70,56 @@ COMMAND_REGISTRY: Dict[Tuple[str, str], CommandSpec] = {
     ("mod", "create"): CommandSpec("bg3_authoring.create_mod_scaffold", "Create a new mod project scaffold with meta.lsx, localization, and folder structure", "authoring", "bg3_authoring"),
     ("mod", "scaffold"): CommandSpec("bg3_authoring.scaffold_asset", "Scaffold mod asset definitions (class, feat, spell-list, etc.)", "authoring", "bg3_authoring"),
     ("mod", "validate"): CommandSpec("bg3_authoring.diagnostics.validate_mod", "Run static validation audits on mod assets, XML syntax, and directory layout", "diagnostics", "bg3_authoring"),
-    ("mod", "conflict"): CommandSpec("bg3_core.check_mod_conflicts", "Detect potential stat, progression, or root template collisions across mods", "diagnostics"),
+    ("mod", "conflict"): CommandSpec("bg3_core.profile.check_mod_conflicts", "Detect potential stat, progression, or root template collisions across mods", "diagnostics"),
     ("mod", "add-dependency"): CommandSpec("bg3_authoring.add_mod_dependency", "Add a dependency module UUID and metadata to a target mod's meta.lsx", "authoring", "bg3_authoring"),
-    ("mod", "bump-version"): CommandSpec("bg3_core.bump_mod_version", "Bump or set the 64-bit integer Version64 in a mod's meta.lsx", "management"),
+    ("mod", "bump-version"): CommandSpec("bg3_core.profile.bump_mod_version", "Bump or set the 64-bit integer Version64 in a mod's meta.lsx", "management"),
     ("mod", "pack"): CommandSpec("bg3_authoring.packaging.pack_mod_pak", "Build a distributable LSPK package (.pak) from raw mod files", "packaging", "bg3_authoring"),
     ("mod", "sync-loca"): CommandSpec("bg3_authoring.diagnostics.sync_localization", "Synchronize string handles across XML files and compile .loca binaries", "diagnostics", "bg3_authoring"),
     ("mod", "sync-game"): CommandSpec("bg3_authoring.packaging.sync_game_data", "Synchronize custom mod files into the Baldur's Gate 3 Data directory", "packaging", "bg3_authoring"),
     ("mod", "patch"): CommandSpec("bg3_authoring.generate_compat_patch", "Generate compatibility patches between conflicting mods", "authoring", "bg3_authoring"),
     ("mod", "diagnose-logs"): CommandSpec("bg3_authoring.diagnostics.diagnose_toolkit_logs", "Inspect and triage Baldur's Gate 3 Toolkit messages.log runtime errors", "diagnostics", "bg3_authoring"),
-    ("mod", "inspect-save"): CommandSpec("bg3_core.save_inspector", "Inspect mod dependencies in a save game (.lsv)", "diagnostics"),
+    ("mod", "inspect-save"): CommandSpec("bg3_core.profile.save_inspector", "Inspect mod dependencies in a save game (.lsv)", "diagnostics"),
     ("mod", "inject-treasure"): CommandSpec("bg3_authoring.inject_treasure_table", "Inject modded items into standard world containers and vendor inventories", "authoring", "bg3_authoring"),
-    ("mod", "render-desc"): CommandSpec("bg3_core.render_modio_description", "Render mod README.md to HTML for mod.io description", "management"),
+    ("mod", "render-desc"): CommandSpec("bg3_core.modio.render_modio_description", "Render mod README.md to HTML for mod.io description", "management"),
     # loadorder group
-    ("loadorder", "list"): CommandSpec("bg3_core.manage_load_order", "Display active mod load order from modsettings.lsx", "management"),
-    ("loadorder", "sync"): CommandSpec("bg3_core.manage_load_order", "Synchronize local mods into active load order profile", "management"),
-    ("loadorder", "clean"): CommandSpec("bg3_core.manage_load_order", "Clean invalid or missing mods from load order profile", "management"),
-    ("loadorder", "enable"): CommandSpec("bg3_core.manage_load_order", "Enable a mod in the active load order profile", "management"),
-    ("loadorder", "disable"): CommandSpec("bg3_core.manage_load_order", "Disable a mod from active load order profile", "management"),
-    ("loadorder", "validate"): CommandSpec("bg3_core.manage_load_order", "Validate current load order rules and core module positions", "management"),
-    ("loadorder", "auto-sort"): CommandSpec("bg3_core.manage_load_order", "Topologically auto-sort active mods based on dependencies", "management"),
-    ("loadorder", "isolate"): CommandSpec("bg3_core.manage_load_order", "Clean-room isolation: disable all other mods except dependencies", "management"),
-    ("loadorder", "restore"): CommandSpec("bg3_core.manage_load_order", "Restore quarantined mods from Mods_Disabled/ back to active Mods", "management"),
-    ("loadorder", "dedup"): CommandSpec("bg3_core.manage_load_order", "Deduplicate installed .pak files in AppData Mods", "management"),
+    ("loadorder", "list"): CommandSpec("bg3_core.profile.manage_load_order", "Display active mod load order from modsettings.lsx", "management"),
+    ("loadorder", "sync"): CommandSpec("bg3_core.profile.manage_load_order", "Synchronize local mods into active load order profile", "management"),
+    ("loadorder", "clean"): CommandSpec("bg3_core.profile.manage_load_order", "Clean invalid or missing mods from load order profile", "management"),
+    ("loadorder", "enable"): CommandSpec("bg3_core.profile.manage_load_order", "Enable a mod in the active load order profile", "management"),
+    ("loadorder", "disable"): CommandSpec("bg3_core.profile.manage_load_order", "Disable a mod from active load order profile", "management"),
+    ("loadorder", "validate"): CommandSpec("bg3_core.profile.manage_load_order", "Validate current load order rules and core module positions", "management"),
+    ("loadorder", "auto-sort"): CommandSpec("bg3_core.profile.manage_load_order", "Topologically auto-sort active mods based on dependencies", "management"),
+    ("loadorder", "isolate"): CommandSpec("bg3_core.profile.manage_load_order", "Clean-room isolation: disable all other mods except dependencies", "management"),
+    ("loadorder", "restore"): CommandSpec("bg3_core.profile.manage_load_order", "Restore quarantined mods from Mods_Disabled/ back to active Mods", "management"),
+    ("loadorder", "dedup"): CommandSpec("bg3_core.profile.manage_load_order", "Deduplicate installed .pak files in AppData Mods", "management"),
     # modio group
-    ("modio", "search"): CommandSpec("bg3_core.modio_search", "Search mod.io community catalog with platform and tag filters", "library"),
-    ("modio", "sync"): CommandSpec("bg3_core.modio_sync", "Sync subscribed mods from mod.io into local library", "library"),
-    ("modio", "extract"): CommandSpec("bg3_core.modio_extract", "Unpack mod.io .pak archive and generate documentation spec", "library"),
-    ("modio", "update"): CommandSpec("bg3_core.modio_update", "Check for upstream updates to cataloged community mods", "library"),
-    ("modio", "update-metadata"): CommandSpec("bg3_core.modio_update_metadata", "Update mod.io storefront profile metadata and tags", "library"),
-    ("modio", "create-collection"): CommandSpec("bg3_core.modio_create_collection", "Create or update a public mod.io collection from library.md", "library"),
-    ("modio", "purge"): CommandSpec("bg3_core.purge_library", "Safely purge downloaded mods and catalog documentation", "library"),
-    ("modio", "catalog"): CommandSpec("bg3_core.update_library_catalog", "Update master community mod catalog markdown documentation", "library"),
-    ("modio", "update-catalog"): CommandSpec("bg3_core.update_library_catalog", "Update master community mod catalog markdown documentation", "library"),
+    ("modio", "search"): CommandSpec("bg3_core.modio.modio_search", "Search mod.io community catalog with platform and tag filters", "library"),
+    ("modio", "sync"): CommandSpec("bg3_core.modio.modio_sync", "Sync subscribed mods from mod.io into local library", "library"),
+    ("modio", "extract"): CommandSpec("bg3_core.modio.modio_extract", "Unpack mod.io .pak archive and generate documentation spec", "library"),
+    ("modio", "update"): CommandSpec("bg3_core.modio.modio_update", "Check for upstream updates to cataloged community mods", "library"),
+    ("modio", "update-metadata"): CommandSpec("bg3_core.modio.modio_update_metadata", "Update mod.io storefront profile metadata and tags", "library"),
+    ("modio", "create-collection"): CommandSpec("bg3_core.modio.modio_create_collection", "Create or update a public mod.io collection from library.md", "library"),
+    ("modio", "purge"): CommandSpec("bg3_core.modio.purge_library", "Safely purge downloaded mods and catalog documentation", "library"),
+    ("modio", "catalog"): CommandSpec("bg3_core.modio.update_library_catalog", "Update master community mod catalog markdown documentation", "library"),
+    ("modio", "update-catalog"): CommandSpec("bg3_core.modio.update_library_catalog", "Update master community mod catalog markdown documentation", "library"),
     # save group
-    ("save", "list"): CommandSpec("bg3_core.manage_saves", "Discover and list BG3 save games across Proton/WSL/Windows", "diagnostics"),
-    ("save", "inspect"): CommandSpec("bg3_core.manage_saves", "Audit save game dependencies against active modsettings.lsx", "diagnostics"),
-    ("save", "backup"): CommandSpec("bg3_core.manage_saves", "Create timestamped zip backup of save game folders", "management"),
-    ("save", "purge"): CommandSpec("bg3_core.manage_saves", "Safely purge old save games with configurable retention", "management"),
-    ("save", "clean-missing"): CommandSpec("bg3_core.manage_saves", "Prune missing mod UUIDs from save game meta.lsf to rescue save", "diagnostics"),
+    ("save", "list"): CommandSpec("bg3_core.profile.manage_saves", "Discover and list BG3 save games across Proton/WSL/Windows", "diagnostics"),
+    ("save", "inspect"): CommandSpec("bg3_core.profile.manage_saves", "Audit save game dependencies against active modsettings.lsx", "diagnostics"),
+    ("save", "backup"): CommandSpec("bg3_core.profile.manage_saves", "Create timestamped zip backup of save game folders", "management"),
+    ("save", "purge"): CommandSpec("bg3_core.profile.manage_saves", "Safely purge old save games with configurable retention", "management"),
+    ("save", "clean-missing"): CommandSpec("bg3_core.profile.manage_saves", "Prune missing mod UUIDs from save game meta.lsf to rescue save", "diagnostics"),
     # build group
     ("build", "simulate"): CommandSpec("bg3_theorycraft.simulate_build_synergy", "Calculate Level 20 multiclass spell slots and Turn 1 DPR burst sequence", "theorycrafting", "bg3_theorycraft"),
     ("build", "sim"): CommandSpec("bg3_theorycraft.simulate_build_synergy", "Calculate Level 20 multiclass spell slots and Turn 1 DPR burst sequence", "theorycrafting", "bg3_theorycraft"),
     # tools group
-    ("tools", "list"): CommandSpec("bg3_core.tools", "List all registered tools in the studio discovery catalog", "management"),
-    ("tools", "search"): CommandSpec("bg3_core.tools", "Search registered tools by intent keywords or category", "management"),
-    ("tools", "info"): CommandSpec("bg3_core.tools", "Display detailed help and argument schemas for a specific tool", "management"),
-    ("tools", "verify"): CommandSpec("bg3_core.tools", "Validate tool availability and verify command health across studio", "management"),
+    ("tools", "list"): CommandSpec("bg3_core.cli.tools", "List all registered tools in the studio discovery catalog", "management"),
+    ("tools", "search"): CommandSpec("bg3_core.cli.tools", "Search registered tools by intent keywords or category", "management"),
+    ("tools", "info"): CommandSpec("bg3_core.cli.tools", "Display detailed help and argument schemas for a specific tool", "management"),
+    ("tools", "verify"): CommandSpec("bg3_core.cli.tools", "Validate tool availability and verify command health across studio", "management"),
     # env group
-    ("env", "check"): CommandSpec("bg3_core.setup_environment", "Check environment configuration and XDG directories", "management"),
-    ("env", "paths"): CommandSpec("bg3_core.cli", "Display standard XDG base directory paths", "management"),
-    ("env", "setup"): CommandSpec("bg3_core.setup_environment", "Run interactive setup wizard for BG3 Mod Studio environment", "management"),
+    ("env", "check"): CommandSpec("bg3_core.cli.setup_environment", "Check environment configuration and XDG directories", "management"),
+    ("env", "paths"): CommandSpec("bg3_core.cli.router", "Display standard XDG base directory paths", "management"),
+    ("env", "setup"): CommandSpec("bg3_core.cli.setup_environment", "Run interactive setup wizard for BG3 Mod Studio environment", "management"),
 }
 
 # Scaffold asset types forwarded to bg3_authoring.scaffold_asset
@@ -153,8 +153,8 @@ for asset in SCAFFOLD_ASSETS:
 
 # Direct top-level command specifications
 DIRECT_COMMANDS: Dict[str, CommandSpec] = {
-    "query": CommandSpec("bg3_core.query_mod_database", "Query indexed catalog equipment, passives, spells, and boosts", "theorycrafting"),
-    "conflict": CommandSpec("bg3_core.check_mod_conflicts", "Detect potential stat, progression, or root template collisions across mods", "diagnostics"),
+    "query": CommandSpec("bg3_core.modio.query_mod_database", "Query indexed catalog equipment, passives, spells, and boosts", "theorycrafting"),
+    "conflict": CommandSpec("bg3_core.profile.check_mod_conflicts", "Detect potential stat, progression, or root template collisions across mods", "diagnostics"),
     "sim": CommandSpec("bg3_theorycraft.simulate_build_synergy", "Simulate Level 20 character progression and DPR burst sequence", "theorycrafting", "bg3_theorycraft"),
 }
 

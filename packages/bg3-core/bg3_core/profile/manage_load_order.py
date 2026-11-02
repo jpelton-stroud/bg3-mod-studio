@@ -26,7 +26,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
-from bg3_core.cli_common import ConsoleColor
+from bg3_core.binary.larian_parsers import find_mod_meta_files, parse_meta_lsx
+from bg3_core.binary.lspk import LspkArchive
+from bg3_core.cli.common import ConsoleColor
 from bg3_core.env_paths import (
     MODS_DIR,
     MY_MODS_DIR,
@@ -36,9 +38,7 @@ from bg3_core.env_paths import (
     normalize_mod_key,
     resolve_mod_dir,
 )
-from bg3_core.larian_parsers import find_mod_meta_files, parse_meta_lsx
-from bg3_core.lspk import LspkArchive
-from bg3_core.mod_resolver import ensure_dependency_paks, resolve_dependency_metadata
+from bg3_core.profile.mod_resolver import ensure_dependency_paks, resolve_dependency_metadata
 
 # Zero-dependency ANSI Terminal Colors honoring NO_COLOR
 _color = ConsoleColor(stream=sys.stderr)
@@ -436,7 +436,7 @@ def resolve_all_dependencies(
         )
         if not installed:
             try:
-                from .mod_resolver import resolve_dependency_metadata
+                from bg3_core.profile.mod_resolver import resolve_dependency_metadata
                 resolved_info = resolve_dependency_metadata(dep_uuid or dep.get("Name", ""), auto_document=False)
                 if resolved_info and resolved_info.get("UUID"):
                     installed = resolved_info

@@ -27,7 +27,7 @@ import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from bg3_core.cli_common import (
+from bg3_core.cli.common import (
     ConsoleColor,
     ExitCode,
     NonInteractiveConfirmationError,
@@ -35,7 +35,7 @@ from bg3_core.cli_common import (
     format_json_response,
 )
 from bg3_core.env_paths import get_xdg_data_home
-from bg3_core.save_inspector import (
+from bg3_core.profile.save_inspector import (
     audit_against_modsettings,
     extract_save_metadata,
     find_save_file,

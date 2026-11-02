@@ -25,12 +25,12 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
+from bg3_core.binary.larian_parsers import HANDLE_PATTERN, has_balanced_parens
+from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import (
     get_authored_mods_dir,
     resolve_mod_dir,
 )
-from bg3_core.larian_parsers import HANDLE_PATTERN, has_balanced_parens
 
 # Zero-dependency ANSI Terminal Colors honoring NO_COLOR
 _color = ConsoleColor(stream=sys.stderr)

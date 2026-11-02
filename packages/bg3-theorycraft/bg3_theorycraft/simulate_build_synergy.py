@@ -18,8 +18,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from bg3_core.cli_common import ConsoleColor, ExitCode
-from bg3_core.query_mod_database import build_or_load_index
+from bg3_core.cli.common import ConsoleColor, ExitCode
+from bg3_core.modio.query_mod_database import build_or_load_index
 
 from bg3_theorycraft.models import (
     ActionBudget,
