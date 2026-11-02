@@ -21,12 +21,14 @@ import json
 import os
 import re
 import shutil
+import struct
 import sys
 import xml.etree.ElementTree as ET
+import zlib
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
-from bg3_core.binary.larian_parsers import find_mod_meta_files, parse_meta_lsx
+from bg3_core.binary.larian_parsers import DEFAULT_VERSION64, find_mod_meta_files, parse_meta_lsx
 from bg3_core.binary.lspk import LspkArchive
 from bg3_core.cli.common import ConsoleColor
 from bg3_core.env_paths import (
@@ -38,6 +40,7 @@ from bg3_core.env_paths import (
     normalize_mod_key,
     resolve_mod_dir,
 )
+from bg3_core.exceptions import BG3BinaryError, BG3Error
 from bg3_core.profile.mod_resolver import ensure_dependency_paks, resolve_dependency_metadata
 
 # Zero-dependency ANSI Terminal Colors honoring NO_COLOR
@@ -77,7 +80,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "DiceSet_01",
         "PublishHandle": "0",
         "UUID": "e842840a-2449-588c-b0c4-22122cfce31b",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "DiceSet_02",
@@ -85,7 +88,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "DiceSet_02",
         "PublishHandle": "0",
         "UUID": "b176a0ac-d79f-ed9d-5a87-5c2c80874e10",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "DiceSet_03",
@@ -93,7 +96,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "DiceSet_03",
         "PublishHandle": "0",
         "UUID": "e0a4d990-7b9b-8fa9-d7c6-04017c6cf5b1",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "DiceSet_06",
@@ -101,7 +104,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "DiceSet_06",
         "PublishHandle": "0",
         "UUID": "ee4989eb-aab8-968f-8674-812ea2f4bfd7",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "MainUI",
@@ -109,7 +112,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "MainUI",
         "PublishHandle": "0",
         "UUID": "630daa32-70f8-3da5-41b9-154fe8410236",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "ModBrowser",
@@ -117,7 +120,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "ModBrowser",
         "PublishHandle": "0",
         "UUID": "ee5a55ff-eb38-0b27-c5b0-f358dc306d34",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "PhotoMode",
@@ -125,7 +128,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "PhotoMode",
         "PublishHandle": "0",
         "UUID": "55ef175c-59e3-b44b-3fb2-8f86acc5d550",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "CrossplayUI",
@@ -133,7 +136,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "CrossplayUI",
         "PublishHandle": "0",
         "UUID": "e1ce736b-52e6-e713-e9e7-e6abbb15a198",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
 ]
 
@@ -164,7 +167,7 @@ def get_appdata_mods_dir(modsettings_path: Path | None = None) -> Path | None:
             candidate = modsettings_path.resolve().parents[2] / "Mods"
             if candidate.is_dir() or candidate.parent.is_dir():
                 return candidate
-        except Exception:
+        except (OSError, ValueError):
             pass
 
     for appdata in detect_bg3_appdata_dirs():
@@ -282,7 +285,7 @@ def _extract_dependencies_from_xml_text(content: str) -> list[dict]:
             "Name": n_str,
             "PublishHandle": attrs.get("PublishHandle", "0"),
             "UUID": u_str,
-            "Version64": attrs.get("Version64", "36028797018963968"),
+            "Version64": attrs.get("Version64", str(DEFAULT_VERSION64)),
         })
     return deps
 
@@ -306,7 +309,7 @@ def _extract_meta_from_xml_text(content: str, fallback_name: str) -> dict | None
             "Name": name.group(1) if name else fallback_name,
             "PublishHandle": handle.group(1) if handle else "0",
             "UUID": uuid_val.group(1),
-            "Version64": v64.group(1) if v64 else "36028797018963968",
+            "Version64": v64.group(1) if v64 else str(DEFAULT_VERSION64),
         }
     return None
 
@@ -332,7 +335,7 @@ def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
                         parsed = _extract_meta_from_xml_text(mf.read_text(encoding="utf-8", errors="ignore"), d.name)
                         if parsed and parsed.get("UUID", "").lower() == query_raw:
                             return parsed
-                    except Exception:
+                    except (OSError, UnicodeDecodeError, ValueError):
                         pass
 
     # 2. Pass 1: Exact directory name match
@@ -350,7 +353,7 @@ def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
                         parsed = _extract_meta_from_xml_text(mf.read_text(encoding="utf-8", errors="ignore"), d.name)
                         if parsed:
                             return parsed
-                    except Exception:
+                    except (OSError, UnicodeDecodeError, ValueError):
                         pass
 
     # 3. Pass 2: Substring directory name match
@@ -368,7 +371,7 @@ def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
                         parsed = _extract_meta_from_xml_text(mf.read_text(encoding="utf-8", errors="ignore"), d.name)
                         if parsed:
                             return parsed
-                    except Exception:
+                    except (OSError, UnicodeDecodeError, ValueError):
                         pass
 
     # 4. Search AppData/.../Mods/*.pak (exact stem first, then substring)
@@ -387,7 +390,7 @@ def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
                             parsed = _extract_meta_from_xml_text(xml_txt, pak_file.stem)
                             if parsed:
                                 return parsed
-                except Exception:
+                except (OSError, struct.error, zlib.error, BG3BinaryError):
                     pass
         for pak_file in sorted(pak_dir.glob("*.pak")):
             if query_norm in normalize_mod_key(pak_file.stem) or query_raw in pak_file.stem.lower():
@@ -399,7 +402,7 @@ def get_mod_metadata_from_workspace(mod_name_or_uuid: str) -> dict | None:
                             parsed = _extract_meta_from_xml_text(xml_txt, pak_file.stem)
                             if parsed:
                                 return parsed
-                except Exception:
+                except (OSError, struct.error, zlib.error, BG3BinaryError):
                     pass
 
     return None
@@ -440,7 +443,7 @@ def resolve_all_dependencies(
                 resolved_info = resolve_dependency_metadata(dep_uuid or dep.get("Name", ""), auto_document=False)
                 if resolved_info and resolved_info.get("UUID"):
                     installed = resolved_info
-            except Exception:
+            except (BG3Error, OSError, ValueError):
                 pass
         if installed:
             actual_meta = installed
@@ -537,47 +540,33 @@ def _ensure_base_module(root: ET.Element, mods_children: ET.Element, mod_order_c
             if val:
                 existing_by_uuid[val] = desc_node
 
-    # If file is legacy Patch 7 (GustavDev present without GustavX), keep GustavDev at index 0
-    is_legacy_p7 = (
-        GUSTAV_DEV["UUID"].lower() in existing_by_uuid
-        and CORE_SYSTEM_MODULES[0]["UUID"].lower() not in existing_by_uuid
-    )
-
-    if is_legacy_p7:
-        gustav_node = existing_by_uuid[GUSTAV_DEV["UUID"].lower()]
-        all_descs = mods_children.findall("node[@id='ModuleShortDesc']")
-        if all_descs and all_descs[0] != gustav_node:
-            mods_children.remove(gustav_node)
-            mods_children.insert(0, gustav_node)
-            modified = True
-    else:
-        # Patch 8: ensure each core system module is present in canonical order
-        for idx, mod in enumerate(CORE_SYSTEM_MODULES):
-            u_key = mod["UUID"].lower()
-            if u_key in existing_by_uuid:
-                node = existing_by_uuid[u_key]
-                all_descs = mods_children.findall("node[@id='ModuleShortDesc']")
-                curr_idx = all_descs.index(node) if node in all_descs else -1
-                if curr_idx != idx and curr_idx > idx:
-                    mods_children.remove(node)
-                    mods_children.insert(idx, node)
-                    modified = True
-            else:
-                node = ET.Element("node", id="ModuleShortDesc")
-                ET.SubElement(node, "attribute", id="Folder", type="LSString", value=mod["Folder"])
-                ET.SubElement(node, "attribute", id="MD5", type="LSString", value=mod["MD5"])
-                ET.SubElement(node, "attribute", id="Name", type="LSString", value=mod["Name"])
-                ET.SubElement(node, "attribute", id="PublishHandle", type="uint64", value=str(mod["PublishHandle"]))
-                ET.SubElement(node, "attribute", id="UUID", type="guid", value=mod["UUID"])
-                ET.SubElement(node, "attribute", id="Version64", type="int64", value=str(mod["Version64"]))
+    # Ensure each core system module is present in canonical order (Patch 8)
+    for idx, mod in enumerate(CORE_SYSTEM_MODULES):
+        u_key = mod["UUID"].lower()
+        if u_key in existing_by_uuid:
+            node = existing_by_uuid[u_key]
+            all_descs = mods_children.findall("node[@id='ModuleShortDesc']")
+            curr_idx = all_descs.index(node) if node in all_descs else -1
+            if curr_idx != idx and curr_idx > idx:
+                mods_children.remove(node)
                 mods_children.insert(idx, node)
-                existing_by_uuid[u_key] = node
                 modified = True
+        else:
+            node = ET.Element("node", id="ModuleShortDesc")
+            ET.SubElement(node, "attribute", id="Folder", type="LSString", value=mod["Folder"])
+            ET.SubElement(node, "attribute", id="MD5", type="LSString", value=mod["MD5"])
+            ET.SubElement(node, "attribute", id="Name", type="LSString", value=mod["Name"])
+            ET.SubElement(node, "attribute", id="PublishHandle", type="uint64", value=str(mod["PublishHandle"]))
+            ET.SubElement(node, "attribute", id="UUID", type="guid", value=mod["UUID"])
+            ET.SubElement(node, "attribute", id="Version64", type="int64", value=str(mod["Version64"]))
+            mods_children.insert(idx, node)
+            existing_by_uuid[u_key] = node
+            modified = True
 
     # Check mod_order_children only if ModOrder exists in file (legacy compatibility)
     if mod_order_children is not None:
         order_modules = mod_order_children.findall("node[@id='Module']")
-        base_uuid = GUSTAV_DEV["UUID"] if is_legacy_p7 else CORE_SYSTEM_MODULES[0]["UUID"]
+        base_uuid = CORE_SYSTEM_MODULES[0]["UUID"]
         base_order_node = None
         for m in order_modules:
             u_attr = m.find("attribute[@id='UUID']")
@@ -691,7 +680,7 @@ def enable_mod(path: Path, mod_meta: dict | str, order_index: int | None = None,
         ET.SubElement(new_desc_node, "attribute", id="Name", type="LSString", value=mod_meta["Name"])
         ET.SubElement(new_desc_node, "attribute", id="PublishHandle", type="uint64", value=str(mod_meta.get("PublishHandle", "0")))
         ET.SubElement(new_desc_node, "attribute", id="UUID", type="guid", value=target_uuid)
-        ET.SubElement(new_desc_node, "attribute", id="Version64", type="int64", value=str(mod_meta.get("Version64", "36028797018963968")))
+        ET.SubElement(new_desc_node, "attribute", id="Version64", type="int64", value=str(mod_meta.get("Version64", str(DEFAULT_VERSION64))))
 
         if order_index is not None:
             # Never insert ahead of core system modules
@@ -830,7 +819,7 @@ def get_pak_module_info(pak_path: Path) -> dict | None:
             if entry["name"].replace("\\", "/").lower().endswith("meta.lsx"):
                 xml_txt = archive.extract_file(entry).decode("utf-8", errors="ignore")
                 return _extract_meta_from_xml_text(xml_txt, pak_path.stem)
-    except Exception:
+    except (OSError, struct.error, zlib.error, BG3BinaryError):
         pass
     return None
 
@@ -984,7 +973,7 @@ def quarantine_unrelated_paks(
     if manifest_path.is_file():
         try:
             manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
-        except Exception:
+        except (json.JSONDecodeError, OSError):
             manifest_data = {}
 
     for pak_path in sorted(mods_dir.glob("*.pak")):
@@ -1055,7 +1044,7 @@ def restore_quarantined_paks(
     if not dry_run and manifest_path.is_file():
         try:
             manifest_path.unlink()
-        except Exception:
+        except OSError:
             pass
 
     return restored
@@ -1186,7 +1175,8 @@ def auto_sort_load_order(path: Path, dry_run: bool = False) -> tuple[bool, list[
     return True, sorted_order, {"total_sorted": len(sorted_order), "dry_run": dry_run}
 
 
-def main() -> None:
+def build_load_order_parser() -> argparse.ArgumentParser:
+    """Build the argument parser for manage_load_order."""
     parser = argparse.ArgumentParser(
         description="Inspect, activate, reorder, and validate Baldur's Gate 3 modsettings.lsx load order."
     )
@@ -1217,35 +1207,51 @@ def main() -> None:
         help="Subcommand action for loadorder",
     )
     parser.add_argument("mod_name", nargs="?", help="Mod name or UUID for enable/disable/isolate")
+    return parser
 
-    args = parser.parse_args()
 
-    if args.subcommand:
-        if args.subcommand in ("list", "sync"):
-            args.list = True
-        elif args.subcommand in ("enable", "activate"):
-            args.enable = args.mod_name or args.enable
-        elif args.subcommand == "disable":
-            args.disable = args.mod_name or args.disable
-        elif args.subcommand in ("clean", "isolate"):
-            args.isolate = True
-            if args.mod_name:
-                args.enable = args.mod_name
-        elif args.subcommand in ("auto-sort", "sort"):
-            args.auto_sort = True
-        elif args.subcommand == "validate":
-            args.validate = True
-        elif args.subcommand == "quarantine":
-            args.quarantine = True
-        elif args.subcommand == "restore":
-            args.restore = True
-        elif args.subcommand == "dedup":
-            args.dedup = True
-        elif args.subcommand == "create-default":
-            args.create_default = True
+def _resolve_subcommand_aliases(args: argparse.Namespace) -> None:
+    """Map positional subcommands to explicit flag combinations."""
+    sc = args.subcommand
+    if not sc:
+        return
+    if sc in ("list", "sync"):
+        args.list = True
+        return
+    if sc in ("enable", "activate"):
+        args.enable = args.mod_name or args.enable
+        return
+    if sc == "disable":
+        args.disable = args.mod_name or args.disable
+        return
+    if sc in ("clean", "isolate"):
+        args.isolate = True
+        if args.mod_name:
+            args.enable = args.mod_name
+        return
+    if sc in ("auto-sort", "sort"):
+        args.auto_sort = True
+        return
+    if sc == "validate":
+        args.validate = True
+        return
+    if sc == "quarantine":
+        args.quarantine = True
+        return
+    if sc == "restore":
+        args.restore = True
+        return
+    if sc == "dedup":
+        args.dedup = True
+        return
+    if sc == "create-default":
+        args.create_default = True
+        return
 
+
+def _resolve_modsettings_path(args: argparse.Namespace) -> Path:
+    """Resolve and validate the modsettings.lsx file path."""
     modsettings_path = Path(args.path) if args.path else detect_modsettings_path()
-
     if not modsettings_path:
         msg = "Could not locate modsettings.lsx. Specify path with --path."
         if args.json:
@@ -1253,20 +1259,318 @@ def main() -> None:
         else:
             print(f"{RED}Error: {msg}{RESET}", file=sys.stderr)
         sys.exit(1)
+    return modsettings_path
 
-    if args.create_default:
-        created = False
-        if not modsettings_path.is_file():
-            create_default_modsettings(modsettings_path)
-            created = True
-        if args.json:
-            print(json.dumps({"status": "created" if created else "already_exists", "path": str(modsettings_path)}, indent=2))
+
+def _handle_create_default(modsettings_path: Path, args: argparse.Namespace) -> None:
+    """Handle the --create-default action and exit."""
+    created = False
+    if not modsettings_path.is_file():
+        create_default_modsettings(modsettings_path)
+        created = True
+    if args.json:
+        print(json.dumps({"status": "created" if created else "already_exists", "path": str(modsettings_path)}, indent=2))
+    else:
+        if created:
+            print(f"✓ Created default modsettings.lsx at: {modsettings_path}")
         else:
-            if created:
-                print(f"✓ Created default modsettings.lsx at: {modsettings_path}")
-            else:
-                print(f"modsettings.lsx already exists at: {modsettings_path}")
+            print(f"modsettings.lsx already exists at: {modsettings_path}")
+    sys.exit(0)
+
+def _dispatch_auto_sort(
+    modsettings_path: Path,
+    args: argparse.Namespace,
+    action_result: dict[str, Any],
+) -> None:
+    """Handle topological load order sorting."""
+    success, sorted_order, meta_sort = auto_sort_load_order(modsettings_path, dry_run=args.dry_run)
+    action_result["auto_sort"] = {
+        "success": success,
+        "sorted_order": sorted_order,
+        **meta_sort,
+    }
+    if not args.json:
+        verb = "[DRY-RUN] Would reorder" if args.dry_run else "Reordered"
+        print(f"✓ {verb} {len(sorted_order)} active mod(s) via topological dependency sorting.")
+
+
+def _dispatch_restore(
+    modsettings_path: Path,
+    args: argparse.Namespace,
+    action_result: dict[str, Any],
+) -> None:
+    """Handle restoring quarantined mod pak archives."""
+    mods_dir = get_appdata_mods_dir(modsettings_path)
+    if not mods_dir:
+        msg = "Could not locate AppData Mods directory for restore."
+        if args.json:
+            print(json.dumps({"error": msg, "success": False}, indent=2))
+        else:
+            print(f"{RED}Error: {msg}{RESET}", file=sys.stderr)
+        sys.exit(1)
+    restored = restore_quarantined_paks(mods_dir, dry_run=args.dry_run)
+    action_result["restore"] = {
+        "count": len(restored),
+        "files": restored,
+        "dry_run": args.dry_run,
+    }
+    if not args.json:
+        verb = "[DRY-RUN] Would restore" if args.dry_run else "Restored"
+        print(f"✓ {verb} {len(restored)} mod archive(s) from Mods_Disabled/ to Mods/.")
+        for r in restored:
+            print(f"  ↳ {r['filename']}")
+    if not (args.enable or args.list or args.validate or args.disable):
         sys.exit(0)
+
+
+def _dispatch_dedup(
+    modsettings_path: Path,
+    args: argparse.Namespace,
+    action_result: dict[str, Any],
+) -> None:
+    """Handle deduplicating installed paks and cleaning redundant archives."""
+    mods_dir = get_appdata_mods_dir(modsettings_path)
+    if not mods_dir:
+        msg = "Could not locate AppData Mods directory for deduplication."
+        if args.json:
+            print(json.dumps({"error": msg, "success": False}, indent=2))
+        else:
+            print(f"{RED}Error: {msg}{RESET}", file=sys.stderr)
+        sys.exit(1)
+    deduped = deduplicate_installed_paks(mods_dir, dry_run=args.dry_run)
+    steam_cleaned = clean_steam_data_paks(dry_run=args.dry_run)
+    action_result["deduplicate"] = {
+        "count": len(deduped),
+        "actions": deduped,
+        "steam_cleaned": steam_cleaned,
+        "dry_run": args.dry_run,
+    }
+    if not args.json:
+        verb = "[DRY-RUN] Would deduplicate" if args.dry_run else "Deduplicated"
+        print(f"✓ {verb} {len(deduped)} duplicate/backup file(s).")
+        for d in deduped:
+            if d.get("action") == "deduplicated":
+                print(f"  ↳ Kept '{d['winner']}', archived '{d['redundant']}'")
+            elif d.get("action") == "removed_bak":
+                print(f"  ↳ Archived backup file '{d['file']}'")
+        if steam_cleaned:
+            print(f"✓ Cleaned {len(steam_cleaned)} duplicate .pak archive(s) from Steam Data/Mods.")
+    if not (args.enable or args.list or args.validate or args.disable):
+        sys.exit(0)
+
+
+def _collect_test_dependencies(mod_name: str, cli_test_deps: Sequence[str]) -> list[dict]:
+    """Collect and resolve metadata for declared and CLI-specified test dependencies."""
+    mod_dir = resolve_mod_dir(mod_name, prefer_my_mods=True)
+    test_dep_queries = list(cli_test_deps)
+    if mod_dir and (mod_dir / ".test_deps.json").is_file():
+        try:
+            cfg = json.loads((mod_dir / ".test_deps.json").read_text(encoding="utf-8"))
+            for td in cfg.get("test_dependencies", []):
+                if td not in test_dep_queries:
+                    test_dep_queries.append(td)
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    resolved_test_deps: list[dict] = []
+    for t_query in test_dep_queries:
+        t_meta = get_mod_metadata_from_workspace(t_query)
+        if not t_meta:
+            try:
+                t_meta = resolve_dependency_metadata(t_query, auto_document=True)
+            except (BG3Error, OSError, ValueError):
+                pass
+        if t_meta and t_meta.get("UUID"):
+            resolved_test_deps.append(t_meta)
+    return resolved_test_deps
+
+
+def _dispatch_enable(
+    modsettings_path: Path,
+    args: argparse.Namespace,
+    action_result: dict[str, Any],
+) -> None:
+    """Handle enabling a mod, its declared dependencies, and test dependencies."""
+    mod_meta = get_mod_metadata_from_workspace(args.enable)
+    if not mod_meta:
+        msg = f"Mod '{args.enable}' not found in my_mods/, mods/, or AppData Mods."
+        if args.json:
+            print(json.dumps({"error": msg, "success": False}, indent=2))
+        else:
+            print(f"{RED}Error: {msg}{RESET}", file=sys.stderr)
+        sys.exit(1)
+
+    resolved_deps: list[dict] = []
+    missing_deps: list[dict] = []
+    if args.with_deps:
+        resolved_deps, missing_deps = resolve_all_dependencies(mod_meta)
+
+    resolved_test_deps = _collect_test_dependencies(args.enable, args.test_deps)
+
+    pak_sync_results = []
+    if args.with_deps and not args.dry_run:
+        all_deps = list(resolved_deps) + list(resolved_test_deps)
+        pak_sync_results = ensure_dependency_paks(all_deps)
+
+    if args.isolate:
+        keep_uuids = {
+            mod_meta["UUID"],
+            *(d["UUID"] for d in resolved_deps),
+            *(d["UUID"] for d in resolved_test_deps),
+        }
+        mods_dir = get_appdata_mods_dir(modsettings_path)
+        clean_steam_results = clean_steam_data_paks(dry_run=args.dry_run)
+        dedup_results = []
+        quarantined_paks = []
+        if mods_dir and mods_dir.is_dir():
+            dedup_results = deduplicate_installed_paks(mods_dir, dry_run=args.dry_run)
+            if getattr(args, "quarantine", False):
+                quarantined_paks = quarantine_unrelated_paks(mods_dir, keep_uuids, dry_run=args.dry_run)
+
+        action_result["clean_steam_data"] = clean_steam_results
+        action_result["deduplicate"] = dedup_results
+        action_result["quarantined_paks"] = quarantined_paks
+
+        isolated_count = isolate_load_order(modsettings_path, keep_uuids, dry_run=args.dry_run)
+        action_result["isolated_count"] = isolated_count
+        if not args.json:
+            verb = "[DRY-RUN] Would isolate" if args.dry_run else "Isolated"
+            print(f"✓ {verb} load order (disabled {isolated_count} mod entries in modsettings.lsx).")
+            if clean_steam_results:
+                print(f"  ↳ Cleaned {len(clean_steam_results)} duplicate .pak archive(s) from Steam Data/Mods.")
+            if dedup_results:
+                print(f"  ↳ Deduplicated {len(dedup_results)} conflicting/redundant .pak archive(s).")
+            if quarantined_paks:
+                print(f"  ↳ Quarantined {len(quarantined_paks)} unrelated .pak archive(s) to Mods_Disabled/.")
+
+    current_order_idx = 1
+    dep_results = []
+    for dep in resolved_deps:
+        req_idx = current_order_idx if args.isolate else None
+        dep_changed, dep_status = enable_mod(modsettings_path, dep, order_index=req_idx, dry_run=args.dry_run)
+        current_order_idx += 1
+        dep_results.append({
+            "mod": dep.get("Name", dep["UUID"]),
+            "uuid": dep["UUID"],
+            "changed": dep_changed,
+            "status": dep_status,
+        })
+        if not args.json and dep_changed:
+            verb = "[DRY-RUN] Would enable dependency" if args.dry_run else "Enabled dependency"
+            print(f"  ↳ {verb} '{dep.get('Name', dep['UUID'])}' ({dep['UUID']})")
+
+    test_dep_results = []
+    for tdep in resolved_test_deps:
+        req_idx = current_order_idx if args.isolate else None
+        tdep_changed, tdep_status = enable_mod(modsettings_path, tdep, order_index=req_idx, dry_run=args.dry_run)
+        current_order_idx += 1
+        test_dep_results.append({
+            "mod": tdep.get("Name", tdep["UUID"]),
+            "uuid": tdep["UUID"],
+            "changed": tdep_changed,
+            "status": tdep_status,
+        })
+        if not args.json and tdep_changed:
+            verb = "[DRY-RUN] Would enable test dependency" if args.dry_run else "Enabled test dependency"
+            print(f"  🧪 {verb} '{tdep.get('Name', tdep['UUID'])}' ({tdep['UUID']})")
+
+    target_order = args.order if args.order is not None else (current_order_idx if args.isolate else None)
+    changed, status_str = enable_mod(modsettings_path, mod_meta, order_index=target_order, dry_run=args.dry_run)
+    action_result["enable"] = {
+        "mod": mod_meta["Name"],
+        "uuid": mod_meta["UUID"],
+        "changed": changed,
+        "status": status_str,
+        "order_index": args.order,
+        "dry_run": args.dry_run,
+        "dependencies": dep_results,
+        "test_dependencies": test_dep_results,
+        "pak_sync": pak_sync_results,
+        "missing_dependencies": missing_deps,
+    }
+    if not args.json:
+        if changed:
+            verb = "[DRY-RUN] Would enable/reorder" if args.dry_run else f"Successfully {status_str}"
+            print(f"✓ {verb} '{mod_meta['Name']}' ({mod_meta['UUID']}) in load order at {modsettings_path}!")
+        else:
+            print(f"Mod '{mod_meta['Name']}' is already active in load order.")
+
+        if missing_deps:
+            print(f"{YELLOW}⚠ Warning: {len(missing_deps)} declared dependenc{'y' if len(missing_deps) == 1 else 'ies'} not found in workspace or AppData Mods:{RESET}")
+            for md in missing_deps:
+                print(f"  • {md.get('Name', 'Unknown')} ({md.get('UUID', 'No UUID')})")
+
+
+def _dispatch_disable(
+    modsettings_path: Path,
+    args: argparse.Namespace,
+    action_result: dict[str, Any],
+) -> None:
+    """Handle disabling a mod from active load order."""
+    try:
+        changed = disable_mod(modsettings_path, args.disable, dry_run=args.dry_run)
+        action_result["disable"] = {
+            "mod": args.disable,
+            "changed": changed,
+            "dry_run": args.dry_run,
+        }
+        if not args.json:
+            if changed:
+                action_desc = "[DRY-RUN] Would disable" if args.dry_run else "Successfully disabled"
+                print(f"✓ {action_desc} '{args.disable}' from load order at {modsettings_path}!")
+            else:
+                print(f"Mod '{args.disable}' was not found in active load order.")
+    except (BG3Error, OSError, ValueError) as e:
+        if args.json:
+            print(json.dumps({"error": str(e), "success": False}, indent=2))
+        else:
+            print(f"{RED}Error: {e}{RESET}", file=sys.stderr)
+        sys.exit(1)
+
+
+def _dispatch_validate(
+    parsed: dict[str, Any],
+    args: argparse.Namespace,
+    action_result: dict[str, Any],
+) -> None:
+    """Validate current load order rules and display issues."""
+    issues = validate_load_order(parsed)
+    action_result["validation"] = {
+        "valid": len(issues) == 0,
+        "active_count": len(parsed["order"]),
+        "issues": issues,
+    }
+    if not args.json:
+        if not issues:
+            print(f"{GREEN}✓ Load order is valid ({len(parsed['order'])} mods active).{RESET}")
+        else:
+            print(f"{YELLOW}Load order issues detected:{RESET}")
+            for issue in issues:
+                print(f"  • {issue}")
+
+
+def _dispatch_list(parsed: dict[str, Any], modsettings_path: Path) -> None:
+    """Display active load order table to stdout."""
+    print(f"\n{BOLD}{CYAN}=== Active Baldur's Gate 3 Load Order ==={RESET}")
+    print(f"Location: {modsettings_path}\n")
+    print(f"{'Idx':<4} | {'Mod Name':<28} | {'UUID':<38} | {'Version'}")
+    print("-" * 85)
+    for idx, u in enumerate(parsed["order"]):
+        m = parsed["mods"].get(u, {})
+        name = m.get("Name", "Unknown")
+        v64 = m.get("Version64", "-")
+        print(f"{idx:<4} | {name:<28} | {u:<38} | {v64}")
+    print(f"\nTotal active mods: {len(parsed['order'])}\n")
+
+
+def main() -> None:
+    parser = build_load_order_parser()
+    args = parser.parse_args()
+    _resolve_subcommand_aliases(args)
+
+    modsettings_path = _resolve_modsettings_path(args)
+    if args.create_default:
+        _handle_create_default(modsettings_path, args)
 
     if not modsettings_path.is_file() and not args.enable:
         if args.json:
@@ -1276,258 +1580,29 @@ def main() -> None:
             print("Run with --create-default to initialize, or --enable <Mod> to generate with mod.")
         sys.exit(0)
 
-    # Default to --list when --json is passed without an explicit action
     if args.json and not (args.list or args.enable or args.disable or args.validate or args.auto_sort):
         args.list = True
 
     action_result: dict[str, Any] = {}
 
     if args.auto_sort:
-        success, sorted_order, meta_sort = auto_sort_load_order(modsettings_path, dry_run=args.dry_run)
-        action_result["auto_sort"] = {
-            "success": success,
-            "sorted_order": sorted_order,
-            **meta_sort,
-        }
-        if not args.json:
-            verb = "[DRY-RUN] Would reorder" if args.dry_run else "Reordered"
-            print(f"✓ {verb} {len(sorted_order)} active mod(s) via topological dependency sorting.")
-
+        _dispatch_auto_sort(modsettings_path, args, action_result)
     if args.restore:
-        mods_dir = get_appdata_mods_dir(modsettings_path)
-        if not mods_dir:
-            msg = "Could not locate AppData Mods directory for restore."
-            if args.json:
-                print(json.dumps({"error": msg, "success": False}, indent=2))
-            else:
-                print(f"{RED}Error: {msg}{RESET}", file=sys.stderr)
-            sys.exit(1)
-        restored = restore_quarantined_paks(mods_dir, dry_run=args.dry_run)
-        action_result["restore"] = {
-            "count": len(restored),
-            "files": restored,
-            "dry_run": args.dry_run,
-        }
-        if not args.json:
-            verb = "[DRY-RUN] Would restore" if args.dry_run else "Restored"
-            print(f"✓ {verb} {len(restored)} mod archive(s) from Mods_Disabled/ to Mods/.")
-            for r in restored:
-                print(f"  ↳ {r['filename']}")
-        if not (args.enable or args.list or args.validate or args.disable):
-            sys.exit(0)
-
+        _dispatch_restore(modsettings_path, args, action_result)
     if args.dedup:
-        mods_dir = get_appdata_mods_dir(modsettings_path)
-        if not mods_dir:
-            msg = "Could not locate AppData Mods directory for deduplication."
-            if args.json:
-                print(json.dumps({"error": msg, "success": False}, indent=2))
-            else:
-                print(f"{RED}Error: {msg}{RESET}", file=sys.stderr)
-            sys.exit(1)
-        deduped = deduplicate_installed_paks(mods_dir, dry_run=args.dry_run)
-        steam_cleaned = clean_steam_data_paks(dry_run=args.dry_run)
-        action_result["deduplicate"] = {
-            "count": len(deduped),
-            "actions": deduped,
-            "steam_cleaned": steam_cleaned,
-            "dry_run": args.dry_run,
-        }
-        if not args.json:
-            verb = "[DRY-RUN] Would deduplicate" if args.dry_run else "Deduplicated"
-            print(f"✓ {verb} {len(deduped)} duplicate/backup file(s).")
-            for d in deduped:
-                if d.get("action") == "deduplicated":
-                    print(f"  ↳ Kept '{d['winner']}', archived '{d['redundant']}'")
-                elif d.get("action") == "removed_bak":
-                    print(f"  ↳ Archived backup file '{d['file']}'")
-            if steam_cleaned:
-                print(f"✓ Cleaned {len(steam_cleaned)} duplicate .pak archive(s) from Steam Data/Mods.")
-        if not (args.enable or args.list or args.validate or args.disable):
-            sys.exit(0)
-
+        _dispatch_dedup(modsettings_path, args, action_result)
     if args.enable:
-        mod_meta = get_mod_metadata_from_workspace(args.enable)
-        if not mod_meta:
-            msg = f"Mod '{args.enable}' not found in my_mods/, mods/, or AppData Mods."
-            if args.json:
-                print(json.dumps({"error": msg, "success": False}, indent=2))
-            else:
-                print(f"{RED}Error: {msg}{RESET}", file=sys.stderr)
-            sys.exit(1)
-
-        resolved_deps: list[dict] = []
-        missing_deps: list[dict] = []
-        if args.with_deps:
-            resolved_deps, missing_deps = resolve_all_dependencies(mod_meta)
-
-        # Collect test dependencies from CLI and .test_deps.json if mod is in my_mods/
-        mod_dir = resolve_mod_dir(args.enable, prefer_my_mods=True)
-        test_dep_queries = list(args.test_deps)
-        if mod_dir and (mod_dir / ".test_deps.json").is_file():
-            try:
-                cfg = json.loads((mod_dir / ".test_deps.json").read_text(encoding="utf-8"))
-                for td in cfg.get("test_dependencies", []):
-                    if td not in test_dep_queries:
-                        test_dep_queries.append(td)
-            except Exception:
-                pass
-
-        resolved_test_deps: list[dict] = []
-        for t_query in test_dep_queries:
-            t_meta = get_mod_metadata_from_workspace(t_query)
-            if not t_meta:
-                try:
-                    t_meta = resolve_dependency_metadata(t_query, auto_document=True)
-                except Exception:
-                    pass
-            if t_meta and t_meta.get("UUID"):
-                resolved_test_deps.append(t_meta)
-
-        # Ensure .pak files exist in Steam Data/Mods and AppData Mods
-        pak_sync_results = []
-        if args.with_deps and not args.dry_run:
-            all_deps = list(resolved_deps) + list(resolved_test_deps)
-            pak_sync_results = ensure_dependency_paks(all_deps)
-
-        isolated_count = 0
-        if args.isolate:
-            keep_uuids = {
-                mod_meta["UUID"],
-                *(d["UUID"] for d in resolved_deps),
-                *(d["UUID"] for d in resolved_test_deps),
-            }
-            mods_dir = get_appdata_mods_dir(modsettings_path)
-            clean_steam_results = clean_steam_data_paks(dry_run=args.dry_run)
-            dedup_results = []
-            quarantined_paks = []
-            if mods_dir and mods_dir.is_dir():
-                dedup_results = deduplicate_installed_paks(mods_dir, dry_run=args.dry_run)
-                if getattr(args, "quarantine", False):
-                    quarantined_paks = quarantine_unrelated_paks(mods_dir, keep_uuids, dry_run=args.dry_run)
-
-            action_result["clean_steam_data"] = clean_steam_results
-            action_result["deduplicate"] = dedup_results
-            action_result["quarantined_paks"] = quarantined_paks
-
-            isolated_count = isolate_load_order(modsettings_path, keep_uuids, dry_run=args.dry_run)
-            action_result["isolated_count"] = isolated_count
-            if not args.json:
-                verb = "[DRY-RUN] Would isolate" if args.dry_run else "Isolated"
-                print(f"✓ {verb} load order (disabled {isolated_count} mod entries in modsettings.lsx).")
-                if clean_steam_results:
-                    print(f"  ↳ Cleaned {len(clean_steam_results)} duplicate .pak archive(s) from Steam Data/Mods.")
-                if dedup_results:
-                    print(f"  ↳ Deduplicated {len(dedup_results)} conflicting/redundant .pak archive(s).")
-                if quarantined_paks:
-                    print(f"  ↳ Quarantined {len(quarantined_paks)} unrelated .pak archive(s) to Mods_Disabled/.")
-
-        current_order_idx = 1
-        dep_results = []
-        for dep in resolved_deps:
-            req_idx = current_order_idx if args.isolate else None
-            dep_changed, dep_status = enable_mod(modsettings_path, dep, order_index=req_idx, dry_run=args.dry_run)
-            current_order_idx += 1
-            dep_results.append({
-                "mod": dep.get("Name", dep["UUID"]),
-                "uuid": dep["UUID"],
-                "changed": dep_changed,
-                "status": dep_status,
-            })
-            if not args.json and dep_changed:
-                verb = "[DRY-RUN] Would enable dependency" if args.dry_run else "Enabled dependency"
-                print(f"  ↳ {verb} '{dep.get('Name', dep['UUID'])}' ({dep['UUID']})")
-
-        test_dep_results = []
-        for tdep in resolved_test_deps:
-            req_idx = current_order_idx if args.isolate else None
-            tdep_changed, tdep_status = enable_mod(modsettings_path, tdep, order_index=req_idx, dry_run=args.dry_run)
-            current_order_idx += 1
-            test_dep_results.append({
-                "mod": tdep.get("Name", tdep["UUID"]),
-                "uuid": tdep["UUID"],
-                "changed": tdep_changed,
-                "status": tdep_status,
-            })
-            if not args.json and tdep_changed:
-                verb = "[DRY-RUN] Would enable test dependency" if args.dry_run else "Enabled test dependency"
-                print(f"  🧪 {verb} '{tdep.get('Name', tdep['UUID'])}' ({tdep['UUID']})")
-
-        target_order = args.order if args.order is not None else (current_order_idx if args.isolate else None)
-        changed, status_str = enable_mod(modsettings_path, mod_meta, order_index=target_order, dry_run=args.dry_run)
-        action_result["enable"] = {
-            "mod": mod_meta["Name"],
-            "uuid": mod_meta["UUID"],
-            "changed": changed,
-            "status": status_str,
-            "order_index": args.order,
-            "dry_run": args.dry_run,
-            "dependencies": dep_results,
-            "test_dependencies": test_dep_results,
-            "pak_sync": pak_sync_results,
-            "missing_dependencies": missing_deps,
-        }
-        if not args.json:
-            if changed:
-                verb = "[DRY-RUN] Would enable/reorder" if args.dry_run else f"Successfully {status_str}"
-                print(f"✓ {verb} '{mod_meta['Name']}' ({mod_meta['UUID']}) in load order at {modsettings_path}!")
-            else:
-                print(f"Mod '{mod_meta['Name']}' is already active in load order.")
-
-            if missing_deps:
-                print(f"{YELLOW}⚠ Warning: {len(missing_deps)} declared dependenc{'y' if len(missing_deps) == 1 else 'ies'} not found in workspace or AppData Mods:{RESET}")
-                for md in missing_deps:
-                    print(f"  • {md.get('Name', 'Unknown')} ({md.get('UUID', 'No UUID')})")
-
+        _dispatch_enable(modsettings_path, args, action_result)
     if args.disable:
-        try:
-            changed = disable_mod(modsettings_path, args.disable, dry_run=args.dry_run)
-            action_result["disable"] = {
-                "mod": args.disable,
-                "changed": changed,
-                "dry_run": args.dry_run,
-            }
-            if not args.json:
-                if changed:
-                    action_desc = "[DRY-RUN] Would disable" if args.dry_run else "Successfully disabled"
-                    print(f"✓ {action_desc} '{args.disable}' from load order at {modsettings_path}!")
-                else:
-                    print(f"Mod '{args.disable}' was not found in active load order.")
-        except Exception as e:
-            if args.json:
-                print(json.dumps({"error": str(e), "success": False}, indent=2))
-            else:
-                print(f"{RED}Error: {e}{RESET}", file=sys.stderr)
-            sys.exit(1)
+        _dispatch_disable(modsettings_path, args, action_result)
 
     parsed = parse_modsettings(modsettings_path)
 
     if args.validate:
-        issues = validate_load_order(parsed)
-        action_result["validation"] = {
-            "valid": len(issues) == 0,
-            "active_count": len(parsed["order"]),
-            "issues": issues,
-        }
-        if not args.json:
-            if not issues:
-                print(f"{GREEN}✓ Load order is valid ({len(parsed['order'])} mods active).{RESET}")
-            else:
-                print(f"{YELLOW}Load order issues detected:{RESET}")
-                for issue in issues:
-                    print(f"  • {issue}")
+        _dispatch_validate(parsed, args, action_result)
 
     if args.list and not args.json:
-        print(f"\n{BOLD}{CYAN}=== Active Baldur's Gate 3 Load Order ==={RESET}")
-        print(f"Location: {modsettings_path}\n")
-        print(f"{'Idx':<4} | {'Mod Name':<28} | {'UUID':<38} | {'Version'}")
-        print("-" * 85)
-        for idx, u in enumerate(parsed["order"]):
-            m = parsed["mods"].get(u, {})
-            name = m.get("Name", "Unknown")
-            v64 = m.get("Version64", "-")
-            print(f"{idx:<4} | {name:<28} | {u:<38} | {v64}")
-        print(f"\nTotal active mods: {len(parsed['order'])}\n")
+        _dispatch_list(parsed, modsettings_path)
 
     if args.json:
         payload = {

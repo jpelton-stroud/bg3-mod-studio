@@ -345,6 +345,45 @@ def _parse_string_table(data: bytes) -> list[str]:
     return strings
 
 
+_NUMERIC_STRUCT_PARSERS: dict[int, tuple[str, int]] = {
+    TYPE_UINT8: ("<B", 1),
+    TYPE_INT16: ("<h", 2),
+    TYPE_UINT16: ("<H", 2),
+    TYPE_INT32: ("<i", 4),
+    TYPE_UINT32: ("<I", 4),
+    TYPE_INT64: ("<q", 8),
+    TYPE_UINT64: ("<Q", 8),
+}
+
+_NUMERIC_STRUCT_SERIALIZERS: dict[int, str] = {
+    TYPE_UINT8: "<B",
+    TYPE_INT16: "<h",
+    TYPE_UINT16: "<H",
+    TYPE_INT32: "<i",
+    TYPE_UINT32: "<I",
+    TYPE_INT64: "<q",
+    TYPE_UINT64: "<Q",
+}
+
+
+def _parse_uuid_bytes(raw: bytes) -> str:
+    """Parse raw bytes into canonical hyphenated UUID string."""
+    if len(raw) == 16:
+        d1, d2, d3, d4, d5, d6, d7 = struct.unpack("<IHHHHHH", raw)
+        return f"{d1:08x}-{d2:04x}-{d3:04x}-{d4:04x}-{d5:04x}{d6:04x}{d7:04x}"
+    return raw.split(b"\x00")[0].decode("utf-8", errors="replace")
+
+
+def _parse_string_bytes(raw: bytes) -> str:
+    """Parse null-terminated string bytes into string."""
+    return raw.split(b"\x00")[0].decode("utf-8", errors="replace")
+
+
+def _parse_bool_bytes(raw: bytes) -> bool:
+    """Parse raw byte into boolean."""
+    return raw[0] != 0 if raw else False
+
+
 def _parse_attribute_value(values_chunk: bytes, offset: int, length: int, type_id: int) -> Any:
     """Parse raw bytes from values chunk into typed Python object."""
     if offset >= len(values_chunk):
@@ -352,71 +391,49 @@ def _parse_attribute_value(values_chunk: bytes, offset: int, length: int, type_i
     raw = values_chunk[offset : offset + length]
 
     try:
-        if type_id == TYPE_UINT8:
-            return struct.unpack("<B", raw[:1])[0]
-        elif type_id == TYPE_INT16:
-            return struct.unpack("<h", raw[:2])[0]
-        elif type_id == TYPE_UINT16:
-            return struct.unpack("<H", raw[:2])[0]
-        elif type_id == TYPE_INT32:
-            return struct.unpack("<i", raw[:4])[0]
-        elif type_id == TYPE_UINT32:
-            return struct.unpack("<I", raw[:4])[0]
-        elif type_id == TYPE_INT64:
-            return struct.unpack("<q", raw[:8])[0]
-        elif type_id == TYPE_UINT64:
-            return struct.unpack("<Q", raw[:8])[0]
-        elif type_id == TYPE_BOOL:
-            return raw[0] != 0 if raw else False
-        elif type_id in (TYPE_STRING, TYPE_FIXED_STRING, TYPE_LS_STRING, TYPE_PATH):
-            return raw.split(b"\x00")[0].decode("utf-8", errors="replace")
-        elif type_id == TYPE_UUID:
-            if len(raw) == 16:
-                d1, d2, d3, d4, d5, d6, d7 = struct.unpack("<IHHHHHH", raw)
-                return f"{d1:08x}-{d2:04x}-{d3:04x}-{d4:04x}-{d5:04x}{d6:04x}{d7:04x}"
-            return raw.split(b"\x00")[0].decode("utf-8", errors="replace")
-        else:
-            return raw
-    except Exception:
+        if type_id in _NUMERIC_STRUCT_PARSERS:
+            fmt, size = _NUMERIC_STRUCT_PARSERS[type_id]
+            return struct.unpack(fmt, raw[:size])[0]
+        if type_id == TYPE_BOOL:
+            return _parse_bool_bytes(raw)
+        if type_id in (TYPE_STRING, TYPE_FIXED_STRING, TYPE_LS_STRING, TYPE_PATH):
+            return _parse_string_bytes(raw)
+        if type_id == TYPE_UUID:
+            return _parse_uuid_bytes(raw)
         return raw
+    except (struct.error, UnicodeDecodeError, ValueError):
+        return raw
+
+
+def _serialize_uuid(val: Any) -> bytes:
+    """Serialize UUID representation into LSF binary representation."""
+    uuid_str = str(val).replace("-", "")
+    if len(uuid_str) == 32:
+        try:
+            b = bytes.fromhex(uuid_str)
+            d1 = struct.unpack(">I", b[0:4])[0]
+            d2 = struct.unpack(">H", b[4:6])[0]
+            d3 = struct.unpack(">H", b[6:8])[0]
+            d4 = struct.unpack(">H", b[8:10])[0]
+            d5 = struct.unpack(">H", b[10:12])[0]
+            d6 = struct.unpack(">H", b[12:14])[0]
+            d7 = struct.unpack(">H", b[14:16])[0]
+            return struct.pack("<IHHHHHH", d1, d2, d3, d4, d5, d6, d7)
+        except ValueError:
+            pass
+    return str(val).encode("utf-8") + b"\x00"
 
 
 def _serialize_attribute_value(val: Any, type_id: int) -> bytes:
     """Serialize a typed Python object into raw bytes."""
-    if type_id == TYPE_UINT8:
-        return struct.pack("<B", int(val))
-    elif type_id == TYPE_INT16:
-        return struct.pack("<h", int(val))
-    elif type_id == TYPE_UINT16:
-        return struct.pack("<H", int(val))
-    elif type_id == TYPE_INT32:
-        return struct.pack("<i", int(val))
-    elif type_id == TYPE_UINT32:
-        return struct.pack("<I", int(val))
-    elif type_id == TYPE_INT64:
-        return struct.pack("<q", int(val))
-    elif type_id == TYPE_UINT64:
-        return struct.pack("<Q", int(val))
-    elif type_id == TYPE_BOOL:
+    if type_id in _NUMERIC_STRUCT_SERIALIZERS:
+        return struct.pack(_NUMERIC_STRUCT_SERIALIZERS[type_id], int(val))
+    if type_id == TYPE_BOOL:
         return b"\x01" if val else b"\x00"
-    elif type_id in (TYPE_STRING, TYPE_FIXED_STRING, TYPE_LS_STRING, TYPE_PATH):
+    if type_id in (TYPE_STRING, TYPE_FIXED_STRING, TYPE_LS_STRING, TYPE_PATH):
         return str(val).encode("utf-8") + b"\x00"
-    elif type_id == TYPE_UUID:
-        uuid_str = str(val).replace("-", "")
-        if len(uuid_str) == 32:
-            try:
-                b = bytes.fromhex(uuid_str)
-                d1 = struct.unpack(">I", b[0:4])[0]
-                d2 = struct.unpack(">H", b[4:6])[0]
-                d3 = struct.unpack(">H", b[6:8])[0]
-                d4 = struct.unpack(">H", b[8:10])[0]
-                d5 = struct.unpack(">H", b[10:12])[0]
-                d6 = struct.unpack(">H", b[12:14])[0]
-                d7 = struct.unpack(">H", b[14:16])[0]
-                return struct.pack("<IHHHHHH", d1, d2, d3, d4, d5, d6, d7)
-            except ValueError:
-                pass
-        return str(val).encode("utf-8") + b"\x00"
-    elif isinstance(val, (bytes, bytearray)):
+    if type_id == TYPE_UUID:
+        return _serialize_uuid(val)
+    if isinstance(val, (bytes, bytearray)):
         return bytes(val)
     return str(val).encode("utf-8")

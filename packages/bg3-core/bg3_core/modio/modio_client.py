@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from bg3_core.env_paths import get_env_var, get_xdg_cache_home
+from bg3_core.exceptions import BG3CatalogError
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ API_ROOT = f"https://{MODIO_API_HOST}/v1"
 USER_AGENT = "BG3ModStudio/1.0"
 
 
-class ModioError(RuntimeError):
+class ModioError(BG3CatalogError):
     """Raised for an invalid target, preflight failure, or mod.io API error."""
 
     def __init__(
@@ -204,7 +205,7 @@ class ModioClient:
                 raise ModioError(
                     f"mod.io API returned HTTP {error.code} {error.reason}"
                     + (f": {detail}" if detail else "")
-                ) from None
+                ) from error
             except urllib.error.URLError as error:
                 if retries < self.max_retries:
                     retries += 1
@@ -213,7 +214,7 @@ class ModioClient:
                         sleep_time += random.uniform(0.0, 0.25)
                     time.sleep(sleep_time)
                     continue
-                raise ModioError(f"Network error contacting mod.io: {error.reason}") from None
+                raise ModioError(f"Network error contacting mod.io: {error.reason}") from error
 
         try:
             payload = json.loads(response_body.decode("utf-8"))
@@ -358,7 +359,7 @@ def query_modio(query_or_slug: str, api_key: str) -> Dict[str, Any]:
             data = client.request("GET", f"/games/{BG3_GAME_ID}/mods", params=params)
             if data.get("data") and len(data["data"]) > 0:
                 return data["data"][0]
-        except Exception as err:
+        except (ModioError, OSError, ValueError) as err:
             logger.debug("Candidate query failed: %s", err)
 
     clean_q_alpha = re.sub(r"[^a-z0-9]", "", clean_query.lower())
@@ -374,7 +375,7 @@ def query_modio(query_or_slug: str, api_key: str) -> Dict[str, Any]:
             batch = data.get("data", [])
             if batch:
                 results.extend(batch)
-        except Exception as err:
+        except (ModioError, OSError, ValueError) as err:
             logger.debug("Search query term failed: %s", err)
 
         for m in results:

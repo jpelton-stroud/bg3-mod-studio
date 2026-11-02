@@ -220,15 +220,6 @@ def check_environment_status(as_json: bool = False, config_path: Optional[Path] 
     cache_home = get_xdg_cache_home()
     data_home = get_xdg_data_home()
     state_home = get_xdg_state_home()
-    legacy_env = WORKSPACE_ROOT / ".env"
-
-    # Auto-migrate legacy repository .env if target doesn't exist
-    if not target_env.is_file() and legacy_env.is_file():
-        try:
-            write_env_file(target_env, legacy_env.read_text(encoding="utf-8"))
-            legacy_env.unlink()
-        except OSError:
-            pass
 
     if not target_env.is_file():
         xdg_info = {

@@ -54,33 +54,6 @@ class ScaffoldResult(collections.abc.Mapping[str, Any]):
             "file": self.file,
             "dry_run": self.dry_run,
         }
-        # Populate specific aliases for callers expecting legacy/generator-specific keys
-        if self.asset_type in ("class", "class-description"):
-            out.setdefault("class_name", self.name)
-            if self.uuid:
-                out.setdefault("class_uuid", self.uuid)
-        elif self.asset_type == "feat":
-            out.setdefault("feat_name", self.name)
-            if self.uuid:
-                out.setdefault("feat_uuid", self.uuid)
-        elif self.asset_type == "stat":
-            out.setdefault("entry_name", self.name)
-            out.setdefault("stat_file", self.file)
-        elif self.asset_type == "action-resource":
-            out.setdefault("resource_name", self.name)
-            if self.uuid:
-                out.setdefault("resource_uuid", self.uuid)
-        elif self.asset_type in ("atlas", "icon-uvs"):
-            out.setdefault("atlas_name", self.name)
-            if self.uuid:
-                out.setdefault("atlas_uuid", self.uuid)
-        elif self.asset_type == "race":
-            if self.uuid:
-                out.setdefault("race_uuid", self.uuid)
-        elif self.asset_type == "origin":
-            if self.uuid:
-                out.setdefault("origin_uuid", self.uuid)
-
         out.update(self.details)
         return out
 

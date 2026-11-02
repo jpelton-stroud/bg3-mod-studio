@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from bg3_core.binary.larian_parsers import (
+    DEFAULT_VERSION64,
     HANDLE_PATTERN,
     PATCH_8_VERSION,
     calculate_version64,
@@ -78,6 +79,7 @@ __all__ = [
     "TYPE_UUID",
     "TYPE_WSTRING",
     # Larian Engine Parsers
+    "DEFAULT_VERSION64",
     "HANDLE_PATTERN",
     "PATCH_8_VERSION",
     "calculate_version64",

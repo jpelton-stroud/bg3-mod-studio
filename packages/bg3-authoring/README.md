@@ -28,7 +28,7 @@ Modular scaffolding engines producing standard Larian engine structures and retu
 - `scaffold_visuals.py`: 3D GameObject root templates and appearance visuals.
 - `scaffold_atlas.py`: Texture atlas UV coordinate mapping and `Icons.lsx`.
 - `scaffold_character.py`: Custom races, origins, appearances, and tags.
-- `scaffold_common.py`: Shared XML formatting, path resolution, placeholder PNG generation, and `ScaffoldResult` mapping dataclass.
+- `scaffold_common.py`: Shared XML formatting, placeholder PNG generation, and `ScaffoldResult` mapping dataclass.
 
 ### 2. Diagnostics & Compatibility
 - `diagnostics/validate_mod.py`: Deep static validation checking XML/LSX syntax, UUID collisions, missing string handles, and required folder layouts.
@@ -42,6 +42,12 @@ Modular scaffolding engines producing standard Larian engine structures and retu
 - `packaging/pack_mod_pak.py`: Pure-Python LSPK v18 binary compiler that writes 40-byte headers, compresses files using raw LZ4 block compression (`LSPK v18`), compiles XML localization into binary `.loca`, and outputs deployable `.pak` archives.
 - `packaging/sync_game_data.py`: Idempotent differential file synchronizer that mirrors mod assets into the game's `Data/` directory for live in-engine playtesting.
 - `packaging/common.py`: Centralized exclusion rules and file filtering predicates for distribution builds.
+
+### 4. Domain Exceptions (`bg3_authoring.exceptions`)
+Domain exception hierarchy inheriting from `bg3_core.exceptions.BG3Error`:
+- `BG3AuthoringError`: Root exception for all mod authoring and scaffolding failures.
+- `BG3ScaffoldError`: Subclass raised when asset generation, XML serialization, or template interpolation fails.
+- `BG3ConflictError`: Subclass raised on structural UUID collisions, asset conflicts, or dependency cycles.
 
 ---
 

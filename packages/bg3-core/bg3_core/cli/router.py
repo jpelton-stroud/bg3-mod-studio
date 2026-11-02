@@ -168,19 +168,6 @@ DESTRUCTIVE_CONFIRMATIONS = {
 }
 
 
-def resolve_module_fallback(script_target: Path) -> Optional[str]:
-    """Derive fully qualified python module name from a target file path."""
-    parts = list(script_target.parts)
-    for pkg in ("bg3_authoring", "bg3_core", "bg3_theorycraft"):
-        if pkg in parts:
-            idx = parts.index(pkg)
-            mod_parts = list(parts[idx:])
-            if mod_parts[-1].endswith(".py"):
-                mod_parts[-1] = mod_parts[-1][:-3]
-            return ".".join(mod_parts)
-    return None
-
-
 def _find_module_file(mod_name: str) -> Optional[Path]:
     """Find absolute file path for a given module name."""
     try:
@@ -260,20 +247,8 @@ def _add_scaffold_subparsers(sub_sp: Any) -> None:
             sub_p.add_argument("--json", action="store_true", help="Format output as JSON")
 
 
-def build_parser() -> JsonCompliantArgumentParser:
-    """Build structured command tree for in-process execution, CLI help, and introspection."""
-    parser = JsonCompliantArgumentParser(
-        prog="bg3",
-        description="Baldur's Gate 3 Mod Studio & Mod.io Automation Workspace",
-    )
-    parser.add_argument("--json", action="store_true", help="Format all output as machine-readable JSON")
-    parser.add_argument("--no-color", action="store_true", help="Disable ANSI color output")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose diagnostics on stderr")
-    parser.add_argument("--config", help="Custom environment configuration file path")
-
-    subparsers = parser.add_subparsers(dest="command", parser_class=JsonCompliantArgumentParser)
-
-    # 1. Direct top-level commands
+def _add_direct_subparsers(subparsers: Any) -> None:
+    """Add direct top-level commands (query, conflict, sim)."""
     # query
     p_query = subparsers.add_parser("query", help=DIRECT_COMMANDS["query"].help)
     p_query.add_argument("query", nargs="?", default=None, help="General search term across name, desc, and boosts")
@@ -297,8 +272,9 @@ def build_parser() -> JsonCompliantArgumentParser:
     p_sim.add_argument("--level", type=int, default=20, help="Total character level cap")
     p_sim.add_argument("--dry-run", action="store_true", help="Simulate progression without saving")
 
-    # 2. Group commands
-    # mod group
+
+def _add_mod_subparsers(subparsers: Any) -> None:
+    """Add mod management, scaffolding, diagnostics, and packaging commands."""
     p_mod = subparsers.add_parser("mod", help="Mod creation, diagnostics, packaging, and asset authoring")
     mod_sp = p_mod.add_subparsers(dest="subcommand", parser_class=JsonCompliantArgumentParser)
 
@@ -391,12 +367,9 @@ def build_parser() -> JsonCompliantArgumentParser:
     p_mod_desc.add_argument("--mod", dest="mod_flag", help="Target mod directory containing README.md")
     p_mod_desc.add_argument("--output", help="Output file path for rendered HTML")
 
-    # scaffold group (top-level alias for mod scaffold)
-    p_scaffold = subparsers.add_parser("scaffold", help="Scaffold mod asset definitions (class, feat, spell-list, etc.)")
-    scaffold_sp = p_scaffold.add_subparsers(dest="asset_type", parser_class=JsonCompliantArgumentParser)
-    _add_scaffold_subparsers(scaffold_sp)
 
-    # loadorder group
+def _add_loadorder_subparsers(subparsers: Any) -> None:
+    """Add load order inspection, synchronization, and sorting commands."""
     p_lo = subparsers.add_parser("loadorder", help="Mod load order profile inspection, synchronization, and sorting")
     lo_sp = p_lo.add_subparsers(dest="subcommand", parser_class=JsonCompliantArgumentParser)
 
@@ -451,7 +424,9 @@ def build_parser() -> JsonCompliantArgumentParser:
     p_lo_dedup.add_argument("--path", help="Explicit path to modsettings.lsx")
     p_lo_dedup.add_argument("--dry-run", action="store_true", help="Preview deduplication")
 
-    # modio group
+
+def _add_modio_subparsers(subparsers: Any) -> None:
+    """Add mod.io integration and catalog commands."""
     p_modio = subparsers.add_parser("modio", help="Mod.io community library integration and catalog updates")
     modio_sp = p_modio.add_subparsers(dest="subcommand", parser_class=JsonCompliantArgumentParser)
 
@@ -500,7 +475,9 @@ def build_parser() -> JsonCompliantArgumentParser:
     p_modio_up_cat = modio_sp.add_parser("update-catalog", help=COMMAND_REGISTRY[("modio", "update-catalog")].help)
     p_modio_up_cat.add_argument("--output", help="Output path for updated catalog markdown")
 
-    # save group
+
+def _add_save_subparsers(subparsers: Any) -> None:
+    """Add save game inspection, backup, purge, and clean commands."""
     p_save = subparsers.add_parser("save", help="Save game dependency inspection, backup, and recovery")
     save_sp = p_save.add_subparsers(dest="subcommand", parser_class=JsonCompliantArgumentParser)
 
@@ -524,7 +501,9 @@ def build_parser() -> JsonCompliantArgumentParser:
     p_save_clean.add_argument("-y", "--yes", action="store_true", help="Bypass confirmation prompt")
     p_save_clean.add_argument("--dry-run", action="store_true", help="Preview rescue operations")
 
-    # build group
+
+def _add_build_subparsers(subparsers: Any) -> None:
+    """Add character theorycrafting and simulation commands."""
     p_build = subparsers.add_parser("build", help="Character theorycrafting and Level 20 DPR burst simulation")
     build_sp = p_build.add_subparsers(dest="subcommand", parser_class=JsonCompliantArgumentParser)
 
@@ -538,7 +517,9 @@ def build_parser() -> JsonCompliantArgumentParser:
     p_build_sim2.add_argument("--level", type=int, default=20, help="Total character level cap")
     p_build_sim2.add_argument("--dry-run", action="store_true", help="Simulate progression without writing")
 
-    # tools group
+
+def _add_tools_subparsers(subparsers: Any) -> None:
+    """Add tools registry inspection, search, and audit commands."""
     p_tools = subparsers.add_parser("tools", help="Studio CLI command registry and discovery catalog")
     tools_sp = p_tools.add_subparsers(dest="subcommand", parser_class=JsonCompliantArgumentParser)
 
@@ -555,13 +536,44 @@ def build_parser() -> JsonCompliantArgumentParser:
     p_tools_verify = tools_sp.add_parser("verify", help=COMMAND_REGISTRY[("tools", "verify")].help)
     p_tools_verify.add_argument("--audit-skills", action="store_true", help="Audit agent skills in .agents/skills/")
 
-    # env group
+
+def _add_env_subparsers(subparsers: Any) -> None:
+    """Add environment and path diagnostic commands."""
     p_env = subparsers.add_parser("env", help="Environment setup, path diagnostics, and XDG directory status")
     env_sp = p_env.add_subparsers(dest="subcommand", parser_class=JsonCompliantArgumentParser)
 
     env_sp.add_parser("check", help=COMMAND_REGISTRY[("env", "check")].help)
     env_sp.add_parser("paths", help=COMMAND_REGISTRY[("env", "paths")].help)
     env_sp.add_parser("setup", help=COMMAND_REGISTRY[("env", "setup")].help)
+
+
+def build_parser() -> JsonCompliantArgumentParser:
+    """Build structured command tree for in-process execution, CLI help, and introspection."""
+    parser = JsonCompliantArgumentParser(
+        prog="bg3",
+        description="Baldur's Gate 3 Mod Studio & Mod.io Automation Workspace",
+    )
+    parser.add_argument("--json", action="store_true", help="Format all output as machine-readable JSON")
+    parser.add_argument("--no-color", action="store_true", help="Disable ANSI color output")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose diagnostics on stderr")
+    parser.add_argument("--config", help="Custom environment configuration file path")
+
+    subparsers = parser.add_subparsers(dest="command", parser_class=JsonCompliantArgumentParser)
+
+    _add_direct_subparsers(subparsers)
+    _add_mod_subparsers(subparsers)
+
+    # scaffold group (top-level alias for mod scaffold)
+    p_scaffold = subparsers.add_parser("scaffold", help="Scaffold mod asset definitions (class, feat, spell-list, etc.)")
+    scaffold_sp = p_scaffold.add_subparsers(dest="asset_type", parser_class=JsonCompliantArgumentParser)
+    _add_scaffold_subparsers(scaffold_sp)
+
+    _add_loadorder_subparsers(subparsers)
+    _add_modio_subparsers(subparsers)
+    _add_save_subparsers(subparsers)
+    _add_build_subparsers(subparsers)
+    _add_tools_subparsers(subparsers)
+    _add_env_subparsers(subparsers)
 
     return parser
 

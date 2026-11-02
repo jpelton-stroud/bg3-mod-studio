@@ -19,6 +19,7 @@ from bg3_core.binary.larian_parsers import compile_xml_bytes_to_loca
 from bg3_core.binary.lspk import LspkArchive
 from bg3_core.binary.lspk import build_lspk_archive as build_pak_archive
 from bg3_core.env_paths import DIST_DIR, detect_bg3_appdata_dirs, get_env_var, resolve_mod_dir
+from bg3_core.exceptions import BG3BinaryError, BG3PackagingError
 
 from bg3_authoring.packaging.common import (
     should_include_file,
@@ -124,7 +125,7 @@ def get_mod_pak_filename(mod_dir: Path) -> str:
                 if uuid_val and not folder.endswith(uuid_val):
                     return f"{folder}_{uuid_val}.pak"
                 return f"{folder}.pak"
-        except Exception:
+        except (OSError, UnicodeDecodeError, ValueError):
             pass
     return f"{mod_dir.name}.pak"
 
@@ -160,7 +161,7 @@ def clean_local_pak(mod_dir: Path, dry_run: bool = False) -> dict:
                 candidates.add(f"{folder_val}.pak")
             if uuid_match:
                 uuid_val = uuid_match.group(1).lower()
-        except Exception:
+        except (OSError, UnicodeDecodeError, ValueError):
             pass
 
     removed_paks = []
@@ -278,7 +279,7 @@ def main() -> int:
         # Verification pass
         verified = verify_pak_archive(pak_bytes, files_to_pack)
         if not verified:
-            raise RuntimeError("Generated .pak archive failed self-verification check.")
+            raise BG3PackagingError("Generated .pak archive failed self-verification check.")
 
         # Safe atomic write
         out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -298,7 +299,7 @@ def main() -> int:
                 f"Permission denied writing to '{out_path}'. "
                 "Ensure Baldur's Gate 3 and the BG3 Toolkit are closed if they are locking the file."
             ) from pe
-        except Exception:
+        except (OSError, ValueError, BG3PackagingError, BG3BinaryError):
             if temp_out.exists():
                 temp_out.unlink()
             raise
@@ -325,7 +326,7 @@ def main() -> int:
 
         return 0
 
-    except Exception as e:
+    except (BG3PackagingError, BG3BinaryError, OSError, ValueError) as e:
         if args.json:
             print(json.dumps({"error": str(e), "success": False}, indent=2))
         else:

@@ -13,11 +13,14 @@ Resolution Priority:
 import io
 import re
 import shutil
+import struct
+import xml.etree.ElementTree as ET
 import zipfile
+import zlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
-from bg3_core.binary.larian_parsers import find_mod_meta_files, parse_meta_lsx
+from bg3_core.binary.larian_parsers import DEFAULT_VERSION64, find_mod_meta_files, parse_meta_lsx
 from bg3_core.binary.lspk import LspkArchive
 from bg3_core.env_paths import (
     detect_bg3_appdata_dirs,
@@ -27,6 +30,7 @@ from bg3_core.env_paths import (
     get_subscribed_mods_dir,
     normalize_mod_key,
 )
+from bg3_core.exceptions import BG3BinaryError, BG3Error
 from bg3_core.modio.library_catalog import parse_library_rows
 
 # Known common core dependencies
@@ -106,11 +110,11 @@ def extract_metadata_from_meta_lsx(path: Path, fallback_name: str = "") -> Optio
 
         folder = parsed.get("Folder") or fallback_name
         name = parsed.get("Name") or fallback_name
-        v64_raw = parsed.get("Version64", "36028797018963968")
+        v64_raw = parsed.get("Version64", str(DEFAULT_VERSION64))
         try:
             v64 = int(v64_raw)
         except ValueError:
-            v64 = 36028797018963968
+            v64 = DEFAULT_VERSION64
 
         handle_raw = parsed.get("PublishHandle", "0")
         try:
@@ -126,7 +130,7 @@ def extract_metadata_from_meta_lsx(path: Path, fallback_name: str = "") -> Optio
             "UUID": parsed["UUID"],
             "Version64": v64,
         }
-    except Exception:
+    except (ET.ParseError, OSError, KeyError, ValueError):
         return None
 
 
@@ -238,7 +242,7 @@ def resolve_dependency_metadata(
                                 if not extracted.get("PublishHandle"):
                                     extracted["PublishHandle"] = m_id
                                 return extracted
-                    except Exception:
+                    except (OSError, KeyError, ValueError, ET.ParseError, BG3Error):
                         pass
 
                 # Return synthesized metadata if auto-documentation did not complete
@@ -248,9 +252,9 @@ def resolve_dependency_metadata(
                     "Name": m_name,
                     "PublishHandle": m_id,
                     "UUID": str(mod_meta.get("id", "")),
-                    "Version64": 36028797018963968,
+                    "Version64": DEFAULT_VERSION64,
                 }
-    except Exception:
+    except (OSError, KeyError, ValueError, BG3Error):
         pass
 
     if strict:
@@ -263,7 +267,7 @@ def resolve_dependency_metadata(
         "Name": clean_id,
         "PublishHandle": 0,
         "UUID": "",
-        "Version64": 36028797018963968,
+        "Version64": DEFAULT_VERSION64,
     }
 
 
@@ -314,7 +318,7 @@ def find_installed_pak(dep: Dict[str, Any], search_dirs: Sequence[Path]) -> Opti
                                     return pak_file
                                 fallback_candidates.append(pak_file)
                             break
-                except Exception:
+                except (OSError, struct.error, zlib.error, BG3BinaryError):
                     pass
 
     if fallback_candidates:
@@ -368,7 +372,7 @@ def ensure_dependency_paks(
                             "destination": str(dest),
                             "status": "synchronized",
                         })
-                    except Exception as err:
+                    except (OSError, shutil.Error) as err:
                         results.append({
                             "mod": dep.get("Name", dep_uuid),
                             "action": "copy_failed",
@@ -417,7 +421,7 @@ def ensure_dependency_paks(
                             "size_bytes": len(pak_payload),
                             "status": "downloaded_from_modio",
                         })
-        except Exception as exc:
+        except (BG3Error, OSError, ValueError, zipfile.BadZipFile) as exc:
             results.append({
                 "mod": mod_name,
                 "action": "download_failed",

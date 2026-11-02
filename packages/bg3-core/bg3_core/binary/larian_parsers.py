@@ -26,6 +26,9 @@ def format_patch8_lsx_header() -> str:
 # ----------------------------------------------------------------------
 # Version64 Encoding & Decoding
 # ----------------------------------------------------------------------
+DEFAULT_VERSION64: int = 36028797018963968  # 1.0.0.0 packed representation
+
+
 def calculate_version64(major: int = 1, minor: int = 0, revision: int = 0, build: int = 0) -> int:
     """Encode major.minor.revision.build into Larian Version64 integer."""
     return (major << 55) | (minor << 47) | (revision << 31) | (build & 0x7FFFFFFF)
@@ -140,7 +143,7 @@ def parse_localization_xml(xml_bytes: bytes, strip_tags: bool = True) -> Dict[st
             text = elem.text or ""
             if handle:
                 loc_dict[handle] = clean_loc_text(text) if strip_tags else text
-    except Exception:
+    except (ET.ParseError, OSError, ValueError):
         pass
     return loc_dict
 
@@ -346,7 +349,7 @@ def parse_meta_lsx(lsx_bytes: bytes) -> Dict[str, Any]:
             if dep_attrs:
                 deps.append(dep_attrs)
         meta["dependencies"] = deps
-    except Exception:
+    except (ET.ParseError, OSError, ValueError):
         if "dependencies" not in meta:
             meta["dependencies"] = []
     return meta
@@ -370,7 +373,7 @@ def parse_root_templates_lsx(lsx_bytes: bytes) -> Dict[str, Dict[str, str]]:
             map_key = attrs.get("MapKey")
             if map_key:
                 templates[map_key] = attrs
-    except Exception:
+    except (ET.ParseError, OSError, ValueError):
         pass
     return templates
 
@@ -392,7 +395,7 @@ def parse_progressions_lsx(lsx_bytes: bytes) -> List[Dict[str, str]]:
                     p[attr_id] = val
             if p:
                 progressions.append(p)
-    except Exception:
+    except (ET.ParseError, OSError, ValueError):
         pass
     return progressions
 

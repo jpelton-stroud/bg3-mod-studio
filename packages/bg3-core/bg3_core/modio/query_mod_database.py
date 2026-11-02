@@ -100,19 +100,94 @@ def load_localization_strings(mod_dir: Path) -> dict[str, str]:
     return strings
 
 
+def _classify_stat_file(filename: str) -> Optional[str]:
+    """Classifies a stat file into a standard category or returns None."""
+    fname_lower = filename.lower()
+    if fname_lower in TARGET_STAT_FILES:
+        return TARGET_STAT_FILES[fname_lower]
+    if fname_lower.startswith("spell_") and fname_lower.endswith(".txt"):
+        return "Spell"
+    return None
+
+
+def _apply_stat_property(entry: dict, prop: str, val: str) -> None:
+    """Applies a single key-value stat property to the entry dictionary."""
+    prop_lower = prop.lower()
+    if prop_lower == "displayname":
+        entry["_raw_display"] = val
+        return
+    if prop_lower == "description":
+        entry["_raw_desc"] = val
+        return
+    if prop_lower == "slot":
+        entry["slot"] = val
+        return
+    if prop_lower == "rarity":
+        entry["rarity"] = val
+        return
+    if prop_lower in ("boosts", "defaultboosts"):
+        entry["boosts"] = (
+            (entry["boosts"] + ";" + val).strip(";")
+            if entry["boosts"]
+            else val
+        )
+        return
+    if prop_lower in ("passivesonequip", "passives"):
+        entry["passives"] = (
+            (entry["passives"] + ";" + val).strip(";")
+            if entry["passives"]
+            else val
+        )
+        return
+    if prop_lower == "damage":
+        entry["damage"] = val
+        return
+    if prop_lower == "damage type":
+        entry["damage_type"] = val
+        return
+    if prop_lower == "armorclass":
+        entry["ac"] = val
+        return
+
+
+def _build_stat_entry(
+    name: str,
+    p_entry: dict,
+    mod_slug: str,
+    category: str,
+    filename: str,
+) -> dict:
+    """Initializes and populates a structured stat entry from raw parsed data."""
+    entry = {
+        "id": name,
+        "mod": mod_slug,
+        "category": category,
+        "type": p_entry.get("type") or category,
+        "using": p_entry.get("using", ""),
+        "display_name": "",
+        "description": "",
+        "slot": "",
+        "rarity": "Common",
+        "boosts": "",
+        "passives": "",
+        "damage": "",
+        "damage_type": "",
+        "ac": "",
+        "source_file": filename,
+    }
+    for prop, val in p_entry.get("data", {}).items():
+        _apply_stat_property(entry, prop, val)
+    return entry
+
+
 def parse_mod_stat_entries(mod_dir: Path, mod_slug: str) -> list[dict]:
     """Parses stat files in a mod and returns normalized structured entries."""
     loc_map = load_localization_strings(mod_dir)
     entries = []
 
-    # Find all .txt files
     for txt_path in mod_dir.rglob("*.txt"):
-        filename_lower = txt_path.name.lower()
-        if filename_lower in TARGET_STAT_FILES:
-            category = TARGET_STAT_FILES[filename_lower]
-        elif filename_lower.startswith("spell_") and filename_lower.endswith(".txt"):
-            category = "Spell"
-        else:
+        category = _classify_stat_file(txt_path.name)
+        if not category:
             continue
 
         try:
@@ -121,54 +196,7 @@ def parse_mod_stat_entries(mod_dir: Path, mod_slug: str) -> list[dict]:
             continue
 
         for name, p_entry in parsed.items():
-            data = p_entry.get("data", {})
-            entry = {
-                "id": name,
-                "mod": mod_slug,
-                "category": category,
-                "type": p_entry.get("type") or category,
-                "using": p_entry.get("using", ""),
-                "display_name": "",
-                "description": "",
-                "slot": "",
-                "rarity": "Common",
-                "boosts": "",
-                "passives": "",
-                "damage": "",
-                "damage_type": "",
-                "ac": "",
-                "source_file": str(txt_path.name),
-            }
-
-            for prop, val in data.items():
-                prop_lower = prop.lower()
-                if prop_lower == "displayname":
-                    entry["_raw_display"] = val
-                elif prop_lower == "description":
-                    entry["_raw_desc"] = val
-                elif prop_lower == "slot":
-                    entry["slot"] = val
-                elif prop_lower == "rarity":
-                    entry["rarity"] = val
-                elif prop_lower in ("boosts", "defaultboosts"):
-                    entry["boosts"] = (
-                        (entry["boosts"] + ";" + val).strip(";")
-                        if entry["boosts"]
-                        else val
-                    )
-                elif prop_lower in ("passivesonequip", "passives"):
-                    entry["passives"] = (
-                        (entry["passives"] + ";" + val).strip(";")
-                        if entry["passives"]
-                        else val
-                    )
-                elif prop_lower == "damage":
-                    entry["damage"] = val
-                elif prop_lower == "damage type":
-                    entry["damage_type"] = val
-                elif prop_lower == "armorclass":
-                    entry["ac"] = val
-
+            entry = _build_stat_entry(name, p_entry, mod_slug, category, str(txt_path.name))
             finalize_entry(entry, loc_map)
             entries.append(entry)
 

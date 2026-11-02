@@ -192,37 +192,23 @@ def calculate_resource_pools(classes: Dict[str, int]) -> ResourcePools:
     sorcery_points = sorcerer_lvl if sorcerer_lvl >= 2 else 0
 
     # Superiority dice: Fighter level 3+
-    if fighter_lvl >= 15:
-        superiority_count = 6
-        superiority_die = "d10"
-    elif fighter_lvl >= 7:
-        superiority_count = 5
-        superiority_die = "d8"
-    elif fighter_lvl >= 3:
-        superiority_count = 4
-        superiority_die = "d8"
-    else:
-        superiority_count = 0
-        superiority_die = "None"
+    superiority_count, superiority_die = (
+        (6, "d10") if fighter_lvl >= 15
+        else (5, "d8") if fighter_lvl >= 7
+        else (4, "d8") if fighter_lvl >= 3
+        else (0, "None")
+    )
 
     # Channel Oath: Paladin level 1+
     channel_oath = 1 if paladin_lvl >= 1 else 0
 
     # Rage charges: Barbarian progression
-    if barbarian_lvl >= 20:
-        rage_charges: Any = "Unlimited"
-    elif barbarian_lvl >= 17:
-        rage_charges = 6
-    elif barbarian_lvl >= 12:
-        rage_charges = 5
-    elif barbarian_lvl >= 6:
-        rage_charges = 4
-    elif barbarian_lvl >= 3:
-        rage_charges = 3
-    elif barbarian_lvl >= 1:
-        rage_charges = 2
-    else:
-        rage_charges = 0
+    rage_charges: Any = 0
+    rage_thresholds = ((20, "Unlimited"), (17, 6), (12, 5), (6, 4), (3, 3), (1, 2))
+    for req_lvl, charges in rage_thresholds:
+        if barbarian_lvl >= req_lvl:
+            rage_charges = charges
+            break
 
     return ResourcePools(
         ki_points=ki_points,
@@ -419,157 +405,211 @@ def _parse_weapon_dice(
     return default
 
 
-def simulate_turn_1_dpr(
-    sequence_type: str,
+def _simulate_eldritch_blast_sequence(
     classes: Dict[str, int],
     stats: Dict[str, int],
     gear_effects: Dict[str, Any],
     prof: int,
-    target_ac: int = 18,
-    roll_mode: str = "normal",
-    savage_attacker: bool = False,
-    weapon_damage: str | None = None,
+    target_ac: int,
+    crit_threshold: int,
+    roll_mode: str,
+    savage_attacker: bool,
+    sequence_type: str,
+    action_econ: ActionBudget,
+    resources: ResourcePools,
 ) -> CombatSequence:
-    """Calculates Turn 1 Damage Per Round factoring in class abilities, resources,
+    """Simulate Eldritch Blast turn 1 burst sequence."""
+    total_lvl = sum(classes.values())
+    base_beams = (
+        4 if total_lvl >= 17 else (3 if total_lvl >= 11 else (2 if total_lvl >= 5 else 1))
+    )
+    cha_mod = parse_ability_modifier(stats.get("Cha", 10))
+    attack_mod = prof + cha_mod + gear_effects.get("attack_bonus", 0)
 
-    roll state (Advantage/Disadvantage), and Savage Attacker dice math.
-    """
-    crit_threshold = 20 - int(gear_effects.get("crit_threshold", 0))
-    action_econ = calculate_action_economy(classes)
-    resources = calculate_resource_pools(classes)
+    hit_info = calculate_hit_probability(target_ac, attack_mod, crit_threshold, roll_mode)
+    p_hit = hit_info["hit_chance"]
+    p_crit = hit_info["crit_chance"]
 
-    if sequence_type == "eldritch_blast":
-        total_lvl = sum(classes.values())
-        base_beams = (
-            4 if total_lvl >= 17 else (3 if total_lvl >= 11 else (2 if total_lvl >= 5 else 1))
-        )
-        cha_mod = parse_ability_modifier(stats.get("Cha", 10))
-        attack_mod = prof + cha_mod + gear_effects.get("attack_bonus", 0)
+    # Metamagic Quicken Spell: Sorcerer level >= 3 with >= 3 Sorcery Points casts a second EB
+    has_quicken = classes.get("sorcerer", 0) >= 3 and resources.sorcery_points >= 3
+    # Fighter Action Surge: Fighter level >= 2 casts EB with surged Action
+    has_surge = action_econ.has_action_surge
 
-        hit_info = calculate_hit_probability(target_ac, attack_mod, crit_threshold, roll_mode)
-        p_hit = hit_info["hit_chance"]
-        p_crit = hit_info["crit_chance"]
+    multiplier = 1
+    actions_desc = ["1 Action"]
+    if has_surge:
+        multiplier += 1
+        actions_desc.append("Action Surge")
+    if has_quicken:
+        multiplier += 1
+        actions_desc.append("Quickened (3 SP)")
 
-        # Metamagic Quicken Spell: Sorcerer level >= 3 with >= 3 Sorcery Points casts a second EB
-        has_quicken = classes.get("sorcerer", 0) >= 3 and resources["sorcery_points"] >= 3
-        # Fighter Action Surge: Fighter level >= 2 casts EB with surged Action
-        has_surge = action_econ["has_action_surge"]
+    total_beams = base_beams * multiplier
 
-        multiplier = 1
-        actions_desc = ["1 Action"]
-        if has_surge:
-            multiplier += 1
-            actions_desc.append("Action Surge")
-        if has_quicken:
-            multiplier += 1
-            actions_desc.append("Quickened (3 SP)")
+    # Beam: 1d10 (5.5) + cha_mod (Agonizing Blast) + gear_damage
+    dmg_bonus = gear_effects.get("damage_bonus", 0)
+    beam_avg = 5.5 + cha_mod + dmg_bonus
+    beam_crit_extra = 5.5  # Extra 1d10 on critical hit
 
-        total_beams = base_beams * multiplier
+    per_beam_expected = (p_hit * beam_avg) + (p_crit * beam_crit_extra)
+    total_dpr = total_beams * per_beam_expected
+    max_crit_burst = total_beams * ((5.5 * 2) + cha_mod + dmg_bonus)
 
-        # Beam: 1d10 (5.5) + cha_mod (Agonizing Blast) + gear_damage
-        dmg_bonus = gear_effects.get("damage_bonus", 0)
-        beam_avg = 5.5 + cha_mod + dmg_bonus
-        beam_crit_extra = 5.5  # Extra 1d10 on critical hit
+    return CombatSequence(
+        sequence=f"Eldritch Blast ({total_beams} Beams, Agonizing Blast)",
+        actions_used=" + ".join(actions_desc),
+        beams_or_attacks=total_beams,
+        hit_chance_pct=round(p_hit * 100, 1),
+        crit_chance_pct=round(p_crit * 100, 1),
+        expected_dpr=round(total_dpr, 1),
+        max_crit_burst=round(max_crit_burst, 1),
+        roll_mode=roll_mode,
+        savage_attacker=savage_attacker,
+        sequence_type=sequence_type,
+        damage_breakdown=DamageBreakdown(
+            weapon_base_avg=5.5,
+            ability_mod=cha_mod,
+            gear_damage_bonus=dmg_bonus,
+            hit_damage_per_attack=beam_avg,
+            crit_damage_per_attack=beam_crit_extra,
+        ),
+    )
 
-        per_beam_expected = (p_hit * beam_avg) + (p_crit * beam_crit_extra)
-        total_dpr = total_beams * per_beam_expected
-        max_crit_burst = total_beams * ((5.5 * 2) + cha_mod + dmg_bonus)
 
-        return CombatSequence(
-            sequence=f"Eldritch Blast ({total_beams} Beams, Agonizing Blast)",
-            actions_used=" + ".join(actions_desc),
-            beams_or_attacks=total_beams,
-            hit_chance_pct=round(p_hit * 100, 1),
-            crit_chance_pct=round(p_crit * 100, 1),
-            expected_dpr=round(total_dpr, 1),
-            max_crit_burst=round(max_crit_burst, 1),
-            roll_mode=roll_mode,
-            savage_attacker=savage_attacker,
-            sequence_type=sequence_type,
-            damage_breakdown=DamageBreakdown(
-                weapon_base_avg=5.5,
-                ability_mod=cha_mod,
-                gear_damage_bonus=dmg_bonus,
-                hit_damage_per_attack=beam_avg,
-                crit_damage_per_attack=beam_crit_extra,
-            ),
-        )
+def _simulate_ranged_burst_sequence(
+    classes: Dict[str, int],
+    stats: Dict[str, int],
+    gear_effects: Dict[str, Any],
+    prof: int,
+    target_ac: int,
+    crit_threshold: int,
+    roll_mode: str,
+    savage_attacker: bool,
+    sequence_type: str,
+    weapon_damage: str | None,
+    action_econ: ActionBudget,
+    resources: ResourcePools,
+) -> CombatSequence:
+    """Simulate ranged weapon burst sequence."""
+    total_attacks = action_econ.turn_1_weapon_attacks
+    dex_mod = parse_ability_modifier(stats.get("Dex", 10))
+    attack_roll_bonus = prof + dex_mod + gear_effects.get("attack_bonus", 0)
 
-    if sequence_type == "ranged_burst":
-        total_attacks = action_econ["turn_1_weapon_attacks"]
-        dex_mod = parse_ability_modifier(stats.get("Dex", 10))
-        attack_roll_bonus = prof + dex_mod + gear_effects.get("attack_bonus", 0)
+    hit_info = calculate_hit_probability(target_ac, attack_roll_bonus, crit_threshold, roll_mode)
+    p_hit = hit_info["hit_chance"]
+    p_crit = hit_info["crit_chance"]
 
-        hit_info = calculate_hit_probability(target_ac, attack_roll_bonus, crit_threshold, roll_mode)
-        p_hit = hit_info["hit_chance"]
-        p_crit = hit_info["crit_chance"]
+    w_spec = weapon_damage or gear_effects.get("weapon_damage", "1d10")
+    w_count, w_sides = _parse_weapon_dice(w_spec, default=(1, 10))
+    if savage_attacker:
+        weapon_base_die = calculate_savage_attacker_average(w_count, w_sides)
+    else:
+        weapon_base_die = w_count * (w_sides + 1) / 2.0
 
-        w_spec = weapon_damage or gear_effects.get("weapon_damage", "1d10")
-        w_count, w_sides = _parse_weapon_dice(w_spec, default=(1, 10))
-        if savage_attacker:
-            weapon_base_die = calculate_savage_attacker_average(w_count, w_sides)
-        else:
-            weapon_base_die = w_count * (w_sides + 1) / 2.0
+    dmg_bonus = gear_effects.get("damage_bonus", 0)
+    rogue_lvl = classes.get("rogue", 0)
+    sneak_attack_avg = math.ceil(rogue_lvl / 2) * 3.5 if rogue_lvl >= 1 else 0.0
 
-        dmg_bonus = gear_effects.get("damage_bonus", 0)
-        rogue_lvl = classes.get("rogue", 0)
-        sneak_attack_avg = math.ceil(rogue_lvl / 2) * 3.5 if rogue_lvl >= 1 else 0.0
+    superiority_avg = 0.0
+    if resources.superiority_dice["count"] > 0:
+        superiority_avg = 5.5 if resources.superiority_dice["die"] == "d10" else 4.5
 
-        superiority_avg = 0.0
-        if resources["superiority_dice"]["count"] > 0:
-            superiority_avg = 5.5 if resources["superiority_dice"]["die"] == "d10" else 4.5
+    action_notes = [f"{action_econ.turn_1_actions} Action(s)"]
+    if action_econ.has_action_surge:
+        action_notes.append("Action Surge")
+    if rogue_lvl >= 1:
+        action_notes.append("Sneak Attack")
 
-        action_notes = [f"{action_econ['turn_1_actions']} Action(s)"]
-        if action_econ["has_action_surge"]:
-            action_notes.append("Action Surge")
-        if rogue_lvl >= 1:
-            action_notes.append("Sneak Attack")
+    attack_flat = dex_mod + dmg_bonus
+    per_attack_base = weapon_base_die + attack_flat
+    per_attack_crit_extra = (
+        weapon_base_die * 2 if savage_attacker else (w_count * (w_sides + 1) / 2.0)
+    )
 
-        attack_flat = dex_mod + dmg_bonus
-        per_attack_base = weapon_base_die + attack_flat
-        per_attack_crit_extra = (
-            weapon_base_die * 2 if savage_attacker else (w_count * (w_sides + 1) / 2.0)
-        )
+    total_dpr = (
+        total_attacks * ((p_hit * per_attack_base) + (p_crit * per_attack_crit_extra))
+        + (p_hit * sneak_attack_avg)
+        + (p_crit * sneak_attack_avg)
+        + (p_hit * superiority_avg)
+    )
 
-        total_dpr = (
-            total_attacks * ((p_hit * per_attack_base) + (p_crit * per_attack_crit_extra))
-            + (p_hit * sneak_attack_avg)
-            + (p_crit * sneak_attack_avg)
-            + (p_hit * superiority_avg)
-        )
+    max_crit_burst = (
+        total_attacks * (((weapon_base_die) * 2) + attack_flat)
+        + (sneak_attack_avg * 2)
+        + (superiority_avg * 2)
+    )
 
-        max_crit_burst = (
-            total_attacks * (((weapon_base_die) * 2) + attack_flat)
-            + (sneak_attack_avg * 2)
-            + (superiority_avg * 2)
-        )
+    return CombatSequence(
+        sequence=f"Ranged Burst ({total_attacks} Attacks)",
+        actions_used=" + ".join(action_notes),
+        beams_or_attacks=total_attacks,
+        hit_chance_pct=round(p_hit * 100, 1),
+        crit_chance_pct=round(p_crit * 100, 1),
+        expected_dpr=round(total_dpr, 1),
+        max_crit_burst=round(max_crit_burst, 1),
+        roll_mode=roll_mode,
+        savage_attacker=savage_attacker,
+        sequence_type=sequence_type,
+        damage_breakdown=DamageBreakdown(
+            weapon_base_avg=weapon_base_die,
+            ability_mod=dex_mod,
+            smite_avg=0.0,
+            sneak_attack_avg=sneak_attack_avg,
+            rage_bonus=0,
+            gear_damage_bonus=dmg_bonus,
+            superiority_avg=superiority_avg,
+            hit_damage_per_attack=per_attack_base,
+            crit_damage_per_attack=per_attack_crit_extra,
+        ),
+    )
 
-        return CombatSequence(
-            sequence=f"Ranged Burst ({total_attacks} Attacks)",
-            actions_used=" + ".join(action_notes),
-            beams_or_attacks=total_attacks,
-            hit_chance_pct=round(p_hit * 100, 1),
-            crit_chance_pct=round(p_crit * 100, 1),
-            expected_dpr=round(total_dpr, 1),
-            max_crit_burst=round(max_crit_burst, 1),
-            roll_mode=roll_mode,
-            savage_attacker=savage_attacker,
-            sequence_type=sequence_type,
-            damage_breakdown=DamageBreakdown(
-                weapon_base_avg=weapon_base_die,
-                ability_mod=dex_mod,
-                smite_avg=0.0,
-                sneak_attack_avg=sneak_attack_avg,
-                rage_bonus=0,
-                gear_damage_bonus=dmg_bonus,
-                superiority_avg=superiority_avg,
-                hit_damage_per_attack=per_attack_base,
-                crit_damage_per_attack=per_attack_crit_extra,
-            ),
-        )
 
-    # Default Melee Burst
-    total_attacks = action_econ["turn_1_weapon_attacks"]
+def _calculate_barbarian_rage_bonus(barbarian_lvl: int) -> int:
+    """Calculate rage flat damage bonus based on Barbarian level."""
+    if barbarian_lvl >= 16:
+        return 4
+    if barbarian_lvl >= 9:
+        return 3
+    if barbarian_lvl >= 1:
+        return 2
+    return 0
+
+
+def _calculate_divine_smite_dice_avg(classes: Dict[str, int]) -> float:
+    """Calculate Divine Smite average damage dice using highest available spell slot."""
+    paladin_lvl = classes.get("paladin", 0)
+    if paladin_lvl < 2:
+        return 0.0
+    _, slots = calculate_spell_slots(classes)
+    pact_count, pact_level = calculate_pact_slots(classes.get("warlock", 0))
+    highest_slot = 0
+    for i in range(len(slots) - 1, -1, -1):
+        if slots[i] > 0:
+            highest_slot = i + 1
+            break
+    highest_slot = max(highest_slot, pact_level if pact_count > 0 else 0)
+    # Divine Smite: 2d8 for 1st level slot, +1d8 per slot level above 1st, max 5d8
+    smite_slot_effective = min(4, max(1, highest_slot if highest_slot > 0 else 1))
+    smite_dice_count = 1 + smite_slot_effective
+    return smite_dice_count * 4.5
+
+
+def _simulate_melee_burst_sequence(
+    classes: Dict[str, int],
+    stats: Dict[str, int],
+    gear_effects: Dict[str, Any],
+    prof: int,
+    target_ac: int,
+    crit_threshold: int,
+    roll_mode: str,
+    savage_attacker: bool,
+    sequence_type: str,
+    weapon_damage: str | None,
+    action_econ: ActionBudget,
+    resources: ResourcePools,
+) -> CombatSequence:
+    """Simulate melee weapon burst sequence."""
+    total_attacks = action_econ.turn_1_weapon_attacks
     main_mod = max(
         parse_ability_modifier(stats.get("Str", 10)), parse_ability_modifier(stats.get("Dex", 10))
     )
@@ -588,46 +628,20 @@ def simulate_turn_1_dpr(
         weapon_base_die = weapon_dice_count * (weapon_die_sides + 1) / 2.0
 
     dmg_bonus = gear_effects.get("damage_bonus", 0)
-
-    # Barbarian Rage bonus damage
     barbarian_lvl = classes.get("barbarian", 0)
-    rage_bonus = 0
-    if barbarian_lvl >= 16:
-        rage_bonus = 4
-    elif barbarian_lvl >= 9:
-        rage_bonus = 3
-    elif barbarian_lvl >= 1:
-        rage_bonus = 2
-
-    # Paladin Divine Smite: uses highest available multiclass or pact spell slot
+    rage_bonus = _calculate_barbarian_rage_bonus(barbarian_lvl)
     paladin_lvl = classes.get("paladin", 0)
-    smite_dice_avg = 0.0
-    if paladin_lvl >= 2:
-        _, slots = calculate_spell_slots(classes)
-        pact_count, pact_level = calculate_pact_slots(classes.get("warlock", 0))
-        highest_slot = 0
-        for i in range(len(slots) - 1, -1, -1):
-            if slots[i] > 0:
-                highest_slot = i + 1
-                break
-        highest_slot = max(highest_slot, pact_level if pact_count > 0 else 0)
-        # Divine Smite: 2d8 for 1st level slot, +1d8 per slot level above 1st, max 5d8
-        smite_slot_effective = min(4, max(1, highest_slot if highest_slot > 0 else 1))
-        smite_dice_count = 1 + smite_slot_effective
-        smite_dice_avg = smite_dice_count * 4.5
+    smite_dice_avg = _calculate_divine_smite_dice_avg(classes)
 
-    # Rogue Sneak Attack: ceil(rogue_lvl / 2) d6 once per turn
     rogue_lvl = classes.get("rogue", 0)
     sneak_attack_avg = math.ceil(rogue_lvl / 2) * 3.5 if rogue_lvl >= 1 else 0.0
 
-    # Superiority Die rider: Fighter level >= 3 adds 1 die on first attack
     superiority_avg = 0.0
-    if resources["superiority_dice"]["count"] > 0:
-        superiority_avg = 5.5 if resources["superiority_dice"]["die"] == "d10" else 4.5
+    if resources.superiority_dice["count"] > 0:
+        superiority_avg = 5.5 if resources.superiority_dice["die"] == "d10" else 4.5
 
-    # Turn 1 actions description
-    action_notes = [f"{action_econ['turn_1_actions']} Action(s)"]
-    if action_econ["has_action_surge"]:
+    action_notes = [f"{action_econ.turn_1_actions} Action(s)"]
+    if action_econ.has_action_surge:
         action_notes.append("Action Surge")
     if paladin_lvl >= 2:
         action_notes.append("Divine Smite")
@@ -641,7 +655,7 @@ def simulate_turn_1_dpr(
     per_attack_crit_extra = (
         (weapon_base_die * 2 if savage_attacker else (weapon_dice_count * (weapon_die_sides + 1) / 2.0))
         + smite_dice_avg
-    )  # Extra dice on crit
+    )
 
     total_dpr = (
         total_attacks * ((p_hit * per_attack_base) + (p_crit * per_attack_crit_extra))
@@ -681,6 +695,72 @@ def simulate_turn_1_dpr(
     )
 
 
+def simulate_turn_1_dpr(
+    sequence_type: str,
+    classes: Dict[str, int],
+    stats: Dict[str, int],
+    gear_effects: Dict[str, Any],
+    prof: int,
+    target_ac: int = 18,
+    roll_mode: str = "normal",
+    savage_attacker: bool = False,
+    weapon_damage: str | None = None,
+) -> CombatSequence:
+    """Calculates Turn 1 Damage Per Round factoring in class abilities, resources,
+
+    roll state (Advantage/Disadvantage), and Savage Attacker dice math.
+    """
+    crit_threshold = 20 - int(gear_effects.get("crit_threshold", 0))
+    action_econ = calculate_action_economy(classes)
+    resources = calculate_resource_pools(classes)
+
+    if sequence_type == "eldritch_blast":
+        return _simulate_eldritch_blast_sequence(
+            classes=classes,
+            stats=stats,
+            gear_effects=gear_effects,
+            prof=prof,
+            target_ac=target_ac,
+            crit_threshold=crit_threshold,
+            roll_mode=roll_mode,
+            savage_attacker=savage_attacker,
+            sequence_type=sequence_type,
+            action_econ=action_econ,
+            resources=resources,
+        )
+
+    if sequence_type == "ranged_burst":
+        return _simulate_ranged_burst_sequence(
+            classes=classes,
+            stats=stats,
+            gear_effects=gear_effects,
+            prof=prof,
+            target_ac=target_ac,
+            crit_threshold=crit_threshold,
+            roll_mode=roll_mode,
+            savage_attacker=savage_attacker,
+            sequence_type=sequence_type,
+            weapon_damage=weapon_damage,
+            action_econ=action_econ,
+            resources=resources,
+        )
+
+    return _simulate_melee_burst_sequence(
+        classes=classes,
+        stats=stats,
+        gear_effects=gear_effects,
+        prof=prof,
+        target_ac=target_ac,
+        crit_threshold=crit_threshold,
+        roll_mode=roll_mode,
+        savage_attacker=savage_attacker,
+        sequence_type=sequence_type,
+        weapon_damage=weapon_damage,
+        action_econ=action_econ,
+        resources=resources,
+    )
+
+
 def calculate_ac_curve(
     sequence_type: str,
     classes: Dict[str, int],
@@ -708,9 +788,9 @@ def calculate_ac_curve(
         curve.append(
             {
                 "target_ac": ac,
-                "hit_chance_pct": sim["hit_chance_pct"],
-                "crit_chance_pct": sim["crit_chance_pct"],
-                "expected_dpr": sim["expected_dpr"],
+                "hit_chance_pct": sim.hit_chance_pct,
+                "crit_chance_pct": sim.crit_chance_pct,
+                "expected_dpr": sim.expected_dpr,
             }
         )
     return curve
@@ -910,62 +990,62 @@ def main() -> int:
         else:
             color = ConsoleColor(stream=sys.stdout)
             class_str = " / ".join(f"{c.capitalize()} {lvl}" for c, lvl in classes.items())
-            print(f"{color.bold('Build Synergy Simulation:')} {class_str} (Level {res['total_level']})")
+            print(f"{color.bold('Build Synergy Simulation:')} {class_str} (Level {res.total_level})")
             print("=" * 75)
-            print(f"  Proficiency Bonus:   +{res['proficiency_bonus']}")
-            st = res["final_stats"]
+            print(f"  Proficiency Bonus:   +{res.proficiency_bonus}")
+            st = res.final_stats
             print(f"  Ability Scores:      STR {st['Str']} | DEX {st['Dex']} | CON {st['Con']} | INT {st['Int']} | WIS {st['Wis']} | CHA {st['Cha']}")
-            print(f"  Effective Spell DC:  {res['effective_spell_save_dc']}")
-            print(f"  Base Armor Class:    {res['armor_class']}")
+            print(f"  Effective Spell DC:  {res.effective_spell_save_dc}")
+            print(f"  Base Armor Class:    {res.armor_class}")
 
             # Action Economy
-            ae = res["action_economy"]
-            surge_str = " (Action Surge)" if ae["has_action_surge"] else ""
-            print(f"  Action Economy:      {ae['turn_1_actions']} Action(s){surge_str} | {ae['bonus_actions']} Bonus Action(s) | {ae['reactions']} Reaction(s)")
-            print(f"  Attacks per Action:  {ae['attacks_per_action']} ({ae['turn_1_weapon_attacks']} total turn-1 attacks)")
+            ae = res.action_economy
+            surge_str = " (Action Surge)" if ae.has_action_surge else ""
+            print(f"  Action Economy:      {ae.turn_1_actions} Action(s){surge_str} | {ae.bonus_actions} Bonus Action(s) | {ae.reactions} Reaction(s)")
+            print(f"  Attacks per Action:  {ae.attacks_per_action} ({ae.turn_1_weapon_attacks} total turn-1 attacks)")
 
             # Resource Pools
-            rp = res["resource_pools"]
+            rp = res.resource_pools
             pools: List[str] = []
-            if rp["ki_points"] > 0:
-                pools.append(f"Ki: {rp['ki_points']}")
-            if rp["sorcery_points"] > 0:
-                pools.append(f"Sorcery Points: {rp['sorcery_points']}")
-            if rp["superiority_dice"]["count"] > 0:
-                pools.append(f"Superiority: {rp['superiority_dice']['count']}{rp['superiority_dice']['die']}")
-            if rp["channel_oath_charges"] > 0:
-                pools.append(f"Channel Oath: {rp['channel_oath_charges']}")
-            if rp["rage_charges"] != 0:
-                pools.append(f"Rage: {rp['rage_charges']}")
+            if rp.ki_points > 0:
+                pools.append(f"Ki: {rp.ki_points}")
+            if rp.sorcery_points > 0:
+                pools.append(f"Sorcery Points: {rp.sorcery_points}")
+            if rp.superiority_dice["count"] > 0:
+                pools.append(f"Superiority: {rp.superiority_dice['count']}{rp.superiority_dice['die']}")
+            if rp.channel_oath_charges > 0:
+                pools.append(f"Channel Oath: {rp.channel_oath_charges}")
+            if rp.rage_charges != 0:
+                pools.append(f"Rage: {rp.rage_charges}")
             if pools:
                 print(f"  Resource Pools:      {' | '.join(pools)}")
 
-            if res["spell_slots"]:
-                slots_repr = ", ".join(f"L{k[-1]}:{v}" for k, v in res["spell_slots"].items())
+            if res.spell_slots:
+                slots_repr = ", ".join(f"L{k[-1]}:{v}" for k, v in res.spell_slots.items())
                 print(f"  Spell Slots:         {slots_repr}")
-            if res["pact_magic"]:
-                print(f"  Pact Magic:          {res['pact_magic']['slots']}x Level {res['pact_magic']['slot_level']} slots")
-            if res["gear_applied"]:
-                print(f"\n  Active Gear ({len(res['gear_applied'])} items):")
-                for gi in res["gear_applied"]:
+            if res.pact_magic:
+                print(f"  Pact Magic:          {res.pact_magic['slots']}x Level {res.pact_magic['slot_level']} slots")
+            if res.gear_applied:
+                print(f"\n  Active Gear ({len(res.gear_applied)} items):")
+                for gi in res.gear_applied:
                     print(f"    • {gi}")
 
             print("\n" + "-" * 75)
-            dpr = res["turn_1_dpr"]
-            print(f"Turn 1 Combat Simulation: {dpr['sequence']}")
-            print(f"  Actions Expended:    {dpr['actions_used']}")
-            print(f"  Roll Mode:           {dpr['roll_mode'].capitalize()}" + (" (Savage Attacker)" if dpr["savage_attacker"] else ""))
+            dpr = res.turn_1_dpr
+            print(f"Turn 1 Combat Simulation: {dpr.sequence}")
+            print(f"  Actions Expended:    {dpr.actions_used}")
+            print(f"  Roll Mode:           {dpr.roll_mode.capitalize()}" + (" (Savage Attacker)" if dpr.savage_attacker else ""))
             print(f"  Target AC:           {args.target_ac}")
-            print(f"  Hit Probability:     {dpr['hit_chance_pct']}% (Crit: {dpr['crit_chance_pct']}%)")
-            print(f"  Expected DPR:        {dpr['expected_dpr']} damage")
-            print(f"  Max Crit Potential:  {dpr['max_crit_burst']} damage")
+            print(f"  Hit Probability:     {dpr.hit_chance_pct}% (Crit: {dpr.crit_chance_pct}%)")
+            print(f"  Expected DPR:        {dpr.expected_dpr} damage")
+            print(f"  Max Crit Potential:  {dpr.max_crit_burst} damage")
 
-            if "ac_curve" in res:
+            if res.ac_curve:
                 print("\n" + "-" * 75)
                 print("Target AC Distribution Curve (AC 10-25):")
                 print("  AC | Hit % | Crit % | Expected DPR")
                 print("  ---+-------+--------+-------------")
-                for row in res["ac_curve"]:
+                for row in res.ac_curve:
                     print(f"  {row['target_ac']:2d} | {row['hit_chance_pct']:4.1f}% |  {row['crit_chance_pct']:4.1f}% | {row['expected_dpr']:6.1f} dmg")
 
         return ExitCode.OK

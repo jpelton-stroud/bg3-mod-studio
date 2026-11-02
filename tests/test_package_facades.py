@@ -35,10 +35,23 @@ class TestPackageFacades(unittest.TestCase):
         # Larian parsers
         self.assertTrue(callable(bg3_core.calculate_version64))
         self.assertTrue(callable(bg3_core.compile_xml_bytes_to_loca))
+        self.assertEqual(bg3_core.DEFAULT_VERSION64, 36028797018963968)
 
         # Environment
         self.assertTrue(callable(bg3_core.get_workspace_root))
         self.assertTrue(callable(bg3_core.get_studio_dir))
+
+        # Domain exceptions
+        for exc_name in (
+            "BG3Error",
+            "BG3BinaryError",
+            "BG3PackagingError",
+            "BG3ProfileError",
+            "BG3CatalogError",
+            "BG3EnvironmentError",
+        ):
+            self.assertIn(exc_name, bg3_core.__all__)
+            self.assertTrue(issubclass(getattr(bg3_core, exc_name), Exception))
 
     def test_bg3_core_subpackages(self) -> None:
         import bg3_core.binary
@@ -51,6 +64,7 @@ class TestPackageFacades(unittest.TestCase):
         self.assertIsNotNone(bg3_core.binary.LspkArchive)
         self.assertIsNotNone(bg3_core.binary.LsfDocument)
         self.assertTrue(callable(bg3_core.binary.calculate_version64))
+        self.assertEqual(bg3_core.binary.DEFAULT_VERSION64, 36028797018963968)
 
         # Modio subpackage
         self.assertTrue(hasattr(bg3_core.modio, "__all__"))
@@ -88,6 +102,15 @@ class TestPackageFacades(unittest.TestCase):
         self.assertTrue(callable(bg3_authoring.check_uuid_uniqueness))
         self.assertTrue(callable(bg3_authoring.sync_mod))
 
+        # Domain exceptions
+        for exc_name in (
+            "BG3AuthoringError",
+            "BG3ScaffoldError",
+            "BG3ConflictError",
+        ):
+            self.assertIn(exc_name, bg3_authoring.__all__)
+            self.assertTrue(issubclass(getattr(bg3_authoring, exc_name), Exception))
+
     def test_bg3_theorycraft_public_exports(self) -> None:
         import bg3_theorycraft
 
@@ -102,6 +125,15 @@ class TestPackageFacades(unittest.TestCase):
 
         self.assertTrue(callable(bg3_theorycraft.simulate_build))
         self.assertTrue(callable(bg3_theorycraft.simulate_turn_1_dpr))
+
+        # Domain exceptions
+        for exc_name in (
+            "BG3TheorycraftError",
+            "BG3BuildValidationError",
+            "BG3SimulationError",
+        ):
+            self.assertIn(exc_name, bg3_theorycraft.__all__)
+            self.assertTrue(issubclass(getattr(bg3_theorycraft, exc_name), Exception))
 
 
 if __name__ == "__main__":

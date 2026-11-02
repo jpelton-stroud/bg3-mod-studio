@@ -34,17 +34,16 @@ class LibraryCatalogTests(unittest.TestCase):
         self.assertEqual(parsed["description"], "Adds a complete equipment summoning system.")
         self.assertEqual(parsed["feature_count"], 7)
 
-    def test_existing_legacy_ids_are_preserved_during_schema_migration(self):
-        legacy_library = (
-            "## Mod.io IDs\n"
-            "| Mod Name | Slug | Mod.io ID |\n"
-            "| :--- | :--- | ---: |\n"
-            "| Alpha | `alpha` | 123 |\n"
-            "| Beta | `beta` | 456 |\n"
+    def test_existing_ids_parsed_from_canonical_rows(self):
+        canonical_library = (
+            "| Mod Id | Mod Name | Mod Slug | Description | Features Documented | Spec Link |\n"
+            "| :--- | :--- | :--- | :--- | :--- | :--- |\n"
+            "| 123 | Alpha | `alpha` | Desc A | 2 implemented | [View Spec](alpha/README.md) |\n"
+            "| 456 | Beta | `beta` | Desc B | 2 implemented | [View Spec](beta/README.md) |\n"
         )
 
         self.assertEqual(
-            parse_existing_mod_ids(legacy_library),
+            parse_existing_mod_ids(canonical_library),
             {"alpha": "123", "beta": "456"},
         )
 
@@ -81,7 +80,7 @@ class LibraryCatalogTests(unittest.TestCase):
         )
         self.assertNotIn("Mod.io IDs", markdown)
 
-    def test_writer_migrates_known_ids_and_leaves_unknown_ids_blank(self):
+    def test_writer_preserves_known_ids_and_leaves_unknown_ids_blank(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             mods_dir = Path(temporary_directory) / "mods"
             mods_dir.mkdir()
@@ -96,9 +95,9 @@ class LibraryCatalogTests(unittest.TestCase):
                 )
             library_file = mods_dir / "library.md"
             library_file.write_text(
-                "## Mod.io IDs\n"
-                "| Mod Name | Slug | Mod.io ID |\n"
-                "| Alpha | `alpha` | 123 |\n",
+                "| Mod Id | Mod Name | Mod Slug | Description | Features Documented | Spec Link |\n"
+                "| :--- | :--- | :--- | :--- | :--- | :--- |\n"
+                "| 123 | Alpha | `alpha` | Description for alpha. | 2 implemented | [View Spec](alpha/README.md) |\n",
                 encoding="utf-8",
             )
 
@@ -106,11 +105,10 @@ class LibraryCatalogTests(unittest.TestCase):
             markdown = library_file.read_text(encoding="utf-8")
             rows = {row["slug"]: row for row in parse_library_rows(markdown)}
 
-        self.assertEqual(rows["alpha"]["mod_id"], "123")
-        self.assertEqual(rows["beta"]["mod_id"], "")
-        self.assertEqual(rows["alpha"]["features_documented"], "2 implemented")
-        self.assertEqual(rows["beta"]["spec_link"], "beta/README.md")
-        self.assertNotIn("Mod.io IDs", markdown)
+            self.assertEqual(rows["alpha"]["mod_id"], "123")
+            self.assertEqual(rows["beta"]["mod_id"], "")
+            self.assertEqual(rows["alpha"]["features_documented"], "2 implemented")
+            self.assertEqual(rows["beta"]["spec_link"], "beta/README.md")
 
     def test_generated_spec_records_schema_metadata(self):
         spec = generate_spec_markdown(

@@ -6,34 +6,13 @@ Unit tests for CLI dispatch module resolution and fallback execution via `python
 """
 
 import unittest
-from pathlib import Path
 from unittest.mock import Mock, patch
 
-from bg3_core.cli import build_parser, dispatch_command, resolve_module_fallback
+from bg3_core.cli import build_parser, dispatch_command
 from bg3_core.cli.common import OutputEmitter
 
 
 class TestCliDispatchModuleFallback(unittest.TestCase):
-    def test_resolve_module_fallback_core(self):
-        p = Path("/app/packages/bg3-core/bg3_core/modio/modio_search.py")
-        mod = resolve_module_fallback(p)
-        self.assertEqual(mod, "bg3_core.modio.modio_search")
-
-    def test_resolve_module_fallback_authoring_subpackage(self):
-        p = Path("/app/packages/bg3-authoring/bg3_authoring/packaging/pack_mod_pak.py")
-        mod = resolve_module_fallback(p)
-        self.assertEqual(mod, "bg3_authoring.packaging.pack_mod_pak")
-
-    def test_resolve_module_fallback_theorycraft(self):
-        p = Path("/app/packages/bg3-theorycraft/bg3_theorycraft/simulate_build_synergy.py")
-        mod = resolve_module_fallback(p)
-        self.assertEqual(mod, "bg3_theorycraft.simulate_build_synergy")
-
-    def test_resolve_module_fallback_unknown(self):
-        p = Path("/some/random/script.py")
-        mod = resolve_module_fallback(p)
-        self.assertIsNone(mod)
-
     @patch("bg3_core.cli.router._invoke_in_process")
     def test_dispatch_in_process_execution(self, mock_invoke):
         mock_invoke.return_value = 0

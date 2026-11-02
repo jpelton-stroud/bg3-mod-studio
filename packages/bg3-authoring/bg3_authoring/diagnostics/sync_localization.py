@@ -15,10 +15,11 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
-from xml.dom import minidom
 
 from bg3_core.binary.larian_parsers import HANDLE_PATTERN, compile_xml_to_loca
-from bg3_core.env_paths import resolve_mod_dir as _resolve_mod_dir
+from bg3_core.env_paths import resolve_mod_dir
+
+from bg3_authoring.scaffold_common import prettify_xml
 
 LANGUAGE_DIR_MAP = {
     "de": "German",
@@ -36,13 +37,6 @@ LANGUAGE_DIR_MAP = {
     "zh": "Chinese",
     "chinese": "Chinese",
 }
-
-
-def resolve_mod_dir(mod_path_or_slug: str, workspace_root: Path | None = None) -> Path:
-    res = _resolve_mod_dir(mod_path_or_slug, prefer_my_mods=True)
-    if res is None:
-        raise FileNotFoundError(f"Mod directory not found: {mod_path_or_slug}")
-    return res
 
 
 def collect_referenced_handles(mod_dir: Path) -> dict[str, list[str]]:
@@ -115,12 +109,7 @@ def prune_orphan_handles(xml_file: Path, orphans: set[str], dry_run: bool = Fals
             root.remove(node)
             removed_count += 1
 
-    rough = ET.tostring(root, encoding="utf-8")
-    reparsed = minidom.parseString(rough)
-    pretty = reparsed.toprettyxml(indent="    ", encoding="utf-8").decode("utf-8")
-    lines = [line for line in pretty.splitlines() if line.strip()]
-
-    xml_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    xml_file.write_text(prettify_xml(root), encoding="utf-8")
 
 
 def sync_language_skeletons(
@@ -184,7 +173,9 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        mod_dir = resolve_mod_dir(args.mod)
+        mod_dir = resolve_mod_dir(args.mod, prefer_my_mods=True)
+        if mod_dir is None:
+            raise FileNotFoundError(f"Mod directory not found: {args.mod}")
         xml_file, declared_handles, _ = load_english_xml(mod_dir)
         referenced_handles = collect_referenced_handles(mod_dir)
 

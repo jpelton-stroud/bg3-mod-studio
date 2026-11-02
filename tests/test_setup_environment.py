@@ -139,12 +139,12 @@ class SetupEnvironmentQATests(unittest.TestCase):
         self.assertIn("Continuing setup without subscription sync.", proc_dry.stdout)
         self.assertIn("Continuing without purging custom mods.", proc_dry.stdout)
 
-    def test_auto_migration_from_legacy_env(self):
-        """Verify that a legacy repo-level .env is safely migrated and unlinked."""
+    def test_legacy_env_is_not_auto_migrated(self):
+        """Verify that a legacy repo-level .env is ignored and not unlinked."""
         with tempfile.TemporaryDirectory() as tmp:
             tmp_root = Path(tmp)
             legacy_file = tmp_root / ".env"
-            legacy_file.write_text("MODIO_API_KEY=migrated_key_999\n", encoding="utf-8")
+            legacy_file.write_text("MODIO_API_KEY=legacy_key_999\n", encoding="utf-8")
             target_config = tmp_root / "xdg" / "bg3" / "env"
 
             from bg3_core.cli.setup_environment import check_environment_status
@@ -152,9 +152,8 @@ class SetupEnvironmentQATests(unittest.TestCase):
             with patch("bg3_core.cli.setup_environment.WORKSPACE_ROOT", tmp_root), \
                  patch("bg3_core.cli.setup_environment.ENV_PATH", target_config):
                 check_environment_status(as_json=True)
-                self.assertTrue(target_config.is_file())
-                self.assertIn("MODIO_API_KEY=migrated_key_999", target_config.read_text(encoding="utf-8"))
-                self.assertFalse(legacy_file.exists())
+                self.assertFalse(target_config.is_file())
+                self.assertTrue(legacy_file.is_file())
 
     def test_setup_environment_studio_dir_option(self):
         """Verify that --studio-dir sets BG3_STUDIO_DIR and scaffolds directories."""

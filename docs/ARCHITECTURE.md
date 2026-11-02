@@ -58,6 +58,51 @@ flowchart TD
     CorePkg -->|Resolves paths & secrets| XDGConfig
 ```
 
+### Cross-Monorepo Domain Exception Architecture
+
+The studio implements a unified domain exception hierarchy rooted in `bg3_core.exceptions.BG3Error`. To provide seamless compatibility with standard Python exception handling while preserving rich domain categorization, all leaf exceptions employ a dual-inheritance architecture pairing `BG3Error` with a standard built-in exception (`ValueError`, `RuntimeError`, `OSError`):
+
+```mermaid
+classDiagram
+    class Exception
+    class BG3Error
+    class ValueError
+    class RuntimeError
+    class OSError
+
+    Exception <|-- BG3Error
+    Exception <|-- ValueError
+    Exception <|-- RuntimeError
+    Exception <|-- OSError
+
+    BG3Error <|-- BG3BinaryError
+    ValueError <|-- BG3BinaryError
+
+    BG3Error <|-- BG3PackagingError
+    RuntimeError <|-- BG3PackagingError
+
+    BG3Error <|-- BG3ProfileError
+    RuntimeError <|-- BG3ProfileError
+
+    BG3Error <|-- BG3CatalogError
+    RuntimeError <|-- BG3CatalogError
+
+    BG3Error <|-- BG3EnvironmentError
+    OSError <|-- BG3EnvironmentError
+
+    BG3Error <|-- BG3AuthoringError
+    BG3AuthoringError <|-- BG3ScaffoldError
+    BG3AuthoringError <|-- BG3ConflictError
+
+    BG3Error <|-- BG3TheorycraftError
+    BG3TheorycraftError <|-- BG3BuildValidationError
+    BG3TheorycraftError <|-- BG3SimulationError
+```
+
+- **`bg3_core.exceptions`**: Root domain errors for core binary parsers (`BG3BinaryError`), archive packaging (`BG3PackagingError`), profile/load-order management (`BG3ProfileError`), mod catalog operations (`BG3CatalogError`), and filesystem/environment resolution (`BG3EnvironmentError`).
+- **`bg3_authoring.exceptions`**: Authoring lifecycle exceptions (`BG3AuthoringError`, `BG3ScaffoldError`, `BG3ConflictError`) re-exported on the root `bg3_authoring` facade.
+- **`bg3_theorycraft.exceptions`**: Multiclass modeling exceptions (`BG3TheorycraftError`, `BG3BuildValidationError`, `BG3SimulationError`) re-exported on the root `bg3_theorycraft` facade.
+
 ---
 
 ## 2. Core Workflows & Data Pipelines
@@ -113,13 +158,13 @@ When exploring community mods on mod.io, the ingestion pipeline decompresses ups
 
 ```mermaid
 flowchart LR
-    Remote["mod.io REST API\n(v1/games/6715)"] -->|bg3 modio search\n(bg3_core.modio_search)| SearchResults["Candidate Mod\n(Platform Filtered)"]
-    SearchResults -->|bg3 modio extract\n(bg3_core.modio_extract)| DL["Download Archive\n(.pak / .zip)"]
-    DL --> Extract["Pure-Python Unpacker\n(bg3_core.lspk)"]
-    Extract --> Parse["Larian Engine Parsers\n(bg3_core.larian_parsers)"]
+    Remote["mod.io REST API\n(v1/games/6715)"] -->|bg3 modio search\n(bg3_core.modio.modio_search)| SearchResults["Candidate Mod\n(Platform Filtered)"]
+    SearchResults -->|bg3 modio extract\n(bg3_core.modio.modio_extract)| DL["Download Archive\n(.pak / .zip)"]
+    DL --> Extract["Pure-Python Unpacker\n(bg3_core.binary.lspk)"]
+    Extract --> Parse["Larian Engine Parsers\n(bg3_core.binary.larian_parsers)"]
     Parse --> Specs["Mods/subscribed/<slug>/README.md\n(Rich Markdown Spec)"]
     Parse --> Index["Master Catalog\n(Mods/subscribed/library.md: six columns)"]
-    Index --> FastDB["bg3 query\n(bg3_core.query_mod_database)"]
+    Index --> FastDB["bg3 query\n(bg3_core.modio.query_mod_database)"]
 ```
 
 ---
@@ -158,7 +203,7 @@ BG3_Mod_Studio/Mods/authored/<mod-slug>/
 
 ### Larian 64-bit Version Encoding (`Version64`)
 
-Larian's engine encodes semantic versioning into an unsigned 64-bit integer (`Version64`) using bitwise shifts. The formula implemented by `bg3_core.larian_parsers` and utilized by `bg3_authoring.create_mod_scaffold` (`bg3 mod scaffold`) and `bg3_authoring.bump_mod_version` (`bg3 mod bump-version`) is:
+Larian's engine encodes semantic versioning into an unsigned 64-bit integer (`Version64`) using bitwise shifts. The baseline default version for newly initialized mods is centralized as `DEFAULT_VERSION64 = 36028797018963968` (`1.0.0.0`) in `bg3_core.binary.larian_parsers`. The formula implemented by `bg3_core.binary.larian_parsers` and utilized by `bg3_authoring.create_mod_scaffold` (`bg3 mod scaffold`) and `bg3_core.profile.bump_mod_version` (`bg3 mod bump-version`) is:
 
 $$\text{Version64} = (\text{major} \ll 55) \mid (\text{minor} \ll 47) \mid (\text{revision} \ll 31) \mid \text{build}$$
 
@@ -172,7 +217,7 @@ $$\text{Version64} = (\text{major} \ll 55) \mid (\text{minor} \ll 47) \mid (\tex
 
 ### Pure-Python LSPK v18 Binary Packaging (`pack_mod_pak.py` / `lspk.py`)
 
-Rather than relying on Windows-exclusive binaries (`LSLib/divine.exe`) or running through `wine`, the workspace implements a pure Python packager for Larian's **LSPK v18** format in `packages/bg3-authoring/bg3_authoring/packaging/pack_mod_pak.py` and `packages/bg3-core/bg3_core/lspk.py` (`bg3 mod pack`):
+Rather than relying on Windows-exclusive binaries (`LSLib/divine.exe`) or running through `wine`, the workspace implements a pure Python packager for Larian's **LSPK v18** format in `packages/bg3-authoring/bg3_authoring/packaging/pack_mod_pak.py` and `packages/bg3-core/bg3_core/binary/lspk.py` (`bg3 mod pack`):
 
 - **Zero External Dependencies**: Implemented strictly with Python's standard library `struct`, `zlib`, and `hashlib`.
 - **Package Header**: Writes standard 40-byte LSPK v18 header signature (`LSPK`), file version, flags, priority, and file table metadata offset (`<4sIIII16sH`).
@@ -206,8 +251,8 @@ The live synchronization system (`packages/bg3-authoring/bg3_authoring/packaging
 
 The community mod library indexes over 2,200 unique community gear items, passives, spells, and boosts:
 
-- **Aggregation Pipeline**: `packages/bg3-core/bg3_core/update_library_catalog.py` (`bg3 modio update-catalog`) crawls all `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/subscribed/<slug>/README.md` files, parses mod.io IDs, titles, descriptions, feature counts, and directory slugs, and compiles the categorized six-column `library.md` with relative spec links.
-- **Query Optimization**: `packages/bg3-core/bg3_core/query_mod_database.py` (`bg3 query`) evaluates queries against cached catalog structures using in-memory tokenization and regex matching. Lookups complete in under 10ms, allowing agent workflows to perform real-time Best-in-Slot gear evaluation without noticeable latency.
+- **Aggregation Pipeline**: `packages/bg3-core/bg3_core/modio/update_library_catalog.py` (`bg3 modio update-catalog`) crawls all `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/subscribed/<slug>/README.md` files, parses mod.io IDs, titles, descriptions, feature counts, and directory slugs, and compiles the categorized six-column `library.md` with relative spec links.
+- **Query Optimization**: `packages/bg3-core/bg3_core/modio/query_mod_database.py` (`bg3 query`) evaluates queries against cached catalog structures using in-memory tokenization and regex matching. Lookups complete in under 10ms, allowing agent workflows to perform real-time Best-in-Slot gear evaluation without noticeable latency.
 
 ---
 
