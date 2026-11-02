@@ -11,7 +11,7 @@ Combat modeling, multiclass build simulation, and theorycrafting engine for the 
 ```mermaid
 flowchart LR
     Config["Build Spec\n(--classes Paladin=6,Sorcerer=14)"] --> Simulator["simulate_build_synergy.py"]
-    Gear["Cataloged Mod Gear\n(bg3_core.query_mod_database)"] --> Simulator
+    Gear["Cataloged Mod Gear\n(bg3_core.modio.query_mod_database)"] --> Simulator
     Simulator --> Output["Markdown Build Guide\n& DPR Progression Table"]
 ```
 
@@ -27,10 +27,16 @@ flowchart LR
 - **Spell Slot Matrices**: Computes multiclass spellcaster levels, 9-level spell slot allocations according to 5e rules, and Warlock Pact Magic slots.
 
 ### 2. Best-in-Slot (BiS) Community Gear Integration
-Interfaces directly with `bg3_core.query_mod_database` to analyze cataloged equipment from community mods:
+Interfaces directly with `bg3_core.modio.query_mod_database` to analyze cataloged equipment from community mods:
 - Search equipment by stat bonuses, spell save DC increases, attack bonuses, damage riders, and critical threshold reductions.
 - Dynamically applies stat overrides (e.g., Amulet of Greater Health setting Constitution to 23).
 - Maps item synergies directly to Turn 1 combat sequences.
+
+### 3. Domain Exceptions (`bg3_theorycraft.exceptions`)
+Domain exception hierarchy inheriting from `bg3_core.exceptions.BG3Error`:
+- `BG3TheorycraftError`: Root exception for all multiclass modeling and simulation failures.
+- `BG3BuildValidationError`: Raised on invalid level distributions, class totals exceeding 20, or malformed stat assignments.
+- `BG3SimulationError`: Raised when combat sequence calculation, DPR evaluation, or dice mass function computation encounters illegal configurations.
 
 ---
 

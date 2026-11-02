@@ -10,10 +10,10 @@ Autonomous skills packaged within the workspace domain packages (`packages/*/ski
 
 | Category | Intent / Slash Command | Description | Canonical CLI Command & Module |
 | :--- | :--- | :--- | :--- |
-| Discovery | `/bg3-search-mods` | Discovers community mods on mod.io with natural language and platform filters, pre-filtering tracked mods. | `bg3 modio search`<br>(`bg3_core.modio_search`) |
-| Documentation | `/bg3-sync-mod-docs` | Concurrently extracts, validates, documents, and updates markdown specifications for community mods. | `bg3 modio extract` / `bg3 modio update`<br>(`bg3_core.modio_extract`, `bg3_core.modio_update`) |
-| Compatibility | `/bg3-check-mod-conflicts` | Analyzes mod overrides and stat collisions against cataloged library mods. | `bg3 mod conflict`<br>(`bg3_core.check_mod_conflicts`) |
-| Collections | `/bg3-create-modio-collection` | Curates and syncs public mod.io collections directly from library catalog. | `bg3 modio create-collection`<br>(`bg3_core.modio_create_collection`) |
+| Discovery | `/bg3-search-mods` | Discovers community mods on mod.io with natural language and platform filters, pre-filtering tracked mods. | `bg3 modio search`<br>(`bg3_core.modio.modio_search`) |
+| Documentation | `/bg3-sync-mod-docs` | Concurrently extracts, validates, documents, and updates markdown specifications for community mods. | `bg3 modio extract` / `bg3 modio update`<br>(`bg3_core.modio.modio_extract`, `bg3_core.modio.update_library_catalog`) |
+| Compatibility | `/bg3-check-mod-conflicts` | Analyzes mod overrides and stat collisions against cataloged library mods. | `bg3 mod conflict`<br>(`bg3_core.profile.check_mod_conflicts`) |
+| Collections | `/bg3-create-modio-collection` | Curates and syncs public mod.io collections directly from library catalog. | `bg3 modio create-collection`<br>(`bg3_core.modio.modio_create_collection`) |
 
 > [!NOTE]
 > For complete CLI parameters, technical flag descriptions, and binary architecture details, see the [Features & Functionality Guide](FEATURES.md).
@@ -69,7 +69,7 @@ When invoked, the skill translates conversational parameters into a structured s
 bg3 modio search "<query>" --platform <platform> --json
 
 # Direct module execution
-uv run -m bg3_core.modio_search "<query>" --platform <platform> --json
+uv run -m bg3_core.modio.modio_search "<query>" --platform <platform> --json
 ```
 
 - **Candidate Pre-Filtering**: The skill inspects the JSON payload, filters out mods already tracked in `Mods/subscribed/library.md`, and presents concise descriptions and download stats in chat.
@@ -137,7 +137,7 @@ The skill runs static conflict analysis against cataloged definitions:
 bg3 mod conflict <ModSlug> --against-library --json
 
 # Direct module execution
-uv run -m bg3_core.check_mod_conflicts --candidate <ModSlug> --against-library --json
+uv run -m bg3_core.profile.check_mod_conflicts --candidate <ModSlug> --against-library --json
 ```
 
 - **Collision Detection**: Compares unpacked stat records, RootTemplate overrides, and prerequisite frameworks (such as `CompatibilityFramework` or `CommunityLibrary`).

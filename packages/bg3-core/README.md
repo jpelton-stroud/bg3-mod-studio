@@ -21,16 +21,20 @@ graph TD
 
 | Module | Core Responsibility | Key Exported Symbols |
 | :--- | :--- | :--- |
-| `bg3_core.larian_parsers` | Larian binary formats, version encoding, and localization | `encode_version64()`, `decode_version64()`, `parse_loca_bytes()`, `compile_xml_bytes_to_loca()`, `split_larian_items()` |
-| `bg3_core.lspk` | Pure-Python LSPK v18 archive reader, builder, and unpacker | `LspkArchive`, `build_lspk_archive()`, `lz4_block_decompress()`, `lz4_frame_or_block_decompress()`, `decompress_pak_file_data()` |
-| `bg3_core.save_inspector` | Save game metadata extraction, AST audit, and mod pruning | `extract_save_metadata()`, `audit_against_modsettings()`, `prune_missing_mods_from_save()` |
-| `bg3_core.manage_saves` | Savegame discovery, backup, retention purging, and rescue | `discover_save_games()`, `handle_clean_missing()` |
-| `bg3_core.env_paths` | Cross-platform state, cache, config, and game path detection | `get_xdg_config_home()`, `get_xdg_cache_home()`, `get_xdg_data_home()`, `detect_bg3_appdata_dirs()`, `detect_bg3_install_dir()` |
-| `bg3_core.cli_common` | Stream separation, POSIX exit codes, and JSON envelopes | `OutputEmitter`, `ConsoleColor`, `ExitCode`, `format_json_response()`, `confirm_action()` |
-| `bg3_core.modio_client` | Authenticated mod.io v1 REST client | `ModioClient`, `ModioError`, `get_oauth_token()`, `get_api_key()` |
-| `bg3_core.tools` | Dynamic CLI argument parser introspection and registry | `build_parser_ast_registry()`, `search_tools()`, `verify_registry()`, `audit_skills()` |
-| `bg3_core.check_mod_conflicts` | Static conflict detector and cross-mod compatibility analyzer | `compare_two_mods()`, `compare_candidate_against_catalog()`, `check_native_dlls()`, `find_missing_local_dependencies()` |
-| `bg3_core.cli` | Central unified router for all workspace domains | `main()`, `build_parser()`, `dispatch_command()` |
+| `bg3_core.binary.larian_parsers` | Larian binary formats, version encoding, and localization | `DEFAULT_VERSION64`, `encode_version64()`, `decode_version64()`, `calculate_version64()`, `compile_xml_bytes_to_loca()`, `split_larian_items()` |
+| `bg3_core.binary.lspk` | Pure-Python LSPK v18 archive reader, builder, and unpacker | `LspkArchive`, `build_lspk_archive()`, `lz4_block_decompress()`, `lz4_frame_or_block_decompress()`, `decompress_pak_file_data()` |
+| `bg3_core.binary.lsf` | LSF binary document serializer, deserializer, and AST node model | `LsfDocument`, `LsfNode`, `LsfAttribute` |
+| `bg3_core.exceptions` | Unified domain exception hierarchy dual-inheriting standard Python exceptions | `BG3Error`, `BG3BinaryError`, `BG3PackagingError`, `BG3ProfileError`, `BG3CatalogError`, `BG3EnvironmentError` |
+| `bg3_core.profile.manage_load_order` | Mod order validation, activation, dependency resolution, and quarantine | `build_load_order_parser()`, `main()` |
+| `bg3_core.profile.save_inspector` | Save game metadata extraction, AST audit, and mod pruning | `extract_save_metadata()`, `audit_against_modsettings()`, `prune_missing_mods_from_save()` |
+| `bg3_core.profile.manage_saves` | Savegame discovery, backup, retention purging, and rescue | `discover_save_games()`, `handle_clean_missing()` |
+| `bg3_core.profile.check_mod_conflicts` | Static conflict detector and cross-mod compatibility analyzer | `compare_two_mods()`, `compare_candidate_against_catalog()`, `check_native_dlls()`, `find_missing_local_dependencies()` |
+| `bg3_core.modio.modio_client` | Authenticated mod.io v1 REST client | `ModioClient`, `ModioError`, `get_oauth_token()`, `get_api_key()` |
+| `bg3_core.modio.query_mod_database` | SQLite mod database indexer, equipment parser, and query engine | `build_or_load_index()`, `parse_mod_stat_entries()` |
+| `bg3_core.cli.router` | Central unified router and subparser dispatcher for all workspace domains | `main()`, `build_parser()`, `dispatch_command()` |
+| `bg3_core.cli.tools` | Dynamic CLI argument parser introspection and registry | `build_parser_ast_registry()`, `search_tools()`, `verify_registry()`, `audit_skills()` |
+| `bg3_core.cli.common` | Stream separation, POSIX exit codes, and JSON envelopes | `OutputEmitter`, `ConsoleColor`, `ExitCode`, `format_json_response()`, `confirm_action()` |
+| `bg3_core.env_paths` | Cross-platform state, cache, config, game path detection, and mod dir resolution | `resolve_mod_dir()`, `get_xdg_config_home()`, `get_xdg_cache_home()`, `get_xdg_data_home()`, `detect_bg3_appdata_dirs()`, `detect_bg3_install_dir()` |
 
 ---
 
