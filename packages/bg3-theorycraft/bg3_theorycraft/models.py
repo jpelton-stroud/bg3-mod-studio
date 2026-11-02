@@ -19,7 +19,7 @@ class _MappingDataclass(collections.abc.Mapping[str, Any]):
 
     def to_dict(self) -> dict[str, Any]:
         """Convert dataclass and nested dataclasses to primitive dictionaries."""
-        return asdict(self)
+        return asdict(self)  # type: ignore[call-overload]
 
     def __getitem__(self, key: str) -> Any:
         d = self.to_dict()

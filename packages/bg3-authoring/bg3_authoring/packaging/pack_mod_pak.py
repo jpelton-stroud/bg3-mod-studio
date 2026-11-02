@@ -2,7 +2,7 @@
 """
 pack_mod_pak.py - Pure-Python LSPK v18 .pak package builder for Baldur's Gate 3 mods.
 
-Packages mod files into standard Larian Package v18 (.pak) format with zlib
+Packages mod files into standard Larian Package v18 (.pak) format with LZ4
 compression, enabling distribution and local Mod Manager installation without
 requiring the official Toolkit or external Windows binaries.
 """
@@ -21,9 +21,6 @@ from bg3_core.lspk import LspkArchive
 from bg3_core.lspk import build_lspk_archive as build_pak_archive
 
 from bg3_authoring.packaging.common import (
-    EXCLUDED_DIRECTORIES,
-    EXCLUDED_EXTENSIONS,
-    EXCLUDED_FILENAMES,
     should_include_file,
 )
 

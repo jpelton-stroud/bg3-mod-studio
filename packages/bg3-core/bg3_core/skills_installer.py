@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from bg3_core.env_paths import REPO_ROOT, get_studio_dir
+from bg3_core.env_paths import get_studio_dir
 
 # Domain package definitions: (import_module_name, display_package_name)
 PACKAGED_SKILL_SOURCES = [
@@ -108,6 +108,7 @@ def install_agent_skills(
     symlink: bool = False,
     force: bool = True,
     dry_run: bool = False,
+    prune: bool = False,
 ) -> Dict[str, Any]:
     """
     Install discovered domain skills into the destination skills directory.
@@ -119,6 +120,7 @@ def install_agent_skills(
     installed: List[str] = []
     updated: List[str] = []
     skipped: List[str] = []
+    pruned: List[str] = []
     errors: List[Dict[str, str]] = []
 
     if not dry_run:
@@ -151,6 +153,22 @@ def install_agent_skills(
         except Exception as e:
             errors.append({"skill": skill_name, "error": str(e)})
 
+    # Prune orphaned skill directories not in discovered
+    if prune and destination.is_dir():
+        for item in sorted(destination.iterdir()):
+            if item.name not in discovered and (item.is_dir() or item.is_symlink()):
+                skill_md = item / "SKILL.md" if item.is_dir() else None
+                if item.is_symlink() or (skill_md and skill_md.is_file()):
+                    try:
+                        if not dry_run:
+                            if item.is_symlink() or item.is_file():
+                                item.unlink()
+                            elif item.is_dir():
+                                shutil.rmtree(item)
+                        pruned.append(item.name)
+                    except Exception as e:
+                        errors.append({"skill": item.name, "error": f"Failed to prune orphan: {e}"})
+
     return {
         "success": len(errors) == 0,
         "target_dir": str(destination),
@@ -158,6 +176,7 @@ def install_agent_skills(
         "installed": installed,
         "updated": updated,
         "skipped": skipped,
+        "pruned": pruned,
         "errors": errors,
     }
 
@@ -178,6 +197,11 @@ def main() -> None:
         "-s",
         action="store_true",
         help="Symlink skills instead of copying them (useful for active development)",
+    )
+    parser.add_argument(
+        "--prune",
+        action="store_true",
+        help="Remove orphaned skills from target directory that are no longer bundled in packages",
     )
     parser.add_argument(
         "--check",
@@ -234,6 +258,7 @@ def main() -> None:
         symlink=args.symlink,
         force=True,
         dry_run=args.dry_run,
+        prune=args.prune,
     )
 
     if args.json:
@@ -243,6 +268,8 @@ def main() -> None:
         if result["success"]:
             count = len(result["installed"]) + len(result["updated"])
             print(f"{GREEN}✓ {prefix}Successfully installed {count} agent skills to {target_dir}{RESET}")
+            if result.get("pruned"):
+                print(f"  {YELLOW}Pruned (orphaned):{RESET} {', '.join(result['pruned'])}")
         else:
             print(f"{RED}✗ {prefix}Errors occurred during skill installation:{RESET}")
             for err in result["errors"]:

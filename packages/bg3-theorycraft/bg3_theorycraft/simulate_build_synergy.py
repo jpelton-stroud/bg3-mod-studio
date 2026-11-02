@@ -134,7 +134,7 @@ def calculate_pact_slots(warlock_level: int) -> Tuple[int, int]:
     return 4, 5
 
 
-def calculate_action_economy(classes: Dict[str, int]) -> Dict[str, Any]:
+def calculate_action_economy(classes: Dict[str, int]) -> ActionBudget:
     """Calculates action economy budget: Actions, Bonus Actions, Reactions,
 
     Action Surge, and Extra Attack scaling.
@@ -626,7 +626,7 @@ def simulate_turn_1_dpr(
         superiority_avg = 5.5 if resources["superiority_dice"]["die"] == "d10" else 4.5
 
     # Turn 1 actions description
-    action_notes: List[str] = [f"{action_econ['turn_1_actions']} Action(s)"]
+    action_notes = [f"{action_econ['turn_1_actions']} Action(s)"]
     if action_econ["has_action_surge"]:
         action_notes.append("Action Surge")
     if paladin_lvl >= 2:
@@ -726,7 +726,7 @@ def simulate_build(
     savage_attacker: bool = False,
     include_ac_curve: bool = False,
     workspace_root: Optional[Path] = None,
-) -> Dict[str, Any]:
+) -> SimulationResult:
     """Top-level simulation function for character progression, resource pools,
 
     action economy, and combat DPR.
@@ -798,7 +798,7 @@ def simulate_build(
         else None,
         action_economy=action_econ,
         resource_pools=resources,
-        gear_applied=[g.get("display_name", g.get("id")) for g in loaded_gear],
+        gear_applied=[str(g.get("display_name") or g.get("id") or "") for g in loaded_gear],
         gear_bonuses={
             "dc_bonus": gear_effects.get("dc", 0),
             "ac_bonus": gear_effects.get("ac", 0),

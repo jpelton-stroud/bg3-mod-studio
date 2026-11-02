@@ -24,6 +24,7 @@ import shutil
 import sys
 import time
 import xml.etree.ElementTree as ET
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 

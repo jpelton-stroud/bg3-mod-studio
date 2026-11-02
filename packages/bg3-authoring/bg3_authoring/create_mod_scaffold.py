@@ -18,9 +18,7 @@ import argparse
 import json
 import os
 import re
-import struct
 import uuid
-import zlib
 from pathlib import Path
 from typing import Any, Optional
 

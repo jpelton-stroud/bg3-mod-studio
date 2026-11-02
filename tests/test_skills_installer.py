@@ -96,6 +96,26 @@ class TestSkillsInstaller(unittest.TestCase):
         target = get_default_skills_target(studio_dir=custom_studio)
         self.assertEqual(target, custom_studio / ".agents" / "skills")
 
+    def test_install_agent_skills_prune_orphans(self):
+        # Initial install
+        install_agent_skills(target_dir=self.target_dir, force=True)
+
+        # Create simulated orphaned skill directories
+        orphan_dir = self.target_dir / "bg3-deprecated-skill"
+        orphan_dir.mkdir(parents=True, exist_ok=True)
+        (orphan_dir / "SKILL.md").write_text("---\nname: deprecated\n---\n", encoding="utf-8")
+
+        non_skill_dir = self.target_dir / "unrelated_folder"
+        non_skill_dir.mkdir(parents=True, exist_ok=True)
+
+        # Run with prune=True
+        res = install_agent_skills(target_dir=self.target_dir, force=True, prune=True)
+        self.assertTrue(res["success"])
+        self.assertIn("bg3-deprecated-skill", res["pruned"])
+        self.assertFalse(orphan_dir.exists())
+        # Unrelated folder without SKILL.md is not pruned
+        self.assertTrue(non_skill_dir.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

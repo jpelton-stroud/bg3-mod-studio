@@ -5,9 +5,9 @@ Centralized dependency metadata resolution and .pak provisioning for Baldur's Ga
 
 Resolution Priority:
 1. Hardcoded known engine dependencies (GustavDev, GustavX, UnlockLevelCurve)
-2. Local catalog lookup via mods/library.md and mods/<slug>/data/meta.lsx
-3. Workspace search in mods/ and my_mods/
-4. Remote fallback to mod.io REST API (with automatic cataloging into mods/<slug>/)
+2. Local catalog lookup via library catalog (Mods/subscribed/library.md) and meta.lsx
+3. Studio workspace search in Mods/authored/ and Mods/subscribed/
+4. Remote fallback to mod.io REST API (with automatic cataloging into Mods/subscribed/<slug>/)
 """
 
 import io

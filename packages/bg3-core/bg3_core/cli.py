@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import importlib.util
 import inspect
 import json
 import os
@@ -182,6 +183,14 @@ def resolve_module_fallback(script_target: Path) -> Optional[str]:
 
 def _find_module_file(mod_name: str) -> Optional[Path]:
     """Find absolute file path for a given module name."""
+    try:
+        spec = importlib.util.find_spec(mod_name)
+        if spec and spec.origin:
+            origin_path = Path(spec.origin).resolve()
+            if origin_path.is_file():
+                return origin_path
+    except Exception:
+        pass
     try:
         mod = importlib.import_module(mod_name)
         if hasattr(mod, "__file__") and mod.__file__:
@@ -612,7 +621,7 @@ def _invoke_in_process(target_module_name: str, target_args: List[str]) -> int:
             return ExitCode.OK
         if isinstance(code, int):
             return code
-        return ExitCode.GENERAL_ERROR if code else ExitCode.OK
+        return ExitCode.GENERAL if code else ExitCode.OK
     finally:
         sys.argv = old_argv
 
@@ -624,11 +633,11 @@ def dispatch_command(args: Any, emitter: OutputEmitter) -> int:
     asset_type: str = str(getattr(args, "asset_type", "") or "")
 
     if not cmd:
-        raw_tokens = [a for a in sys.argv[1:] if not a.startswith("-")]
-        if raw_tokens:
-            cmd = raw_tokens[0]
-            if len(raw_tokens) > 1:
-                sub = raw_tokens[1]
+        non_flag_tokens = [a for a in sys.argv[1:] if not a.startswith("-")]
+        if non_flag_tokens:
+            cmd = non_flag_tokens[0]
+            if len(non_flag_tokens) > 1:
+                sub = non_flag_tokens[1]
 
     json_mode = getattr(args, "json", False) or "--json" in sys.argv
     verbose = getattr(args, "verbose", False) or "-v" in sys.argv or "--verbose" in sys.argv
@@ -695,7 +704,7 @@ def dispatch_command(args: Any, emitter: OutputEmitter) -> int:
         return _execute_env_paths(json_mode, emitter)
 
     # Collect raw tokens from args or sys.argv for transparent downstream flag forwarding
-    raw_tokens = getattr(args, "_raw_tokens", None) if getattr(args, "_raw_tokens", None) is not None else sys.argv[1:]
+    raw_tokens: List[str] = list(getattr(args, "_raw_tokens", None) or sys.argv[1:])
     # Find start of subcommand tokens
     target_args: List[str] = []
     if cmd in DIRECT_COMMANDS:

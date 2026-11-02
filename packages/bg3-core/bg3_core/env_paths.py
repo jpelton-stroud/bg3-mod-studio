@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
+
 def get_workspace_root() -> Path:
     """Dynamically discover workspace root via environment, marker files (.git, pyproject.toml), or cwd."""
     env_root = os.environ.get("BG3_WORKSPACE_ROOT") or os.environ.get("BG3_REPO_ROOT")
