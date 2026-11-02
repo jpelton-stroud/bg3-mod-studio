@@ -711,6 +711,10 @@ def dispatch_command(args: Any, emitter: OutputEmitter) -> int:
         if cmd in raw_tokens:
             c_idx = raw_tokens.index(cmd)
             target_args = raw_tokens[c_idx + 1:]
+    elif cmd in ("loadorder", "save", "tools", "env"):
+        if cmd in raw_tokens:
+            c_idx = raw_tokens.index(cmd)
+            target_args = raw_tokens[c_idx + 1:]
     elif cmd == "scaffold":
         if asset_type and asset_type in raw_tokens:
             s_idx = raw_tokens.index(asset_type)
@@ -740,59 +744,7 @@ def dispatch_command(args: Any, emitter: OutputEmitter) -> int:
         if asset_name and (not target_args or target_args[0] != asset_name):
             target_args = [asset_name] + target_args
 
-    # Argument translation for save noun-verb syntax
-    if cmd == "save" and sub:
-        target_args = [sub] + target_args
-
-    # Argument translation for tools noun-verb syntax
-    if cmd == "tools" and sub in ("list", "search", "info", "verify"):
-        if not is_help:
-            target_args = [f"--{sub}"] + target_args
-
-    # Argument translation for env check
-    if cmd == "env" and sub == "check":
-        target_args = ["--check"] + target_args
-
-    # Normalize positional name parameter to --name for mod create
-    if (cmd, sub) == ("mod", "create"):
-        if target_args and not target_args[0].startswith("-"):
-            target_args = ["--name", target_args[0]] + target_args[1:]
-
-    # Normalize positional mod parameter to --mod for specific mod tools
-    if (cmd, sub) in (("mod", "pack"), ("mod", "sync-loca"), ("mod", "bump-version"), ("mod", "render-desc")):
-        if target_args and not target_args[0].startswith("-"):
-            target_args = ["--mod", target_args[0]] + target_args[1:]
-
-    # Argument translation for loadorder noun-verb syntax
-    if cmd == "loadorder":
-        loadorder_map = {
-            "list": ["--list"],
-            "sync": ["--sync"],
-            "clean": ["--clean"],
-            "validate": ["--validate"],
-            "auto-sort": ["--auto-sort"],
-            "sort": ["--auto-sort"],
-            "restore": ["--restore"],
-            "dedup": ["--dedup"],
-        }
-        if is_help:
-            target_args = ["--help"]
-        elif sub in loadorder_map:
-            target_args = loadorder_map[sub] + target_args
-        elif sub in ("enable", "activate"):
-            mod = target_args[0] if target_args and not target_args[0].startswith("-") else getattr(args, "mod", None)
-            rest = target_args[1:] if mod and target_args and target_args[0] == mod else target_args
-            target_args = (["--enable", mod] if mod else ["--enable"]) + rest
-        elif sub == "disable":
-            mod = target_args[0] if target_args and not target_args[0].startswith("-") else getattr(args, "mod", None)
-            rest = target_args[1:] if mod and target_args and target_args[0] == mod else target_args
-            target_args = (["--disable", mod] if mod else ["--disable"]) + rest
-        elif sub == "isolate":
-            mod = target_args[0] if target_args and not target_args[0].startswith("-") else getattr(args, "mod", None)
-            rest = target_args[1:] if mod and target_args and target_args[0] == mod else target_args
-            target_args = (["--enable", mod, "--isolate"] if mod else ["--isolate"]) + rest
-
-    # Argument translation for mod conflict / conflict
+    # Normalize positional candidate for mod conflict / conflict
     if (cmd == "conflict" or (cmd == "mod" and sub == "conflict")) and not is_help:
         has_pos = target_args and not target_args[0].startswith("-")
         has_flag = any(a in target_args for a in ("--candidate", "--mod1", "--all"))

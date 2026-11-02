@@ -695,7 +695,16 @@ def main() -> None:
         default=None,
         help="Target directory for BG3 Mod Studio user content (defaults to XDG_DOCUMENTS_DIR/BG3_Mod_Studio)",
     )
+    parser.add_argument(
+        "subcommand",
+        nargs="?",
+        choices=["check", "setup"],
+        help="Environment action subcommand: check or setup",
+    )
     args = parser.parse_args()
+
+    if args.subcommand == "check":
+        args.check = True
 
     if args.check:
         check_environment_status(as_json=args.json, config_path=args.config)

@@ -195,7 +195,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Pure-Python LSPK v18 .pak package builder for Baldur's Gate 3 mods."
     )
-    parser.add_argument("--mod", required=True, help="Mod name/slug in my_mods/ or directory path.")
+    parser.add_argument("mod_pos", nargs="?", default=None, help="Mod name/slug in my_mods/ or directory path.")
+    parser.add_argument("--mod", default=None, help="Mod name/slug in my_mods/ or directory path.")
     parser.add_argument("--out", help="Output .pak file path (default: dist/<mod_slug>.pak).")
     parser.add_argument("--output-dir", help="Output directory for generated .pak file.")
     parser.add_argument(
@@ -231,10 +232,14 @@ def main() -> int:
 
     args = parser.parse_args()
 
+    mod_target = args.mod or args.mod_pos
+    if not mod_target:
+        parser.error("Mod target is required (pass positional <mod> or --mod <mod>).")
+
     try:
-        mod_dir = resolve_mod_dir(args.mod, prefer_my_mods=True)
+        mod_dir = resolve_mod_dir(mod_target, prefer_my_mods=True)
         if mod_dir is None:
-            raise FileNotFoundError(f"Mod directory not found: {args.mod}")
+            raise FileNotFoundError(f"Mod directory not found: {mod_target}")
         mod_slug = mod_dir.name
 
         if args.clean_local:

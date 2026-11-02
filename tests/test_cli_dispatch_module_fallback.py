@@ -5,7 +5,6 @@ tests/test_cli_dispatch_module_fallback.py
 Unit tests for CLI dispatch module resolution and fallback execution via `python -m <module>`.
 """
 
-import os
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -51,12 +50,13 @@ class TestCliDispatchModuleFallback(unittest.TestCase):
         self.assertTrue(mock_invoke.called)
         target_mod, target_args = mock_invoke.call_args[0]
         self.assertEqual(target_mod, "bg3_core.tools")
-        self.assertIn("--list", target_args)
+        self.assertIn("list", target_args)
         self.assertIn("--json", target_args)
 
     def test_invoke_in_process_captures_system_exit(self):
         import contextlib
         import io
+
         from bg3_core.cli import _invoke_in_process
         from bg3_core.cli_common import ExitCode
 

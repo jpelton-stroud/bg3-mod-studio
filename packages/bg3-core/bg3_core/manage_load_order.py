@@ -1207,8 +1207,42 @@ def main() -> None:
     parser.add_argument("--create-default", action="store_true", help="Create default modsettings.lsx if missing")
     parser.add_argument("--dry-run", action="store_true", help="Preview modifications without writing to disk")
     parser.add_argument("--json", action="store_true", help="Output result as JSON")
+    parser.add_argument(
+        "subcommand",
+        nargs="?",
+        choices=[
+            "list", "sync", "clean", "enable", "disable", "validate",
+            "auto-sort", "sort", "isolate", "quarantine", "restore", "dedup", "create-default",
+        ],
+        help="Subcommand action for loadorder",
+    )
+    parser.add_argument("mod_name", nargs="?", help="Mod name or UUID for enable/disable/isolate")
 
     args = parser.parse_args()
+
+    if args.subcommand:
+        if args.subcommand in ("list", "sync"):
+            args.list = True
+        elif args.subcommand in ("enable", "activate"):
+            args.enable = args.mod_name or args.enable
+        elif args.subcommand == "disable":
+            args.disable = args.mod_name or args.disable
+        elif args.subcommand in ("clean", "isolate"):
+            args.isolate = True
+            if args.mod_name:
+                args.enable = args.mod_name
+        elif args.subcommand in ("auto-sort", "sort"):
+            args.auto_sort = True
+        elif args.subcommand == "validate":
+            args.validate = True
+        elif args.subcommand == "quarantine":
+            args.quarantine = True
+        elif args.subcommand == "restore":
+            args.restore = True
+        elif args.subcommand == "dedup":
+            args.dedup = True
+        elif args.subcommand == "create-default":
+            args.create_default = True
 
     modsettings_path = Path(args.path) if args.path else detect_modsettings_path()
 
