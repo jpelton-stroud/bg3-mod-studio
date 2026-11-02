@@ -102,7 +102,7 @@ class TestBg3CliIntegration(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
         data = json.loads(proc.stdout)
         self.assertEqual(data["status"], "created")
-        self.assertEqual(data["entry_name"], "IntegrationTestBlade")
+        self.assertEqual(data["name"], "IntegrationTestBlade")
         self.assertTrue(data["dry_run"])
 
     def test_scaffold_progression_help(self):

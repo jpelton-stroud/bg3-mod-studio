@@ -9,39 +9,20 @@ and complete build simulation results.
 
 from __future__ import annotations
 
-import collections.abc
 from dataclasses import asdict, dataclass, field
-from typing import Any, Iterator
+from typing import Any
 
 
-class _MappingDataclass(collections.abc.Mapping[str, Any]):
-    """Base mixin providing transparent dict access and mapping semantics to dataclasses."""
+class BaseDataclass:
+    """Base mixin providing dictionary serialization to dataclasses."""
 
     def to_dict(self) -> dict[str, Any]:
         """Convert dataclass and nested dataclasses to primitive dictionaries."""
         return asdict(self)  # type: ignore[call-overload]
 
-    def __getitem__(self, key: str) -> Any:
-        d = self.to_dict()
-        if key in d:
-            return d[key]
-        raise KeyError(key)
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(self.to_dict())
-
-    def __len__(self) -> int:
-        return len(self.to_dict())
-
-    def get(self, key: str, default: Any = None) -> Any:
-        try:
-            return self[key]
-        except KeyError:
-            return default
-
 
 @dataclass
-class ActionBudget(_MappingDataclass):
+class ActionBudget(BaseDataclass):
     """Action economy budget for Turn 1 burst combat."""
 
     base_actions: int = 1
@@ -54,7 +35,7 @@ class ActionBudget(_MappingDataclass):
 
 
 @dataclass
-class ResourcePools(_MappingDataclass):
+class ResourcePools(BaseDataclass):
     """Resource pools available to a character build."""
 
     ki_points: int = 0
@@ -65,7 +46,7 @@ class ResourcePools(_MappingDataclass):
 
 
 @dataclass
-class DamageBreakdown(_MappingDataclass):
+class DamageBreakdown(BaseDataclass):
     """Mathematical damage decomposition per attack hit and crit."""
 
     weapon_base_avg: float = 0.0
@@ -80,7 +61,7 @@ class DamageBreakdown(_MappingDataclass):
 
 
 @dataclass
-class CombatSequence(_MappingDataclass):
+class CombatSequence(BaseDataclass):
     """Simulated Turn 1 combat sequence results."""
 
     sequence: str
@@ -97,7 +78,7 @@ class CombatSequence(_MappingDataclass):
 
 
 @dataclass
-class SimulationResult(_MappingDataclass):
+class SimulationResult(BaseDataclass):
     """Complete character build simulation output."""
 
     total_level: int

@@ -451,9 +451,9 @@ def simulate_turn_1_dpr(
         p_crit = hit_info["crit_chance"]
 
         # Metamagic Quicken Spell: Sorcerer level >= 3 with >= 3 Sorcery Points casts a second EB
-        has_quicken = classes.get("sorcerer", 0) >= 3 and resources["sorcery_points"] >= 3
+        has_quicken = classes.get("sorcerer", 0) >= 3 and resources.sorcery_points >= 3
         # Fighter Action Surge: Fighter level >= 2 casts EB with surged Action
-        has_surge = action_econ["has_action_surge"]
+        has_surge = action_econ.has_action_surge
 
         multiplier = 1
         actions_desc = ["1 Action"]
@@ -496,7 +496,7 @@ def simulate_turn_1_dpr(
         )
 
     if sequence_type == "ranged_burst":
-        total_attacks = action_econ["turn_1_weapon_attacks"]
+        total_attacks = action_econ.turn_1_weapon_attacks
         dex_mod = parse_ability_modifier(stats.get("Dex", 10))
         attack_roll_bonus = prof + dex_mod + gear_effects.get("attack_bonus", 0)
 
@@ -516,11 +516,11 @@ def simulate_turn_1_dpr(
         sneak_attack_avg = math.ceil(rogue_lvl / 2) * 3.5 if rogue_lvl >= 1 else 0.0
 
         superiority_avg = 0.0
-        if resources["superiority_dice"]["count"] > 0:
-            superiority_avg = 5.5 if resources["superiority_dice"]["die"] == "d10" else 4.5
+        if resources.superiority_dice["count"] > 0:
+            superiority_avg = 5.5 if resources.superiority_dice["die"] == "d10" else 4.5
 
-        action_notes = [f"{action_econ['turn_1_actions']} Action(s)"]
-        if action_econ["has_action_surge"]:
+        action_notes = [f"{action_econ.turn_1_actions} Action(s)"]
+        if action_econ.has_action_surge:
             action_notes.append("Action Surge")
         if rogue_lvl >= 1:
             action_notes.append("Sneak Attack")
@@ -569,7 +569,7 @@ def simulate_turn_1_dpr(
         )
 
     # Default Melee Burst
-    total_attacks = action_econ["turn_1_weapon_attacks"]
+    total_attacks = action_econ.turn_1_weapon_attacks
     main_mod = max(
         parse_ability_modifier(stats.get("Str", 10)), parse_ability_modifier(stats.get("Dex", 10))
     )
@@ -622,12 +622,12 @@ def simulate_turn_1_dpr(
 
     # Superiority Die rider: Fighter level >= 3 adds 1 die on first attack
     superiority_avg = 0.0
-    if resources["superiority_dice"]["count"] > 0:
-        superiority_avg = 5.5 if resources["superiority_dice"]["die"] == "d10" else 4.5
+    if resources.superiority_dice["count"] > 0:
+        superiority_avg = 5.5 if resources.superiority_dice["die"] == "d10" else 4.5
 
     # Turn 1 actions description
-    action_notes = [f"{action_econ['turn_1_actions']} Action(s)"]
-    if action_econ["has_action_surge"]:
+    action_notes = [f"{action_econ.turn_1_actions} Action(s)"]
+    if action_econ.has_action_surge:
         action_notes.append("Action Surge")
     if paladin_lvl >= 2:
         action_notes.append("Divine Smite")
@@ -708,9 +708,9 @@ def calculate_ac_curve(
         curve.append(
             {
                 "target_ac": ac,
-                "hit_chance_pct": sim["hit_chance_pct"],
-                "crit_chance_pct": sim["crit_chance_pct"],
-                "expected_dpr": sim["expected_dpr"],
+                "hit_chance_pct": sim.hit_chance_pct,
+                "crit_chance_pct": sim.crit_chance_pct,
+                "expected_dpr": sim.expected_dpr,
             }
         )
     return curve
@@ -910,62 +910,62 @@ def main() -> int:
         else:
             color = ConsoleColor(stream=sys.stdout)
             class_str = " / ".join(f"{c.capitalize()} {lvl}" for c, lvl in classes.items())
-            print(f"{color.bold('Build Synergy Simulation:')} {class_str} (Level {res['total_level']})")
+            print(f"{color.bold('Build Synergy Simulation:')} {class_str} (Level {res.total_level})")
             print("=" * 75)
-            print(f"  Proficiency Bonus:   +{res['proficiency_bonus']}")
-            st = res["final_stats"]
+            print(f"  Proficiency Bonus:   +{res.proficiency_bonus}")
+            st = res.final_stats
             print(f"  Ability Scores:      STR {st['Str']} | DEX {st['Dex']} | CON {st['Con']} | INT {st['Int']} | WIS {st['Wis']} | CHA {st['Cha']}")
-            print(f"  Effective Spell DC:  {res['effective_spell_save_dc']}")
-            print(f"  Base Armor Class:    {res['armor_class']}")
+            print(f"  Effective Spell DC:  {res.effective_spell_save_dc}")
+            print(f"  Base Armor Class:    {res.armor_class}")
 
             # Action Economy
-            ae = res["action_economy"]
-            surge_str = " (Action Surge)" if ae["has_action_surge"] else ""
-            print(f"  Action Economy:      {ae['turn_1_actions']} Action(s){surge_str} | {ae['bonus_actions']} Bonus Action(s) | {ae['reactions']} Reaction(s)")
-            print(f"  Attacks per Action:  {ae['attacks_per_action']} ({ae['turn_1_weapon_attacks']} total turn-1 attacks)")
+            ae = res.action_economy
+            surge_str = " (Action Surge)" if ae.has_action_surge else ""
+            print(f"  Action Economy:      {ae.turn_1_actions} Action(s){surge_str} | {ae.bonus_actions} Bonus Action(s) | {ae.reactions} Reaction(s)")
+            print(f"  Attacks per Action:  {ae.attacks_per_action} ({ae.turn_1_weapon_attacks} total turn-1 attacks)")
 
             # Resource Pools
-            rp = res["resource_pools"]
+            rp = res.resource_pools
             pools: List[str] = []
-            if rp["ki_points"] > 0:
-                pools.append(f"Ki: {rp['ki_points']}")
-            if rp["sorcery_points"] > 0:
-                pools.append(f"Sorcery Points: {rp['sorcery_points']}")
-            if rp["superiority_dice"]["count"] > 0:
-                pools.append(f"Superiority: {rp['superiority_dice']['count']}{rp['superiority_dice']['die']}")
-            if rp["channel_oath_charges"] > 0:
-                pools.append(f"Channel Oath: {rp['channel_oath_charges']}")
-            if rp["rage_charges"] != 0:
-                pools.append(f"Rage: {rp['rage_charges']}")
+            if rp.ki_points > 0:
+                pools.append(f"Ki: {rp.ki_points}")
+            if rp.sorcery_points > 0:
+                pools.append(f"Sorcery Points: {rp.sorcery_points}")
+            if rp.superiority_dice["count"] > 0:
+                pools.append(f"Superiority: {rp.superiority_dice['count']}{rp.superiority_dice['die']}")
+            if rp.channel_oath_charges > 0:
+                pools.append(f"Channel Oath: {rp.channel_oath_charges}")
+            if rp.rage_charges != 0:
+                pools.append(f"Rage: {rp.rage_charges}")
             if pools:
                 print(f"  Resource Pools:      {' | '.join(pools)}")
 
-            if res["spell_slots"]:
-                slots_repr = ", ".join(f"L{k[-1]}:{v}" for k, v in res["spell_slots"].items())
+            if res.spell_slots:
+                slots_repr = ", ".join(f"L{k[-1]}:{v}" for k, v in res.spell_slots.items())
                 print(f"  Spell Slots:         {slots_repr}")
-            if res["pact_magic"]:
-                print(f"  Pact Magic:          {res['pact_magic']['slots']}x Level {res['pact_magic']['slot_level']} slots")
-            if res["gear_applied"]:
-                print(f"\n  Active Gear ({len(res['gear_applied'])} items):")
-                for gi in res["gear_applied"]:
+            if res.pact_magic:
+                print(f"  Pact Magic:          {res.pact_magic['slots']}x Level {res.pact_magic['slot_level']} slots")
+            if res.gear_applied:
+                print(f"\n  Active Gear ({len(res.gear_applied)} items):")
+                for gi in res.gear_applied:
                     print(f"    • {gi}")
 
             print("\n" + "-" * 75)
-            dpr = res["turn_1_dpr"]
-            print(f"Turn 1 Combat Simulation: {dpr['sequence']}")
-            print(f"  Actions Expended:    {dpr['actions_used']}")
-            print(f"  Roll Mode:           {dpr['roll_mode'].capitalize()}" + (" (Savage Attacker)" if dpr["savage_attacker"] else ""))
+            dpr = res.turn_1_dpr
+            print(f"Turn 1 Combat Simulation: {dpr.sequence}")
+            print(f"  Actions Expended:    {dpr.actions_used}")
+            print(f"  Roll Mode:           {dpr.roll_mode.capitalize()}" + (" (Savage Attacker)" if dpr.savage_attacker else ""))
             print(f"  Target AC:           {args.target_ac}")
-            print(f"  Hit Probability:     {dpr['hit_chance_pct']}% (Crit: {dpr['crit_chance_pct']}%)")
-            print(f"  Expected DPR:        {dpr['expected_dpr']} damage")
-            print(f"  Max Crit Potential:  {dpr['max_crit_burst']} damage")
+            print(f"  Hit Probability:     {dpr.hit_chance_pct}% (Crit: {dpr.crit_chance_pct}%)")
+            print(f"  Expected DPR:        {dpr.expected_dpr} damage")
+            print(f"  Max Crit Potential:  {dpr.max_crit_burst} damage")
 
-            if "ac_curve" in res:
+            if res.ac_curve:
                 print("\n" + "-" * 75)
                 print("Target AC Distribution Curve (AC 10-25):")
                 print("  AC | Hit % | Crit % | Expected DPR")
                 print("  ---+-------+--------+-------------")
-                for row in res["ac_curve"]:
+                for row in res.ac_curve:
                     print(f"  {row['target_ac']:2d} | {row['hit_chance_pct']:4.1f}% |  {row['crit_chance_pct']:4.1f}% | {row['expected_dpr']:6.1f} dmg")
 
         return ExitCode.OK

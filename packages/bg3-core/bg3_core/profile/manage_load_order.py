@@ -26,7 +26,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
-from bg3_core.binary.larian_parsers import find_mod_meta_files, parse_meta_lsx
+from bg3_core.binary.larian_parsers import DEFAULT_VERSION64, find_mod_meta_files, parse_meta_lsx
 from bg3_core.binary.lspk import LspkArchive
 from bg3_core.cli.common import ConsoleColor
 from bg3_core.env_paths import (
@@ -77,7 +77,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "DiceSet_01",
         "PublishHandle": "0",
         "UUID": "e842840a-2449-588c-b0c4-22122cfce31b",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "DiceSet_02",
@@ -85,7 +85,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "DiceSet_02",
         "PublishHandle": "0",
         "UUID": "b176a0ac-d79f-ed9d-5a87-5c2c80874e10",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "DiceSet_03",
@@ -93,7 +93,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "DiceSet_03",
         "PublishHandle": "0",
         "UUID": "e0a4d990-7b9b-8fa9-d7c6-04017c6cf5b1",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "DiceSet_06",
@@ -101,7 +101,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "DiceSet_06",
         "PublishHandle": "0",
         "UUID": "ee4989eb-aab8-968f-8674-812ea2f4bfd7",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "MainUI",
@@ -109,7 +109,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "MainUI",
         "PublishHandle": "0",
         "UUID": "630daa32-70f8-3da5-41b9-154fe8410236",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "ModBrowser",
@@ -117,7 +117,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "ModBrowser",
         "PublishHandle": "0",
         "UUID": "ee5a55ff-eb38-0b27-c5b0-f358dc306d34",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "PhotoMode",
@@ -125,7 +125,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "PhotoMode",
         "PublishHandle": "0",
         "UUID": "55ef175c-59e3-b44b-3fb2-8f86acc5d550",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
     {
         "Folder": "CrossplayUI",
@@ -133,7 +133,7 @@ CORE_SYSTEM_MODULES = [
         "Name": "CrossplayUI",
         "PublishHandle": "0",
         "UUID": "e1ce736b-52e6-e713-e9e7-e6abbb15a198",
-        "Version64": "36028797018963968",
+        "Version64": str(DEFAULT_VERSION64),
     },
 ]
 
@@ -282,7 +282,7 @@ def _extract_dependencies_from_xml_text(content: str) -> list[dict]:
             "Name": n_str,
             "PublishHandle": attrs.get("PublishHandle", "0"),
             "UUID": u_str,
-            "Version64": attrs.get("Version64", "36028797018963968"),
+            "Version64": attrs.get("Version64", str(DEFAULT_VERSION64)),
         })
     return deps
 
@@ -306,7 +306,7 @@ def _extract_meta_from_xml_text(content: str, fallback_name: str) -> dict | None
             "Name": name.group(1) if name else fallback_name,
             "PublishHandle": handle.group(1) if handle else "0",
             "UUID": uuid_val.group(1),
-            "Version64": v64.group(1) if v64 else "36028797018963968",
+            "Version64": v64.group(1) if v64 else str(DEFAULT_VERSION64),
         }
     return None
 
@@ -537,47 +537,33 @@ def _ensure_base_module(root: ET.Element, mods_children: ET.Element, mod_order_c
             if val:
                 existing_by_uuid[val] = desc_node
 
-    # If file is legacy Patch 7 (GustavDev present without GustavX), keep GustavDev at index 0
-    is_legacy_p7 = (
-        GUSTAV_DEV["UUID"].lower() in existing_by_uuid
-        and CORE_SYSTEM_MODULES[0]["UUID"].lower() not in existing_by_uuid
-    )
-
-    if is_legacy_p7:
-        gustav_node = existing_by_uuid[GUSTAV_DEV["UUID"].lower()]
-        all_descs = mods_children.findall("node[@id='ModuleShortDesc']")
-        if all_descs and all_descs[0] != gustav_node:
-            mods_children.remove(gustav_node)
-            mods_children.insert(0, gustav_node)
-            modified = True
-    else:
-        # Patch 8: ensure each core system module is present in canonical order
-        for idx, mod in enumerate(CORE_SYSTEM_MODULES):
-            u_key = mod["UUID"].lower()
-            if u_key in existing_by_uuid:
-                node = existing_by_uuid[u_key]
-                all_descs = mods_children.findall("node[@id='ModuleShortDesc']")
-                curr_idx = all_descs.index(node) if node in all_descs else -1
-                if curr_idx != idx and curr_idx > idx:
-                    mods_children.remove(node)
-                    mods_children.insert(idx, node)
-                    modified = True
-            else:
-                node = ET.Element("node", id="ModuleShortDesc")
-                ET.SubElement(node, "attribute", id="Folder", type="LSString", value=mod["Folder"])
-                ET.SubElement(node, "attribute", id="MD5", type="LSString", value=mod["MD5"])
-                ET.SubElement(node, "attribute", id="Name", type="LSString", value=mod["Name"])
-                ET.SubElement(node, "attribute", id="PublishHandle", type="uint64", value=str(mod["PublishHandle"]))
-                ET.SubElement(node, "attribute", id="UUID", type="guid", value=mod["UUID"])
-                ET.SubElement(node, "attribute", id="Version64", type="int64", value=str(mod["Version64"]))
+    # Ensure each core system module is present in canonical order (Patch 8)
+    for idx, mod in enumerate(CORE_SYSTEM_MODULES):
+        u_key = mod["UUID"].lower()
+        if u_key in existing_by_uuid:
+            node = existing_by_uuid[u_key]
+            all_descs = mods_children.findall("node[@id='ModuleShortDesc']")
+            curr_idx = all_descs.index(node) if node in all_descs else -1
+            if curr_idx != idx and curr_idx > idx:
+                mods_children.remove(node)
                 mods_children.insert(idx, node)
-                existing_by_uuid[u_key] = node
                 modified = True
+        else:
+            node = ET.Element("node", id="ModuleShortDesc")
+            ET.SubElement(node, "attribute", id="Folder", type="LSString", value=mod["Folder"])
+            ET.SubElement(node, "attribute", id="MD5", type="LSString", value=mod["MD5"])
+            ET.SubElement(node, "attribute", id="Name", type="LSString", value=mod["Name"])
+            ET.SubElement(node, "attribute", id="PublishHandle", type="uint64", value=str(mod["PublishHandle"]))
+            ET.SubElement(node, "attribute", id="UUID", type="guid", value=mod["UUID"])
+            ET.SubElement(node, "attribute", id="Version64", type="int64", value=str(mod["Version64"]))
+            mods_children.insert(idx, node)
+            existing_by_uuid[u_key] = node
+            modified = True
 
     # Check mod_order_children only if ModOrder exists in file (legacy compatibility)
     if mod_order_children is not None:
         order_modules = mod_order_children.findall("node[@id='Module']")
-        base_uuid = GUSTAV_DEV["UUID"] if is_legacy_p7 else CORE_SYSTEM_MODULES[0]["UUID"]
+        base_uuid = CORE_SYSTEM_MODULES[0]["UUID"]
         base_order_node = None
         for m in order_modules:
             u_attr = m.find("attribute[@id='UUID']")
@@ -691,7 +677,7 @@ def enable_mod(path: Path, mod_meta: dict | str, order_index: int | None = None,
         ET.SubElement(new_desc_node, "attribute", id="Name", type="LSString", value=mod_meta["Name"])
         ET.SubElement(new_desc_node, "attribute", id="PublishHandle", type="uint64", value=str(mod_meta.get("PublishHandle", "0")))
         ET.SubElement(new_desc_node, "attribute", id="UUID", type="guid", value=target_uuid)
-        ET.SubElement(new_desc_node, "attribute", id="Version64", type="int64", value=str(mod_meta.get("Version64", "36028797018963968")))
+        ET.SubElement(new_desc_node, "attribute", id="Version64", type="int64", value=str(mod_meta.get("Version64", str(DEFAULT_VERSION64))))
 
         if order_index is not None:
             # Never insert ahead of core system modules

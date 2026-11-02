@@ -18,7 +18,6 @@ from bg3_core.cli.router import (
     build_parser,
     dispatch_command,
     main,
-    resolve_module_fallback,
 )
 
 __all__ = [
@@ -35,5 +34,4 @@ __all__ = [
     "dispatch_command",
     "format_json_response",
     "main",
-    "resolve_module_fallback",
 ]

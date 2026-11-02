@@ -168,19 +168,6 @@ DESTRUCTIVE_CONFIRMATIONS = {
 }
 
 
-def resolve_module_fallback(script_target: Path) -> Optional[str]:
-    """Derive fully qualified python module name from a target file path."""
-    parts = list(script_target.parts)
-    for pkg in ("bg3_authoring", "bg3_core", "bg3_theorycraft"):
-        if pkg in parts:
-            idx = parts.index(pkg)
-            mod_parts = list(parts[idx:])
-            if mod_parts[-1].endswith(".py"):
-                mod_parts[-1] = mod_parts[-1][:-3]
-            return ".".join(mod_parts)
-    return None
-
-
 def _find_module_file(mod_name: str) -> Optional[Path]:
     """Find absolute file path for a given module name."""
     try:

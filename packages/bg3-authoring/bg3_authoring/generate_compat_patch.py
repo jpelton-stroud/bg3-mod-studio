@@ -16,18 +16,14 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
-from bg3_core.binary.larian_parsers import find_mod_meta_files, find_mod_progression_files
-from bg3_core.env_paths import get_authored_mods_dir
-from bg3_core.env_paths import resolve_mod_dir as _resolve_mod_dir
+from bg3_core.binary.larian_parsers import (
+    DEFAULT_VERSION64,
+    find_mod_meta_files,
+    find_mod_progression_files,
+)
+from bg3_core.env_paths import get_authored_mods_dir, resolve_mod_dir
 
 from bg3_authoring.scaffold_common import generate_placeholder_png, prettify_xml
-
-
-def resolve_mod_dir(mod_name_or_path: str, workspace_root: Path | None = None) -> Path:
-    res = _resolve_mod_dir(mod_name_or_path, prefer_my_mods=True)
-    if res is None:
-        raise FileNotFoundError(f"Mod directory not found: {mod_name_or_path}")
-    return res
 
 
 def extract_mod_meta(mod_dir: Path) -> dict:
@@ -45,7 +41,7 @@ def extract_mod_meta(mod_dir: Path) -> dict:
     mod_uuid = desc.get("value") if desc is not None else str(uuid.uuid4())
     mod_name = name_attr.get("value") if name_attr is not None else mod_dir.name
     mod_folder = folder_attr.get("value") if folder_attr is not None else mod_dir.name
-    mod_ver = ver_attr.get("value") if ver_attr is not None else "36028797018963968"
+    mod_ver = ver_attr.get("value") if ver_attr is not None else str(DEFAULT_VERSION64)
 
     return {
         "UUID": mod_uuid,
@@ -143,10 +139,10 @@ def build_mods_meta_lsx(
                     <attribute id="PublishHandle" type="uint64" value="0"/>
                     <attribute id="StartupLevelName" type="FixedString" value=""/>
                     <attribute id="UUID" type="FixedString" value="{patch_uuid}"/>
-                    <attribute id="Version64" type="int64" value="36028797018963968"/>
+                    <attribute id="Version64" type="int64" value="{DEFAULT_VERSION64}"/>
                     <children>
                         <node id="PublishVersion">
-                            <attribute id="Version64" type="int64" value="36028797018963968"/>
+                            <attribute id="Version64" type="int64" value="{DEFAULT_VERSION64}"/>
                         </node>
                         <node id="Scripts"/>
                         <node id="TargetModes">
@@ -200,8 +196,12 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        mod1_dir = resolve_mod_dir(args.mod1)
-        mod2_dir = resolve_mod_dir(args.mod2)
+        mod1_dir = resolve_mod_dir(args.mod1, prefer_my_mods=True)
+        if mod1_dir is None:
+            raise FileNotFoundError(f"Mod directory not found: {args.mod1}")
+        mod2_dir = resolve_mod_dir(args.mod2, prefer_my_mods=True)
+        if mod2_dir is None:
+            raise FileNotFoundError(f"Mod directory not found: {args.mod2}")
 
         meta1 = extract_mod_meta(mod1_dir)
         meta2 = extract_mod_meta(mod2_dir)

@@ -26,6 +26,9 @@ def format_patch8_lsx_header() -> str:
 # ----------------------------------------------------------------------
 # Version64 Encoding & Decoding
 # ----------------------------------------------------------------------
+DEFAULT_VERSION64: int = 36028797018963968  # 1.0.0.0 packed representation
+
+
 def calculate_version64(major: int = 1, minor: int = 0, revision: int = 0, build: int = 0) -> int:
     """Encode major.minor.revision.build into Larian Version64 integer."""
     return (major << 55) | (minor << 47) | (revision << 31) | (build & 0x7FFFFFFF)

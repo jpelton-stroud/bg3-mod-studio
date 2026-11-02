@@ -24,6 +24,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from bg3_core.binary.larian_parsers import DEFAULT_VERSION64
 from bg3_core.env_paths import MY_MODS_DIR, resolve_mod_dir
 from bg3_core.profile.mod_resolver import resolve_dependency_metadata
 
@@ -166,7 +167,7 @@ def add_permanent_dependencies(mod_dir: Path, dep_metas: List[Dict[str, Any]], d
         ET.SubElement(new_desc, "attribute", id="Name", type="LSString", value=dep_meta.get("Name", ""))
         ET.SubElement(new_desc, "attribute", id="PublishHandle", type="uint64", value=str(dep_meta.get("PublishHandle", 0)))
         ET.SubElement(new_desc, "attribute", id="UUID", type="guid", value=dep_meta.get("UUID", ""))
-        ET.SubElement(new_desc, "attribute", id="Version64", type="int64", value=str(dep_meta.get("Version64", 36028797018963968)))
+        ET.SubElement(new_desc, "attribute", id="Version64", type="int64", value=str(dep_meta.get("Version64", DEFAULT_VERSION64)))
 
         children.append(new_desc)
         if dep_uuid:

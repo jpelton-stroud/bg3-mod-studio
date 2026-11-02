@@ -110,74 +110,74 @@ class TestActionEconomyAndResourceBudgets(unittest.TestCase):
     def test_action_economy_budgets(self) -> None:
         # Baseline
         base = calculate_action_economy({"wizard": 4})
-        self.assertEqual(base["base_actions"], 1)
-        self.assertEqual(base["turn_1_actions"], 1)
-        self.assertFalse(base["has_action_surge"])
-        self.assertEqual(base["bonus_actions"], 1)
-        self.assertEqual(base["reactions"], 1)
-        self.assertEqual(base["attacks_per_action"], 1)
-        self.assertEqual(base["turn_1_weapon_attacks"], 1)
+        self.assertEqual(base.base_actions, 1)
+        self.assertEqual(base.turn_1_actions, 1)
+        self.assertFalse(base.has_action_surge)
+        self.assertEqual(base.bonus_actions, 1)
+        self.assertEqual(base.reactions, 1)
+        self.assertEqual(base.attacks_per_action, 1)
+        self.assertEqual(base.turn_1_weapon_attacks, 1)
 
         # Fighter Action Surge and Extra Attack
         f2 = calculate_action_economy({"fighter": 2})
-        self.assertTrue(f2["has_action_surge"])
-        self.assertEqual(f2["turn_1_actions"], 2)
+        self.assertTrue(f2.has_action_surge)
+        self.assertEqual(f2.turn_1_actions, 2)
 
         f5 = calculate_action_economy({"fighter": 5})
-        self.assertEqual(f5["attacks_per_action"], 2)
-        self.assertEqual(f5["turn_1_weapon_attacks"], 4)
+        self.assertEqual(f5.attacks_per_action, 2)
+        self.assertEqual(f5.turn_1_weapon_attacks, 4)
 
         f11 = calculate_action_economy({"fighter": 11})
-        self.assertEqual(f11["attacks_per_action"], 3)
-        self.assertEqual(f11["turn_1_weapon_attacks"], 6)
+        self.assertEqual(f11.attacks_per_action, 3)
+        self.assertEqual(f11.turn_1_weapon_attacks, 6)
 
         f20 = calculate_action_economy({"fighter": 20})
-        self.assertEqual(f20["attacks_per_action"], 4)
-        self.assertEqual(f20["turn_1_weapon_attacks"], 8)
+        self.assertEqual(f20.attacks_per_action, 4)
+        self.assertEqual(f20.turn_1_weapon_attacks, 8)
 
         # Rogue Fast Hands extra Bonus Action
         rogue3 = calculate_action_economy({"rogue": 3})
-        self.assertEqual(rogue3["bonus_actions"], 2)
+        self.assertEqual(rogue3.bonus_actions, 2)
 
     def test_resource_pools(self) -> None:
         # Monk Ki
-        self.assertEqual(calculate_resource_pools({"monk": 1})["ki_points"], 0)
-        self.assertEqual(calculate_resource_pools({"monk": 2})["ki_points"], 2)
-        self.assertEqual(calculate_resource_pools({"monk": 12})["ki_points"], 12)
+        self.assertEqual(calculate_resource_pools({"monk": 1}).ki_points, 0)
+        self.assertEqual(calculate_resource_pools({"monk": 2}).ki_points, 2)
+        self.assertEqual(calculate_resource_pools({"monk": 12}).ki_points, 12)
 
         # Sorcerer Sorcery Points
-        self.assertEqual(calculate_resource_pools({"sorcerer": 1})["sorcery_points"], 0)
-        self.assertEqual(calculate_resource_pools({"sorcerer": 2})["sorcery_points"], 2)
-        self.assertEqual(calculate_resource_pools({"sorcerer": 14})["sorcery_points"], 14)
+        self.assertEqual(calculate_resource_pools({"sorcerer": 1}).sorcery_points, 0)
+        self.assertEqual(calculate_resource_pools({"sorcerer": 2}).sorcery_points, 2)
+        self.assertEqual(calculate_resource_pools({"sorcerer": 14}).sorcery_points, 14)
 
         # Fighter Superiority Dice
         f2 = calculate_resource_pools({"fighter": 2})
-        self.assertEqual(f2["superiority_dice"]["count"], 0)
-        self.assertEqual(f2["superiority_dice"]["die"], "None")
+        self.assertEqual(f2.superiority_dice["count"], 0)
+        self.assertEqual(f2.superiority_dice["die"], "None")
 
         f3 = calculate_resource_pools({"fighter": 3})
-        self.assertEqual(f3["superiority_dice"]["count"], 4)
-        self.assertEqual(f3["superiority_dice"]["die"], "d8")
+        self.assertEqual(f3.superiority_dice["count"], 4)
+        self.assertEqual(f3.superiority_dice["die"], "d8")
 
         f7 = calculate_resource_pools({"fighter": 7})
-        self.assertEqual(f7["superiority_dice"]["count"], 5)
-        self.assertEqual(f7["superiority_dice"]["die"], "d8")
+        self.assertEqual(f7.superiority_dice["count"], 5)
+        self.assertEqual(f7.superiority_dice["die"], "d8")
 
         f15 = calculate_resource_pools({"fighter": 15})
-        self.assertEqual(f15["superiority_dice"]["count"], 6)
-        self.assertEqual(f15["superiority_dice"]["die"], "d10")
+        self.assertEqual(f15.superiority_dice["count"], 6)
+        self.assertEqual(f15.superiority_dice["die"], "d10")
 
         # Paladin Channel Oath
-        self.assertEqual(calculate_resource_pools({"paladin": 1})["channel_oath_charges"], 1)
-        self.assertEqual(calculate_resource_pools({"wizard": 20})["channel_oath_charges"], 0)
+        self.assertEqual(calculate_resource_pools({"paladin": 1}).channel_oath_charges, 1)
+        self.assertEqual(calculate_resource_pools({"wizard": 20}).channel_oath_charges, 0)
 
         # Barbarian Rage
-        self.assertEqual(calculate_resource_pools({"barbarian": 1})["rage_charges"], 2)
-        self.assertEqual(calculate_resource_pools({"barbarian": 3})["rage_charges"], 3)
-        self.assertEqual(calculate_resource_pools({"barbarian": 6})["rage_charges"], 4)
-        self.assertEqual(calculate_resource_pools({"barbarian": 12})["rage_charges"], 5)
-        self.assertEqual(calculate_resource_pools({"barbarian": 17})["rage_charges"], 6)
-        self.assertEqual(calculate_resource_pools({"barbarian": 20})["rage_charges"], "Unlimited")
+        self.assertEqual(calculate_resource_pools({"barbarian": 1}).rage_charges, 2)
+        self.assertEqual(calculate_resource_pools({"barbarian": 3}).rage_charges, 3)
+        self.assertEqual(calculate_resource_pools({"barbarian": 6}).rage_charges, 4)
+        self.assertEqual(calculate_resource_pools({"barbarian": 12}).rage_charges, 5)
+        self.assertEqual(calculate_resource_pools({"barbarian": 17}).rage_charges, 6)
+        self.assertEqual(calculate_resource_pools({"barbarian": 20}).rage_charges, "Unlimited")
 
 
 class TestHitProbabilityMath(unittest.TestCase):
@@ -308,14 +308,14 @@ class TestGeneralizedMulticlassDPR(unittest.TestCase):
         f5 = simulate_turn_1_dpr(
             "melee_burst", {"fighter": 5}, stats, gear, prof=3, target_ac=15
         )
-        self.assertEqual(f5["beams_or_attacks"], 4)
+        self.assertEqual(f5.beams_or_attacks, 4)
 
         # Fighter 11 (3 attacks, Action Surge -> 6 attacks)
         f11 = simulate_turn_1_dpr(
             "melee_burst", {"fighter": 11}, stats, gear, prof=4, target_ac=15
         )
-        self.assertEqual(f11["beams_or_attacks"], 6)
-        self.assertGreater(f11["expected_dpr"], f5["expected_dpr"])
+        self.assertEqual(f11.beams_or_attacks, 6)
+        self.assertGreater(f11.expected_dpr, f5.expected_dpr)
 
     def test_advantage_and_savage_attacker_increases_dpr(self) -> None:
         classes = {"paladin": 6, "fighter": 2}
@@ -354,8 +354,8 @@ class TestGeneralizedMulticlassDPR(unittest.TestCase):
             savage_attacker=True,
         )
 
-        self.assertGreater(adv_dpr["expected_dpr"], normal_dpr["expected_dpr"])
-        self.assertGreater(savage_dpr["expected_dpr"], normal_dpr["expected_dpr"])
+        self.assertGreater(adv_dpr.expected_dpr, normal_dpr.expected_dpr)
+        self.assertGreater(savage_dpr.expected_dpr, normal_dpr.expected_dpr)
 
     def test_sorlock_eldritch_blast_scaling(self) -> None:
         # Sorcerer 16 / Warlock 2 / Fighter 2 (Level 20)
@@ -369,9 +369,9 @@ class TestGeneralizedMulticlassDPR(unittest.TestCase):
         prof = 6
 
         eb = simulate_turn_1_dpr("eldritch_blast", classes, stats, gear, prof, target_ac=18)
-        self.assertEqual(eb["beams_or_attacks"], 12)
-        self.assertIn("Quickened", eb["actions_used"])
-        self.assertIn("Action Surge", eb["actions_used"])
+        self.assertEqual(eb.beams_or_attacks, 12)
+        self.assertIn("Quickened", eb.actions_used)
+        self.assertIn("Action Surge", eb.actions_used)
 
 
 class TestQueryModDatabaseIntegration(unittest.TestCase):
@@ -449,12 +449,12 @@ class TestTheorycraftCLI(unittest.TestCase):
             savage_attacker=True,
             include_ac_curve=True,
         )
-        self.assertEqual(result["total_level"], 20)
-        self.assertEqual(result["proficiency_bonus"], 6)
-        self.assertIn("action_economy", result)
-        self.assertIn("resource_pools", result)
-        self.assertIn("ac_curve", result)
-        self.assertEqual(len(result["ac_curve"]), 16)
+        self.assertEqual(result.total_level, 20)
+        self.assertEqual(result.proficiency_bonus, 6)
+        self.assertIsNotNone(result.action_economy)
+        self.assertIsNotNone(result.resource_pools)
+        self.assertIsNotNone(result.ac_curve)
+        self.assertEqual(len(result.ac_curve), 16)
 
     def test_typed_domain_models(self) -> None:
         from bg3_theorycraft.models import (

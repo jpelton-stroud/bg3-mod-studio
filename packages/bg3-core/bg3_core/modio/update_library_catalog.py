@@ -95,30 +95,12 @@ def classify_mod(slug: str, title: str, desc: str) -> str:
 
 
 def parse_existing_mod_ids(library_content: str) -> dict[str, str]:
-    """Read IDs from the current schema or the legacy Mod.io IDs table."""
+    """Read IDs from canonical library catalog rows."""
     ids = {}
     for row in parse_library_rows(library_content):
         raw_id = row["mod_id"].strip()
         if raw_id.isdigit() and int(raw_id) > 0:
             ids[row["slug"]] = raw_id
-
-    in_legacy_ids = False
-    legacy_row = re.compile(
-        r"^\|\s*[^|]*?\s*\|\s*`(?P<slug>[^`]+)`\s*\|\s*(?P<mod_id>[^|]*?)\s*\|$"
-    )
-    for line in library_content.splitlines():
-        if line.startswith("## "):
-            in_legacy_ids = line[3:].strip().casefold() == "mod.io ids"
-            continue
-        if not in_legacy_ids or not line.startswith("|"):
-            continue
-        match = legacy_row.match(line)
-        if not match:
-            continue
-        raw_id = match.group("mod_id").strip()
-        slug = match.group("slug").strip()
-        if raw_id.isdigit() and int(raw_id) > 0:
-            ids.setdefault(slug, raw_id)
     return ids
 
 

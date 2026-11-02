@@ -402,7 +402,7 @@ class TestUnifiedScaffoldAssetAPI(unittest.TestCase):
         )
         self.assertTrue(res["success"])
         self.assertEqual(res["status"], "created")
-        self.assertEqual(res["entry_name"], "DirectTestBlade")
+        self.assertEqual(res["name"], "DirectTestBlade")
 
     def test_scaffold_feat_direct(self):
         res = scaffold_feat(
@@ -412,7 +412,7 @@ class TestUnifiedScaffoldAssetAPI(unittest.TestCase):
             dry_run=True,
         )
         self.assertTrue(res["success"])
-        self.assertEqual(res["feat_name"], "DirectTestFeat")
+        self.assertEqual(res["name"], "DirectTestFeat")
 
     def test_scaffold_action_resource_direct(self):
         res = scaffold_action_resource(
@@ -486,9 +486,8 @@ class TestUnifiedScaffoldAssetAPI(unittest.TestCase):
         self.assertEqual(res.asset_type, "stat")
         self.assertTrue(res.success)
         self.assertEqual(res.status, "created")
-        self.assertEqual(res["entry_name"], "TypedBlade")
         self.assertEqual(res["name"], "TypedBlade")
-        self.assertIn("stat_file", res.to_dict())
+        self.assertIn("file", res.to_dict())
 
     def test_subdomain_imports_and_packaging_common(self):
         from bg3_authoring.packaging.common import (

@@ -22,7 +22,11 @@ import uuid
 from pathlib import Path
 from typing import Any, Optional
 
-from bg3_core.binary.larian_parsers import calculate_version64, generate_larian_handle
+from bg3_core.binary.larian_parsers import (
+    DEFAULT_VERSION64,
+    calculate_version64,
+    generate_larian_handle,
+)
 from bg3_core.env_paths import get_authored_mods_dir, load_env_file
 from bg3_core.profile.mod_resolver import KNOWN_DEPENDENCIES, resolve_dependency_metadata
 
@@ -297,7 +301,7 @@ def scaffold_mod(
                         "Name": str(dep),
                         "PublishHandle": 0,
                         "UUID": generate_uuid(),
-                        "Version64": 36028797018963968,
+                        "Version64": DEFAULT_VERSION64,
                     })
 
     if not description:

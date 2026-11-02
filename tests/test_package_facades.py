@@ -35,6 +35,7 @@ class TestPackageFacades(unittest.TestCase):
         # Larian parsers
         self.assertTrue(callable(bg3_core.calculate_version64))
         self.assertTrue(callable(bg3_core.compile_xml_bytes_to_loca))
+        self.assertEqual(bg3_core.DEFAULT_VERSION64, 36028797018963968)
 
         # Environment
         self.assertTrue(callable(bg3_core.get_workspace_root))
@@ -51,6 +52,7 @@ class TestPackageFacades(unittest.TestCase):
         self.assertIsNotNone(bg3_core.binary.LspkArchive)
         self.assertIsNotNone(bg3_core.binary.LsfDocument)
         self.assertTrue(callable(bg3_core.binary.calculate_version64))
+        self.assertEqual(bg3_core.binary.DEFAULT_VERSION64, 36028797018963968)
 
         # Modio subpackage
         self.assertTrue(hasattr(bg3_core.modio, "__all__"))

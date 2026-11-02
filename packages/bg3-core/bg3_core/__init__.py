@@ -5,6 +5,7 @@ bg3_core - Core runtime, binary engines, environment, and CLI tools for Baldur's
 from __future__ import annotations
 
 from bg3_core.binary.larian_parsers import (
+    DEFAULT_VERSION64,
     PATCH_8_VERSION,
     calculate_version64,
     compile_xml_bytes_to_loca,
@@ -34,6 +35,7 @@ __version__ = "1.0.0"
 
 __all__ = [
     "ConsoleColor",
+    "DEFAULT_VERSION64",
     "ExitCode",
     "LsfAttribute",
     "LsfDocument",

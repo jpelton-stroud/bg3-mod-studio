@@ -17,7 +17,7 @@ import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
-from bg3_core.binary.larian_parsers import find_mod_meta_files, parse_meta_lsx
+from bg3_core.binary.larian_parsers import DEFAULT_VERSION64, find_mod_meta_files, parse_meta_lsx
 from bg3_core.binary.lspk import LspkArchive
 from bg3_core.env_paths import (
     detect_bg3_appdata_dirs,
@@ -106,11 +106,11 @@ def extract_metadata_from_meta_lsx(path: Path, fallback_name: str = "") -> Optio
 
         folder = parsed.get("Folder") or fallback_name
         name = parsed.get("Name") or fallback_name
-        v64_raw = parsed.get("Version64", "36028797018963968")
+        v64_raw = parsed.get("Version64", str(DEFAULT_VERSION64))
         try:
             v64 = int(v64_raw)
         except ValueError:
-            v64 = 36028797018963968
+            v64 = DEFAULT_VERSION64
 
         handle_raw = parsed.get("PublishHandle", "0")
         try:
@@ -248,7 +248,7 @@ def resolve_dependency_metadata(
                     "Name": m_name,
                     "PublishHandle": m_id,
                     "UUID": str(mod_meta.get("id", "")),
-                    "Version64": 36028797018963968,
+                    "Version64": DEFAULT_VERSION64,
                 }
     except Exception:
         pass
@@ -263,7 +263,7 @@ def resolve_dependency_metadata(
         "Name": clean_id,
         "PublishHandle": 0,
         "UUID": "",
-        "Version64": 36028797018963968,
+        "Version64": DEFAULT_VERSION64,
     }
 
 
