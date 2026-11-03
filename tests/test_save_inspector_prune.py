@@ -122,21 +122,23 @@ class TestSaveInspectorPrune(unittest.TestCase):
 
     def test_prune_lsf_missing_mods_to_output_file(self) -> None:
         """Verify targeted mod UUID is pruned from binary LSF AST and cleanly repacked."""
-        mod1 = {"uuid": "11111111-1111-1111-1111-111111111111", "name": "PreservedMod", "folder": "PreservedMod"}
-        mod2 = {"uuid": "22222222-2222-2222-2222-222222222222", "name": "MissingOrphanMod", "folder": "MissingOrphanMod"}
+        mod1 = {"uuid": "28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8", "name": "PreservedMod", "folder": "PreservedMod"}
+        mod2 = {"uuid": "b47c0a76-9c44-48f8-b39d-7df64c39832b", "name": "MissingOrphanMod", "folder": "MissingOrphanMod"}
 
         source_save = self._create_synthetic_lsf_save([mod1, mod2], "Campaign1.lsv")
         out_save = self.dir_path / "Campaign1_Rescued.lsv"
 
-        # Verify initial metadata has 2 mods
+        # Verify initial metadata has 2 mods with exact asymmetric UUID fidelity
         initial_meta = extract_save_metadata(source_save)
         self.assertEqual(len(initial_meta["mods"]), 2)
+        self.assertEqual(initial_meta["mods"][0]["uuid"], "28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8")
+        self.assertEqual(initial_meta["mods"][1]["uuid"], "b47c0a76-9c44-48f8-b39d-7df64c39832b")
 
         # Prune mod2
         ok, pruned = prune_missing_mods_from_save(
             save_path=source_save,
             output_path=out_save,
-            target_uuids=["22222222-2222-2222-2222-222222222222"],
+            target_uuids=["b47c0a76-9c44-48f8-b39d-7df64c39832b"],
             dry_run=False,
         )
 
@@ -166,15 +168,15 @@ class TestSaveInspectorPrune(unittest.TestCase):
 
     def test_prune_lsf_dry_run_does_not_modify(self) -> None:
         """Verify dry-run returns planned pruned list without modifying files."""
-        mod1 = {"uuid": "11111111-1111-1111-1111-111111111111", "name": "Mod1", "folder": "Mod1"}
-        mod2 = {"uuid": "22222222-2222-2222-2222-222222222222", "name": "Mod2", "folder": "Mod2"}
+        mod1 = {"uuid": "28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8", "name": "Mod1", "folder": "Mod1"}
+        mod2 = {"uuid": "b47c0a76-9c44-48f8-b39d-7df64c39832b", "name": "Mod2", "folder": "Mod2"}
 
         save = self._create_synthetic_lsf_save([mod1, mod2], "DryRunSave.lsv")
         initial_mtime = save.stat().st_mtime_ns
 
         ok, pruned = prune_missing_mods_from_save(
             save_path=save,
-            target_uuids=["22222222-2222-2222-2222-222222222222"],
+            target_uuids=["b47c0a76-9c44-48f8-b39d-7df64c39832b"],
             dry_run=True,
         )
 
@@ -189,8 +191,8 @@ class TestSaveInspectorPrune(unittest.TestCase):
 
     def test_prune_in_place_creates_backup(self) -> None:
         """Verify in-place pruning creates a .bak backup file."""
-        mod1 = {"uuid": "11111111-1111-1111-1111-111111111111", "name": "Mod1", "folder": "Mod1"}
-        mod2 = {"uuid": "22222222-2222-2222-2222-222222222222", "name": "Mod2", "folder": "Mod2"}
+        mod1 = {"uuid": "28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8", "name": "Mod1", "folder": "Mod1"}
+        mod2 = {"uuid": "b47c0a76-9c44-48f8-b39d-7df64c39832b", "name": "Mod2", "folder": "Mod2"}
 
         save = self._create_synthetic_lsf_save([mod1, mod2], "InPlaceSave.lsv")
         backup = save.with_name("InPlaceSave.lsv.bak")
@@ -198,7 +200,7 @@ class TestSaveInspectorPrune(unittest.TestCase):
         ok, pruned = prune_missing_mods_from_save(
             save_path=save,
             output_path=None,
-            target_uuids=["22222222-2222-2222-2222-222222222222"],
+            target_uuids=["b47c0a76-9c44-48f8-b39d-7df64c39832b"],
             dry_run=False,
         )
 

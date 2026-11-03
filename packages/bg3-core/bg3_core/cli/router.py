@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import importlib.metadata
 import importlib.util
 import inspect
 import json
@@ -72,7 +73,7 @@ COMMAND_REGISTRY: Dict[Tuple[str, str], CommandSpec] = {
     ("mod", "validate"): CommandSpec("bg3_authoring.diagnostics.validate_mod", "Run static validation audits on mod assets, XML syntax, and directory layout", "diagnostics", "bg3_authoring"),
     ("mod", "conflict"): CommandSpec("bg3_core.profile.check_mod_conflicts", "Detect potential stat, progression, or root template collisions across mods", "diagnostics"),
     ("mod", "add-dependency"): CommandSpec("bg3_authoring.add_mod_dependency", "Add a dependency module UUID and metadata to a target mod's meta.lsx", "authoring", "bg3_authoring"),
-    ("mod", "bump-version"): CommandSpec("bg3_core.profile.bump_mod_version", "Bump or set the 64-bit integer Version64 in a mod's meta.lsx", "management"),
+    ("mod", "bump-version"): CommandSpec("bg3_authoring.bump_mod_version", "Bump or set the 64-bit integer Version64 in a mod's meta.lsx", "authoring", "bg3_authoring"),
     ("mod", "pack"): CommandSpec("bg3_authoring.packaging.pack_mod_pak", "Build a distributable LSPK package (.pak) from raw mod files", "packaging", "bg3_authoring"),
     ("mod", "sync-loca"): CommandSpec("bg3_authoring.diagnostics.sync_localization", "Synchronize string handles across XML files and compile .loca binaries", "diagnostics", "bg3_authoring"),
     ("mod", "sync-game"): CommandSpec("bg3_authoring.packaging.sync_game_data", "Synchronize custom mod files into the Baldur's Gate 3 Data directory", "packaging", "bg3_authoring"),
@@ -184,24 +185,42 @@ def _find_module_file(mod_name: str) -> Optional[Path]:
             return Path(mod.__file__).resolve()
     except Exception:
         pass
-    repo_root = Path(__file__).resolve().parent.parent.parent.parent
-    pkg_dir = mod_name.split(".")[0].replace("_", "-")
-    rel_path = Path("packages") / pkg_dir / Path(*mod_name.split(".")).with_suffix(".py")
-    candidate = repo_root / rel_path
-    if candidate.is_file():
-        return candidate
     return None
+
+
+def _discover_entry_point_commands() -> Dict[Tuple[str, str], CommandSpec]:
+    """Discover external CLI commands published under the bg3.commands entry point group."""
+    discovered: Dict[Tuple[str, str], CommandSpec] = {}
+    try:
+        eps = importlib.metadata.entry_points(group="bg3.commands")
+        for ep in eps:
+            parts = ep.name.split(".", 1)
+            if len(parts) == 2:
+                key = (parts[0], parts[1])
+            else:
+                key = (ep.name, "")
+            spec = CommandSpec(
+                target_module=ep.value,
+                help=f"Extension command: {ep.name}",
+                category="extension",
+            )
+            discovered[key] = spec
+    except Exception:
+        pass
+    return discovered
 
 
 def _add_scaffold_subparsers(sub_sp: Any) -> None:
     """Add structured subparsers for asset scaffolding types."""
-    # Attempt to load rich schema definitions from scaffold_asset if available
+    # Attempt to load rich schema definitions from scaffold_asset lazily if scaffold is targeted
     target_parser = None
-    try:
-        from bg3_authoring.scaffold_asset import build_parser as build_scaffold_p
-        target_parser = build_scaffold_p()
-    except Exception:
-        pass
+    if any(t in sys.argv for t in ("scaffold", "scaffold_asset")):
+        try:
+            mod = importlib.import_module("bg3_authoring.scaffold_asset")
+            if hasattr(mod, "build_parser"):
+                target_parser = mod.build_parser()
+        except Exception:
+            pass
 
     target_actions: Dict[str, Any] = {}
     if target_parser is not None:
@@ -575,6 +594,16 @@ def build_parser() -> JsonCompliantArgumentParser:
     _add_tools_subparsers(subparsers)
     _add_env_subparsers(subparsers)
 
+    # Discover and mount external command extensions
+    exts = _discover_entry_point_commands()
+    for (ext_cmd, ext_sub), ext_spec in exts.items():
+        if not ext_sub and ext_cmd not in getattr(subparsers, "choices", {}):
+            try:
+                p_ext = subparsers.add_parser(ext_cmd, help=ext_spec.help)
+                p_ext.add_argument("remainder", nargs=argparse.REMAINDER)
+            except Exception:
+                pass
+
     return parser
 
 
@@ -678,6 +707,13 @@ def dispatch_command(args: Any, emitter: OutputEmitter) -> int:
         spec = COMMAND_REGISTRY[(cmd, sub)]
     elif cmd == "build" and sub in ("sim", "simulate"):
         spec = COMMAND_REGISTRY[("build", "simulate")]
+
+    if not spec:
+        discovered = _discover_entry_point_commands()
+        if (cmd, sub) in discovered:
+            spec = discovered[(cmd, sub)]
+        elif (cmd, "") in discovered:
+            spec = discovered[(cmd, "")]
 
     if not spec:
         full_cmd = f"{cmd} {sub}".strip()

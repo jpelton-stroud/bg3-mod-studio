@@ -7,6 +7,7 @@ binary parser and AST decompiler for Baldur's Gate 3 saves and mod assets.
 from __future__ import annotations
 
 import struct
+import uuid
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
@@ -277,18 +278,21 @@ class LsfDocument:
         for name_idx, type_id, next_attr_idx, val_offset, val_length in all_attrs:
             attrs_buf.extend(struct.pack("<IIiII", name_idx, type_id, next_attr_idx, val_offset, val_length))
 
-        # 4. Serialize Nodes chunk
+        # 4. Serialize Nodes chunk (O(N) sibling resolution)
+        next_sibling_map: dict[int, int] = {}
+        last_child_per_parent: dict[int, int] = {}
+        for n_idx, node in enumerate(all_nodes):
+            p_idx = node_parents[n_idx]
+            if p_idx in last_child_per_parent:
+                next_sibling_map[last_child_per_parent[p_idx]] = n_idx
+            last_child_per_parent[p_idx] = n_idx
+
         nodes_buf = bytearray()
         for n_idx, node in enumerate(all_nodes):
             name_idx = get_string_idx(node.name)
             p_idx = node_parents[n_idx]
             first_a = node_first_attr.get(n_idx, -1)
-            # Find next sibling
-            next_sib = -1
-            for later_idx in range(n_idx + 1, len(all_nodes)):
-                if node_parents.get(later_idx) == p_idx:
-                    next_sib = later_idx
-                    break
+            next_sib = next_sibling_map.get(n_idx, -1)
             nodes_buf.extend(struct.pack("<Iiii", name_idx, p_idx, next_sib, first_a))
 
         # 5. Pack chunks with optional compression
@@ -301,8 +305,12 @@ class LsfDocument:
             if compress and uncomp_sz > 0:
                 comp_c = lz4_block_compress(raw_c)
                 comp_sz = len(comp_c)
-                chunk_descs.append((uncomp_sz, comp_sz))
-                final_chunks.append(comp_c)
+                if comp_sz < uncomp_sz:
+                    chunk_descs.append((uncomp_sz, comp_sz))
+                    final_chunks.append(comp_c)
+                else:
+                    chunk_descs.append((uncomp_sz, 0))
+                    final_chunks.append(raw_c)
             else:
                 chunk_descs.append((uncomp_sz, 0))
                 final_chunks.append(raw_c)
@@ -367,10 +375,12 @@ _NUMERIC_STRUCT_SERIALIZERS: dict[int, str] = {
 
 
 def _parse_uuid_bytes(raw: bytes) -> str:
-    """Parse raw bytes into canonical hyphenated UUID string."""
+    """Parse raw bytes into canonical hyphenated UUID string using Microsoft GUID layout."""
     if len(raw) == 16:
-        d1, d2, d3, d4, d5, d6, d7 = struct.unpack("<IHHHHHH", raw)
-        return f"{d1:08x}-{d2:04x}-{d3:04x}-{d4:04x}-{d5:04x}{d6:04x}{d7:04x}"
+        try:
+            return str(uuid.UUID(bytes_le=raw))
+        except ValueError:
+            pass
     return raw.split(b"\x00")[0].decode("utf-8", errors="replace")
 
 
@@ -406,22 +416,13 @@ def _parse_attribute_value(values_chunk: bytes, offset: int, length: int, type_i
 
 
 def _serialize_uuid(val: Any) -> bytes:
-    """Serialize UUID representation into LSF binary representation."""
-    uuid_str = str(val).replace("-", "")
-    if len(uuid_str) == 32:
-        try:
-            b = bytes.fromhex(uuid_str)
-            d1 = struct.unpack(">I", b[0:4])[0]
-            d2 = struct.unpack(">H", b[4:6])[0]
-            d3 = struct.unpack(">H", b[6:8])[0]
-            d4 = struct.unpack(">H", b[8:10])[0]
-            d5 = struct.unpack(">H", b[10:12])[0]
-            d6 = struct.unpack(">H", b[12:14])[0]
-            d7 = struct.unpack(">H", b[14:16])[0]
-            return struct.pack("<IHHHHHH", d1, d2, d3, d4, d5, d6, d7)
-        except ValueError:
-            pass
-    return str(val).encode("utf-8") + b"\x00"
+    """Serialize UUID representation into LSF binary representation (Microsoft GUID layout)."""
+    uuid_str = str(val).strip()
+    try:
+        return uuid.UUID(uuid_str).bytes_le
+    except (ValueError, AttributeError):
+        pass
+    return uuid_str.encode("utf-8") + b"\x00"
 
 
 def _serialize_attribute_value(val: Any, type_id: int) -> bytes:

@@ -1,24 +1,44 @@
 """Integration tests for bg3 unified CLI entrypoint."""
 
+import io
 import json
 import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+
+from bg3_core.cli.router import main
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+class _ProcResult:
+    def __init__(self, returncode: int, stdout: str, stderr: str) -> None:
+        self.returncode = returncode
+        self.stdout = stdout
+        self.stderr = stderr
 
 
 class TestBg3CliIntegration(unittest.TestCase):
 
     def run_cli(self, args, stdin=None):
-        return subprocess.run(
-            [sys.executable, "-m", "bg3_core.cli"] + args,
-            capture_output=True,
-            text=True,
-            input=stdin,
-            cwd=REPO_ROOT,
-        )
+        stdout_buf = io.StringIO()
+        stderr_buf = io.StringIO()
+        stdin_stream = io.StringIO(stdin or "")
+        test_argv = ["bg3"] + list(args)
+        returncode = 0
+
+        with patch("sys.argv", test_argv), \
+             patch("sys.stdout", stdout_buf), \
+             patch("sys.stderr", stderr_buf), \
+             patch("sys.stdin", stdin_stream):
+            try:
+                main()
+            except SystemExit as e:
+                returncode = e.code if isinstance(e.code, int) else (1 if e.code else 0)
+
+        return _ProcResult(returncode, stdout_buf.getvalue(), stderr_buf.getvalue())
 
     def test_help_screen(self):
         proc = self.run_cli(["--help"])
@@ -224,6 +244,61 @@ sys.exit(ret)
         self.assertNotEqual(proc.returncode, 69)
         payload = json.loads(proc.stdout)
         self.assertIn("total_mods", payload)
+
+    def test_bump_version_targets_authoring_package(self):
+        """Assert that 'bg3 mod bump-version' points to bg3_authoring."""
+        from bg3_core.cli.router import COMMAND_REGISTRY
+
+        spec = COMMAND_REGISTRY.get(("mod", "bump-version"))
+        self.assertIsNotNone(spec)
+        self.assertEqual(spec.target_module, "bg3_authoring.bump_mod_version")
+        self.assertEqual(spec.pkg_requirement, "bg3_authoring")
+
+    def test_missing_authoring_package_gating_bump_version(self):
+        """Assert that missing bg3_authoring cleanly gates bump-version with exit code 69."""
+        code = """
+import sys
+sys.modules['bg3_authoring'] = None
+from bg3_core.cli import build_parser, dispatch_command
+from bg3_core.cli.common import OutputEmitter
+
+parser = build_parser()
+args = parser.parse_args(['mod', 'bump-version', '--patch', '--json'])
+emitter = OutputEmitter(json_mode=True)
+sys.exit(dispatch_command(args, emitter))
+"""
+        proc = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 69)
+        payload = json.loads(proc.stdout)
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["error"]["code"], "PACKAGE_NOT_INSTALLED")
+        self.assertIn("bg3-authoring", payload["error"]["message"])
+
+    def test_entry_points_manifest_declarations(self):
+        """Verify that bg3.commands entry points are properly configured in package pyproject.toml files."""
+        try:
+            import tomllib
+        except ImportError:
+            import tomli as tomllib  # type: ignore[no-redef]
+
+        authoring_toml = REPO_ROOT / "packages" / "bg3-authoring" / "pyproject.toml"
+        with open(authoring_toml, "rb") as f:
+            auth_data = tomllib.load(f)
+
+        auth_eps = auth_data.get("project", {}).get("entry-points", {}).get("bg3.commands", {})
+        self.assertIn("mod.create", auth_eps)
+        self.assertIn("mod.scaffold", auth_eps)
+        self.assertIn("mod.bump-version", auth_eps)
+        self.assertIn("mod.pack", auth_eps)
+        self.assertEqual(auth_eps["mod.bump-version"], "bg3_authoring.bump_mod_version:main")
+
+        theory_toml = REPO_ROOT / "packages" / "bg3-theorycraft" / "pyproject.toml"
+        with open(theory_toml, "rb") as f:
+            theory_data = tomllib.load(f)
+
+        theory_eps = theory_data.get("project", {}).get("entry-points", {}).get("bg3.commands", {})
+        self.assertIn("build.simulate", theory_eps)
+        self.assertIn("build.sim", theory_eps)
 
 
 if __name__ == "__main__":

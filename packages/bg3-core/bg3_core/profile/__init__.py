@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from bg3_core.profile.bump_mod_version import bump_version
 from bg3_core.profile.check_mod_conflicts import (
     compare_candidate_against_catalog,
     compare_two_mods,
@@ -44,7 +43,6 @@ __all__ = [
     "audit_against_modsettings",
     "auto_sort_load_order",
     "backup_save_games",
-    "bump_version",
     "clean_steam_data_paks",
     "compare_candidate_against_catalog",
     "compare_two_mods",

@@ -221,7 +221,9 @@ def bump_version(
                 print(f"  └ {_rel_path(mf, WORKSPACE_ROOT)}")
         else:
             action_desc = "[DRY-RUN] Would update" if dry_run else "Successfully updated"
-            print(f"{action_desc} '{target_mod.name}': {old_version_str} -> {new_version_str} (Version64: {new_v64})")
+            print(
+                f"{action_desc} '{target_mod.name}': {old_version_str} -> {new_version_str} (Version64: {new_v64})"
+            )
             for f in updated_files:
                 print(f"  ✓ Updated {f}")
 
@@ -232,16 +234,33 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Auto-generate and bump semantic versions and Larian Version64 integers in BG3 mods."
     )
-    parser.add_argument("--mod", required=True, help="Mod name or folder in my_mods/ (e.g. paladins-call)")
+    parser.add_argument(
+        "--mod", required=True, help="Mod name or folder in my_mods/ (e.g. paladins-call)"
+    )
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("--show", action="store_true", help="Display current version without modifying")
+    group.add_argument(
+        "--show", action="store_true", help="Display current version without modifying"
+    )
     group.add_argument("--build", "-b", action="store_true", help="Increment build number (+1)")
-    group.add_argument("--patch", "-p", action="store_true", help="Increment patch/revision (+1) and reset build")
-    group.add_argument("--minor", "-m", action="store_true", help="Increment minor version (+1) and reset patch/build")
-    group.add_argument("--major", action="store_true", help="Increment major version (+1) and reset minor/patch/build")
+    group.add_argument(
+        "--patch", "-p", action="store_true", help="Increment patch/revision (+1) and reset build"
+    )
+    group.add_argument(
+        "--minor",
+        "-m",
+        action="store_true",
+        help="Increment minor version (+1) and reset patch/build",
+    )
+    group.add_argument(
+        "--major",
+        action="store_true",
+        help="Increment major version (+1) and reset minor/patch/build",
+    )
     group.add_argument("--set", type=str, help="Explicitly set version (e.g. 1.2.0.0)")
 
-    parser.add_argument("--dry-run", action="store_true", help="Preview version changes without writing to disk")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Preview version changes without writing to disk"
+    )
     parser.add_argument("--json", action="store_true", help="Output result as JSON")
 
     args = parser.parse_args()

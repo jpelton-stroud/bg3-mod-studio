@@ -5,6 +5,7 @@ bg3_authoring - Authoring, scaffolding, and asset generation toolkit for Baldur'
 from __future__ import annotations
 
 from bg3_authoring.add_mod_dependency import add_permanent_dependency, add_test_dependency
+from bg3_authoring.bump_mod_version import bump_version
 from bg3_authoring.create_mod_scaffold import scaffold_mod
 from bg3_authoring.diagnostics.diagnose_toolkit_logs import parse_log_file, purge_toolkit_logs
 from bg3_authoring.diagnostics.sync_localization import (
@@ -52,6 +53,7 @@ __all__ = [
     "__version__",
     "add_permanent_dependency",
     "add_test_dependency",
+    "bump_version",
     "check_uuid_uniqueness",
     "clean_local_pak",
     "collect_mod_files",

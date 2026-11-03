@@ -464,6 +464,34 @@ class TestUnifiedScaffoldAssetAPI(unittest.TestCase):
         )
         self.assertTrue(res["success"])
 
+    def test_scaffold_progression_table_uuid_retention(self):
+        """Verify sequential progression levels for a custom class retain the same TableUUID."""
+        res_lvl1 = scaffold_progression(
+            mod_name_or_path=str(self.mod_dir),
+            name="CustomArtificer",
+            level=1,
+            dry_run=False,
+        )
+        self.assertTrue(res_lvl1["success"])
+        table_uuid_1 = res_lvl1.details["table_uuid"]
+
+        res_lvl2 = scaffold_progression(
+            mod_name_or_path=str(self.mod_dir),
+            name="CustomArtificer",
+            level=2,
+            dry_run=False,
+        )
+        self.assertTrue(res_lvl2["success"])
+        table_uuid_2 = res_lvl2.details["table_uuid"]
+
+        self.assertEqual(table_uuid_1, table_uuid_2)
+
+        # Verify in the written XML file that both levels share the same TableUUID
+        prog_file = Path(res_lvl2.file)
+        self.assertTrue(prog_file.exists())
+        content = prog_file.read_text(encoding="utf-8")
+        self.assertEqual(content.count(table_uuid_1), 2)
+
     def test_scaffold_class_direct(self):
         res = scaffold_class(
             mod_name_or_path=str(self.mod_dir),
@@ -511,6 +539,53 @@ class TestUnifiedScaffoldAssetAPI(unittest.TestCase):
         self.assertFalse(should_include_file(Path("thumbnail.png")))
         self.assertFalse(should_include_file(Path(".git/HEAD")))
         self.assertFalse(should_include_file(Path("some_script.py")))
+
+    def test_clean_custom_mods_and_atomic_sync_writes(self):
+        from bg3_authoring.packaging.sync_game_data import (
+            clean_custom_mods,
+            write_bytes_if_different,
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_root:
+            root = Path(tmp_root)
+            data_dir = root / "Data"
+            source_dir = root / "my_mods"
+            source_dir.mkdir(parents=True)
+
+            # Create authored mod directory so get_custom_mod_prefixes identifies it
+            authored_mod = source_dir / "sample-spell"
+            (authored_mod / "Mods" / "SampleSpell_12345678-1234-1234-1234-123456789abc").mkdir(parents=True)
+
+            # Create corresponding files in game Data directory
+            data_mod = data_dir / "Mods" / "SampleSpell_12345678-1234-1234-1234-123456789abc"
+            data_mod.mkdir(parents=True)
+            (data_mod / "meta.lsx").write_text("<meta/>")
+
+            data_loc = data_dir / "Localization" / "English"
+            data_loc.mkdir(parents=True)
+            (data_loc / "SampleSpell.xml").write_text("<loc/>")
+
+            # Test write_bytes_if_different performs atomic writes
+            test_file = data_dir / "test_out.txt"
+            act1 = write_bytes_if_different(b"hello", test_file)
+            self.assertEqual(act1, "created")
+            self.assertEqual(test_file.read_bytes(), b"hello")
+            self.assertEqual(list(data_dir.glob("*.tmp")), [])
+
+            act2 = write_bytes_if_different(b"world", test_file)
+            self.assertEqual(act2, "updated")
+            self.assertEqual(test_file.read_bytes(), b"world")
+
+            # Test clean_custom_mods preserves kept mod
+            kept = clean_custom_mods(data_dir, keep_mods=["SampleSpell"], source_dir=source_dir, quiet=True)
+            self.assertEqual(kept, 0)
+            self.assertTrue(data_mod.is_dir())
+
+            # Test clean_custom_mods purges custom mod when not kept
+            removed = clean_custom_mods(data_dir, keep_mods=[], source_dir=source_dir, quiet=True)
+            self.assertGreater(removed, 0)
+            self.assertFalse(data_mod.exists())
+            self.assertFalse((data_loc / "SampleSpell.xml").exists())
 
 
 if __name__ == "__main__":

@@ -68,15 +68,19 @@ class ModioClientTests(unittest.TestCase):
         def fake_opener(req, timeout=30):
             calls.append(req.full_url)
             if "_offset=0" in req.full_url:
-                body = json.dumps({
-                    "data": [{"id": 1, "name": "Mod 1"}, {"id": 2, "name": "Mod 2"}],
-                    "result_total": 3,
-                }).encode("utf-8")
+                body = json.dumps(
+                    {
+                        "data": [{"id": 1, "name": "Mod 1"}, {"id": 2, "name": "Mod 2"}],
+                        "result_total": 3,
+                    }
+                ).encode("utf-8")
             else:
-                body = json.dumps({
-                    "data": [{"id": 3, "name": "Mod 3"}],
-                    "result_total": 3,
-                }).encode("utf-8")
+                body = json.dumps(
+                    {
+                        "data": [{"id": 3, "name": "Mod 3"}],
+                        "result_total": 3,
+                    }
+                ).encode("utf-8")
 
             resp = Mock()
             resp.read.return_value = body
@@ -114,7 +118,9 @@ class ModioClientTests(unittest.TestCase):
             response.__exit__ = Mock(return_value=False)
             opener = Mock(return_value=response)
 
-            client = ModioClient("tok", opener=opener, cache_path=cache_file, cache_ttl_seconds=60, enable_cache=True)
+            client = ModioClient(
+                "tok", opener=opener, cache_path=cache_file, cache_ttl_seconds=60, enable_cache=True
+            )
             res1 = client.request("GET", "/games/6715")
             self.assertEqual(res1, {"result": "cached_val"})
             self.assertEqual(opener.call_count, 1)
@@ -136,7 +142,9 @@ class ModioClientTests(unittest.TestCase):
             response.__exit__ = Mock(return_value=False)
             opener = Mock(return_value=response)
 
-            client = ModioClient("tok", opener=opener, cache_path=cache_file, cache_ttl_seconds=60, enable_cache=True)
+            client = ModioClient(
+                "tok", opener=opener, cache_path=cache_file, cache_ttl_seconds=60, enable_cache=True
+            )
             client.request("GET", "/games/6715")
             self.assertTrue(cache_file.exists())
 
@@ -155,12 +163,100 @@ class ModioClientTests(unittest.TestCase):
             response.__exit__ = Mock(return_value=False)
             opener = Mock(return_value=response)
 
-            client = ModioClient("tok", opener=opener, cache_path=cache_file, cache_ttl_seconds=60, enable_cache=True)
+            client = ModioClient(
+                "tok", opener=opener, cache_path=cache_file, cache_ttl_seconds=60, enable_cache=True
+            )
             client.request("GET", "/games/6715")
             self.assertEqual(opener.call_count, 1)
 
             client.request("GET", "/games/6715", bypass_cache=True)
             self.assertEqual(opener.call_count, 2)
+
+    def test_multipart_binary_file_upload_encoding(self):
+        response = Mock()
+        response.read.return_value = json.dumps({"id": 999, "version": "1.0.0"}).encode("utf-8")
+        response.__enter__ = Mock(return_value=response)
+        response.__exit__ = Mock(return_value=False)
+        opener = Mock(return_value=response)
+
+        client = ModioClient("test-token", opener=opener)
+        dummy_pak = b"PK_DUMMY_BINARY_DATA_12345"
+        fields = [
+            ("filedata", ("my_mod.pak", dummy_pak, "application/octet-stream")),
+            ("version", "1.0.0"),
+            ("active", "true"),
+        ]
+
+        payload = client.request("POST", "/games/6715/mods/42/files", fields=fields, multipart=True)
+        self.assertEqual(payload["id"], 999)
+
+        request = opener.call_args.args[0]
+        content_type = request.get_header("Content-type")
+        self.assertIn("multipart/form-data; boundary=", content_type)
+
+        req_data = request.data
+        self.assertIsInstance(req_data, bytes)
+        self.assertIn(
+            b'Content-Disposition: form-data; name="filedata"; filename="my_mod.pak"', req_data
+        )
+        self.assertIn(b"Content-Type: application/octet-stream", req_data)
+        self.assertIn(dummy_pak, req_data)
+        self.assertIn(b'Content-Disposition: form-data; name="version"', req_data)
+        self.assertIn(b"1.0.0", req_data)
+
+    def test_upload_mod_file_api(self):
+        import tempfile
+        from pathlib import Path
+
+        from bg3_core.modio.modio_client import upload_mod_file
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            pak_path = Path(tmpdir) / "TestMod.pak"
+            pak_path.write_bytes(b"LSPK_MOCK_BYTES")
+
+            response = Mock()
+            response.read.return_value = json.dumps({"status": "uploaded", "id": 101}).encode(
+                "utf-8"
+            )
+            response.__enter__ = Mock(return_value=response)
+            response.__exit__ = Mock(return_value=False)
+            opener = Mock(return_value=response)
+
+            client = ModioClient("test-token", opener=opener)
+            res = upload_mod_file(
+                mod_id=42,
+                file_path=pak_path,
+                version="1.0.0",
+                changelog="Initial release",
+                active=True,
+                client=client,
+            )
+            self.assertEqual(res["status"], "uploaded")
+            self.assertEqual(res["id"], 101)
+
+            req = opener.call_args.args[0]
+            self.assertEqual(req.get_method(), "POST")
+            self.assertIn("/games/6715/mods/42/files", req.full_url)
+            self.assertIn(b'filename="TestMod.pak"', req.data)
+            self.assertIn(b"LSPK_MOCK_BYTES", req.data)
+            self.assertIn(b"Initial release", req.data)
+
+    def test_upload_mod_file_validations(self):
+        from bg3_core.modio.modio_client import upload_mod_file
+
+        # Missing file raises FileNotFoundError
+        with self.assertRaises(FileNotFoundError):
+            upload_mod_file(mod_id=42, file_path="/nonexistent/path/Mod.pak")
+
+        # Missing token raises ModioError
+        import tempfile
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            p = Path(tmpdir) / "dummy.pak"
+            p.write_bytes(b"data")
+            with self.assertRaises(ModioError):
+                upload_mod_file(mod_id=42, file_path=p, client=ModioClient(token=""))
 
 
 if __name__ == "__main__":

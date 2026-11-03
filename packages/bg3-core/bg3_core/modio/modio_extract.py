@@ -29,6 +29,12 @@ from bg3_core.binary.larian_parsers import (
 )
 from bg3_core.binary.lspk import LspkArchive
 from bg3_core.cli.common import ConsoleColor, ExitCode
+from bg3_core.data.mod_overrides import (
+    BASE_GAME_LOCA_HANDLES,
+    BASE_GAME_PASSIVES,
+    BASE_GAME_SPELLS,
+    MOD_SPECIFIC_OVERRIDES,
+)
 from bg3_core.env_paths import get_subscribed_mods_dir, normalize_mod_key
 from bg3_core.exceptions import BG3CatalogError, BG3Error, BG3PackagingError
 from bg3_core.modio.modio_client import (
@@ -37,12 +43,6 @@ from bg3_core.modio.modio_client import (
     query_modio,
 )
 from bg3_core.modio.update_library_catalog import write_library_catalog
-from bg3_core.profile.mod_overrides import (
-    BASE_GAME_LOCA_HANDLES,
-    BASE_GAME_PASSIVES,
-    BASE_GAME_SPELLS,
-    MOD_SPECIFIC_OVERRIDES,
-)
 
 # ----------------------------------------------------------------------
 # Feature Extraction and In-Game Validation

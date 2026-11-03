@@ -47,6 +47,7 @@ from bg3_core.binary.lspk import (
     lz4_block_compress,
     lz4_block_decompress,
     lz4_frame_or_block_decompress,
+    write_lspk_archive,
 )
 
 __all__ = [
@@ -56,6 +57,7 @@ __all__ = [
     "lz4_block_compress",
     "lz4_block_decompress",
     "lz4_frame_or_block_decompress",
+    "write_lspk_archive",
     # LSF
     "LSF_MAGIC",
     "LsfAttribute",

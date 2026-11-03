@@ -50,7 +50,7 @@ def get_default_data_dir() -> Path:
 
 
 def write_bytes_if_different(data: bytes, dst: Path, dry_run: bool = False) -> str:
-    """Writes bytes to dst if dst does not exist or content differs."""
+    """Writes bytes to dst if dst does not exist or content differs atomically."""
     if not dst.exists():
         action = "created"
     elif dst.read_bytes() != data:
@@ -60,7 +60,16 @@ def write_bytes_if_different(data: bytes, dst: Path, dry_run: bool = False) -> s
 
     if not dry_run:
         dst.parent.mkdir(parents=True, exist_ok=True)
-        dst.write_bytes(data)
+        temp_dst = dst.with_suffix(f"{dst.suffix}.tmp")
+        try:
+            temp_dst.write_bytes(data)
+            temp_dst.replace(dst)
+        finally:
+            if temp_dst.exists():
+                try:
+                    temp_dst.unlink()
+                except OSError:
+                    pass
     return action
 
 
@@ -459,7 +468,7 @@ def clean_mod_data(mod_path: Path, data_dir: Path, dry_run: bool = False, quiet:
 
 def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list[Any] | None = None, quiet: bool = False, source_dir: Path | None = None) -> int:
     """
-    Purges custom studio mods from Data/ without touching eldritch-blast baseline or base game files.
+    Purges custom studio mods from Data/ without touching base game files.
     """
     removed_count = 0
     keep_set = set(keep_mods or [])
@@ -472,8 +481,6 @@ def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list[Any
         if not parent.exists():
             continue
         for item in parent.iterdir():
-            if "eldritch-blast" in item.name.lower():
-                continue
             if any(item.name.startswith(p) for p in custom_prefixes):
                 if any(item.name.startswith(k) for k in keep_set):
                     continue
@@ -493,9 +500,9 @@ def clean_custom_mods(data_dir: Path, dry_run: bool = False, keep_mods: list[Any
     loc_dir = data_dir / "Localization" / "English"
     if loc_dir.exists():
         for item in loc_dir.iterdir():
-            if "eldritch-blast" in item.name.lower():
-                continue
             if any(item.name.startswith(p) for p in custom_prefixes):
+                if any(item.name.startswith(k) for k in keep_set):
+                    continue
                 removed_count += 1
                 if dry_run:
                     if not quiet:
@@ -601,7 +608,7 @@ def run_sync(
     # Auto-bump build number if requested
     if bump_build:
         try:
-            from bg3_core.profile.bump_mod_version import bump_version
+            from bg3_authoring.bump_mod_version import bump_version
             for mod_path in sorted(mod_folders):
                 bump_version(mod_path.name, action="build", dry_run=dry_run)
         except Exception as e:
@@ -692,7 +699,7 @@ def main() -> None:
     parser.add_argument(
         "--clean-custom",
         action="store_true",
-        help="Purge all custom studio mods from Steam Data (protects base game and eldritch-blast)",
+        help="Purge all custom studio mods from Steam Data (protects base game files)",
     )
     parser.add_argument(
         "--clean-mod",

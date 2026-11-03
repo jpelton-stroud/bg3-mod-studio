@@ -31,10 +31,10 @@ class TestLsfParser(unittest.TestCase):
         mod_node = LsfNode(name="ModuleShortDesc")
         mod_node.attributes["Name"] = LsfAttribute(name="Name", type_id=TYPE_LS_STRING, value="CustomSpells")
         mod_node.attributes["Folder"] = LsfAttribute(
-            name="Folder", type_id=TYPE_LS_STRING, value="CustomSpells_11111111-2222-3333-4444-555555555555"
+            name="Folder", type_id=TYPE_LS_STRING, value="CustomSpells_28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8"
         )
         mod_node.attributes["UUID"] = LsfAttribute(
-            name="UUID", type_id=TYPE_UUID, value="11111111-2222-3333-4444-555555555555"
+            name="UUID", type_id=TYPE_UUID, value="28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8"
         )
         mod_node.attributes["Version64"] = LsfAttribute(name="Version64", type_id=TYPE_INT64, value=36028797018963968)
         mod_node.attributes["Active"] = LsfAttribute(name="Active", type_id=TYPE_BOOL, value=True)
@@ -57,7 +57,7 @@ class TestLsfParser(unittest.TestCase):
         self.assertIsNotNone(found_mod)
         assert found_mod is not None
         self.assertEqual(found_mod.get_attr_value("Name"), "CustomSpells")
-        self.assertEqual(found_mod.get_attr_value("UUID"), "11111111-2222-3333-4444-555555555555")
+        self.assertEqual(found_mod.get_attr_value("UUID"), "28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8")
         self.assertEqual(found_mod.get_attr_value("Version64"), 36028797018963968)
         self.assertEqual(found_mod.get_attr_value("Active"), True)
 
@@ -106,7 +106,7 @@ class TestLsfParser(unittest.TestCase):
         doc = LsfDocument(version=7)
         save_root = LsfNode(name="save")
         mod1 = LsfNode(name="ModuleShortDesc")
-        mod1.attributes["UUID"] = LsfAttribute(name="UUID", type_id=TYPE_UUID, value="22222222-3333-4444-5555-666666666666")
+        mod1.attributes["UUID"] = LsfAttribute(name="UUID", type_id=TYPE_UUID, value="b47c0a76-9c44-48f8-b39d-7df64c39832b")
         mod1.attributes["Name"] = LsfAttribute(name="Name", type_id=TYPE_FIXED_STRING, value="EpicFeats")
         mod1.attributes["Folder"] = LsfAttribute(name="Folder", type_id=TYPE_FIXED_STRING, value="EpicFeats")
         mod1.attributes["Version64"] = LsfAttribute(name="Version64", type_id=TYPE_INT64, value=1000)
@@ -119,9 +119,29 @@ class TestLsfParser(unittest.TestCase):
 
         self.assertEqual(len(extracted_mods), 1)
         self.assertEqual(extracted_mods[0]["name"], "EpicFeats")
-        self.assertEqual(extracted_mods[0]["uuid"], "22222222-3333-4444-5555-666666666666")
+        self.assertEqual(extracted_mods[0]["uuid"], "b47c0a76-9c44-48f8-b39d-7df64c39832b")
         self.assertEqual(extracted_mods[0]["folder"], "EpicFeats")
         self.assertEqual(extracted_mods[0]["version"], "1000")
+
+    def test_lsf_uuid_endianness_and_fidelity(self) -> None:
+        """Verify LSF UUID serialization matches Microsoft GUID layout without byte-swapping."""
+        import uuid
+
+        from bg3_core.binary.lsf import _parse_uuid_bytes, _serialize_uuid
+
+        asymmetric_uuid = "28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8"
+        u = uuid.UUID(asymmetric_uuid)
+        guid_bytes = u.bytes_le
+
+        # Trailing 8 bytes must not be pairwise swapped
+        self.assertEqual(guid_bytes[8:], bytes.fromhex("b3b56e922f71b6b8"))
+
+        # Verify round-trip parsing and serialization
+        parsed = _parse_uuid_bytes(guid_bytes)
+        self.assertEqual(parsed, asymmetric_uuid)
+
+        serialized = _serialize_uuid(asymmetric_uuid)
+        self.assertEqual(serialized, guid_bytes)
 
 
 if __name__ == "__main__":

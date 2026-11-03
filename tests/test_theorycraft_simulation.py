@@ -305,15 +305,11 @@ class TestGeneralizedMulticlassDPR(unittest.TestCase):
         gear: dict[str, int] = {}
 
         # Fighter 5 (2 attacks, Action Surge -> 4 attacks)
-        f5 = simulate_turn_1_dpr(
-            "melee_burst", {"fighter": 5}, stats, gear, prof=3, target_ac=15
-        )
+        f5 = simulate_turn_1_dpr("melee_burst", {"fighter": 5}, stats, gear, prof=3, target_ac=15)
         self.assertEqual(f5.beams_or_attacks, 4)
 
         # Fighter 11 (3 attacks, Action Surge -> 6 attacks)
-        f11 = simulate_turn_1_dpr(
-            "melee_burst", {"fighter": 11}, stats, gear, prof=4, target_ac=15
-        )
+        f11 = simulate_turn_1_dpr("melee_burst", {"fighter": 11}, stats, gear, prof=4, target_ac=15)
         self.assertEqual(f11.beams_or_attacks, 6)
         self.assertGreater(f11.expected_dpr, f5.expected_dpr)
 
@@ -520,6 +516,168 @@ class TestTheorycraftCLI(unittest.TestCase):
             weapon_damage="1d12",
         )
         self.assertEqual(melee_res.damage_breakdown.weapon_base_avg, 6.5)
+
+    def test_savage_attacker_crit_and_melee_rules(self) -> None:
+        """Verify Savage Attacker applies strictly to melee and does not double crit dice twice."""
+        gear: dict[str, int] = {}
+        # 1. Ranged burst with savage_attacker=True should NOT apply savage attacker (still 5.5)
+        ranged_res = simulate_turn_1_dpr(
+            "ranged_burst",
+            classes={"fighter": 5},
+            stats={"Str": 10, "Dex": 18, "Con": 14, "Int": 10, "Wis": 10, "Cha": 10},
+            gear_effects=gear,
+            prof=3,
+            target_ac=15,
+            savage_attacker=True,
+            weapon_damage="1d10",
+        )
+        self.assertEqual(ranged_res.damage_breakdown.weapon_base_avg, 5.5)
+        self.assertEqual(ranged_res.damage_breakdown.crit_damage_per_attack, 5.5)
+
+        # 2. Melee burst with savage_attacker=True: crit damage adds weapon_base_avg, not 2x
+        melee_res = simulate_turn_1_dpr(
+            "melee_burst",
+            classes={"fighter": 5},
+            stats={"Str": 18, "Dex": 10, "Con": 14, "Int": 10, "Wis": 10, "Cha": 10},
+            gear_effects=gear,
+            prof=3,
+            target_ac=15,
+            savage_attacker=True,
+            weapon_damage="1d12",
+        )
+        # 1d12 Savage Attacker avg is ~8.486
+        ev_1d12_savage = calculate_savage_attacker_average(1, 12)
+        self.assertAlmostEqual(melee_res.damage_breakdown.weapon_base_avg, ev_1d12_savage, places=2)
+        self.assertAlmostEqual(
+            melee_res.damage_breakdown.crit_damage_per_attack, ev_1d12_savage, places=2
+        )
+
+    def test_divine_smite_slot_capping(self) -> None:
+        """Verify Divine Smite damage across multiple attacks is strictly bounded by available spell slots."""
+        # Paladin 2 has two 1st-level spell slots (2d8 = 9.0 damage each -> total 18.0)
+        # Fighter 5 gives Extra Attack (2 attacks) + Action Surge -> 4 weapon attacks in turn 1
+        res = simulate_turn_1_dpr(
+            "melee_burst",
+            classes={"paladin": 2, "fighter": 5},
+            stats={"Str": 16, "Dex": 10, "Con": 14, "Int": 10, "Wis": 10, "Cha": 14},
+            gear_effects={},
+            prof=3,
+            target_ac=10,
+        )
+        self.assertEqual(res.beams_or_attacks, 4)
+        # Across 4 attacks, total smite contribution should be exactly 18.0 (4.5 per attack)
+        self.assertEqual(res.damage_breakdown.smite_avg, 4.5)
+        self.assertEqual(res.damage_breakdown.smite_avg * res.beams_or_attacks, 18.0)
+
+    def test_domain_validation_exception_raised(self) -> None:
+        """Verify BG3BuildValidationError is raised when character level exceeds 20."""
+        from bg3_theorycraft.exceptions import BG3BuildValidationError
+
+        with self.assertRaises(BG3BuildValidationError):
+            simulate_build(
+                classes={"paladin": 15, "sorcerer": 10},  # total 25 > 20
+                stats={"Str": 16, "Dex": 10, "Con": 14, "Int": 10, "Wis": 10, "Cha": 14},
+            )
+
+
+class TestDamageResistancesAndHeadlessFormatting(unittest.TestCase):
+    """Verifies damage resistance scaling and headless summary formatting."""
+
+    def test_apply_resistance_multipliers(self) -> None:
+        from bg3_theorycraft import (
+            ResistanceMultiplier,
+            apply_resistance,
+        )
+
+        self.assertEqual(apply_resistance(100.0, ResistanceMultiplier.IMMUNITY), 0.0)
+        self.assertEqual(apply_resistance(100.0, ResistanceMultiplier.RESISTANCE), 50.0)
+        self.assertEqual(apply_resistance(100.0, ResistanceMultiplier.NORMAL), 100.0)
+        self.assertEqual(apply_resistance(100.0, ResistanceMultiplier.VULNERABILITY), 200.0)
+
+        # String aliases
+        self.assertEqual(apply_resistance(100.0, "immunity"), 0.0)
+        self.assertEqual(apply_resistance(100.0, "resistance"), 50.0)
+        self.assertEqual(apply_resistance(100.0, "vulnerability"), 200.0)
+        self.assertEqual(apply_resistance(100.0, "0.25"), 25.0)
+
+    def test_target_resistances_in_turn_1_dpr(self) -> None:
+        from bg3_theorycraft import DamageType, simulate_turn_1_dpr
+
+        classes = {"paladin": 2, "fighter": 5}
+        stats = {"Str": 16, "Dex": 10, "Con": 14, "Int": 10, "Wis": 10, "Cha": 14}
+
+        # Baseline DPR (target AC 10)
+        normal = simulate_turn_1_dpr(
+            "melee_burst",
+            classes=classes,
+            stats=stats,
+            gear_effects={},
+            prof=3,
+            target_ac=10,
+        )
+
+        # Target resistant to slashing (halves weapon base, flat ability/gear, but leaves radiant smite untouched)
+        resistant = simulate_turn_1_dpr(
+            "melee_burst",
+            classes=classes,
+            stats=stats,
+            gear_effects={},
+            prof=3,
+            target_ac=10,
+            target_resistances={"slashing": "resistance"},
+        )
+        self.assertLess(resistant.expected_dpr, normal.expected_dpr)
+        self.assertGreater(resistant.expected_dpr, 0.0)
+
+        # Target immune to radiant (divine smite damage drops to 0)
+        immune_radiant = simulate_turn_1_dpr(
+            "melee_burst",
+            classes=classes,
+            stats=stats,
+            gear_effects={},
+            prof=3,
+            target_ac=10,
+            target_resistances={DamageType.RADIANT.value: "immunity"},
+        )
+        self.assertLess(immune_radiant.expected_dpr, normal.expected_dpr)
+
+    def test_eldritch_blast_force_vulnerability(self) -> None:
+        from bg3_theorycraft import simulate_turn_1_dpr
+
+        classes = {"warlock": 2}
+        stats = {"Str": 10, "Dex": 10, "Con": 10, "Int": 10, "Wis": 10, "Cha": 20}
+
+        normal = simulate_turn_1_dpr(
+            "eldritch_blast",
+            classes=classes,
+            stats=stats,
+            gear_effects={},
+            prof=2,
+            target_ac=10,
+        )
+        vulnerable = simulate_turn_1_dpr(
+            "eldritch_blast",
+            classes=classes,
+            stats=stats,
+            gear_effects={},
+            prof=2,
+            target_ac=10,
+            target_resistances={"force": 2.0},
+        )
+        self.assertAlmostEqual(vulnerable.expected_dpr, normal.expected_dpr * 2.0, delta=0.5)
+
+    def test_headless_format_simulation_summary(self) -> None:
+        from bg3_theorycraft import format_simulation_summary, simulate_build
+
+        res = simulate_build(
+            classes={"wizard": 20},
+            stats={"Str": 10, "Dex": 14, "Con": 14, "Int": 20, "Wis": 10, "Cha": 10},
+        )
+        output = format_simulation_summary(res)
+        self.assertIn("Wizard 20", output)
+        self.assertIn("Proficiency Bonus:", output)
+        self.assertIn("Effective Spell DC:", output)
+        self.assertIn("Expected DPR:", output)
 
 
 if __name__ == "__main__":

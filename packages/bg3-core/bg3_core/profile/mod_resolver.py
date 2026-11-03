@@ -18,7 +18,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 import zlib
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from bg3_core.binary.larian_parsers import DEFAULT_VERSION64, find_mod_meta_files, parse_meta_lsx
 from bg3_core.binary.lspk import LspkArchive
@@ -134,17 +134,67 @@ def extract_metadata_from_meta_lsx(path: Path, fallback_name: str = "") -> Optio
         return None
 
 
+def _default_modio_fetcher(clean_id: str, auto_document: bool = True) -> Optional[Dict[str, Any]]:
+    """Strategy handler for fetching remote dependency metadata from mod.io."""
+    try:
+        from bg3_core.modio.modio_client import get_api_key, query_modio
+
+        api_key = get_api_key()
+        if not api_key:
+            return None
+
+        mod_meta = query_modio(clean_id, api_key)
+        if not mod_meta:
+            return None
+
+        slug = mod_meta.get("name_id", "")
+        m_name = mod_meta.get("name", clean_id)
+        m_id = mod_meta.get("id", 0)
+
+        if auto_document:
+            try:
+                from bg3_core.modio.modio_extract import process_mod
+
+                res = process_mod(
+                    query=slug or clean_id,
+                    write_spec=True,
+                    update_library=True,
+                )
+                target_dir = Path(res["output_dir"])
+                for meta_path in find_mod_meta_files(target_dir):
+                    extracted = extract_metadata_from_meta_lsx(meta_path, m_name)
+                    if extracted:
+                        if not extracted.get("PublishHandle"):
+                            extracted["PublishHandle"] = m_id
+                        return extracted
+            except (OSError, KeyError, ValueError, ET.ParseError, BG3Error):
+                pass
+
+        # Return synthesized metadata if auto-documentation did not complete
+        return {
+            "Folder": slug or clean_id,
+            "MD5": "",
+            "Name": m_name,
+            "PublishHandle": m_id,
+            "UUID": str(mod_meta.get("id", "")),
+            "Version64": DEFAULT_VERSION64,
+        }
+    except (OSError, KeyError, ValueError, BG3Error):
+        return None
+
+
 def resolve_dependency_metadata(
     identifier: str,
     auto_document: bool = True,
     strict: bool = False,
+    remote_fetcher: Optional[Callable[..., Optional[Dict[str, Any]]]] = None,
 ) -> Dict[str, Any]:
     """
     Resolves dependency metadata with fallback chain:
     1. Check KNOWN_DEPENDENCIES
     2. Lookup via mods/library.md & local mods/<slug>/data/meta.lsx
     3. Search workspace mods/ & my_mods/
-    4. Remote fallback via mod.io REST API
+    4. Remote fallback via mod.io REST API (or custom remote_fetcher strategy)
     """
     clean_id = identifier.strip()
     norm_id = normalize_mod_key(clean_id)
@@ -214,46 +264,19 @@ def resolve_dependency_metadata(
                     if meta:
                         return meta
 
-    # 4. Remote fallback to mod.io REST API
+    # 4. Remote fallback via strategy handler
+    fetcher = remote_fetcher if remote_fetcher is not None else _default_modio_fetcher
     try:
-        from bg3_core.modio.modio_client import get_api_key, query_modio
+        import inspect
 
-        api_key = get_api_key()
-        if api_key:
-            mod_meta = query_modio(clean_id, api_key)
-            if mod_meta:
-                slug = mod_meta.get("name_id", "")
-                m_name = mod_meta.get("name", clean_id)
-                m_id = mod_meta.get("id", 0)
+        sig = inspect.signature(fetcher)
+        if len(sig.parameters) >= 2:
+            remote_meta = fetcher(clean_id, auto_document)
+        else:
+            remote_meta = fetcher(clean_id)
 
-                if auto_document:
-                    try:
-                        from bg3_core.modio.modio_extract import process_mod
-
-                        res = process_mod(
-                            query=slug or clean_id,
-                            write_spec=True,
-                            update_library=True,
-                        )
-                        target_dir = Path(res["output_dir"])
-                        for meta_path in find_mod_meta_files(target_dir):
-                            extracted = extract_metadata_from_meta_lsx(meta_path, m_name)
-                            if extracted:
-                                if not extracted.get("PublishHandle"):
-                                    extracted["PublishHandle"] = m_id
-                                return extracted
-                    except (OSError, KeyError, ValueError, ET.ParseError, BG3Error):
-                        pass
-
-                # Return synthesized metadata if auto-documentation did not complete
-                return {
-                    "Folder": slug or clean_id,
-                    "MD5": "",
-                    "Name": m_name,
-                    "PublishHandle": m_id,
-                    "UUID": str(mod_meta.get("id", "")),
-                    "Version64": DEFAULT_VERSION64,
-                }
+        if remote_meta:
+            return remote_meta
     except (OSError, KeyError, ValueError, BG3Error):
         pass
 
@@ -290,7 +313,11 @@ def find_installed_pak(dep: Dict[str, Any], search_dirs: Sequence[Path]) -> Opti
             p_stem = pak_file.stem
             p_norm = normalize_mod_key(p_stem)
             # Require exact UUID match or exact normalized folder/name equality to avoid falsely matching sub-patches
-            if (dep_uuid and dep_uuid in p_stem.lower()) or p_norm == norm_folder or p_norm == norm_name:
+            if (
+                (dep_uuid and dep_uuid in p_stem.lower())
+                or p_norm == norm_folder
+                or p_norm == norm_name
+            ):
                 if re.search(r"-[0-9a-z]{4}$", p_stem.lower()):
                     fallback_candidates.append(pak_file)
                 else:
@@ -327,24 +354,64 @@ def find_installed_pak(dep: Dict[str, Any], search_dirs: Sequence[Path]) -> Opti
     return None
 
 
+def _default_modio_downloader(dep: Dict[str, Any]) -> Optional[Tuple[str, bytes]]:
+    """Strategy handler downloading a mod archive from mod.io."""
+    pub_handle = dep.get("PublishHandle")
+    mod_name = dep.get("Name", dep.get("Folder", ""))
+    try:
+        from bg3_core.modio.modio_client import download_mod_file, get_api_key, query_modio
+
+        api_key = get_api_key()
+        if not api_key:
+            return None
+
+        lookup_query = str(pub_handle) if pub_handle and pub_handle != 0 else mod_name
+        mod_meta = query_modio(lookup_query, api_key)
+        if not mod_meta:
+            return None
+
+        archive_bytes = download_mod_file(mod_meta, api_key)
+        pak_name = f"{dep.get('Folder', mod_meta.get('name_id', 'mod'))}.pak"
+        pak_payload: Optional[bytes] = None
+
+        if archive_bytes[:2] == b"PK":
+            with zipfile.ZipFile(io.BytesIO(archive_bytes)) as z:
+                for item in z.namelist():
+                    if item.lower().endswith(".pak"):
+                        pak_name = Path(item).name
+                        pak_payload = z.read(item)
+                        break
+        elif archive_bytes[:4] == b"LSPK":
+            pak_payload = archive_bytes
+
+        if pak_payload is not None:
+            return (pak_name, pak_payload)
+        return None
+    except (BG3Error, OSError, ValueError, zipfile.BadZipFile):
+        return None
+
+
 def ensure_dependency_paks(
-    dependencies: List[Dict[str, Any]],
-    target_dirs: Optional[List[Path]] = None,
+    dependencies: Sequence[Dict[str, Any]],
+    target_dirs: Optional[Sequence[Path]] = None,
+    remote_downloader: Optional[Callable[[Dict[str, Any]], Optional[Any]]] = None,
 ) -> List[Dict[str, Any]]:
     """
     Ensures .pak files for dependencies exist in AppData Mods.
-    Synchronizes between directories if found in one, or downloads from mod.io if missing.
+    Synchronizes between directories if found in one, or downloads via remote_downloader if missing.
     Custom .pak files must reside in AppData/Mods (never copied to Steam Data/Mods).
     """
+    dirs: List[Path] = []
     if target_dirs is None:
-        target_dirs = []
         for appdata in detect_bg3_appdata_dirs():
             app_mods = appdata / "Mods"
-            if app_mods not in target_dirs:
-                target_dirs.append(app_mods)
-        if not target_dirs:
+            if app_mods not in dirs:
+                dirs.append(app_mods)
+        if not dirs:
             data_mods = detect_data_dir() / "Mods"
-            target_dirs.append(data_mods)
+            dirs.append(data_mods)
+    else:
+        dirs = list(target_dirs)
 
     results: List[Dict[str, Any]] = []
 
@@ -353,11 +420,11 @@ def ensure_dependency_paks(
         if dep_uuid in CORE_GAME_UUIDS or dep.get("Name") in ("GustavDev", "GustavX"):
             continue
 
-        existing_pak = find_installed_pak(dep, target_dirs)
+        existing_pak = find_installed_pak(dep, dirs)
 
         if existing_pak and existing_pak.is_file():
             # Synchronize to any target directories missing it
-            for t_dir in target_dirs:
+            for t_dir in dirs:
                 if find_installed_pak(dep, [t_dir]):
                     continue
                 dest = t_dir / existing_pak.name
@@ -365,76 +432,73 @@ def ensure_dependency_paks(
                     t_dir.mkdir(parents=True, exist_ok=True)
                     try:
                         shutil.copy2(existing_pak, dest)
-                        results.append({
-                            "mod": dep.get("Name", dep_uuid),
-                            "action": "copied",
-                            "source": str(existing_pak),
-                            "destination": str(dest),
-                            "status": "synchronized",
-                        })
+                        results.append(
+                            {
+                                "mod": dep.get("Name", dep_uuid),
+                                "action": "copied",
+                                "source": str(existing_pak),
+                                "destination": str(dest),
+                                "status": "synchronized",
+                            }
+                        )
                     except (OSError, shutil.Error) as err:
-                        results.append({
-                            "mod": dep.get("Name", dep_uuid),
-                            "action": "copy_failed",
-                            "error": str(err),
-                            "status": "error",
-                        })
+                        results.append(
+                            {
+                                "mod": dep.get("Name", dep_uuid),
+                                "action": "copy_failed",
+                                "error": str(err),
+                                "status": "error",
+                            }
+                        )
             continue
 
-        # Missing from all target directories: attempt to fetch from mod.io
-        pub_handle = dep.get("PublishHandle")
+        # Missing from all target directories: attempt to fetch via remote downloader strategy
         mod_name = dep.get("Name", dep.get("Folder", ""))
         downloaded = False
+        downloader = remote_downloader if remote_downloader is not None else _default_modio_downloader
 
         try:
-            from bg3_core.modio.modio_client import download_mod_file, get_api_key, query_modio
+            res = downloader(dep)
+            pak_name = f"{dep.get('Folder', 'mod')}.pak"
+            pak_payload: Optional[bytes] = None
+            if isinstance(res, tuple) and len(res) == 2:
+                pak_name, pak_payload = res
+            elif isinstance(res, (bytes, bytearray)):
+                pak_payload = bytes(res)
 
-            api_key = get_api_key()
-            if api_key:
-                lookup_query = str(pub_handle) if pub_handle and pub_handle != 0 else mod_name
-                mod_meta = query_modio(lookup_query, api_key)
-                if mod_meta:
-                    archive_bytes = download_mod_file(mod_meta, api_key)
-                    pak_name = f"{dep.get('Folder', mod_meta.get('name_id', 'mod'))}.pak"
-                    pak_payload: Optional[bytes] = None
-
-                    if archive_bytes[:2] == b"PK":
-                        with zipfile.ZipFile(io.BytesIO(archive_bytes)) as z:
-                            for item in z.namelist():
-                                if item.lower().endswith(".pak"):
-                                    pak_name = Path(item).name
-                                    pak_payload = z.read(item)
-                                    break
-                    elif archive_bytes[:4] == b"LSPK":
-                        pak_payload = archive_bytes
-
-                    if pak_payload:
-                        for t_dir in target_dirs:
-                            t_dir.mkdir(parents=True, exist_ok=True)
-                            dest_file = t_dir / pak_name
-                            dest_file.write_bytes(pak_payload)
-                        downloaded = True
-                        results.append({
-                            "mod": mod_name,
-                            "action": "downloaded",
-                            "filename": pak_name,
-                            "size_bytes": len(pak_payload),
-                            "status": "downloaded_from_modio",
-                        })
+            if pak_payload:
+                for t_dir in dirs:
+                    t_dir.mkdir(parents=True, exist_ok=True)
+                    dest_file = t_dir / pak_name
+                    dest_file.write_bytes(pak_payload)
+                downloaded = True
+                results.append(
+                    {
+                        "mod": mod_name,
+                        "action": "downloaded",
+                        "filename": pak_name,
+                        "size_bytes": len(pak_payload),
+                        "status": "downloaded_from_modio",
+                    }
+                )
         except (BG3Error, OSError, ValueError, zipfile.BadZipFile) as exc:
-            results.append({
-                "mod": mod_name,
-                "action": "download_failed",
-                "error": str(exc),
-                "status": "missing",
-            })
+            results.append(
+                {
+                    "mod": mod_name,
+                    "action": "download_failed",
+                    "error": str(exc),
+                    "status": "missing",
+                }
+            )
             continue
 
         if not downloaded:
-            results.append({
-                "mod": mod_name,
-                "action": "not_found",
-                "status": "missing",
-            })
+            results.append(
+                {
+                    "mod": mod_name,
+                    "action": "not_found",
+                    "status": "missing",
+                }
+            )
 
     return results

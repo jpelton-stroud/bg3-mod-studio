@@ -29,6 +29,8 @@ class TestPackageFacades(unittest.TestCase):
 
         # Core binary engines
         self.assertTrue(callable(bg3_core.build_lspk_archive))
+        self.assertTrue(callable(bg3_core.write_lspk_archive))
+        self.assertIn("write_lspk_archive", bg3_core.__all__)
         self.assertIsNotNone(bg3_core.LspkArchive)
         self.assertIsNotNone(bg3_core.LsfDocument)
 
@@ -101,6 +103,7 @@ class TestPackageFacades(unittest.TestCase):
         self.assertTrue(callable(bg3_authoring.collect_mod_files))
         self.assertTrue(callable(bg3_authoring.check_uuid_uniqueness))
         self.assertTrue(callable(bg3_authoring.sync_mod))
+        self.assertTrue(callable(bg3_authoring.bump_version))
 
         # Domain exceptions
         for exc_name in (
@@ -125,6 +128,16 @@ class TestPackageFacades(unittest.TestCase):
 
         self.assertTrue(callable(bg3_theorycraft.simulate_build))
         self.assertTrue(callable(bg3_theorycraft.simulate_turn_1_dpr))
+
+        # Headless calculation execution without CLI modules
+        dpr_res = bg3_theorycraft.simulate_turn_1_dpr(
+            "melee_burst",
+            {"fighter": 12},
+            {"Str": 20, "Dex": 10, "Con": 14, "Int": 10, "Wis": 10, "Cha": 10},
+            {},
+            4,
+        )
+        self.assertGreater(dpr_res.expected_dpr, 0)
 
         # Domain exceptions
         for exc_name in (

@@ -10,8 +10,10 @@ from unittest.mock import patch
 
 from bg3_core.profile.manage_load_order import (
     auto_sort_load_order,
+    backup_file,
     create_default_modsettings,
     parse_modsettings,
+    save_modsettings,
     topological_sort_mods,
 )
 
@@ -122,6 +124,73 @@ class TestManageLoadOrderAutoSort(unittest.TestCase):
             idx_b = parsed_sorted["order"].index(uuid_b)
             idx_a = parsed_sorted["order"].index(uuid_a)
             self.assertLess(idx_b, idx_a, "Prerequisite ModB must be ordered before dependent ModA")
+
+    def test_backup_file_microsecond_collision_deduplication(self) -> None:
+        create_default_modsettings(self.modsettings_path)
+        # Call backup_file in rapid succession
+        b1 = backup_file(self.modsettings_path)
+        b2 = backup_file(self.modsettings_path)
+        b3 = backup_file(self.modsettings_path)
+        self.assertTrue(b1.is_file())
+        self.assertTrue(b2.is_file())
+        self.assertTrue(b3.is_file())
+        # All three must be distinct files
+        self.assertEqual(len({b1, b2, b3}), 3)
+
+    def test_save_modsettings_atomic_replace(self) -> None:
+        create_default_modsettings(self.modsettings_path)
+        import xml.etree.ElementTree as ET
+        tree = ET.parse(self.modsettings_path)
+        save_modsettings(self.modsettings_path, tree)
+        self.assertTrue(self.modsettings_path.is_file())
+        # Confirm no leftover temporary files in directory
+        tmp_files = list(self.modsettings_path.parent.glob("*.tmp"))
+        self.assertEqual(tmp_files, [])
+
+
+class TestModResolverStrategies(unittest.TestCase):
+    def test_resolve_dependency_metadata_with_custom_fetcher(self) -> None:
+        from bg3_core.profile.mod_resolver import resolve_dependency_metadata
+
+        mock_payload = {
+            "Folder": "CustomMod",
+            "MD5": "abc123",
+            "Name": "Custom Mod Display",
+            "PublishHandle": 9999,
+            "UUID": "11111111-2222-3333-4444-555555555555",
+            "Version64": 12345678,
+        }
+
+        def dummy_fetcher(clean_id: str, auto_doc: bool = True) -> dict:
+            return mock_payload
+
+        meta = resolve_dependency_metadata("unknown_query", remote_fetcher=dummy_fetcher)
+        self.assertEqual(meta["UUID"], "11111111-2222-3333-4444-555555555555")
+        self.assertEqual(meta["Name"], "Custom Mod Display")
+
+    def test_ensure_dependency_paks_with_custom_downloader(self) -> None:
+        from bg3_core.profile.mod_resolver import ensure_dependency_paks
+
+        with tempfile.TemporaryDirectory() as tmp:
+            t_dir = Path(tmp) / "target_mods"
+            t_dir.mkdir()
+
+            dep = {
+                "Folder": "InjectedMod",
+                "Name": "Injected Mod",
+                "PublishHandle": 8888,
+                "UUID": "22222222-3333-4444-5555-666666666666",
+            }
+
+            def dummy_downloader(d: dict) -> tuple[str, bytes]:
+                return ("InjectedMod.pak", b"LSPK\x01\x00\x00\x00testpayload")
+
+            results = ensure_dependency_paks([dep], target_dirs=[t_dir], remote_downloader=dummy_downloader)
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]["action"], "downloaded")
+            self.assertTrue((t_dir / "InjectedMod.pak").is_file())
+            self.assertEqual((t_dir / "InjectedMod.pak").read_bytes(), b"LSPK\x01\x00\x00\x00testpayload")
+
 
 
 if __name__ == "__main__":

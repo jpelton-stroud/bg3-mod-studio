@@ -126,7 +126,7 @@ class ModioClient:
         method: str,
         path: str,
         params: Optional[Dict[str, Any]] = None,
-        fields: Optional[Sequence[Tuple[str, str]]] = None,
+        fields: Optional[Sequence[Any]] = None,
         multipart: bool = False,
         bypass_cache: bool = False,
     ) -> Dict[str, Any]:
@@ -157,12 +157,42 @@ class ModioClient:
             if multipart:
                 boundary = "----WebKitFormBoundary" + uuid.uuid4().hex
                 body_bytes = bytearray()
-                for name, value in fields:
+                for item in fields:
+                    if len(item) == 3:
+                        name, filename, raw_val = item
+                        content_type = "application/octet-stream"
+                        val_bytes = bytes(raw_val) if isinstance(raw_val, (bytes, bytearray)) else str(raw_val).encode("utf-8")
+                    elif len(item) == 2:
+                        name, val = item
+                        if isinstance(val, tuple) and len(val) >= 2 and isinstance(val[1], (bytes, bytearray)):
+                            filename = val[0]
+                            val_bytes = bytes(val[1])
+                            content_type = val[2] if len(val) >= 3 else "application/octet-stream"
+                        elif isinstance(val, (bytes, bytearray)):
+                            filename = name
+                            val_bytes = bytes(val)
+                            content_type = "application/octet-stream"
+                        else:
+                            filename = None
+                            val_bytes = str(val).encode("utf-8")
+                            content_type = None
+                    else:
+                        continue
+
                     body_bytes.extend(f"--{boundary}\r\n".encode("utf-8"))
-                    body_bytes.extend(
-                        f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode("utf-8")
-                    )
-                    body_bytes.extend(str(value).encode("utf-8"))
+                    if filename is not None:
+                        body_bytes.extend(
+                            f'Content-Disposition: form-data; name="{name}"; filename="{filename}"\r\n'.encode("utf-8")
+                        )
+                        if content_type:
+                            body_bytes.extend(f"Content-Type: {content_type}\r\n\r\n".encode("utf-8"))
+                        else:
+                            body_bytes.extend(b"\r\n")
+                    else:
+                        body_bytes.extend(
+                            f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode("utf-8")
+                        )
+                    body_bytes.extend(val_bytes)
                     body_bytes.extend(b"\r\n")
                 body_bytes.extend(f"--{boundary}--\r\n".encode("utf-8"))
                 headers["Content-Type"] = f"multipart/form-data; boundary={boundary}"
@@ -428,3 +458,64 @@ def download_mod_file(mod_metadata: Dict[str, Any], api_key: str, destination: P
 
     client = ModioClient()
     return client.download_file(signed_url, destination=destination)
+
+
+def upload_mod_file(
+    mod_id: int | str,
+    file_path: Path | str,
+    version: Optional[str] = None,
+    changelog: Optional[str] = None,
+    active: bool = True,
+    metadata_blob: Optional[str] = None,
+    client: Optional[ModioClient] = None,
+) -> Dict[str, Any]:
+    """Upload a new .pak or .zip release file to a mod on mod.io via multipart form.
+
+    Endpoint: POST /games/{BG3_GAME_ID}/mods/{mod_id}/files
+    """
+    path = Path(file_path).resolve()
+    if not path.is_file():
+        raise FileNotFoundError(f"Mod file archive not found: '{file_path}'")
+
+    if client is None:
+        token = get_oauth_token()
+        if not token:
+            raise ModioError(
+                "Authentication token required to upload mod files. Set MODIO_OAUTH_TOKEN or pass client."
+            )
+        client = ModioClient(token=token)
+
+    file_bytes = path.read_bytes()
+    fields: List[Any] = [
+        ("filedata", (path.name, file_bytes, "application/octet-stream")),
+    ]
+    if version:
+        fields.append(("version", version))
+    if changelog:
+        fields.append(("changelog", changelog))
+    if active is not None:
+        fields.append(("active", "true" if active else "false"))
+    if metadata_blob:
+        fields.append(("metadata_blob", metadata_blob))
+
+    return client.request(
+        method="POST",
+        path=f"/games/{BG3_GAME_ID}/mods/{mod_id}/files",
+        fields=fields,
+        multipart=True,
+    )
+
+
+__all__ = [
+    "API_ROOT",
+    "BG3_GAME_ID",
+    "MODIO_API_HOST",
+    "USER_AGENT",
+    "ModioClient",
+    "ModioError",
+    "download_mod_file",
+    "get_api_key",
+    "get_oauth_token",
+    "query_modio",
+    "upload_mod_file",
+]

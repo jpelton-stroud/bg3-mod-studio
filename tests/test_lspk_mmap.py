@@ -9,8 +9,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bg3_core.binary.lspk import LspkArchive
+from bg3_core.binary.lspk import LspkArchive, decompress_pak_file_data
 from bg3_core.binary.lspk import build_lspk_archive as build_pak_archive
+from bg3_core.exceptions import BG3BinaryError
 
 
 class TestLspkMmap(unittest.TestCase):
@@ -68,6 +69,28 @@ class TestLspkMmap(unittest.TestCase):
         corrupt_path.write_bytes(b"CORRUPTDATA123456789012345678901234567890")
         with self.assertRaises(ValueError):
             LspkArchive.open(corrupt_path)
+
+    def test_corrupt_compression_payloads_raise_binary_error(self):
+        corrupt_bytes = b"\xff\xff\xff\xff\x00\x01\x02\x03\x04\x05"
+        # Test zlib (method 1)
+        with self.assertRaises(BG3BinaryError) as ctx:
+            decompress_pak_file_data(corrupt_bytes, 0, len(corrupt_bytes), 100, flags=1)
+        self.assertIn("zlib decompression failed", str(ctx.exception))
+
+        # Test LZ4 (method 2)
+        with self.assertRaises(BG3BinaryError) as ctx:
+            decompress_pak_file_data(corrupt_bytes, 0, len(corrupt_bytes), 100, flags=2)
+        self.assertIn("LZ4 decompression failed", str(ctx.exception))
+
+        # Test Zstandard (method 3)
+        with self.assertRaises(BG3BinaryError) as ctx:
+            decompress_pak_file_data(corrupt_bytes, 0, len(corrupt_bytes), 100, flags=3)
+        self.assertIn("Zstandard decompression", str(ctx.exception))
+
+        # Test unsupported method
+        with self.assertRaises(BG3BinaryError) as ctx:
+            decompress_pak_file_data(corrupt_bytes, 0, len(corrupt_bytes), 100, flags=7)
+        self.assertIn("Unsupported compression method", str(ctx.exception))
 
 
 if __name__ == "__main__":
