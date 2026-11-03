@@ -31,6 +31,18 @@ API_ROOT = f"https://{MODIO_API_HOST}/v1"
 USER_AGENT = "BG3ModStudio/1.0"
 
 
+def sanitize_url(url: str) -> str:
+    """Scrub sensitive credentials (e.g. api_key, token, secret) from URL query parameters."""
+    if not url:
+        return url
+    return re.sub(
+        r"([?&](?:api_key|token|secret|key|pat)=)[^&#]+",
+        r"\1[REDACTED]",
+        url,
+        flags=re.IGNORECASE,
+    )
+
+
 class ModioError(BG3CatalogError):
     """Raised for an invalid target, preflight failure, or mod.io API error."""
 
@@ -131,7 +143,15 @@ class ModioClient:
         bypass_cache: bool = False,
     ) -> Dict[str, Any]:
         if path.startswith("http://") or path.startswith("https://"):
+            if not path.startswith("https://"):
+                raise ModioError(
+                    f"Insecure endpoint URL scheme. Only https:// is supported: '{path[:10]}...'"
+                )
             url = path
+        elif "://" in path:
+            raise ModioError(
+                f"Unsupported URL scheme. Only https:// is supported: '{path[:10]}...'"
+            )
         else:
             url = f"{API_ROOT}{path}"
         if params:
@@ -139,7 +159,12 @@ class ModioClient:
             url = f"{url}{sep}{urllib.parse.urlencode(params)}"
 
         cache_key = url
-        if method.upper() == "GET" and self.enable_cache and not bypass_cache and self.cache_ttl_seconds > 0:
+        if (
+            method.upper() == "GET"
+            and self.enable_cache
+            and not bypass_cache
+            and self.cache_ttl_seconds > 0
+        ):
             cached = self._read_cache(cache_key)
             if cached is not None:
                 return cached
@@ -161,10 +186,18 @@ class ModioClient:
                     if len(item) == 3:
                         name, filename, raw_val = item
                         content_type = "application/octet-stream"
-                        val_bytes = bytes(raw_val) if isinstance(raw_val, (bytes, bytearray)) else str(raw_val).encode("utf-8")
+                        val_bytes = (
+                            bytes(raw_val)
+                            if isinstance(raw_val, (bytes, bytearray))
+                            else str(raw_val).encode("utf-8")
+                        )
                     elif len(item) == 2:
                         name, val = item
-                        if isinstance(val, tuple) and len(val) >= 2 and isinstance(val[1], (bytes, bytearray)):
+                        if (
+                            isinstance(val, tuple)
+                            and len(val) >= 2
+                            and isinstance(val[1], (bytes, bytearray))
+                        ):
                             filename = val[0]
                             val_bytes = bytes(val[1])
                             content_type = val[2] if len(val) >= 3 else "application/octet-stream"
@@ -182,10 +215,14 @@ class ModioClient:
                     body_bytes.extend(f"--{boundary}\r\n".encode("utf-8"))
                     if filename is not None:
                         body_bytes.extend(
-                            f'Content-Disposition: form-data; name="{name}"; filename="{filename}"\r\n'.encode("utf-8")
+                            f'Content-Disposition: form-data; name="{name}"; filename="{filename}"\r\n'.encode(
+                                "utf-8"
+                            )
                         )
                         if content_type:
-                            body_bytes.extend(f"Content-Type: {content_type}\r\n\r\n".encode("utf-8"))
+                            body_bytes.extend(
+                                f"Content-Type: {content_type}\r\n\r\n".encode("utf-8")
+                            )
                         else:
                             body_bytes.extend(b"\r\n")
                     else:
@@ -215,10 +252,20 @@ class ModioClient:
                     error.close()
                 if self.token:
                     detail = detail.replace(self.token, "[REDACTED]")
+                detail = sanitize_url(detail)
+                if hasattr(error, "filename") and error.filename:
+                    try:
+                        error.filename = sanitize_url(error.filename)
+                    except Exception:
+                        pass
 
                 if error.code in (429, 500, 502, 503, 504) and retries < self.max_retries:
                     retries += 1
-                    retry_after = error.headers.get("Retry-After") if hasattr(error, "headers") and error.headers else None
+                    retry_after = (
+                        error.headers.get("Retry-After")
+                        if hasattr(error, "headers") and error.headers
+                        else None
+                    )
                     sleep_time = 0.0
                     if retry_after:
                         try:
@@ -237,6 +284,11 @@ class ModioClient:
                     + (f": {detail}" if detail else "")
                 ) from error
             except urllib.error.URLError as error:
+                if hasattr(error, "filename") and error.filename:
+                    try:
+                        error.filename = sanitize_url(error.filename)
+                    except Exception:
+                        pass
                 if retries < self.max_retries:
                     retries += 1
                     sleep_time = self.backoff_factor * (2 ** (retries - 1))
@@ -254,15 +306,27 @@ class ModioClient:
         if not isinstance(payload, dict):
             raise ModioError("mod.io returned an unexpected response shape.")
 
-        if method.upper() == "GET" and self.enable_cache and not bypass_cache and self.cache_ttl_seconds > 0:
+        if (
+            method.upper() == "GET"
+            and self.enable_cache
+            and not bypass_cache
+            and self.cache_ttl_seconds > 0
+        ):
             self._write_cache(cache_key, payload)
         elif method.upper() in ("POST", "PUT", "DELETE"):
             self.clear_cache()
 
         return payload
 
-    def download_file(self, url: str, destination: Path | None = None, chunk_size: int = 65536) -> bytes:
+    def download_file(
+        self, url: str, destination: Path | None = None, chunk_size: int = 65536
+    ) -> bytes:
         """Download binary content from URL with chunking and retries."""
+        if not url.lower().startswith("https://"):
+            raise ModioError(
+                f"Insecure or unsupported URL scheme. Only https:// is supported: '{url[:10]}...'"
+            )
+
         headers = {"User-Agent": USER_AGENT}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
@@ -292,20 +356,36 @@ class ModioClient:
                             buffer.extend(chunk)
                         return bytes(buffer)
             except urllib.error.HTTPError as error:
+                if hasattr(error, "filename") and error.filename:
+                    try:
+                        error.filename = sanitize_url(error.filename)
+                    except Exception:
+                        pass
                 is_transient = error.code in (429, 500, 502, 503, 504)
                 if is_transient and retries < self.max_retries:
                     retries += 1
                     sleep_time = self.backoff_factor * (2 ** (retries - 1))
                     time.sleep(sleep_time)
                     continue
-                raise ModioError(f"HTTP {error.code} downloading file: {error.reason}") from error
+                safe_url = sanitize_url(url)
+                raise ModioError(
+                    f"HTTP {error.code} downloading file from {safe_url}: {error.reason}"
+                ) from error
             except urllib.error.URLError as error:
+                if hasattr(error, "filename") and error.filename:
+                    try:
+                        error.filename = sanitize_url(error.filename)
+                    except Exception:
+                        pass
                 if retries < self.max_retries:
                     retries += 1
                     sleep_time = self.backoff_factor * (2 ** (retries - 1))
                     time.sleep(sleep_time)
                     continue
-                raise ModioError(f"Network error downloading file: {error.reason}") from error
+                safe_url = sanitize_url(url)
+                raise ModioError(
+                    f"Network error downloading file from {safe_url}: {error.reason}"
+                ) from error
 
     def get_paged(
         self,
@@ -424,6 +504,7 @@ def query_modio(query_or_slug: str, api_key: str) -> Dict[str, Any]:
 
     query_tokens = set(re.findall(r"\w+", clean_query.lower()))
     if query_tokens:
+
         def match_score(mod_entry: Dict[str, Any]) -> Tuple[int, int, int]:
             name_tokens = set(re.findall(r"\w+", mod_entry.get("name", "").lower()))
             slug_tokens = set(re.findall(r"\w+", mod_entry.get("name_id", "").lower()))
@@ -444,7 +525,9 @@ def query_modio(query_or_slug: str, api_key: str) -> Dict[str, Any]:
     return results[0]
 
 
-def download_mod_file(mod_metadata: Dict[str, Any], api_key: str, destination: Path | None = None) -> bytes:
+def download_mod_file(
+    mod_metadata: Dict[str, Any], api_key: str, destination: Path | None = None
+) -> bytes:
     """Download mod archive (.zip or .pak) from mod.io using resilient ModioClient."""
     modfile = mod_metadata.get("modfile")
     if not modfile or not modfile.get("download", {}).get("binary_url"):

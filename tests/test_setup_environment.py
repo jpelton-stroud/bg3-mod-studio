@@ -7,6 +7,8 @@ custom mod purge, and non-interactive safety guards in bg3_core.setup_environmen
 """
 
 import io
+import os
+import stat
 import subprocess
 import sys
 import tempfile
@@ -28,6 +30,7 @@ class SetupEnvironmentQATests(unittest.TestCase):
 
     def tearDown(self):
         self._stdout_patcher.stop()
+
     def test_prompt_subscription_sync_non_interactive(self):
         # Non-interactive mode must return option "3" (continue without sync)
         choice = prompt_subscription_sync(non_interactive=True)
@@ -99,7 +102,13 @@ class SetupEnvironmentQATests(unittest.TestCase):
 
         # 3. python3 -m bg3_core.cli.setup_environment --dry-run --non-interactive
         proc_dry = subprocess.run(
-            [sys.executable, "-m", "bg3_core.cli.setup_environment", "--dry-run", "--non-interactive"],
+            [
+                sys.executable,
+                "-m",
+                "bg3_core.cli.setup_environment",
+                "--dry-run",
+                "--non-interactive",
+            ],
             cwd=repo_root,
             capture_output=True,
             text=True,
@@ -118,8 +127,10 @@ class SetupEnvironmentQATests(unittest.TestCase):
 
             from bg3_core.cli.setup_environment import check_environment_status
 
-            with patch("bg3_core.cli.setup_environment.WORKSPACE_ROOT", tmp_root), \
-                 patch("bg3_core.cli.setup_environment.ENV_PATH", target_config):
+            with (
+                patch("bg3_core.cli.setup_environment.WORKSPACE_ROOT", tmp_root),
+                patch("bg3_core.cli.setup_environment.ENV_PATH", target_config),
+            ):
                 check_environment_status(as_json=True)
                 self.assertFalse(target_config.is_file())
                 self.assertTrue(legacy_file.is_file())
@@ -133,8 +144,10 @@ class SetupEnvironmentQATests(unittest.TestCase):
 
             from bg3_core.cli.setup_environment import run_wizard
 
-            with patch("bg3_core.cli.setup_environment.WORKSPACE_ROOT", tmp_root), \
-                 patch("bg3_core.cli.setup_environment.ENV_PATH", target_env):
+            with (
+                patch("bg3_core.cli.setup_environment.WORKSPACE_ROOT", tmp_root),
+                patch("bg3_core.cli.setup_environment.ENV_PATH", target_env),
+            ):
                 run_wizard(
                     dry_run=False,
                     non_interactive=True,
@@ -142,10 +155,28 @@ class SetupEnvironmentQATests(unittest.TestCase):
                     studio_dir_override=str(custom_studio),
                 )
                 self.assertTrue(target_env.is_file())
-                self.assertIn(f"BG3_STUDIO_DIR={custom_studio}", target_env.read_text(encoding="utf-8"))
+                self.assertIn(
+                    f"BG3_STUDIO_DIR={custom_studio}", target_env.read_text(encoding="utf-8")
+                )
                 self.assertTrue((custom_studio / "Build_Guides").is_dir())
                 self.assertTrue((custom_studio / "Mods" / "subscribed").is_dir())
                 self.assertTrue((custom_studio / "Mods" / "authored").is_dir())
+
+    def test_write_env_file_directory_and_file_permissions(self):
+        """Verify write_env_file hardens directory (0700) and file (0600) permissions."""
+        from bg3_core.cli.setup_environment import write_env_file
+
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp) / ".config" / "bg3"
+            env_file = config_dir / "env"
+            write_env_file(env_file, "TEST_KEY=12345\n")
+
+            self.assertTrue(env_file.is_file())
+            if hasattr(os, "stat"):
+                dir_mode = stat.S_IMODE(config_dir.stat().st_mode)
+                file_mode = stat.S_IMODE(env_file.stat().st_mode)
+                self.assertEqual(dir_mode, 0o700)
+                self.assertEqual(file_mode, 0o600)
 
 
 if __name__ == "__main__":
