@@ -390,7 +390,7 @@ def main() -> None:
     parser.add_argument(
         "--token",
         "-t",
-        help="mod.io OAuth 2.0 Personal Access Token (defaults to MODIO_OAUTH_TOKEN env or .env)",
+        help="mod.io OAuth 2.0 Personal Access Token (defaults to MODIO_OAUTH_TOKEN env or XDG config)",
     )
     parser.add_argument(
         "--dry-run",

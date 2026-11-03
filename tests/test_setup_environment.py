@@ -125,7 +125,7 @@ class SetupEnvironmentQATests(unittest.TestCase):
             legacy_file.write_text("MODIO_API_KEY=legacy_key_999\n", encoding="utf-8")
             target_config = tmp_root / "xdg" / "bg3" / "env"
 
-            from bg3_core.cli.setup_environment import check_environment_status
+            from bg3_core.cli.setup_environment import check_environment_status, run_wizard
 
             with (
                 patch("bg3_core.cli.setup_environment.WORKSPACE_ROOT", tmp_root),
@@ -133,6 +133,13 @@ class SetupEnvironmentQATests(unittest.TestCase):
             ):
                 check_environment_status(as_json=True)
                 self.assertFalse(target_config.is_file())
+                self.assertTrue(legacy_file.is_file())
+
+                run_wizard(dry_run=False, non_interactive=True, config_path=target_config)
+                self.assertTrue(target_config.is_file())
+                written_content = target_config.read_text(encoding="utf-8")
+                self.assertNotIn("legacy_key_999", written_content)
+                self.assertIn("MODIO_API_KEY=\n", written_content)
                 self.assertTrue(legacy_file.is_file())
 
     def test_setup_environment_studio_dir_option(self):

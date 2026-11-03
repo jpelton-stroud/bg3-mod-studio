@@ -350,7 +350,7 @@ def main() -> int:
 
     token = get_oauth_token()
     if not token:
-        parser.error("MODIO_PAT environment variable or .env entry is required; token is never accepted as an argument.")
+        parser.error("MODIO_PAT environment variable or XDG config entry ($XDG_CONFIG_HOME/bg3/env) is required; token is never accepted as an argument.")
 
     client = ModioClient(token)
     try:

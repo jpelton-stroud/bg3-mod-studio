@@ -5,7 +5,7 @@ Automated diagnostic tool to inspect, classify, and triage runtime message logs
 from the official Baldur's Gate 3 Toolkit (Glasses.exe).
 
 Features:
-- Auto-detects the Toolkit directory from Steam installation or .env (BG3_TOOLKIT_DIR).
+- Auto-detects the Toolkit directory from Steam installation or XDG config (BG3_TOOLKIT_DIR).
 - Discovers newest session logs or filters by subsystem (--type engine|osiris|thoth|personal|network).
 - Classifies log entries by severity (!ASSERT!Code, !ASSERT!Design, Error, Warning).
 - Categorizes messages by subsystem (Boosts, Stats, Thoth, Osiris, RootTemplates, Localization, Assets).

@@ -6,7 +6,7 @@ Interactive setup wizard and environment configuration manager for the
 Baldur's Gate 3 Mod Studio & Mod.io Toolkit.
 
 Features:
-- Validates and configures .env (written with 0600 permissions) using pure Python standard library.
+- Validates and configures environment configuration (written with 0600 permissions) using pure Python standard library.
 - Secrets (API key, PAT) are entered via hidden input and never echoed or displayed.
 - Tests mod.io API Key against https://api.mod.io/v1/games/3716.
 - Tests mod.io Personal Access Token (PAT) against https://api.mod.io/v1/me.
@@ -70,7 +70,7 @@ def print_banner() -> None:
 
 
 def parse_env_file(path: Path) -> dict:
-    """Safely parse key-value pairs from an existing .env file."""
+    """Safely parse key-value pairs from an existing environment configuration file."""
     env: dict[str, str] = {}
     if not path.is_file():
         return env
@@ -484,11 +484,6 @@ def run_wizard(
 
     target_env = config_path or ENV_PATH
     existing_env = parse_env_file(target_env)
-    if not existing_env and (WORKSPACE_ROOT / ".env").is_file():
-        existing_env = parse_env_file(WORKSPACE_ROOT / ".env")
-        print(
-            f"{YELLOW}[!] Detected legacy repository-level .env. Migrating values to {target_env}.{RESET}"
-        )
 
     default_data_dir = detect_default_data_dir()
     default_studio_dir = str(get_xdg_documents_home() / "BG3_Mod_Studio")
@@ -617,13 +612,6 @@ def run_wizard(
         print(
             f"\n{GREEN}✓ Environment configuration saved successfully to {target_env} (mode 600)!{RESET}"
         )
-        legacy_file = WORKSPACE_ROOT / ".env"
-        if legacy_file.is_file():
-            try:
-                legacy_file.unlink()
-                print(f"{GREEN}✓ Removed deprecated repository-level .env file.{RESET}")
-            except OSError:
-                pass
 
         (studio_path / "Build_Guides").mkdir(parents=True, exist_ok=True)
         (studio_path / "Mods" / "subscribed").mkdir(parents=True, exist_ok=True)
