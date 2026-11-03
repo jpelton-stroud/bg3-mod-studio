@@ -26,18 +26,26 @@ flowchart TD
 ```
 
 ### 1. Semantic Bump & Localization Compilation
-- Bump semantic version: `bg3 mod bump-version <mod-slug> --patch --json`
-- Prune and compile binary localization: `bg3 mod sync-loca <mod-slug> --prune --compile --json`
+Run the release preparation recipe:
+```bash
+bg3 mod bump-version <mod-slug> --patch --json
+bg3 mod sync-loca <mod-slug> --prune --compile --json
+```
 
 ### 2. Strict Validation & Description Rendering
-- Strict schema validation: `bg3 mod validate <mod-slug> --strict --json`
-- Library conflict pre-check: `bg3 mod conflict <mod-slug> --against-library --json`
-- Render mod.io storefront HTML description: `bg3 mod render-desc <mod-slug> --write --json`
+Execute strict schema validation, library conflict check, and render mod.io storefront HTML description:
+```bash
+bg3 mod validate <mod-slug> --strict --json
+bg3 mod conflict <mod-slug> --against-library --json
+bg3 mod render-desc <mod-slug> --write --json
+```
 
 ### 3. Game Data Staging & Packaging
 Sync loose development files and `.loca` to `<Game>/Data/`:
-- Sync assets to game: `bg3 mod sync-game --mods <mod-slug> --json`
-- Optional package for Nexus Mods / distributions: `bg3 mod pack <mod-slug> --out "dist/<mod-slug>.pak" --json`
+```bash
+bg3 mod sync-game --mod <mod-slug> --json
+bg3 mod pack <mod-slug> --out "dist/<mod-slug>.pak" --json
+```
 
 *Note: In accordance with official Larian requirements, mod binary publishing to mod.io is performed directly through the Baldur's Gate 3 Toolkit (`Glasses.exe`).*
 
@@ -47,6 +55,6 @@ Sync loose development files and `.loca` to `<Game>/Data/`:
 
 Verify release preparation before Toolkit publishing:
 1. Confirm validation and conflict commands exit with code 0.
-2. Confirm `my_mods/<mod-slug>/modio_description.html` exists and is non-empty.
+2. Confirm `Mods/authored/<mod-slug>/modio_description.html` exists and is non-empty.
 3. Confirm 512×512 PNG icons exist and binary `.loca` is compiled.
 4. Guide user through Toolkit publishing, then transition to [`bg3-post-release`](../bg3-post-release/SKILL.md).

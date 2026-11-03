@@ -30,16 +30,19 @@ flowchart TD
 ```
 
 ### Phase 2A: Workspace Assertion & Game Data Sync
-1. Run rapid static pre-flight validation on `my_mods/<slug>/`:
-   - Execute `bg3 mod validate <mod-slug> --json`
-2. Synchronize unpacked assets and compiled binary `.loca` to `<Game>/Data/`:
-   - Execute `bg3 mod sync-game --mods <mod-slug> --json`
-3. Instruct user to open `<ModName>` in Baldur's Gate 3 Toolkit (`Glasses.exe`) to generate engine runtime logs.
+Run pre-flight validation and sync unpacked assets and compiled binary `.loca` to `<Game>/Data/`:
+```bash
+bg3 mod validate <mod-slug> --json
+bg3 mod sync-game --mod <mod-slug> --json
+```
+Instruct user to open `<ModName>` in Baldur's Gate 3 Toolkit (`Glasses.exe`) to generate engine runtime logs.
 
 ### Phase 2B: Runtime Log Diagnosis
-1. Inspect generated Toolkit logs per [Log Triage Reference](./references/runtime_log_triage.md):
-   - Execute `bg3 mod diagnose-logs <mod-slug> --severity warning --json`
-2. Apply targeted fixes in `my_mods/<mod-slug>/`, re-sync, and confirm resolution (bounded by 3-iteration circuit breaker).
+Inspect generated Toolkit logs per [Log Triage Reference](./references/runtime_log_triage.md):
+```bash
+bg3 mod diagnose-logs --mod <mod-slug> --severity warning --json
+```
+Apply targeted fixes in `Mods/authored/<mod-slug>/`, re-sync, and confirm resolution (bounded by 3-iteration circuit breaker).
 
 ---
 

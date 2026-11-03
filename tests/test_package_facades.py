@@ -119,6 +119,8 @@ class TestPackageFacades(unittest.TestCase):
 
         self.assertTrue(hasattr(bg3_theorycraft, "__all__"))
         self.assertGreater(len(bg3_theorycraft.__all__), 15)
+        self.assertEqual(getattr(bg3_theorycraft, "__version__", None), "1.0.0")
+        self.assertIn("__version__", bg3_theorycraft.__all__)
 
         for symbol in bg3_theorycraft.__all__:
             self.assertTrue(

@@ -33,8 +33,10 @@ flowchart TD
 Conduct structured design interview following [Design Interview Protocol](./references/grill_me_interview_protocol.md). Formulate technical specification and await explicit user approval before scaffolding.
 
 ### 2. Workspace Scaffolding
-After approval, run the scaffolding tool:
-- Execute `bg3 mod create "<ModName>" [--slug "<slug>"] --description "<Desc>" [--unlock-level-curve] --json`
+After approval, run the scaffolding recipe:
+```bash
+bg3 mod create "<ModName>" --description "<Desc>" --json
+```
 
 ### 3. Concurrent Subagent Dispatch
 Launch the 4 specialist subagents in parallel following [Subagent Launch Templates](./resources/subagent_templates.md) (Stats & Spells, Progression & Lists, Localization, Documentation). Ensure all subagents inherit model configuration (`Model: "inherit"`). Await reactive completion notifications without polling.

@@ -261,9 +261,17 @@ def extract_registry_from_parser(parser: Optional[argparse.ArgumentParser] = Non
                     "aliases": all_aliases,
                 })
 
+    version_str = getattr(sys.modules.get("bg3_core"), "__version__", None)
+    if not version_str:
+        try:
+            import bg3_core
+            version_str = getattr(bg3_core, "__version__", "1.0.0")
+        except Exception:
+            version_str = "1.0.0"
+
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "version": "1.0.0",
+        "version": version_str,
         "description": "Baldur's Gate 3 Mod Studio & Mod.io Automation Workspace — Canonical Tool Registry",
         "categories": CATEGORIES,
         "tools": tools,

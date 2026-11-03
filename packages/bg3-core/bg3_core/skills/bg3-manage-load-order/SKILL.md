@@ -24,13 +24,19 @@ flowchart TD
 ```
 
 ### 1. View & Clean Load Order
-- List current profile load order: `bg3 loadorder list --json`
-- Clean missing or removed mods from active profile: `bg3 loadorder clean --json`
-- Topologically auto-sort active mods based on dependencies: `bg3 loadorder auto-sort --json`
+Inspect and organize active profile mods:
+```bash
+bg3 loadorder list --json
+bg3 loadorder clean --json
+bg3 loadorder auto-sort --json
+```
 
 ### 2. Mod Activation & Deactivation
-- Enable at end of load order with dependencies: `bg3 loadorder enable "<mod_slug_or_UUID>" --with-deps --json`
-- Disable a mod safely: `bg3 loadorder disable "<mod_slug_or_UUID>" --json`
+Enable or disable mods safely with dependency resolution:
+```bash
+bg3 loadorder enable "<mod_slug_or_UUID>" --with-deps --json
+bg3 loadorder disable "<mod_slug_or_UUID>" --json
+```
 
 ### 3. Output Presentation
 Present active mods as a structured table with index, mod name, folder, and UUID.
