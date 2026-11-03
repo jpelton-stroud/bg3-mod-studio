@@ -433,6 +433,23 @@ def scaffold_progression(
     spell_lists_file = spell_lists_dir / "SpellLists.lsx"
 
     target_table_uuid = table_uuid.strip() if table_uuid else CLASS_TABLE_UUIDS.get(name.lower(), SUBCLASS_TABLE_UUIDS.get(name.lower()))
+    if not target_table_uuid and progressions_file.exists():
+        try:
+            existing_tree = ET.parse(progressions_file)
+            for p_elem in existing_tree.findall(".//node[@id='Progression']"):
+                found_name = ""
+                found_table = ""
+                for attr in p_elem.findall("attribute"):
+                    if attr.get("id") == "Name":
+                        found_name = (attr.get("value") or "").strip()
+                    elif attr.get("id") == "TableUUID":
+                        found_table = (attr.get("value") or "").strip()
+                if found_name.lower() == name.lower() and found_table:
+                    target_table_uuid = found_table
+                    break
+        except Exception:
+            pass
+
     if not target_table_uuid:
         target_table_uuid = str(uuid.uuid4())
 

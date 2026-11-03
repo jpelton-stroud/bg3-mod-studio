@@ -152,8 +152,11 @@ def lz4_block_decompress(compressed_data: bytes, uncompressed_size: int) -> byte
                 if b != 255:
                     break
 
-        for _ in range(match_len):
-            dst.append(dst[-offset])
+        while match_len > 0:
+            chunk = min(match_len, offset)
+            end_pos = None if chunk == offset else -offset + chunk
+            dst.extend(dst[-offset:end_pos])
+            match_len -= chunk
 
     return bytes(dst)
 
@@ -345,7 +348,6 @@ def build_lspk_archive(
             payload = data
             file_flags = 0
             disk_size = uncomp_size
-            uncomp_size = 0
 
         file_data_blocks.append(payload)
 

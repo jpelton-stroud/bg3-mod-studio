@@ -178,7 +178,7 @@ def parse_loca_bytes(data: bytes, strip_tags: bool = True) -> Dict[str, str]:
             raw_str = raw_str[:-1]
         decoded = raw_str.decode("utf-8", errors="replace")
         if handle:
-            loc_dict[handle] = clean_loc_text(decoded) if strip_tags else decoded
+            loc_dict[handle] = clean_loc_text(decoded) if (strip_tags and "<" in decoded) else decoded
 
     return loc_dict
 

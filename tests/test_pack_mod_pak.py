@@ -79,7 +79,7 @@ class TestLspkPackaging(unittest.TestCase):
         self.assertTrue(verify_pak_archive(pak, files))
 
     def test_uncompressed_packaging(self):
-        """Test packaging with compress=False sets appropriate flags and uncomp_size=0."""
+        """Test packaging with compress=False sets appropriate flags and uncomp_size equal to disk_size."""
         files = [
             ("Mods/ModB/meta.lsx", b"uncompressed-data"),
         ]
@@ -90,6 +90,7 @@ class TestLspkPackaging(unittest.TestCase):
         entry = arc.files[0]
         self.assertEqual(entry["flags"], 0)
         self.assertEqual(entry["disk_size"], len(b"uncompressed-data"))
+        self.assertEqual(entry["uncomp_size"], len(b"uncompressed-data"))
         self.assertEqual(arc.extract_file(entry), b"uncompressed-data")
         self.assertTrue(verify_pak_archive(pak, files))
 

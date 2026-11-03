@@ -464,6 +464,34 @@ class TestUnifiedScaffoldAssetAPI(unittest.TestCase):
         )
         self.assertTrue(res["success"])
 
+    def test_scaffold_progression_table_uuid_retention(self):
+        """Verify sequential progression levels for a custom class retain the same TableUUID."""
+        res_lvl1 = scaffold_progression(
+            mod_name_or_path=str(self.mod_dir),
+            name="CustomArtificer",
+            level=1,
+            dry_run=False,
+        )
+        self.assertTrue(res_lvl1["success"])
+        table_uuid_1 = res_lvl1.details["table_uuid"]
+
+        res_lvl2 = scaffold_progression(
+            mod_name_or_path=str(self.mod_dir),
+            name="CustomArtificer",
+            level=2,
+            dry_run=False,
+        )
+        self.assertTrue(res_lvl2["success"])
+        table_uuid_2 = res_lvl2.details["table_uuid"]
+
+        self.assertEqual(table_uuid_1, table_uuid_2)
+
+        # Verify in the written XML file that both levels share the same TableUUID
+        prog_file = Path(res_lvl2.file)
+        self.assertTrue(prog_file.exists())
+        content = prog_file.read_text(encoding="utf-8")
+        self.assertEqual(content.count(table_uuid_1), 2)
+
     def test_scaffold_class_direct(self):
         res = scaffold_class(
             mod_name_or_path=str(self.mod_dir),

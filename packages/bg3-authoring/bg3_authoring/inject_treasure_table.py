@@ -82,7 +82,14 @@ def resolve_mod_stats_dir(mod_path_or_slug: str, workspace_root: Path | None = N
 def format_item_name(item: str, ensure_prefix: bool = True) -> str:
     """Formats the item name, ensuring standard 'I_' prefix if needed."""
     item = item.strip()
-    if ensure_prefix and not item.startswith("I_") and not item.startswith("OBJ_"):
+    if (
+        ensure_prefix
+        and not item.startswith("I_")
+        and not item.startswith("OBJ_")
+        and not item.startswith("ARM_")
+        and not item.startswith("WPN_")
+        and not item.startswith("MAG_")
+    ):
         return f"I_{item}"
     return item
 
