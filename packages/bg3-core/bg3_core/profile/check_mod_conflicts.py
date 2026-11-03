@@ -127,7 +127,8 @@ def extract_root_templates(mod_dir: Path) -> dict[str, dict]:
     """
     templates = {}
     lsx_files = [
-        f for f in mod_dir.rglob("*.lsx")
+        f
+        for f in mod_dir.rglob("*.lsx")
         if "roottemplate" in str(f.relative_to(mod_dir)).lower() or f.name.lower() == "_merged.lsx"
     ]
     for f in lsx_files:
@@ -164,7 +165,11 @@ def get_mod_dependencies(mod_dir: Path) -> list[str]:
             meta = parse_meta_lsx(mf.read_bytes())
             for dep_item in meta.get("dependencies", []):
                 dep_name = dep_item.get("Name", "").strip()
-                if dep_name and dep_name.lower() not in BUILTIN_MODULES and not dep_name.lower().startswith("diceset"):
+                if (
+                    dep_name
+                    and dep_name.lower() not in BUILTIN_MODULES
+                    and not dep_name.lower().startswith("diceset")
+                ):
                     if dep_name not in deps:
                         deps.append(dep_name)
         except Exception:
@@ -202,7 +207,9 @@ def find_missing_local_dependencies(mod_dir: Path) -> list[str]:
     return missing
 
 
-def extract_lsx_named_nodes(mod_dir: Path, file_pattern: str, node_id: str, exclude_pattern: str | None = None) -> dict[str, dict]:
+def extract_lsx_named_nodes(
+    mod_dir: Path, file_pattern: str, node_id: str, exclude_pattern: str | None = None
+) -> dict[str, dict]:
     """Extracts named nodes from specific LSX files."""
     results = {}
     for f in mod_dir.rglob("*.lsx"):
@@ -239,12 +246,14 @@ def find_node_overlaps(nodes1: dict, nodes2: dict) -> list[dict]:
     overlaps = []
     common = set(nodes1.keys()) & set(nodes2.keys())
     for k in sorted(common):
-        overlaps.append({
-            "name": nodes1[k].get("name") or k,
-            "uuid": nodes1[k].get("uuid") or nodes2[k].get("uuid", ""),
-            "mod1_file": nodes1[k]["file"],
-            "mod2_file": nodes2[k]["file"],
-        })
+        overlaps.append(
+            {
+                "name": nodes1[k].get("name") or k,
+                "uuid": nodes1[k].get("uuid") or nodes2[k].get("uuid", ""),
+                "mod1_file": nodes1[k]["file"],
+                "mod2_file": nodes2[k]["file"],
+            }
+        )
     return overlaps
 
 
@@ -267,11 +276,15 @@ def get_mod_extracted_data(mod_dir: Path) -> dict[str, Any]:
         "progs": extract_progressions(mod_dir),
         "root_templates": extract_root_templates(mod_dir),
         "classes": extract_lsx_named_nodes(mod_dir, "ClassDescription", "ClassDescription"),
-        "feats": extract_lsx_named_nodes(mod_dir, "Feat", "Feat", exclude_pattern="FeatDescription"),
+        "feats": extract_lsx_named_nodes(
+            mod_dir, "Feat", "Feat", exclude_pattern="FeatDescription"
+        ),
         "resources": extract_lsx_named_nodes(mod_dir, "ActionResource", "ActionResourceDefinition"),
         "level_maps": extract_lsx_named_nodes(mod_dir, "LevelMap", "LevelMapSeries"),
         "tags": extract_lsx_named_nodes(mod_dir, "Tags", "Tag"),
-        "races": extract_lsx_named_nodes(mod_dir, "Race", "Race", exclude_pattern="RaceDescription"),
+        "races": extract_lsx_named_nodes(
+            mod_dir, "Race", "Race", exclude_pattern="RaceDescription"
+        ),
         "origins": extract_lsx_named_nodes(mod_dir, "Origin", "Origin"),
         "dlls": check_native_dlls(mod_dir),
     }
@@ -323,33 +336,39 @@ def compare_two_mods(mod1_dir: Path, mod2_dir: Path) -> dict:
     stat_collisions = []
     common_entries = set(stats1.keys()) & set(stats2.keys())
     for e in sorted(common_entries):
-        stat_collisions.append({
-            "entry": e,
-            "mod1_file": stats1[e]["file"],
-            "mod2_file": stats2[e]["file"],
-        })
+        stat_collisions.append(
+            {
+                "entry": e,
+                "mod1_file": stats1[e]["file"],
+                "mod2_file": stats2[e]["file"],
+            }
+        )
 
     # 2. Progression overlaps
     prog_collisions = []
     common_progs = set(progs1.keys()) & set(progs2.keys())
     for p in sorted(common_progs):
-        prog_collisions.append({
-            "class": p[0],
-            "level": p[1],
-            "mod1_uuid": progs1[p].get("uuid", ""),
-            "mod2_uuid": progs2[p].get("uuid", ""),
-        })
+        prog_collisions.append(
+            {
+                "class": p[0],
+                "level": p[1],
+                "mod1_uuid": progs1[p].get("uuid", ""),
+                "mod2_uuid": progs2[p].get("uuid", ""),
+            }
+        )
 
     # 3. RootTemplate MapKey overlaps
     rt_collisions = []
     common_rts = set(rt1.keys()) & set(rt2.keys())
     for rk in sorted(common_rts):
-        rt_collisions.append({
-            "map_key": rk,
-            "name": rt1[rk].get("name") or rt2[rk].get("name", ""),
-            "mod1_file": rt1[rk]["file"],
-            "mod2_file": rt2[rk]["file"],
-        })
+        rt_collisions.append(
+            {
+                "map_key": rk,
+                "name": rt1[rk].get("name") or rt2[rk].get("name", ""),
+                "mod1_file": rt1[rk]["file"],
+                "mod2_file": rt2[rk]["file"],
+            }
+        )
 
     # 4. Patch 8 Schema Collisions
     class_collisions = find_node_overlaps(classes1, classes2)
@@ -416,11 +435,21 @@ def main() -> None:
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--candidate", help="Path or name of candidate mod to check")
     group.add_argument("--mod1", help="First mod path/name to compare")
-    group.add_argument("--all", action="store_true", help="Cross-check all mods in my_mods/ and mods/")
+    group.add_argument(
+        "--all", action="store_true", help="Cross-check all mods in my_mods/ and mods/"
+    )
 
     parser.add_argument("--mod2", help="Second mod path/name (used with --mod1)")
-    parser.add_argument("--against-library", action="store_true", help="Compare candidate against all cataloged mods in mods/")
-    parser.add_argument("--summary", action="store_true", help="Output high-level collision counts and mod pairs without dumping full raw entries")
+    parser.add_argument(
+        "--against-library",
+        action="store_true",
+        help="Compare candidate against all cataloged mods in mods/",
+    )
+    parser.add_argument(
+        "--summary",
+        action="store_true",
+        help="Output high-level collision counts and mod pairs without dumping full raw entries",
+    )
     parser.add_argument("--json", action="store_true", help="Output results as JSON")
 
     args = parser.parse_args()
@@ -458,22 +487,34 @@ def main() -> None:
             print(f"\n{BOLD}{CYAN}=== BG3 Mod Compatibility Analysis ==={RESET}")
             print(f"Comparing: {BOLD}{res['mod1']}{RESET} vs {BOLD}{res['mod2']}{RESET}\n")
             if not res["has_conflicts"]:
-                print(f"{GREEN}✓ No stat, progression, or template collisions detected between these mods.{RESET}")
+                print(
+                    f"{GREEN}✓ No stat, progression, or template collisions detected between these mods.{RESET}"
+                )
             else:
                 if res["stat_collisions"]:
                     print(f"{YELLOW}⚠ Stat Entry Overrides ({len(res['stat_collisions'])}):{RESET}")
                     for sc in res["stat_collisions"]:
-                        print(f"  • Entry '{sc['entry']}' defined in both '{sc['mod1_file']}' and '{sc['mod2_file']}'")
+                        print(
+                            f"  • Entry '{sc['entry']}' defined in both '{sc['mod1_file']}' and '{sc['mod2_file']}'"
+                        )
                 if res["progression_collisions"]:
-                    print(f"{RED}✗ Class Progression Collisions ({len(res['progression_collisions'])}):{RESET}")
+                    print(
+                        f"{RED}✗ Class Progression Collisions ({len(res['progression_collisions'])}):{RESET}"
+                    )
                     for pc in res["progression_collisions"]:
-                        print(f"  • Class '{pc['class']}' Level {pc['level']} overwritten by both mods")
+                        print(
+                            f"  • Class '{pc['class']}' Level {pc['level']} overwritten by both mods"
+                        )
                 if res.get("root_template_collisions"):
-                    print(f"{RED}✗ RootTemplate MapKey Collisions ({len(res['root_template_collisions'])}):{RESET}")
+                    print(
+                        f"{RED}✗ RootTemplate MapKey Collisions ({len(res['root_template_collisions'])}):{RESET}"
+                    )
                     for rc in res["root_template_collisions"]:
                         print(f"  • MapKey '{rc['map_key']}' ({rc['name']}) defined in both mods")
                 if res.get("class_collisions"):
-                    print(f"{RED}✗ Class Description Collisions ({len(res['class_collisions'])}):{RESET}")
+                    print(
+                        f"{RED}✗ Class Description Collisions ({len(res['class_collisions'])}):{RESET}"
+                    )
                     for cc in res["class_collisions"]:
                         print(f"  • Class '{cc['name']}' ({cc['uuid']}) defined in both mods")
                 if res.get("feat_collisions"):
@@ -481,11 +522,15 @@ def main() -> None:
                     for fc in res["feat_collisions"]:
                         print(f"  • Feat '{fc['name']}' ({fc['uuid']}) defined in both mods")
                 if res.get("resource_collisions"):
-                    print(f"{RED}✗ Action Resource Collisions ({len(res['resource_collisions'])}):{RESET}")
+                    print(
+                        f"{RED}✗ Action Resource Collisions ({len(res['resource_collisions'])}):{RESET}"
+                    )
                     for rc in res["resource_collisions"]:
                         print(f"  • Resource '{rc['name']}' ({rc['uuid']}) defined in both mods")
                 if res.get("level_map_collisions"):
-                    print(f"{RED}✗ Level Map Collisions ({len(res['level_map_collisions'])}):{RESET}")
+                    print(
+                        f"{RED}✗ Level Map Collisions ({len(res['level_map_collisions'])}):{RESET}"
+                    )
                     for lmc in res["level_map_collisions"]:
                         print(f"  • LevelMap '{lmc['name']}' defined in both mods")
                 if res.get("tag_collisions"):
@@ -503,12 +548,16 @@ def main() -> None:
 
             for mname, mdeps in res.get("missing_dependencies", {}).items():
                 if mdeps:
-                    print(f"{YELLOW}⚠ Missing Local Dependencies for {mname}:{RESET} {', '.join(mdeps)}")
+                    print(
+                        f"{YELLOW}⚠ Missing Local Dependencies for {mname}:{RESET} {', '.join(mdeps)}"
+                    )
 
             # Check dlls
             for mname, dlls in res["console_incompatible"].items():
                 if dlls:
-                    print(f"{RED}✗ Console Incompatibility in {mname}:{RESET} contains native binaries {dlls}")
+                    print(
+                        f"{RED}✗ Console Incompatibility in {mname}:{RESET} contains native binaries {dlls}"
+                    )
             print("")
 
         sys.exit(1 if res["has_conflicts"] else 0)
@@ -568,13 +617,19 @@ def main() -> None:
             if cand_dlls:
                 print(f"{RED}✗ Native DLLs detected (Console Incompatible): {cand_dlls}{RESET}")
             if cand_missing_deps:
-                print(f"{YELLOW}⚠ Missing Local Dependencies: {', '.join(cand_missing_deps)}{RESET}")
+                print(
+                    f"{YELLOW}⚠ Missing Local Dependencies: {', '.join(cand_missing_deps)}{RESET}"
+                )
 
             if not results:
-                print(f"{GREEN}✓ No conflicts found with any tracked mods in catalog ({len(catalog)} checked).{RESET}\n")
+                print(
+                    f"{GREEN}✓ No conflicts found with any tracked mods in catalog ({len(catalog)} checked).{RESET}\n"
+                )
                 sys.exit(ExitCode.OK)
             else:
-                print(f"{YELLOW}⚠ Potential collisions found with {len(results)} cataloged mods:{RESET}")
+                print(
+                    f"{YELLOW}⚠ Potential collisions found with {len(results)} cataloged mods:{RESET}"
+                )
                 for r in results:
                     print(f"\n  {BOLD}vs {r['mod2']}:{RESET}")
                     for sc in r["stat_collisions"]:
@@ -582,7 +637,9 @@ def main() -> None:
                     for pc in r["progression_collisions"]:
                         print(f"    • Progression collision: {pc['class']} Lvl {pc['level']}")
                     for rc in r.get("root_template_collisions", []):
-                        print(f"    • RootTemplate MapKey collision: {rc['map_key']} ({rc['name']})")
+                        print(
+                            f"    • RootTemplate MapKey collision: {rc['map_key']} ({rc['name']})"
+                        )
                     for cc in r.get("class_collisions", []):
                         print(f"    • Class collision: {cc['name']} ({cc['uuid']})")
                     for fc in r.get("feat_collisions", []):
@@ -617,7 +674,11 @@ def main() -> None:
                     pair_conflicts.append(res)
 
         if args.json:
-            print(json.dumps({"total_mods": len(all_mods), "conflicting_pairs": pair_conflicts}, indent=2))
+            print(
+                json.dumps(
+                    {"total_mods": len(all_mods), "conflicting_pairs": pair_conflicts}, indent=2
+                )
+            )
         else:
             print(f"\n{BOLD}{CYAN}=== Workspace Full Mod Compatibility Scan ==={RESET}")
             print(f"Scanned {len(all_mods)} total mods across my_mods/ and mods/.")

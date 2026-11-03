@@ -28,7 +28,10 @@ class TestLspkPackaging(unittest.TestCase):
         """Test that the 40-byte header adheres strictly to LSPK v18 specification."""
         files = [
             ("Mods/Sample/meta.lsx", b"<save><version>1</version></save>"),
-            ("Public/Sample/Stats/Generated/Data/Armor.txt", b"new entry Sample_Armor\ntype Armor\n"),
+            (
+                "Public/Sample/Stats/Generated/Data/Armor.txt",
+                b"new entry Sample_Armor\ntype Armor\n",
+            ),
         ]
         pak = build_pak_archive(files, compress=True)
         self.assertGreaterEqual(len(pak), 40)
@@ -127,6 +130,33 @@ class TestLspkPackaging(unittest.TestCase):
             # Verify dotfiles and excluded documentation are filtered out
             self.assertFalse(any(".test_deps.json" in name for name in entry_names))
             self.assertFalse(any("README.md" in name for name in entry_names))
+
+    def test_write_lspk_archive_streaming_to_disk(self):
+        """Test streaming LSPK archive directly to disk with write_lspk_archive via generator."""
+        import tempfile
+
+        from bg3_core.binary.lspk import write_lspk_archive
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            out_pak = Path(tmp_dir) / "streamed.pak"
+
+            raw_files = [
+                ("Mods/ModStream/meta.lsx", b"<meta><version>1</version></meta>"),
+                ("Public/ModStream/Stats/Data.txt", b"new entry Test\ntype Armor\n" * 100),
+            ]
+
+            def entry_generator():
+                for name, content in raw_files:
+                    yield (name, content)
+
+            total_written = write_lspk_archive(out_pak, entry_generator(), compress=True)
+            self.assertTrue(out_pak.is_file())
+            self.assertEqual(total_written, out_pak.stat().st_size)
+
+            arc = LspkArchive(out_pak)
+            self.assertEqual(arc.version, 18)
+            self.assertEqual(len(arc.files), 2)
+            self.assertTrue(verify_pak_archive(out_pak, raw_files))
 
 
 if __name__ == "__main__":

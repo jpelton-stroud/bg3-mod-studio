@@ -80,7 +80,10 @@ def discover_save_games(search_dirs: Optional[Sequence[Path]] = None) -> List[Di
 
             # BG3 save directories usually match the save name:
             # e.g., Savegames/Story/<SaveName>/<SaveName>.lsv + <SaveName>.WebP
-            is_dir_package = parent.name == save_name and parent.parent.name.lower() in ("story", "savegames")
+            is_dir_package = parent.name == save_name and parent.parent.name.lower() in (
+                "story",
+                "savegames",
+            )
 
             associated_files: List[Path] = [real_path]
             total_size = lsv_size
@@ -106,21 +109,25 @@ def discover_save_games(search_dirs: Optional[Sequence[Path]] = None) -> List[Di
                         except OSError:
                             pass
 
-            records.append({
-                "name": save_name,
-                "lsv_path": str(real_path),
-                "package_dir": str(package_dir) if package_dir else None,
-                "is_dir_package": is_dir_package,
-                "associated_files": [str(p) for p in associated_files],
-                "size_bytes": total_size,
-                "size_mb": round(total_size / (1024 * 1024), 2),
-                "mtime": mtime,
-                "modified": datetime.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S"),
-            })
+            records.append(
+                {
+                    "name": save_name,
+                    "lsv_path": str(real_path),
+                    "package_dir": str(package_dir) if package_dir else None,
+                    "is_dir_package": is_dir_package,
+                    "associated_files": [str(p) for p in associated_files],
+                    "size_bytes": total_size,
+                    "size_mb": round(total_size / (1024 * 1024), 2),
+                    "mtime": mtime,
+                    "modified": datetime.datetime.fromtimestamp(mtime).strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    ),
+                }
+            )
 
     records.sort(key=lambda r: r["mtime"], reverse=True)
     for idx, r in enumerate(records):
-        r["is_latest"] = (idx == 0)
+        r["is_latest"] = idx == 0
 
     return records
 
@@ -151,7 +158,10 @@ def filter_saves_for_purge(
         # 1. Target specific save name
         if target_save:
             stem = Path(target_save).stem.lower()
-            if save["name"].lower() == stem or Path(save["lsv_path"]).name.lower() == target_save.lower():
+            if (
+                save["name"].lower() == stem
+                or Path(save["lsv_path"]).name.lower() == target_save.lower()
+            ):
                 if idx == 0 and keep_latest:
                     to_preserve.append(save)
                 else:
@@ -305,7 +315,11 @@ def handle_list(args: argparse.Namespace) -> int:
     saves = discover_save_games(search_dirs)
 
     if args.json:
-        print(json.dumps(format_json_response(data={"saves": saves, "total_count": len(saves)}), indent=2))
+        print(
+            json.dumps(
+                format_json_response(data={"saves": saves, "total_count": len(saves)}), indent=2
+            )
+        )
         return ExitCode.OK
 
     color = ConsoleColor(stream=sys.stdout)
@@ -345,7 +359,7 @@ def handle_inspect(args: argparse.Namespace) -> int:
             print(f"\n{color.bold('BG3 Save Game Inspection:')} {save_file.name}")
             print("=" * 70)
             print(f"  Path:        {save_file}")
-            print(f"  Size:        {meta['size_bytes'] / (1024*1024):.2f} MB")
+            print(f"  Size:        {meta['size_bytes'] / (1024 * 1024):.2f} MB")
             if meta.get("level_name"):
                 print(f"  Level/Act:   {meta['level_name']}")
             print(f"  Active Mods: {len(meta.get('mods', []))}")
@@ -358,7 +372,14 @@ def handle_inspect(args: argparse.Namespace) -> int:
 
     except Exception as e:
         if args.json:
-            print(json.dumps(format_json_response(status="error", error={"code": "INSPECT_ERROR", "message": str(e)}), indent=2))
+            print(
+                json.dumps(
+                    format_json_response(
+                        status="error", error={"code": "INSPECT_ERROR", "message": str(e)}
+                    ),
+                    indent=2,
+                )
+            )
         else:
             print(f"{err_color.red('[ERROR]')} {e}", file=sys.stderr)
         return ExitCode.GENERAL
@@ -370,14 +391,25 @@ def handle_backup(args: argparse.Namespace) -> int:
 
     if getattr(args, "save", None):
         target = args.save.lower()
-        saves_to_backup = [s for s in all_saves if s["name"].lower() == target or Path(s["lsv_path"]).name.lower() == target]
+        saves_to_backup = [
+            s
+            for s in all_saves
+            if s["name"].lower() == target or Path(s["lsv_path"]).name.lower() == target
+        ]
     else:
         saves_to_backup = all_saves
 
     if not saves_to_backup:
         err_msg = "No matching save games found to back up."
         if args.json:
-            print(json.dumps(format_json_response(status="error", error={"code": "NO_SAVES_FOUND", "message": err_msg}), indent=2))
+            print(
+                json.dumps(
+                    format_json_response(
+                        status="error", error={"code": "NO_SAVES_FOUND", "message": err_msg}
+                    ),
+                    indent=2,
+                )
+            )
         else:
             print(f"Error: {err_msg}", file=sys.stderr)
         return ExitCode.NOINPUT
@@ -404,7 +436,9 @@ def handle_purge(args: argparse.Namespace) -> int:
     if not all_saves:
         msg = "No save games found to purge."
         if args.json:
-            print(json.dumps(format_json_response(data={"purged_count": 0, "message": msg}), indent=2))
+            print(
+                json.dumps(format_json_response(data={"purged_count": 0, "message": msg}), indent=2)
+            )
         else:
             print(msg)
         return ExitCode.OK
@@ -426,12 +460,19 @@ def handle_purge(args: argparse.Namespace) -> int:
     if not to_purge:
         msg = "No save games matched the purge criteria."
         if args.json:
-            print(json.dumps(format_json_response(data={
-                "purged_count": 0,
-                "preserved_count": len(to_preserve),
-                "reclaimed_bytes": 0,
-                "message": msg,
-            }), indent=2))
+            print(
+                json.dumps(
+                    format_json_response(
+                        data={
+                            "purged_count": 0,
+                            "preserved_count": len(to_preserve),
+                            "reclaimed_bytes": 0,
+                            "message": msg,
+                        }
+                    ),
+                    indent=2,
+                )
+            )
         else:
             print(f"[INFO] {msg} (Preserved: {len(to_preserve)})")
         return ExitCode.OK
@@ -449,7 +490,15 @@ def handle_purge(args: argparse.Namespace) -> int:
             )
         except NonInteractiveConfirmationError as exc:
             if args.json:
-                print(json.dumps(format_json_response(status="error", error={"code": "CONFIRMATION_REQUIRED", "message": str(exc)}), indent=2))
+                print(
+                    json.dumps(
+                        format_json_response(
+                            status="error",
+                            error={"code": "CONFIRMATION_REQUIRED", "message": str(exc)},
+                        ),
+                        indent=2,
+                    )
+                )
             else:
                 err_color = ConsoleColor(stream=sys.stderr)
                 print(f"{err_color.red('[ERROR]')} {exc}", file=sys.stderr)
@@ -464,7 +513,9 @@ def handle_purge(args: argparse.Namespace) -> int:
 
     purge_result = purge_save_games(to_purge, dry_run=args.dry_run)
     purge_result["preserved_count"] = len(to_preserve)
-    purge_result["preserved_saves"] = [{"name": s["name"], "size_mb": s["size_mb"], "modified": s["modified"]} for s in to_preserve]
+    purge_result["preserved_saves"] = [
+        {"name": s["name"], "size_mb": s["size_mb"], "modified": s["modified"]} for s in to_preserve
+    ]
     if backup_result:
         purge_result["backup"] = backup_result
 
@@ -504,7 +555,11 @@ def handle_clean_missing(args: argparse.Namespace) -> int:
         save_file = find_save_file(args.save, args.save_dir)
     except FileNotFoundError as err:
         if args.json:
-            print(json.dumps(format_json_response(status="error", error={"message": str(err)}), indent=2))
+            print(
+                json.dumps(
+                    format_json_response(status="error", error={"message": str(err)}), indent=2
+                )
+            )
         else:
             print(f"{color.red('Error:')} {err}", file=sys.stderr)
         return ExitCode.DATAERR
@@ -522,7 +577,11 @@ def handle_clean_missing(args: argparse.Namespace) -> int:
             )
         except NonInteractiveConfirmationError as err:
             if args.json:
-                print(json.dumps(format_json_response(status="error", error={"message": str(err)}), indent=2))
+                print(
+                    json.dumps(
+                        format_json_response(status="error", error={"message": str(err)}), indent=2
+                    )
+                )
             else:
                 print(f"{color.red('Confirmation required:')} {err}", file=sys.stderr)
             return ExitCode.DATAERR
@@ -535,7 +594,11 @@ def handle_clean_missing(args: argparse.Namespace) -> int:
         )
     except Exception as err:
         if args.json:
-            print(json.dumps(format_json_response(status="error", error={"message": str(err)}), indent=2))
+            print(
+                json.dumps(
+                    format_json_response(status="error", error={"message": str(err)}), indent=2
+                )
+            )
         else:
             print(f"{color.red('Error pruning save:')} {err}", file=sys.stderr)
         return ExitCode.GENERAL
@@ -550,7 +613,11 @@ def handle_clean_missing(args: argparse.Namespace) -> int:
     }
 
     if args.json:
-        print(json.dumps(format_json_response(status="success" if ok else "error", data=data), indent=2))
+        print(
+            json.dumps(
+                format_json_response(status="success" if ok else "error", data=data), indent=2
+            )
+        )
     else:
         status_label = "[DRY-RUN] Would prune" if args.dry_run else "Successfully pruned"
         print(f"\n{color.bold('BG3 Save Game Rescue / Mod Pruning:')} ({status_label})")
@@ -583,10 +650,14 @@ def main() -> int:
     p_list.add_argument("--json", action="store_true", help="Emit JSON output")
 
     # inspect
-    p_inspect = subparsers.add_parser("inspect", help="Inspect and audit a specific or latest save game")
+    p_inspect = subparsers.add_parser(
+        "inspect", help="Inspect and audit a specific or latest save game"
+    )
     p_inspect.add_argument("save", nargs="?", help="Path or name of .lsv save file, or 'latest'")
     p_inspect.add_argument("--save-dir", help="Custom directory containing .lsv save files")
-    p_inspect.add_argument("--audit", action="store_true", help="Audit save mods against active modsettings.lsx")
+    p_inspect.add_argument(
+        "--audit", action="store_true", help="Audit save mods against active modsettings.lsx"
+    )
     p_inspect.add_argument("--json", action="store_true", help="Emit JSON output")
 
     # backup
@@ -598,26 +669,48 @@ def main() -> int:
 
     # purge
     p_purge = subparsers.add_parser("purge", help="Prune old or unneeded save games")
-    p_purge.add_argument("--keep", type=int, default=5, help="Number of newest saves to preserve (default: 5)")
+    p_purge.add_argument(
+        "--keep", type=int, default=5, help="Number of newest saves to preserve (default: 5)"
+    )
     p_purge.add_argument("--days", type=float, help="Purge saves older than specified days")
     p_purge.add_argument("--save", help="Specific save name to purge")
-    p_purge.add_argument("--all", action="store_true", help="Purge all matching saves (preserves latest unless --force-all)")
-    p_purge.add_argument("--force-all", action="store_true", help="Purge ALL saves including the latest save")
-    p_purge.add_argument("--no-keep-latest", action="store_true", help="Disable latest save protection")
+    p_purge.add_argument(
+        "--all",
+        action="store_true",
+        help="Purge all matching saves (preserves latest unless --force-all)",
+    )
+    p_purge.add_argument(
+        "--force-all", action="store_true", help="Purge ALL saves including the latest save"
+    )
+    p_purge.add_argument(
+        "--no-keep-latest", action="store_true", help="Disable latest save protection"
+    )
     p_purge.add_argument("--backup", action="store_true", help="Create a ZIP backup before purging")
     p_purge.add_argument("--backup-dir", help="Custom directory for pre-purge backup")
     p_purge.add_argument("--save-dir", help="Custom directory containing .lsv save files")
-    p_purge.add_argument("--dry-run", "-n", action="store_true", help="Simulate purge without modifying files")
-    p_purge.add_argument("--yes", "-y", action="store_true", help="Confirm deletion non-interactively")
+    p_purge.add_argument(
+        "--dry-run", "-n", action="store_true", help="Simulate purge without modifying files"
+    )
+    p_purge.add_argument(
+        "--yes", "-y", action="store_true", help="Confirm deletion non-interactively"
+    )
     p_purge.add_argument("--json", action="store_true", help="Emit JSON output")
 
     # clean-missing
-    p_clean = subparsers.add_parser("clean-missing", aliases=["clean_missing", "rescue"], help="Prune missing mods from a save game")
+    p_clean = subparsers.add_parser(
+        "clean-missing",
+        aliases=["clean_missing", "rescue"],
+        help="Prune missing mods from a save game",
+    )
     p_clean.add_argument("save", nargs="?", help="Path or name of .lsv save file, or 'latest'")
     p_clean.add_argument("--save-dir", help="Custom directory containing .lsv save files")
     p_clean.add_argument("--out", help="Output path for cleaned .lsv file")
-    p_clean.add_argument("--dry-run", "-n", action="store_true", help="Simulate pruning without modifying files")
-    p_clean.add_argument("--yes", "-y", action="store_true", help="Confirm modification non-interactively")
+    p_clean.add_argument(
+        "--dry-run", "-n", action="store_true", help="Simulate pruning without modifying files"
+    )
+    p_clean.add_argument(
+        "--yes", "-y", action="store_true", help="Confirm modification non-interactively"
+    )
     p_clean.add_argument("--json", action="store_true", help="Emit JSON output")
 
     args = parser.parse_args()

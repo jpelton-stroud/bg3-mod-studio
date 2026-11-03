@@ -88,7 +88,9 @@ result: tc.SimulationResult = tc.simulate_build(
 print(f"Proficiency Bonus: +{result.proficiency_bonus}")
 print(f"Effective Spell DC: {result.effective_spell_save_dc}")
 print(f"Turn 1 Expected DPR: {result.turn_1_dpr.expected_dpr:.2f} damage")
-print(f"Action Budget: {result.action_budget.actions} action, {result.action_budget.bonus_actions} bonus")
+print(
+    f"Action Budget: {result.action_budget.actions} action, {result.action_budget.bonus_actions} bonus"
+)
 print(f"Sorcery Points: {result.resource_pools.sorcery_points}")
 
 # Dictionary subscripting backwards-compatibility

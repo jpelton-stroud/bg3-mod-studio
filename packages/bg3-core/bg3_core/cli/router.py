@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import importlib.metadata
 import importlib.util
 import inspect
 import json
@@ -193,15 +194,39 @@ def _find_module_file(mod_name: str) -> Optional[Path]:
     return None
 
 
-def _add_scaffold_subparsers(sub_sp: Any) -> None:
-    """Add structured subparsers for asset scaffolding types."""
-    # Attempt to load rich schema definitions from scaffold_asset if available
-    target_parser = None
+def _discover_entry_point_commands() -> Dict[Tuple[str, str], CommandSpec]:
+    """Discover external CLI commands published under the bg3.commands entry point group."""
+    discovered: Dict[Tuple[str, str], CommandSpec] = {}
     try:
-        from bg3_authoring.scaffold_asset import build_parser as build_scaffold_p
-        target_parser = build_scaffold_p()
+        eps = importlib.metadata.entry_points(group="bg3.commands")
+        for ep in eps:
+            parts = ep.name.split(".", 1)
+            if len(parts) == 2:
+                key = (parts[0], parts[1])
+            else:
+                key = (ep.name, "")
+            spec = CommandSpec(
+                target_module=ep.value,
+                help=f"Extension command: {ep.name}",
+                category="extension",
+            )
+            discovered[key] = spec
     except Exception:
         pass
+    return discovered
+
+
+def _add_scaffold_subparsers(sub_sp: Any) -> None:
+    """Add structured subparsers for asset scaffolding types."""
+    # Attempt to load rich schema definitions from scaffold_asset lazily if scaffold is targeted
+    target_parser = None
+    if any(t in sys.argv for t in ("scaffold", "scaffold_asset")):
+        try:
+            from bg3_authoring.scaffold_asset import build_parser as build_scaffold_p
+
+            target_parser = build_scaffold_p()
+        except Exception:
+            pass
 
     target_actions: Dict[str, Any] = {}
     if target_parser is not None:
@@ -575,6 +600,16 @@ def build_parser() -> JsonCompliantArgumentParser:
     _add_tools_subparsers(subparsers)
     _add_env_subparsers(subparsers)
 
+    # Discover and mount external command extensions
+    exts = _discover_entry_point_commands()
+    for (ext_cmd, ext_sub), ext_spec in exts.items():
+        if not ext_sub and ext_cmd not in getattr(subparsers, "choices", {}):
+            try:
+                p_ext = subparsers.add_parser(ext_cmd, help=ext_spec.help)
+                p_ext.add_argument("remainder", nargs=argparse.REMAINDER)
+            except Exception:
+                pass
+
     return parser
 
 
@@ -678,6 +713,13 @@ def dispatch_command(args: Any, emitter: OutputEmitter) -> int:
         spec = COMMAND_REGISTRY[(cmd, sub)]
     elif cmd == "build" and sub in ("sim", "simulate"):
         spec = COMMAND_REGISTRY[("build", "simulate")]
+
+    if not spec:
+        discovered = _discover_entry_point_commands()
+        if (cmd, sub) in discovered:
+            spec = discovered[(cmd, sub)]
+        elif (cmd, "") in discovered:
+            spec = discovered[(cmd, "")]
 
     if not spec:
         full_cmd = f"{cmd} {sub}".strip()

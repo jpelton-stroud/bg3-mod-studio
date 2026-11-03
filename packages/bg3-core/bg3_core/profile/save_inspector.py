@@ -18,9 +18,9 @@ import uuid
 import xml.etree.ElementTree as ET
 import zlib
 from pathlib import Path
-from typing import Any
+from typing import Any, Generator
 
-from bg3_core.binary.lspk import LspkArchive, build_lspk_archive
+from bg3_core.binary.lspk import LspkArchive, write_lspk_archive
 from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import detect_bg3_appdata_dirs
 from bg3_core.exceptions import BG3BinaryError, BG3PackagingError
@@ -82,12 +82,14 @@ def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict[str, str]]:
                 folder_val = str(node.get_attr_value("Folder") or "")
                 ver_val = str(node.get_attr_value("Version64") or "")
                 if uuid_val or name_val:
-                    ast_mods.append({
-                        "uuid": uuid_val,
-                        "name": name_val,
-                        "folder": folder_val,
-                        "version": ver_val,
-                    })
+                    ast_mods.append(
+                        {
+                            "uuid": uuid_val,
+                            "name": name_val,
+                            "folder": folder_val,
+                            "version": ver_val,
+                        }
+                    )
             if ast_mods:
                 return ast_mods
     except (struct.error, zlib.error, ValueError, BG3BinaryError):
@@ -111,14 +113,19 @@ def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict[str, str]]:
             payload = lsf_bytes
 
     mods: list[dict[str, str]] = []
-    pattern = re.compile(rb"([0-9a-f]{32})\x00([A-Za-z0-9_\-\. ]{2,128})\x00([A-Za-z0-9_\-\. ]{2,128})\x00")
+    pattern = re.compile(
+        rb"([0-9a-f]{32})\x00([A-Za-z0-9_\-\. ]{2,128})\x00([A-Za-z0-9_\-\. ]{2,128})\x00"
+    )
     for m in pattern.finditer(payload):
         md5_pos = m.start()
         folder = m.group(2).decode("utf-8", errors="ignore")
         name = m.group(3).decode("utf-8", errors="ignore")
         mod_uuid = ""
         ver_str = ""
-        uuid_suffix = re.search(r"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$", folder)
+        uuid_suffix = re.search(
+            r"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$",
+            folder,
+        )
         if uuid_suffix:
             mod_uuid = uuid_suffix.group(1)
         elif md5_pos >= 24:
@@ -132,12 +139,14 @@ def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict[str, str]]:
             ver_int = struct.unpack("<q", payload[md5_pos - 8 : md5_pos])[0]
             ver_str = str(ver_int)
         if mod_uuid:
-            mods.append({
-                "uuid": mod_uuid,
-                "name": name,
-                "folder": folder,
-                "version": ver_str,
-            })
+            mods.append(
+                {
+                    "uuid": mod_uuid,
+                    "name": name,
+                    "folder": folder,
+                    "version": ver_str,
+                }
+            )
     return mods
 
 
@@ -176,7 +185,9 @@ def extract_save_metadata(save_path: Path) -> dict[str, Any]:
 
         if save_info_entry is not None:
             try:
-                info_json = json.loads(archive.extract_file(save_info_entry).decode("utf-8", errors="ignore"))
+                info_json = json.loads(
+                    archive.extract_file(save_info_entry).decode("utf-8", errors="ignore")
+                )
                 save_info["level_name"] = info_json.get("Current Level", "")
                 save_info["version"] = info_json.get("Game Version", "")
             except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
@@ -196,20 +207,28 @@ def extract_save_metadata(save_path: Path) -> dict[str, Any]:
                 elif attr_id == "Version64" and not save_info["version"]:
                     save_info["version"] = val
 
-            mod_nodes = tree.findall(".//node[@id='Mod']") or tree.findall(".//node[@id='Mods']//node[@id='ModuleShortDesc']")
+            mod_nodes = tree.findall(".//node[@id='Mod']") or tree.findall(
+                ".//node[@id='Mods']//node[@id='ModuleShortDesc']"
+            )
             for mod_node in mod_nodes:
                 uuid_attr = mod_node.find("attribute[@id='UUID']")
                 name_attr = mod_node.find("attribute[@id='Name']")
                 folder_attr = mod_node.find("attribute[@id='Folder']")
-                ver_attr = mod_node.find("attribute[@id='Version']") or mod_node.find("attribute[@id='Version64']")
+                ver_attr = mod_node.find("attribute[@id='Version']") or mod_node.find(
+                    "attribute[@id='Version64']"
+                )
 
                 if uuid_attr is not None:
-                    save_info["mods"].append({
-                        "uuid": uuid_attr.get("value", ""),
-                        "name": name_attr.get("value", "") if name_attr is not None else "",
-                        "folder": folder_attr.get("value", "") if folder_attr is not None else "",
-                        "version": ver_attr.get("value", "") if ver_attr is not None else "",
-                    })
+                    save_info["mods"].append(
+                        {
+                            "uuid": uuid_attr.get("value", ""),
+                            "name": name_attr.get("value", "") if name_attr is not None else "",
+                            "folder": folder_attr.get("value", "")
+                            if folder_attr is not None
+                            else "",
+                            "version": ver_attr.get("value", "") if ver_attr is not None else "",
+                        }
+                    )
         elif meta_lsf_entry is not None:
             lsf_bytes = archive.extract_file(meta_lsf_entry)
             save_info["mods"] = _parse_lsf_save_mods(lsf_bytes)
@@ -217,7 +236,9 @@ def extract_save_metadata(save_path: Path) -> dict[str, Any]:
     return save_info
 
 
-def audit_against_modsettings(save_mods: list[dict[str, Any]], workspace_root: Path | None = None) -> dict[str, Any]:
+def audit_against_modsettings(
+    save_mods: list[dict[str, Any]], workspace_root: Path | None = None
+) -> dict[str, Any]:
     """Compares save mod list against active modsettings.lsx."""
     from bg3_core.profile.manage_load_order import (
         CORE_GUSTAV_NAMES,
@@ -240,11 +261,13 @@ def audit_against_modsettings(save_mods: list[dict[str, Any]], workspace_root: P
     active_mods = parsed.get("mods", {})
 
     active_by_uuid = {
-        u.lower(): m for u, m in active_mods.items()
+        u.lower(): m
+        for u, m in active_mods.items()
         if (m.get("Name") or m.get("Folder") or "").lower() not in CORE_GUSTAV_NAMES
     }
     save_by_uuid = {
-        m["uuid"].lower(): m for m in save_mods
+        m["uuid"].lower(): m
+        for m in save_mods
         if (m.get("name") or m.get("folder") or "").lower() not in CORE_GUSTAV_NAMES
     }
 
@@ -261,11 +284,13 @@ def audit_against_modsettings(save_mods: list[dict[str, Any]], workspace_root: P
     new_in_active = []
     for u, am in active_by_uuid.items():
         if u not in save_by_uuid:
-            new_in_active.append({
-                "uuid": u,
-                "name": am.get("Name", ""),
-                "folder": am.get("Folder", ""),
-            })
+            new_in_active.append(
+                {
+                    "uuid": u,
+                    "name": am.get("Name", ""),
+                    "folder": am.get("Folder", ""),
+                }
+            )
 
     return {
         "modsettings_path": str(settings_file),
@@ -306,7 +331,9 @@ def prune_missing_mods_from_save(
         uuids_to_remove = {u.strip().lower() for u in target_uuids if u.strip()}
     else:
         audit_result = audit_against_modsettings(save_mods)
-        uuids_to_remove = {m["uuid"].strip().lower() for m in audit_result.get("missing_mods", []) if m.get("uuid")}
+        uuids_to_remove = {
+            m["uuid"].strip().lower() for m in audit_result.get("missing_mods", []) if m.get("uuid")
+        }
 
     if not uuids_to_remove:
         return True, []
@@ -332,61 +359,72 @@ def prune_missing_mods_from_save(
         if not backup_path.exists():
             shutil.copy2(save_path, backup_path)
 
-    archive_files: list[tuple[str, bytes]] = []
-    with LspkArchive.open(save_path, use_mmap=False) as archive:
-        for entry in archive.files:
-            name = entry["name"]
-            norm = name.replace("\\", "/").lower()
-            raw = archive.extract_file(entry)
+    def generate_pruned_entries() -> Generator[tuple[str, bytes], None, None]:
+        with LspkArchive.open(save_path, use_mmap=False) as archive:
+            for entry in archive.files:
+                name = entry["name"]
+                norm = name.replace("\\", "/").lower()
+                raw = archive.extract_file(entry)
 
-            if norm.endswith("meta.lsf"):
-                from bg3_core.binary.lsf import LsfDocument, LsfNode
+                if norm.endswith("meta.lsf"):
+                    from bg3_core.binary.lsf import LsfDocument, LsfNode
 
-                doc = LsfDocument.from_bytes(raw)
+                    doc = LsfDocument.from_bytes(raw)
 
-                def _prune_lsf_node(node: LsfNode) -> None:
-                    kept_children: list[LsfNode] = []
-                    for child in node.children:
-                        if child.name in ("ModuleShortDesc", "Mod"):
-                            c_uuid = str(child.get_attr_value("UUID") or "").strip().lower()
-                            if c_uuid and c_uuid in uuids_to_remove:
+                    def _prune_lsf_node(node: LsfNode) -> None:
+                        kept_children: list[LsfNode] = []
+                        for child in node.children:
+                            if child.name in ("ModuleShortDesc", "Mod"):
+                                c_uuid = str(child.get_attr_value("UUID") or "").strip().lower()
+                                if c_uuid and c_uuid in uuids_to_remove:
+                                    continue
+                            _prune_lsf_node(child)
+                            kept_children.append(child)
+                        node.children = kept_children
+
+                    new_roots: list[LsfNode] = []
+                    for r in doc.root_nodes:
+                        if r.name in ("ModuleShortDesc", "Mod"):
+                            r_uuid = str(r.get_attr_value("UUID") or "").strip().lower()
+                            if r_uuid and r_uuid in uuids_to_remove:
                                 continue
-                        _prune_lsf_node(child)
-                        kept_children.append(child)
-                    node.children = kept_children
+                        _prune_lsf_node(r)
+                        new_roots.append(r)
+                    doc.root_nodes = new_roots
+                    yield (name, doc.to_bytes(compress=True))
 
-                new_roots: list[LsfNode] = []
-                for r in doc.root_nodes:
-                    if r.name in ("ModuleShortDesc", "Mod"):
-                        r_uuid = str(r.get_attr_value("UUID") or "").strip().lower()
-                        if r_uuid and r_uuid in uuids_to_remove:
-                            continue
-                    _prune_lsf_node(r)
-                    new_roots.append(r)
-                doc.root_nodes = new_roots
-                archive_files.append((name, doc.to_bytes(compress=True)))
+                elif norm.endswith("meta.lsx"):
+                    tree = ET.fromstring(raw)
+                    for parent in tree.iter():
+                        to_remove = []
+                        for child in list(parent):
+                            if child.tag == "node" and child.get("id") in (
+                                "Mod",
+                                "ModuleShortDesc",
+                            ):
+                                u_attr = child.find("attribute[@id='UUID']")
+                                if u_attr is not None:
+                                    val = (u_attr.get("value") or "").strip().lower()
+                                    if val in uuids_to_remove:
+                                        to_remove.append(child)
+                        for child in to_remove:
+                            parent.remove(child)
+                    yield (name, ET.tostring(tree, encoding="utf-8"))
 
-            elif norm.endswith("meta.lsx"):
-                tree = ET.fromstring(raw)
-                for parent in tree.iter():
-                    to_remove = []
-                    for child in list(parent):
-                        if child.tag == "node" and child.get("id") in ("Mod", "ModuleShortDesc"):
-                            u_attr = child.find("attribute[@id='UUID']")
-                            if u_attr is not None:
-                                val = (u_attr.get("value") or "").strip().lower()
-                                if val in uuids_to_remove:
-                                    to_remove.append(child)
-                    for child in to_remove:
-                        parent.remove(child)
-                archive_files.append((name, ET.tostring(tree, encoding="utf-8")))
+                else:
+                    yield (name, raw)
 
-            else:
-                archive_files.append((name, raw))
-
-    repacked_bytes = build_lspk_archive(archive_files, compress=True)
     dest_path.parent.mkdir(parents=True, exist_ok=True)
-    dest_path.write_bytes(repacked_bytes)
+    temp_dest = dest_path.with_name(f"{dest_path.name}.tmp")
+    try:
+        write_lspk_archive(temp_dest, generate_pruned_entries(), compress=True)
+        shutil.move(str(temp_dest), str(dest_path))
+    finally:
+        if temp_dest.exists():
+            try:
+                temp_dest.unlink()
+            except OSError:
+                pass
 
     return True, pruned_mods
 
@@ -395,13 +433,25 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Inspect BG3 .lsv save files and audit them against active mod load orders."
     )
-    parser.add_argument("save_pos", nargs="?", help="Path to .lsv save file, or 'latest' (positional).")
-    parser.add_argument("--save", dest="save_flag", help="Path to .lsv save file, or 'latest' to automatically discover.")
+    parser.add_argument(
+        "save_pos", nargs="?", help="Path to .lsv save file, or 'latest' (positional)."
+    )
+    parser.add_argument(
+        "--save",
+        dest="save_flag",
+        help="Path to .lsv save file, or 'latest' to automatically discover.",
+    )
     parser.add_argument("--save-dir", help="Custom directory containing .lsv save files.")
-    parser.add_argument("--audit", action="store_true", help="Compare save mod list against active modsettings.lsx.")
-    parser.add_argument("--clean-missing", action="store_true", help="Prune missing mods from save game.")
+    parser.add_argument(
+        "--audit", action="store_true", help="Compare save mod list against active modsettings.lsx."
+    )
+    parser.add_argument(
+        "--clean-missing", action="store_true", help="Prune missing mods from save game."
+    )
     parser.add_argument("--out", help="Output path for cleaned save file.")
-    parser.add_argument("--dry-run", "-n", action="store_true", help="Simulate pruning without modifying files.")
+    parser.add_argument(
+        "--dry-run", "-n", action="store_true", help="Simulate pruning without modifying files."
+    )
     parser.add_argument("--json", action="store_true", help="Output machine-readable JSON.")
 
     args = parser.parse_args(argv)
@@ -421,15 +471,22 @@ def main(argv: list[str] | None = None) -> int:
 
         if args.clean_missing:
             out_p = Path(args.out) if args.out else None
-            ok, pruned = prune_missing_mods_from_save(save_file, output_path=out_p, dry_run=args.dry_run)
+            ok, pruned = prune_missing_mods_from_save(
+                save_file, output_path=out_p, dry_run=args.dry_run
+            )
             if args.json:
-                print(json.dumps({
-                    "save_file": str(save_file),
-                    "output_file": str(out_p or save_file),
-                    "dry_run": args.dry_run,
-                    "pruned_mods": pruned,
-                    "success": ok,
-                }, indent=2))
+                print(
+                    json.dumps(
+                        {
+                            "save_file": str(save_file),
+                            "output_file": str(out_p or save_file),
+                            "dry_run": args.dry_run,
+                            "pruned_mods": pruned,
+                            "success": ok,
+                        },
+                        indent=2,
+                    )
+                )
             else:
                 action = "Previewed pruning" if args.dry_run else "Successfully pruned"
                 print(f"{color.green('[✓]')} {action} {len(pruned)} missing mod(s).")
@@ -445,7 +502,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{color.bold('BG3 Save Game Inspection:')} {save_file.name}")
             print("=" * 70)
             print(f"  Path:        {save_file}")
-            print(f"  Size:        {meta['size_bytes'] / (1024*1024):.2f} MB")
+            print(f"  Size:        {meta['size_bytes'] / (1024 * 1024):.2f} MB")
             if meta["level_name"]:
                 print(f"  Level/Act:   {meta['level_name']}")
             print(f"  Active Mods: {len(meta['mods'])}")
@@ -459,11 +516,15 @@ def main(argv: list[str] | None = None) -> int:
                 print("\n" + "=" * 70)
                 print("Mod Load Order Audit:")
                 if audit_result["missing_mods"]:
-                    print(f"  {err_color.red('[!] WARNING:')} Missing mods in current profile (Save may fail or crash):")
+                    print(
+                        f"  {err_color.red('[!] WARNING:')} Missing mods in current profile (Save may fail or crash):"
+                    )
                     for m in audit_result["missing_mods"]:
                         print(f"      {err_color.red('✗')} {m['name']} ({m['uuid']})")
                 else:
-                    print(f"  {color.green('[✓]')} All required mods are present and active in current profile.")
+                    print(
+                        f"  {color.green('[✓]')} All required mods are present and active in current profile."
+                    )
 
                 if audit_result["new_mods"]:
                     print("\n  [i] New mods enabled since save was created:")

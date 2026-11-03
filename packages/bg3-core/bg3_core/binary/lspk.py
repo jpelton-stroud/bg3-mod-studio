@@ -6,7 +6,7 @@ import mmap
 import struct
 import zlib
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Iterable, Sequence
 
 from bg3_core.exceptions import BG3BinaryError
 
@@ -101,7 +101,9 @@ def lz4_block_decompress(compressed_data: bytes, uncompressed_size: int) -> byte
     """
     if _LIBLZ4 is not None and uncompressed_size > 0 and len(compressed_data) > 0:
         c_buf = ctypes.create_string_buffer(uncompressed_size)
-        res = _LIBLZ4.LZ4_decompress_safe(compressed_data, c_buf, len(compressed_data), uncompressed_size)
+        res = _LIBLZ4.LZ4_decompress_safe(
+            compressed_data, c_buf, len(compressed_data), uncompressed_size
+        )
         if res == uncompressed_size:
             return c_buf.raw[:res]
 
@@ -237,8 +239,11 @@ class LspkArchive:
                 raise
         return cls(p.read_bytes())
 
-    def __init__(self, data_bytes: bytes | mmap.mmap):
-        self.data: bytes | mmap.mmap = data_bytes
+    def __init__(self, data: bytes | mmap.mmap | Path | str):
+        if isinstance(data, (str, Path)):
+            self.data: bytes | mmap.mmap = Path(data).read_bytes()
+        else:
+            self.data = data
         self.files: list[dict[str, Any]] = []
         self._file_obj: Any = None
         self._mmap_obj: Any = None
@@ -269,8 +274,8 @@ class LspkArchive:
         if len(self.data) < 40 or self.data[:4] != b"LSPK":
             raise BG3BinaryError("Not a valid LSPK package (magic mismatch)")
 
-        version, file_list_offset, file_list_size, flags, priority, md5, num_parts = struct.unpack_from(
-            "<IQIBB16sH", self.data, 4
+        version, file_list_offset, file_list_size, flags, priority, md5, num_parts = (
+            struct.unpack_from("<IQIBB16sH", self.data, 4)
         )
         self.version = version
         self.file_list_offset = file_list_offset
@@ -322,86 +327,114 @@ class LspkArchive:
         )
 
 
+def write_lspk_archive(
+    output: Path | str | io.BufferedIOBase,
+    files: Sequence[tuple[str, bytes | Path]] | Iterable[tuple[str, bytes | Path]],
+    compress: bool = True,
+) -> int:
+    """Streamingly constructs an LSPK v18 binary package (.pak or .lsv) with LZ4 compression to disk or stream.
+
+    Streams file data in sequential blocks without monolithic heap concatenation.
+    Returns total bytes written.
+    """
+    should_close = False
+    if isinstance(output, (str, Path)):
+        out_path = Path(output)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        f: Any = open(out_path, "wb+")
+        should_close = True
+    else:
+        f = output
+
+    try:
+        # Reserve 40 bytes for LSPK header
+        f.seek(0)
+        f.write(b"\x00" * 40)
+        curr_offset = 40
+
+        file_records: list[bytes] = []
+
+        for archive_name, item in files:
+            if isinstance(item, Path):
+                data = item.read_bytes()
+            else:
+                data = item
+            uncomp_size = len(data)
+
+            if compress:
+                compressed = lz4_block_compress(data)
+                payload = compressed
+                file_flags = 0x42
+                disk_size = len(compressed)
+            else:
+                payload = data
+                file_flags = 0
+                disk_size = uncomp_size
+
+            # Write chunk directly to file/stream
+            f.write(payload)
+
+            # 256 bytes null-padded name
+            name_bytes = archive_name.encode("utf-8")
+            if len(name_bytes) > 255:
+                raise ValueError(f"Archive file path too long (>255 bytes): {archive_name}")
+            name_padded = name_bytes.ljust(256, b"\x00")
+
+            offset_low = curr_offset & 0xFFFFFFFF
+            offset_high = (curr_offset >> 32) & 0xFFFF
+            part = 0
+
+            record = name_padded + struct.pack(
+                "<IHBBII",
+                offset_low,
+                offset_high,
+                part,
+                file_flags,
+                disk_size,
+                uncomp_size,
+            )
+            file_records.append(record)
+            curr_offset += disk_size
+
+        # Write file list table at the end of the archive
+        file_list_offset = f.tell()
+        file_list_payload = b"".join(file_records)
+        num_files = len(file_records)
+        compressed_file_list = lz4_block_compress(file_list_payload)
+        comp_size = len(compressed_file_list)
+
+        file_list_block = struct.pack("<II", num_files, comp_size) + compressed_file_list
+        file_list_size = len(file_list_block)
+        f.write(file_list_block)
+
+        total_size = f.tell()
+
+        # Seek back to byte 0 and write the completed 40-byte LSPK header
+        f.seek(0)
+        header = struct.pack(
+            "<4sIQIBB16sH",
+            b"LSPK",
+            18,
+            file_list_offset,
+            file_list_size,
+            2,  # PackageFlags.AllowMemoryMapping
+            0,  # Priority
+            b"\x00" * 16,  # MD5 checksum
+            1,  # Single-part
+        )
+        f.write(header)
+
+        return total_size
+    finally:
+        if should_close:
+            f.close()
+
+
 def build_lspk_archive(
     files: Sequence[tuple[str, bytes | Path]],
     compress: bool = True,
 ) -> bytes:
-    """Constructs an LSPK v18 binary package (.pak or .lsv) with LZ4 compression."""
-    header_size = 40
-    data_offset = header_size
-
-    file_data_blocks: list[bytes] = []
-    file_records: list[bytes] = []
-
-    curr_offset = data_offset
-
-    for archive_name, item in files:
-        data = item.read_bytes() if isinstance(item, Path) else item
-        uncomp_size = len(data)
-
-        if compress:
-            compressed = lz4_block_compress(data)
-            payload = compressed
-            file_flags = 0x42
-            disk_size = len(compressed)
-        else:
-            payload = data
-            file_flags = 0
-            disk_size = uncomp_size
-
-        file_data_blocks.append(payload)
-
-        # 256 bytes null-padded name
-        name_bytes = archive_name.encode("utf-8")
-        if len(name_bytes) > 255:
-            raise ValueError(f"Archive file path too long (>255 bytes): {archive_name}")
-        name_padded = name_bytes.ljust(256, b"\x00")
-
-        offset_low = curr_offset & 0xFFFFFFFF
-        offset_high = (curr_offset >> 32) & 0xFFFF
-        part = 0
-
-        record = name_padded + struct.pack(
-            "<IHBBII",
-            offset_low,
-            offset_high,
-            part,
-            file_flags,
-            disk_size,
-            uncomp_size,
-        )
-        file_records.append(record)
-        curr_offset += disk_size
-
-    file_list_offset = curr_offset
-    file_list_payload = b"".join(file_records)
-    num_files = len(file_records)
-    compressed_file_list = lz4_block_compress(file_list_payload)
-    comp_size = len(compressed_file_list)
-
-    file_list_block = struct.pack("<II", num_files, comp_size) + compressed_file_list
-    file_list_size = len(file_list_block)
-
-    # 40-byte LSPK Header:
-    # 4s (magic: b"LSPK")
-    # I  (version: 18)
-    # Q  (file_list_offset)
-    # I  (file_list_size)
-    # B  (flags: 2 -> PackageFlags.AllowMemoryMapping)
-    # B  (priority: 0)
-    # 16s (md5: 16 null bytes)
-    # H  (num_parts: 1 -> Single-part archive)
-    header = struct.pack(
-        "<4sIQIBB16sH",
-        b"LSPK",
-        18,
-        file_list_offset,
-        file_list_size,
-        2,
-        0,
-        b"\x00" * 16,
-        1,
-    )
-
-    return header + b"".join(file_data_blocks) + file_list_block
-
+    """Constructs an LSPK v18 binary package (.pak or .lsv) with LZ4 compression in memory."""
+    buf = io.BytesIO()
+    write_lspk_archive(buf, files, compress=compress)
+    return buf.getvalue()

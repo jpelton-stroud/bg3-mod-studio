@@ -290,7 +290,11 @@ def find_installed_pak(dep: Dict[str, Any], search_dirs: Sequence[Path]) -> Opti
             p_stem = pak_file.stem
             p_norm = normalize_mod_key(p_stem)
             # Require exact UUID match or exact normalized folder/name equality to avoid falsely matching sub-patches
-            if (dep_uuid and dep_uuid in p_stem.lower()) or p_norm == norm_folder or p_norm == norm_name:
+            if (
+                (dep_uuid and dep_uuid in p_stem.lower())
+                or p_norm == norm_folder
+                or p_norm == norm_name
+            ):
                 if re.search(r"-[0-9a-z]{4}$", p_stem.lower()):
                     fallback_candidates.append(pak_file)
                 else:
@@ -365,20 +369,24 @@ def ensure_dependency_paks(
                     t_dir.mkdir(parents=True, exist_ok=True)
                     try:
                         shutil.copy2(existing_pak, dest)
-                        results.append({
-                            "mod": dep.get("Name", dep_uuid),
-                            "action": "copied",
-                            "source": str(existing_pak),
-                            "destination": str(dest),
-                            "status": "synchronized",
-                        })
+                        results.append(
+                            {
+                                "mod": dep.get("Name", dep_uuid),
+                                "action": "copied",
+                                "source": str(existing_pak),
+                                "destination": str(dest),
+                                "status": "synchronized",
+                            }
+                        )
                     except (OSError, shutil.Error) as err:
-                        results.append({
-                            "mod": dep.get("Name", dep_uuid),
-                            "action": "copy_failed",
-                            "error": str(err),
-                            "status": "error",
-                        })
+                        results.append(
+                            {
+                                "mod": dep.get("Name", dep_uuid),
+                                "action": "copy_failed",
+                                "error": str(err),
+                                "status": "error",
+                            }
+                        )
             continue
 
         # Missing from all target directories: attempt to fetch from mod.io
@@ -414,27 +422,33 @@ def ensure_dependency_paks(
                             dest_file = t_dir / pak_name
                             dest_file.write_bytes(pak_payload)
                         downloaded = True
-                        results.append({
-                            "mod": mod_name,
-                            "action": "downloaded",
-                            "filename": pak_name,
-                            "size_bytes": len(pak_payload),
-                            "status": "downloaded_from_modio",
-                        })
+                        results.append(
+                            {
+                                "mod": mod_name,
+                                "action": "downloaded",
+                                "filename": pak_name,
+                                "size_bytes": len(pak_payload),
+                                "status": "downloaded_from_modio",
+                            }
+                        )
         except (BG3Error, OSError, ValueError, zipfile.BadZipFile) as exc:
-            results.append({
-                "mod": mod_name,
-                "action": "download_failed",
-                "error": str(exc),
-                "status": "missing",
-            })
+            results.append(
+                {
+                    "mod": mod_name,
+                    "action": "download_failed",
+                    "error": str(exc),
+                    "status": "missing",
+                }
+            )
             continue
 
         if not downloaded:
-            results.append({
-                "mod": mod_name,
-                "action": "not_found",
-                "status": "missing",
-            })
+            results.append(
+                {
+                    "mod": mod_name,
+                    "action": "not_found",
+                    "status": "missing",
+                }
+            )
 
     return results

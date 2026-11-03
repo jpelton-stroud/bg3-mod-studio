@@ -7,6 +7,12 @@ AC 10-25 curves, Savage Attacker dice mathematics, and mod gear synergy analysis
 
 from __future__ import annotations
 
+from bg3_theorycraft.damage_types import (
+    DamageType,
+    ResistanceMultiplier,
+    apply_resistance,
+    normalize_damage_type,
+)
 from bg3_theorycraft.exceptions import (
     BG3BuildValidationError,
     BG3SimulationError,
@@ -31,6 +37,7 @@ from bg3_theorycraft.simulate_build_synergy import (
     calculate_resource_pools,
     calculate_savage_attacker_average,
     calculate_spell_slots,
+    format_simulation_summary,
     load_gear_boosts,
     main,
     parse_ability_modifier,
@@ -45,13 +52,15 @@ __all__ = [
     "BG3SimulationError",
     "BG3TheorycraftError",
     "CASTER_WEIGHTS",
-    "MULTICLASS_SPELL_SLOTS",
-    "PRIMARY_CASTING_STAT",
-    "ActionBudget",
     "CombatSequence",
     "DamageBreakdown",
+    "DamageType",
+    "MULTICLASS_SPELL_SLOTS",
+    "PRIMARY_CASTING_STAT",
+    "ResistanceMultiplier",
     "ResourcePools",
     "SimulationResult",
+    "apply_resistance",
     "calculate_ac_curve",
     "calculate_action_economy",
     "calculate_hit_probability",
@@ -60,8 +69,10 @@ __all__ = [
     "calculate_resource_pools",
     "calculate_savage_attacker_average",
     "calculate_spell_slots",
+    "format_simulation_summary",
     "load_gear_boosts",
     "main",
+    "normalize_damage_type",
     "parse_ability_modifier",
     "parse_boost_effects",
     "simulate_build",
