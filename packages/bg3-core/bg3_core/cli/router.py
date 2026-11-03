@@ -73,7 +73,7 @@ COMMAND_REGISTRY: Dict[Tuple[str, str], CommandSpec] = {
     ("mod", "validate"): CommandSpec("bg3_authoring.diagnostics.validate_mod", "Run static validation audits on mod assets, XML syntax, and directory layout", "diagnostics", "bg3_authoring"),
     ("mod", "conflict"): CommandSpec("bg3_core.profile.check_mod_conflicts", "Detect potential stat, progression, or root template collisions across mods", "diagnostics"),
     ("mod", "add-dependency"): CommandSpec("bg3_authoring.add_mod_dependency", "Add a dependency module UUID and metadata to a target mod's meta.lsx", "authoring", "bg3_authoring"),
-    ("mod", "bump-version"): CommandSpec("bg3_core.profile.bump_mod_version", "Bump or set the 64-bit integer Version64 in a mod's meta.lsx", "management"),
+    ("mod", "bump-version"): CommandSpec("bg3_authoring.bump_mod_version", "Bump or set the 64-bit integer Version64 in a mod's meta.lsx", "authoring", "bg3_authoring"),
     ("mod", "pack"): CommandSpec("bg3_authoring.packaging.pack_mod_pak", "Build a distributable LSPK package (.pak) from raw mod files", "packaging", "bg3_authoring"),
     ("mod", "sync-loca"): CommandSpec("bg3_authoring.diagnostics.sync_localization", "Synchronize string handles across XML files and compile .loca binaries", "diagnostics", "bg3_authoring"),
     ("mod", "sync-game"): CommandSpec("bg3_authoring.packaging.sync_game_data", "Synchronize custom mod files into the Baldur's Gate 3 Data directory", "packaging", "bg3_authoring"),
@@ -185,12 +185,6 @@ def _find_module_file(mod_name: str) -> Optional[Path]:
             return Path(mod.__file__).resolve()
     except Exception:
         pass
-    repo_root = Path(__file__).resolve().parent.parent.parent.parent
-    pkg_dir = mod_name.split(".")[0].replace("_", "-")
-    rel_path = Path("packages") / pkg_dir / Path(*mod_name.split(".")).with_suffix(".py")
-    candidate = repo_root / rel_path
-    if candidate.is_file():
-        return candidate
     return None
 
 
@@ -222,9 +216,9 @@ def _add_scaffold_subparsers(sub_sp: Any) -> None:
     target_parser = None
     if any(t in sys.argv for t in ("scaffold", "scaffold_asset")):
         try:
-            from bg3_authoring.scaffold_asset import build_parser as build_scaffold_p
-
-            target_parser = build_scaffold_p()
+            mod = importlib.import_module("bg3_authoring.scaffold_asset")
+            if hasattr(mod, "build_parser"):
+                target_parser = mod.build_parser()
         except Exception:
             pass
 

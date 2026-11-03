@@ -148,5 +148,50 @@ class TestManageLoadOrderAutoSort(unittest.TestCase):
         self.assertEqual(tmp_files, [])
 
 
+class TestModResolverStrategies(unittest.TestCase):
+    def test_resolve_dependency_metadata_with_custom_fetcher(self) -> None:
+        from bg3_core.profile.mod_resolver import resolve_dependency_metadata
+
+        mock_payload = {
+            "Folder": "CustomMod",
+            "MD5": "abc123",
+            "Name": "Custom Mod Display",
+            "PublishHandle": 9999,
+            "UUID": "11111111-2222-3333-4444-555555555555",
+            "Version64": 12345678,
+        }
+
+        def dummy_fetcher(clean_id: str, auto_doc: bool = True) -> dict:
+            return mock_payload
+
+        meta = resolve_dependency_metadata("unknown_query", remote_fetcher=dummy_fetcher)
+        self.assertEqual(meta["UUID"], "11111111-2222-3333-4444-555555555555")
+        self.assertEqual(meta["Name"], "Custom Mod Display")
+
+    def test_ensure_dependency_paks_with_custom_downloader(self) -> None:
+        from bg3_core.profile.mod_resolver import ensure_dependency_paks
+
+        with tempfile.TemporaryDirectory() as tmp:
+            t_dir = Path(tmp) / "target_mods"
+            t_dir.mkdir()
+
+            dep = {
+                "Folder": "InjectedMod",
+                "Name": "Injected Mod",
+                "PublishHandle": 8888,
+                "UUID": "22222222-3333-4444-5555-666666666666",
+            }
+
+            def dummy_downloader(d: dict) -> tuple[str, bytes]:
+                return ("InjectedMod.pak", b"LSPK\x01\x00\x00\x00testpayload")
+
+            results = ensure_dependency_paks([dep], target_dirs=[t_dir], remote_downloader=dummy_downloader)
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]["action"], "downloaded")
+            self.assertTrue((t_dir / "InjectedMod.pak").is_file())
+            self.assertEqual((t_dir / "InjectedMod.pak").read_bytes(), b"LSPK\x01\x00\x00\x00testpayload")
+
+
+
 if __name__ == "__main__":
     unittest.main()

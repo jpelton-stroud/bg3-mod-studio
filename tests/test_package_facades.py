@@ -103,6 +103,7 @@ class TestPackageFacades(unittest.TestCase):
         self.assertTrue(callable(bg3_authoring.collect_mod_files))
         self.assertTrue(callable(bg3_authoring.check_uuid_uniqueness))
         self.assertTrue(callable(bg3_authoring.sync_mod))
+        self.assertTrue(callable(bg3_authoring.bump_version))
 
         # Domain exceptions
         for exc_name in (

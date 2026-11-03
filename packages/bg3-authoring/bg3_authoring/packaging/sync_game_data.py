@@ -608,7 +608,7 @@ def run_sync(
     # Auto-bump build number if requested
     if bump_build:
         try:
-            from bg3_core.profile.bump_mod_version import bump_version
+            from bg3_authoring.bump_mod_version import bump_version
             for mod_path in sorted(mod_folders):
                 bump_version(mod_path.name, action="build", dry_run=dry_run)
         except Exception as e:

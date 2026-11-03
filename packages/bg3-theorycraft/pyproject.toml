@@ -14,3 +14,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["bg3_theorycraft"]
+
+[project.entry-points."bg3.commands"]
+"build.simulate" = "bg3_theorycraft.simulate_build_synergy:main"
+"build.sim" = "bg3_theorycraft.simulate_build_synergy:main"
+"sim" = "bg3_theorycraft.simulate_build_synergy:main"
+
