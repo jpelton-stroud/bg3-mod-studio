@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Sequence
 
 from bg3_core.binary.larian_parsers import compile_xml_bytes_to_loca
-from bg3_core.binary.lspk import LspkArchive
+from bg3_core.binary.lspk import LspkArchive, write_lspk_archive
 from bg3_core.binary.lspk import build_lspk_archive as build_pak_archive
 from bg3_core.env_paths import DIST_DIR, detect_bg3_appdata_dirs, get_env_var, resolve_mod_dir
 from bg3_core.exceptions import BG3BinaryError, BG3PackagingError
@@ -25,13 +25,24 @@ from bg3_authoring.packaging.common import (
     should_include_file,
 )
 
+__all__ = [
+    "build_pak_archive",
+    "clean_local_pak",
+    "collect_mod_files",
+    "detect_mods_dir",
+    "get_mod_pak_filename",
+    "main",
+    "verify_pak_archive",
+]
 
-def collect_mod_files(mod_dir: Path, include_projects: bool = False) -> list[tuple[str, bytes]]:
+
+def collect_mod_files(mod_dir: Path, include_projects: bool = False) -> list[tuple[str, Path | bytes]]:
     """
-    Gathers all releasable files relative to mod root as (archive_name, payload_bytes).
+    Gathers all releasable files relative to mod root as (archive_name, Path | bytes).
     Automatically compiles Localization/<Lang>/*.xml into binary .loca payloads.
+    Preserves Path objects for disk assets to stream without heap bloat.
     """
-    entries_map: dict[str, bytes] = {}
+    entries_map: dict[str, Path | bytes] = {}
     for root, _, filenames in os.walk(mod_dir):
         root_path = Path(root)
         files_set = set(filenames)
@@ -54,36 +65,41 @@ def collect_mod_files(mod_dir: Path, include_projects: bool = False) -> list[tup
                     continue
 
             archive_name = rel_path.as_posix()
-            entries_map[archive_name] = file_path.read_bytes()
+            entries_map[archive_name] = file_path
 
     return sorted(entries_map.items(), key=lambda x: x[0])
 
 
-
-
-def verify_pak_archive(pak_bytes: bytes, original_files: Sequence[tuple[str, bytes | Path]]) -> bool:
-    """Verifies that the generated pak can be completely parsed and extracted."""
+def verify_pak_archive(pak_path_or_bytes: Path | bytes, original_files: Sequence[tuple[str, bytes | Path]]) -> bool:
+    """Verifies that the generated pak can be completely parsed and extracted using zero-copy mmap."""
     if LspkArchive is None:
         return True
 
-    archive = LspkArchive(pak_bytes)
-    if len(archive.files) != len(original_files):
-        return False
-
-    for entry in archive.files:
-        extracted = archive.extract_file(entry)
-        norm_name = entry["name"].replace("/", "\\")
-        matched = False
-        for a_name, item in original_files:
-            if a_name.replace("/", "\\") == norm_name:
-                orig_data = item.read_bytes() if isinstance(item, Path) else item
-                if extracted == orig_data:
-                    matched = True
-                    break
-        if not matched:
+    archive = (
+        LspkArchive.open(pak_path_or_bytes, use_mmap=True)
+        if isinstance(pak_path_or_bytes, Path)
+        else LspkArchive(pak_path_or_bytes)
+    )
+    try:
+        if len(archive.files) != len(original_files):
             return False
 
-    return True
+        for entry in archive.files:
+            extracted = archive.extract_file(entry)
+            norm_name = entry["name"].replace("/", "\\")
+            matched = False
+            for a_name, item in original_files:
+                if a_name.replace("/", "\\") == norm_name:
+                    orig_data = item.read_bytes() if isinstance(item, Path) else item
+                    if extracted == orig_data:
+                        matched = True
+                        break
+            if not matched:
+                return False
+
+        return True
+    finally:
+        archive.close()
 
 
 def detect_mods_dir() -> Path | None:
@@ -274,18 +290,18 @@ def main() -> int:
         if not files_to_pack:
             raise ValueError(f"No valid mod files found to pack in '{mod_dir}'.")
 
-        pak_bytes = build_pak_archive(files_to_pack, compress=not args.uncompressed)
-
-        # Verification pass
-        verified = verify_pak_archive(pak_bytes, files_to_pack)
-        if not verified:
-            raise BG3PackagingError("Generated .pak archive failed self-verification check.")
-
-        # Safe atomic write
         out_path.parent.mkdir(parents=True, exist_ok=True)
         temp_out = out_path.with_suffix(".pak.tmp")
         try:
-            temp_out.write_bytes(pak_bytes)
+            pak_size_bytes = write_lspk_archive(
+                temp_out, files_to_pack, compress=not args.uncompressed
+            )
+
+            # Verification pass with zero-copy mmap
+            verified = verify_pak_archive(temp_out, files_to_pack)
+            if not verified:
+                raise BG3PackagingError("Generated .pak archive failed self-verification check.")
+
             if out_path.exists():
                 try:
                     out_path.unlink()
@@ -309,7 +325,7 @@ def main() -> int:
             "mod": mod_slug,
             "pak_file": str(out_path),
             "file_count": len(files_to_pack),
-            "pak_size_bytes": len(pak_bytes),
+            "pak_size_bytes": pak_size_bytes,
             "compressed": not args.uncompressed,
             "verified": verified,
             "published_local": args.publish_local,
@@ -319,7 +335,7 @@ def main() -> int:
         if args.json:
             print(json.dumps(res, indent=2))
         else:
-            size_kb = len(pak_bytes) / 1024
+            size_kb = pak_size_bytes / 1024
             target_desc = "published to local BG3 Mods directory" if args.publish_local else "packaged"
             print(f"[✓] Successfully {target_desc}: {out_path} ({size_kb:.1f} KB, {len(files_to_pack)} files)")
             print("    Verification: [✓] LSPK v18 checksum and extraction verified cleanly.")

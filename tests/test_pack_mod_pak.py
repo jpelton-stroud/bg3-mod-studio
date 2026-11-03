@@ -127,9 +127,22 @@ class TestLspkPackaging(unittest.TestCase):
             self.assertIn("Mods/TestMod/meta.lsx", entry_names)
             self.assertIn("Localization/English/strings.loca", entry_names)
 
+            entry_dict = dict(entries)
+            self.assertIsInstance(entry_dict["Mods/TestMod/meta.lsx"], Path)
+            self.assertIsInstance(entry_dict["Localization/English/strings.loca"], bytes)
+
             # Verify dotfiles and excluded documentation are filtered out
             self.assertFalse(any(".test_deps.json" in name for name in entry_names))
             self.assertFalse(any("README.md" in name for name in entry_names))
+
+            # Verify write_lspk_archive and verify_pak_archive handle collected entries with Path objects
+            out_pak = mod_dir / "TestMod.pak"
+            from bg3_core.binary.lspk import write_lspk_archive
+
+            written_bytes = write_lspk_archive(out_pak, entries, compress=True)
+            self.assertTrue(out_pak.is_file())
+            self.assertEqual(written_bytes, out_pak.stat().st_size)
+            self.assertTrue(verify_pak_archive(out_pak, entries))
 
     def test_write_lspk_archive_streaming_to_disk(self):
         """Test streaming LSPK archive directly to disk with write_lspk_archive via generator."""
