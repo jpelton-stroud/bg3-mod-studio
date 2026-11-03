@@ -143,6 +143,24 @@ class TestLsfParser(unittest.TestCase):
         serialized = _serialize_uuid(asymmetric_uuid)
         self.assertEqual(serialized, guid_bytes)
 
+    def test_lsf_serialization_pack_into_parity(self) -> None:
+        """Verify pre-allocated struct packing preserves exact node and attribute offsets."""
+        doc = LsfDocument(version=7, engine_version=200)
+        root = LsfNode(name="root")
+        for i in range(10):
+            node = LsfNode(name=f"Node_{i}")
+            node.attributes["val"] = LsfAttribute(name="val", type_id=TYPE_INT32, value=i * 10)
+            root.children.append(node)
+        doc.root_nodes.append(root)
+
+        raw_bytes = doc.to_bytes(compress=True)
+        parsed = LsfDocument.from_bytes(raw_bytes)
+        self.assertEqual(len(parsed.root_nodes), 1)
+        self.assertEqual(len(parsed.root_nodes[0].children), 10)
+        for i, child in enumerate(parsed.root_nodes[0].children):
+            self.assertEqual(child.name, f"Node_{i}")
+            self.assertEqual(child.get_attr_value("val"), i * 10)
+
 
 if __name__ == "__main__":
     unittest.main()

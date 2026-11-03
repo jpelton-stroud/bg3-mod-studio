@@ -43,6 +43,8 @@ TARGET_STAT_FILES = {
 }
 
 HANDLE_REGEX = re.compile(r'(h[0-9a-fA-F]{32}|h[a-zA-Z0-9_]{30,40})(?:;\d+)?')
+_PREFIX_CLEAN_RE = re.compile(r'^(I_|Tut_|OBJ_|WPN_|ARM_)')
+_CAMEL_CASE_RE = re.compile(r'([a-z])([A-Z])')
 
 
 def infer_slot(entry_type: str, slot_val: str, using_val: str, entry_name: str) -> str:
@@ -217,8 +219,8 @@ def finalize_entry(entry: dict, loc_map: dict[str, str]) -> None:
 
     if not disp_text:
         # Generate friendly name from entry ID
-        clean = re.sub(r'^(I_|Tut_|OBJ_|WPN_|ARM_)', '', entry["id"])
-        clean = re.sub(r'([a-z])([A-Z])', r'\1 \2', clean)
+        clean = _PREFIX_CLEAN_RE.sub('', entry["id"])
+        clean = _CAMEL_CASE_RE.sub(r'\1 \2', clean)
         disp_text = clean.replace("_", " ").strip()
 
     entry["display_name"] = disp_text

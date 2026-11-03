@@ -316,6 +316,18 @@ class TestManageLoadOrderQuarantine(unittest.TestCase):
         self.assertFalse((self.mods_dir / "CustomMod.pak").exists())
         self.assertFalse(manifest_path.exists())
 
+    def test_get_pak_module_info_mmap(self):
+        """Verify get_pak_module_info successfully parses package metadata via zero-copy mmap."""
+        from bg3_core.profile.quarantine import get_pak_module_info
+
+        pak_path = self.mods_dir / "MmapTestMod.pak"
+        create_dummy_pak(pak_path, "MmapTestMod", "12345678-1234-5678-1234-567812345678")
+
+        info = get_pak_module_info(pak_path)
+        self.assertIsNotNone(info)
+        self.assertEqual(info["Name"], "MmapTestMod")
+        self.assertEqual(info["UUID"], "12345678-1234-5678-1234-567812345678")
+
 
 if __name__ == "__main__":
     unittest.main()
