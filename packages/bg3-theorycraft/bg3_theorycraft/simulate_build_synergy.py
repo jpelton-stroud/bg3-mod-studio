@@ -15,6 +15,7 @@ import json
 import math
 import re
 import sys
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -237,6 +238,7 @@ def calculate_resource_pools(classes: Dict[str, int]) -> ResourcePools:
     )
 
 
+@lru_cache(maxsize=128)
 def calculate_savage_attacker_average(dice_count: int, die_sides: int) -> float:
     """Calculates exact analytical expected value for rolling dice_count d(die_sides)
 

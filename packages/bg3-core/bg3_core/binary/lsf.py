@@ -35,6 +35,9 @@ TYPE_INT64 = 27
 TYPE_UINT64 = 28
 TYPE_TRANSLATED_STRING = 29
 
+_ATTR_STRUCT = struct.Struct("<IIiII")
+_NODE_STRUCT = struct.Struct("<Iiii")
+
 
 @dataclass
 class LsfAttribute:
@@ -253,7 +256,6 @@ class LsfDocument:
 
         # 3. Serialize Attributes and Values chunks
         values_buf = bytearray()
-        attrs_buf = bytearray()
         all_attrs: list[tuple[int, int, int, int, int]] = []
         node_first_attr: dict[int, int] = {}
 
@@ -275,8 +277,9 @@ class LsfDocument:
                 name_idx = get_string_idx(attr.name)
                 all_attrs.append((name_idx, attr.type_id, next_idx, val_offset, val_length))
 
-        for name_idx, type_id, next_attr_idx, val_offset, val_length in all_attrs:
-            attrs_buf.extend(struct.pack("<IIiII", name_idx, type_id, next_attr_idx, val_offset, val_length))
+        attrs_buf = bytearray(len(all_attrs) * _ATTR_STRUCT.size)
+        for i, (name_idx, type_id, next_attr_idx, val_offset, val_length) in enumerate(all_attrs):
+            _ATTR_STRUCT.pack_into(attrs_buf, i * _ATTR_STRUCT.size, name_idx, type_id, next_attr_idx, val_offset, val_length)
 
         # 4. Serialize Nodes chunk (O(N) sibling resolution)
         next_sibling_map: dict[int, int] = {}
@@ -287,13 +290,13 @@ class LsfDocument:
                 next_sibling_map[last_child_per_parent[p_idx]] = n_idx
             last_child_per_parent[p_idx] = n_idx
 
-        nodes_buf = bytearray()
+        nodes_buf = bytearray(len(all_nodes) * _NODE_STRUCT.size)
         for n_idx, node in enumerate(all_nodes):
             name_idx = get_string_idx(node.name)
             p_idx = node_parents[n_idx]
             first_a = node_first_attr.get(n_idx, -1)
             next_sib = next_sibling_map.get(n_idx, -1)
-            nodes_buf.extend(struct.pack("<Iiii", name_idx, p_idx, next_sib, first_a))
+            _NODE_STRUCT.pack_into(nodes_buf, n_idx * _NODE_STRUCT.size, name_idx, p_idx, next_sib, first_a)
 
         # 5. Pack chunks with optional compression
         raw_chunks = [bytes(strings_buf), bytes(nodes_buf), bytes(attrs_buf), bytes(values_buf)]

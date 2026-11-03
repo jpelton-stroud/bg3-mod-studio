@@ -8,6 +8,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 HANDLE_PATTERN = re.compile(r"(?<![a-zA-Z0-9_])(h[0-9a-fA-F]{32}|h[a-zA-Z0-9_]{30,40})(?:;\d+)?")
+_TXT_ENTRY_RE = re.compile(r'^new\s+entry\s+"([^"]+)"', re.IGNORECASE)
+_TXT_TYPE_RE = re.compile(r'^type\s+"([^"]+)"', re.IGNORECASE)
+_TXT_USING_RE = re.compile(r'^using\s+"([^"]+)"', re.IGNORECASE)
+_TXT_DATA_RE = re.compile(r'^data\s+"([^"]+)"\s+"([^"]*)"', re.IGNORECASE)
 
 PATCH_8_VERSION = {"major": "4", "minor": "8", "revision": "0", "build": "700"}
 
@@ -304,7 +308,7 @@ def parse_stats_txt(txt_bytes: bytes, loc_dict: Optional[Dict[str, str]] = None)
         if not line or line.startswith("//"):
             continue
 
-        entry_match = re.match(r'^new\s+entry\s+"([^"]+)"', line, re.I)
+        entry_match = _TXT_ENTRY_RE.match(line)
         if entry_match:
             name = entry_match.group(1)
             current_entry = {
@@ -319,17 +323,17 @@ def parse_stats_txt(txt_bytes: bytes, loc_dict: Optional[Dict[str, str]] = None)
         if not current_entry:
             continue
 
-        type_match = re.match(r'^type\s+"([^"]+)"', line, re.I)
+        type_match = _TXT_TYPE_RE.match(line)
         if type_match:
             current_entry["type"] = type_match.group(1)
             continue
 
-        using_match = re.match(r'^using\s+"([^"]+)"', line, re.I)
+        using_match = _TXT_USING_RE.match(line)
         if using_match:
             current_entry["using"] = using_match.group(1)
             continue
 
-        data_match = re.match(r'^data\s+"([^"]+)"\s+"([^"]*)"', line, re.I)
+        data_match = _TXT_DATA_RE.match(line)
         if data_match:
             key, val = data_match.group(1), data_match.group(2)
             current_entry["data"][key] = val

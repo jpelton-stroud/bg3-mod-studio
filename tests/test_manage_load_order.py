@@ -192,6 +192,58 @@ class TestModResolverStrategies(unittest.TestCase):
             self.assertEqual((t_dir / "InjectedMod.pak").read_bytes(), b"LSPK\x01\x00\x00\x00testpayload")
 
 
+class TestCheckModDependenciesPreIndexed(unittest.TestCase):
+    """Verifies pre-indexed dependency resolution in game data packaging."""
+
+    def test_check_mod_dependencies_indexing(self) -> None:
+        from bg3_authoring.packaging.sync_game_data import check_mod_dependencies
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            mod_path = tmp_root / "MyTestMod"
+            meta_dir = mod_path / "Mods" / "MyTestMod"
+            meta_dir.mkdir(parents=True)
+            meta_file = meta_dir / "meta.lsx"
+            meta_file.write_text("""<?xml version="1.0" encoding="utf-8"?>
+<save>
+    <region id="Config">
+        <node id="root">
+            <children>
+                <node id="Dependencies">
+                    <children>
+                        <node id="ModuleShortDesc">
+                            <attribute id="Folder" type="LSString" value="Gustav"/>
+                            <attribute id="Name" type="LSString" value="Gustav"/>
+                            <attribute id="UUID" type="FixedString" value="11111111-1111-1111-1111-111111111111"/>
+                        </node>
+                        <node id="ModuleShortDesc">
+                            <attribute id="Folder" type="LSString" value="PresentPak"/>
+                            <attribute id="Name" type="LSString" value="PresentPak"/>
+                            <attribute id="UUID" type="FixedString" value="22222222-2222-2222-2222-222222222222"/>
+                        </node>
+                        <node id="ModuleShortDesc">
+                            <attribute id="Folder" type="LSString" value="MissingDep"/>
+                            <attribute id="Name" type="LSString" value="MissingDep"/>
+                            <attribute id="UUID" type="FixedString" value="33333333-3333-3333-3333-333333333333"/>
+                        </node>
+                    </children>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>""", encoding="utf-8")
+
+            data_dir = tmp_root / "Data"
+            data_dir.mkdir()
+            user_mods_dir = tmp_root / "UserMods"
+            user_mods_dir.mkdir()
+            (user_mods_dir / "PresentPak.pak").write_bytes(b"dummy pak")
+
+            with patch.dict(os.environ, {"BG3_USER_MODS_DIR": str(user_mods_dir)}):
+                missing = check_mod_dependencies(mod_path, data_dir)
+                self.assertEqual(len(missing), 1)
+                self.assertIn("MissingDep", missing[0])
+
 
 if __name__ == "__main__":
     unittest.main()

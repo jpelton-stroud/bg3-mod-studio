@@ -261,6 +261,21 @@ class TestSavageAttackerMath(unittest.TestCase):
         self.assertAlmostEqual(ev_2d6, 8.37, places=2)
         self.assertGreater(ev_2d6, 7.0)
 
+    def test_savage_attacker_lru_cache(self) -> None:
+        """Verify Savage Attacker analytical calculation utilizes LRU caching."""
+        calculate_savage_attacker_average.cache_clear()
+        initial_info = calculate_savage_attacker_average.cache_info()
+        self.assertEqual(initial_info.hits, 0)
+        self.assertEqual(initial_info.currsize, 0)
+
+        res1 = calculate_savage_attacker_average(1, 8)
+        self.assertEqual(calculate_savage_attacker_average.cache_info().misses, 1)
+        self.assertEqual(calculate_savage_attacker_average.cache_info().hits, 0)
+
+        res2 = calculate_savage_attacker_average(1, 8)
+        self.assertEqual(res1, res2)
+        self.assertEqual(calculate_savage_attacker_average.cache_info().hits, 1)
+
 
 class TestACCurveCalculation(unittest.TestCase):
     """Verifies AC 10-25 curve generation and monotonicity."""

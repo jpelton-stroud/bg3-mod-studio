@@ -109,6 +109,14 @@ def check_mod_dependencies(mod_path: Path, data_dir: Path) -> list:
     else:
         appdata_mods_dirs = [d / "Mods" for d in detect_bg3_appdata_dirs()]
 
+    # Pre-index installed package stems to eliminate repetitive inner-loop disk globs
+    installed_pak_stems: list[tuple[str, str]] = []
+    for appdata_mods in appdata_mods_dirs:
+        if appdata_mods.is_dir():
+            for p in appdata_mods.glob("*.pak"):
+                p_stem = p.stem
+                installed_pak_stems.append((p_stem.lower(), normalize_mod_key(p_stem)))
+
     for meta_file in meta_files:
         try:
             tree = ET.parse(meta_file)
@@ -131,19 +139,12 @@ def check_mod_dependencies(mod_path: Path, data_dir: Path) -> list:
                     or (data_dir / "Mods" / f"{dep_name}.pak").is_file()
                     or (data_dir / "Mods" / f"{dep_folder}.pak").is_file()
                 )
-                in_appdata_pak = False
-                for appdata_mods in appdata_mods_dirs:
-                    if appdata_mods.is_dir():
-                        norm_folder = normalize_mod_key(dep_folder)
-                        norm_name = normalize_mod_key(dep_name)
-                        for p in appdata_mods.glob("*.pak"):
-                            p_stem = p.stem
-                            p_norm = normalize_mod_key(p_stem)
-                            if (dep_uuid and dep_uuid in p_stem.lower()) or p_norm == norm_folder or p_norm == norm_name:
-                                in_appdata_pak = True
-                                break
-                    if in_appdata_pak:
-                        break
+                norm_folder = normalize_mod_key(dep_folder)
+                norm_name = normalize_mod_key(dep_name)
+                in_appdata_pak = any(
+                    (dep_uuid and dep_uuid in stem_lower) or norm_stem == norm_folder or norm_stem == norm_name
+                    for stem_lower, norm_stem in installed_pak_stems
+                )
 
                 if not (in_data_mods or in_data_pak or in_appdata_pak):
                     missing.append(f"{dep_name} (folder: {dep_folder})")

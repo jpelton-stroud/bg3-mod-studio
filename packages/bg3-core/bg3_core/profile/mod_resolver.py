@@ -335,16 +335,16 @@ def find_installed_pak(dep: Dict[str, Any], search_dirs: Sequence[Path]) -> Opti
                 continue
             for pak_file in sorted(s_dir.glob("*.pak")):
                 try:
-                    archive = LspkArchive(pak_file.read_bytes())
-                    for entry in archive.files:
-                        if entry["name"].replace("\\", "/").lower().endswith("meta.lsx"):
-                            xml_bytes = archive.extract_file(entry)
-                            parsed_meta = parse_meta_lsx(xml_bytes)
-                            if parsed_meta.get("UUID", "").lower() == dep_uuid:
-                                if not re.search(r"-[0-9a-z]{4}$", pak_file.stem.lower()):
-                                    return pak_file
-                                fallback_candidates.append(pak_file)
-                            break
+                    with LspkArchive.open(pak_file, use_mmap=True) as archive:
+                        for entry in archive.files:
+                            if entry["name"].replace("\\", "/").lower().endswith("meta.lsx"):
+                                xml_bytes = archive.extract_file(entry)
+                                parsed_meta = parse_meta_lsx(xml_bytes)
+                                if parsed_meta.get("UUID", "").lower() == dep_uuid:
+                                    if not re.search(r"-[0-9a-z]{4}$", pak_file.stem.lower()):
+                                        return pak_file
+                                    fallback_candidates.append(pak_file)
+                                break
                 except (OSError, struct.error, zlib.error, BG3BinaryError):
                     pass
 

@@ -44,6 +44,11 @@ from bg3_core.modio.modio_client import (
 )
 from bg3_core.modio.update_library_catalog import write_library_catalog
 
+_WEAPON_ENCHANTMENT_RE = re.compile(r"WeaponEnchantment\((\d+)\)")
+_UNLOCK_SPELL_RE = re.compile(r"UnlockSpell\(([^)]+)\)")
+_SELECT_PASSIVES_RE = re.compile(r"SelectPassives\(([^,]+),\s*(\d+),\s*([^)]+)\)")
+_HANDLE_BYTES_RE = re.compile(rb"h[0-9a-f]{4,8}g[0-9a-f]{4}g[0-9a-f]{4}g[0-9a-f]{4}g[0-9a-f]{10,14}|h[0-9a-f]{32}")
+
 # ----------------------------------------------------------------------
 # Feature Extraction and In-Game Validation
 # ----------------------------------------------------------------------
@@ -235,7 +240,7 @@ def _build_weapon_feature(
 
     def_boosts = data.get("DefaultBoosts", "")
     if "WeaponEnchantment(" in def_boosts:
-        m_ench = re.search(r"WeaponEnchantment\((\d+)\)", def_boosts)
+        m_ench = _WEAPON_ENCHANTMENT_RE.search(def_boosts)
         if m_ench:
             base_stats.append(f"Enchantment: **+{m_ench.group(1)}**")
     if "WeaponProperty(Magical)" in def_boosts:
@@ -262,7 +267,7 @@ def _build_weapon_feature(
             if p:
                 granted_effects.append(f"[Main Hand] {_resolve_passive_mechanics(p, passives)}")
     if "UnlockSpell" in data.get("Boosts", ""):
-        for match in re.finditer(r"UnlockSpell\(([^)]+)\)", data.get("Boosts", "")):
+        for match in _UNLOCK_SPELL_RE.finditer(data.get("Boosts", "")):
             spell_id = match.group(1).split(",")[0].strip()
             granted_effects.append(_resolve_spell_mechanics(spell_id, spells))
 
@@ -337,7 +342,7 @@ def _build_armor_feature(
             if p:
                 granted_effects.append(_resolve_passive_mechanics(p, passives))
     if "UnlockSpell" in data.get("Boosts", ""):
-        for match in re.finditer(r"UnlockSpell\(([^)]+)\)", data.get("Boosts", "")):
+        for match in _UNLOCK_SPELL_RE.finditer(data.get("Boosts", "")):
             spell_id = match.group(1).split(",")[0].strip()
             granted_effects.append(_resolve_spell_mechanics(spell_id, spells))
 
@@ -530,7 +535,7 @@ def _build_progression_features(progressions: list[dict[str, Any]]) -> list[dict
         mechanics_lines = []
         if selectors:
             mechanics_lines.append(f"**Selectors**: `{selectors}`")
-            m = re.match(r"SelectPassives\(([^,]+),\s*(\d+),\s*([^)]+)\)", selectors)
+            m = _SELECT_PASSIVES_RE.match(selectors)
             if m:
                 plist_uuid, count, list_name = m.groups()
                 if plist_uuid == "333fb1b0-9398-4ca8-953e-6c0f9a59bbed":
@@ -901,7 +906,7 @@ def process_mod(
             except (ET.ParseError, ValueError, OSError):
                 pass
         rt_uuid = os.path.splitext(os.path.basename(rt_path))[0]
-        handles = [h.decode("ascii") for h in re.findall(rb"h[0-9a-f]{4,8}g[0-9a-f]{4}g[0-9a-f]{4}g[0-9a-f]{4}g[0-9a-f]{10,14}|h[0-9a-f]{32}", rt_content)]
+        handles = [h.decode("ascii") for h in _HANDLE_BYTES_RE.findall(rt_content)]
         texts = [loc_dict[h] for h in handles if h in loc_dict]
         if texts and rt_uuid not in roottemplate_names:
             roottemplate_names[rt_uuid] = texts[0]

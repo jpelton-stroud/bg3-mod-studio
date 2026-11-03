@@ -41,6 +41,21 @@ CYAN = "\033[36m" if _color.enabled else ""
 BOLD = "\033[1m" if _color.enabled else ""
 RESET = "\033[0m" if _color.enabled else ""
 
+# Precompiled regular expressions for high-frequency tokenization and metadata extraction
+_META_NAME_RE = re.compile(r'<attribute\s+id="Name"\s+type="LSString"\s+value="([^"]*)"')
+_META_MODULE_RE = re.compile(r'<attribute\s+id="Module"\s+type="LSString"\s+value="([^"]*)"')
+_META_UUID_RE = re.compile(r'<attribute\s+id="UUID"\s+type="LSString"\s+value="([^"]*)"')
+_META_TYPE_RE = re.compile(r'<attribute\s+id="Type"\s+type="LSString"\s+value="([^"]*)"')
+_MODULE_INFO_RE = re.compile(r'<node\s+id="ModuleInfo">(.*?)</node>', re.DOTALL)
+_META_AUTHOR_RE = re.compile(r'<attribute\s+id="Author"\s+type="LSString"\s+value="([^"]*)"')
+_META_UUID_VAL_RE = re.compile(r'<attribute\s+id="UUID"\s+type="(?:FixedString|guid|LSString)"\s+value="([^"]*)"')
+_META_V64_RE = re.compile(r'<attribute\s+id="Version64"\s+type="int64"\s+value="(\d+)"')
+_META_FOLDER_RE = re.compile(r'<attribute\s+id="Folder"\s+type="LSString"\s+value="([^"]*)"')
+_GUID_RE = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+_DATA_RE = re.compile(r'^data\s+"([^"]+)"\s+"(.*)"$')
+_NEW_ENTRY_RE = re.compile(r'^new\s+entry\s+"([^"]+)"')
+_UUID_OR_MODULE_RE = re.compile(r'<attribute\s+id="(?:UUID|Module)"\s+type="(?:FixedString|guid|LSString)"\s+value="([^"]+)"')
+
 
 class ModValidator:
     def __init__(self, mod_dir: Path, strict: bool = False) -> None:
@@ -102,10 +117,10 @@ class ModValidator:
             content = meta_file.read_text(encoding="utf-8")
             if '<region id="MetaData">' in content:
                 data["is_project"] = True
-                name = re.search(r'<attribute\s+id="Name"\s+type="LSString"\s+value="([^"]*)"', content)
-                module = re.search(r'<attribute\s+id="Module"\s+type="LSString"\s+value="([^"]*)"', content)
-                uuid_val = re.search(r'<attribute\s+id="UUID"\s+type="LSString"\s+value="([^"]*)"', content)
-                mod_type = re.search(r'<attribute\s+id="Type"\s+type="LSString"\s+value="([^"]*)"', content)
+                name = _META_NAME_RE.search(content)
+                module = _META_MODULE_RE.search(content)
+                uuid_val = _META_UUID_RE.search(content)
+                mod_type = _META_TYPE_RE.search(content)
                 if name:
                     data["name"] = name.group(1)
                 if module:
@@ -116,14 +131,14 @@ class ModValidator:
                 if mod_type:
                     data["type"] = mod_type.group(1)
             else:
-                mod_info = re.search(r'<node\s+id="ModuleInfo">(.*?)</node>', content, re.DOTALL)
+                mod_info = _MODULE_INFO_RE.search(content)
                 target = mod_info.group(1) if mod_info else content
 
-                name = re.search(r'<attribute\s+id="Name"\s+type="LSString"\s+value="([^"]*)"', target)
-                author = re.search(r'<attribute\s+id="Author"\s+type="LSString"\s+value="([^"]*)"', target)
-                uuid_val = re.search(r'<attribute\s+id="UUID"\s+type="(?:FixedString|guid|LSString)"\s+value="([^"]*)"', target)
-                v64 = re.search(r'<attribute\s+id="Version64"\s+type="int64"\s+value="(\d+)"', target)
-                folder = re.search(r'<attribute\s+id="Folder"\s+type="LSString"\s+value="([^"]*)"', target)
+                name = _META_NAME_RE.search(target)
+                author = _META_AUTHOR_RE.search(target)
+                uuid_val = _META_UUID_VAL_RE.search(target)
+                v64 = _META_V64_RE.search(target)
+                folder = _META_FOLDER_RE.search(target)
 
                 if name:
                     data["name"] = name.group(1)
@@ -274,9 +289,7 @@ class ModValidator:
                 pass
 
         # 2. Validate RootTemplate references & balanced functor parentheses in Stats/*.txt
-        guid_re = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
         paren_keys = {"Boosts", "DefaultBoosts", "PassivesOnEquip", "SpellProperties", "StatsFunctors", "OnEquipFunctors"}
-        data_re = re.compile(r'^data\s+"([^"]+)"\s+"(.*)"$')
 
         for sdir in self.mod_dir.glob("Public/*/Stats/Generated/Data"):
             for txt_file in sdir.glob("*.txt"):
@@ -286,7 +299,7 @@ class ModValidator:
                         line = raw_line.strip()
                         if not line or line.startswith("//"):
                             continue
-                        m = data_re.match(line)
+                        m = _DATA_RE.match(line)
                         if not m:
                             continue
                         key, val = m.group(1), m.group(2)
@@ -295,7 +308,7 @@ class ModValidator:
                                 f"Unbalanced parentheses in {txt_file.name}:{idx} data \"{key}\": '{val}'"
                             )
                         if key == "RootTemplate" and val:
-                            if not guid_re.match(val):
+                            if not _GUID_RE.match(val):
                                 self.add_error(
                                     f"Invalid RootTemplate UUID format in {txt_file.name}:{idx}: '{val}'"
                                 )
@@ -313,7 +326,7 @@ class ModValidator:
             for s_file in stats_dirs[0].glob("Spell_*.txt"):
                 try:
                     for line in s_file.read_text(encoding="utf-8", errors="replace").splitlines():
-                        m = re.match(r'^new\s+entry\s+"([^"]+)"', line.strip())
+                        m = _NEW_ENTRY_RE.match(line.strip())
                         if m:
                             self.defined_spells.add(m.group(1))
                 except (OSError, UnicodeDecodeError):
@@ -476,9 +489,9 @@ def check_uuid_uniqueness(mod_dirs: list[Path]) -> list[str]:
         for mf in target_metas:
             try:
                 content = mf.read_text(encoding="utf-8")
-                mod_info = re.search(r'<node\s+id="ModuleInfo">(.*?)</node>', content, re.DOTALL)
+                mod_info = _MODULE_INFO_RE.search(content)
                 target = mod_info.group(1) if mod_info else content
-                m = re.search(r'<attribute\s+id="(?:UUID|Module)"\s+type="(?:FixedString|guid|LSString)"\s+value="([^"]+)"', target)
+                m = _UUID_OR_MODULE_RE.search(target)
                 if m:
                     u = m.group(1)
                     if u in seen:

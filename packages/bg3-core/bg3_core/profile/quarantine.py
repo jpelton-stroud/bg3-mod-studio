@@ -86,11 +86,11 @@ def isolate_load_order(path: Path, keep_uuids: set[str], dry_run: bool = False) 
 def get_pak_module_info(pak_path: Path) -> dict | None:
     """Extract UUID, Name, Folder, Version64 from meta.lsx inside a .pak archive."""
     try:
-        archive = LspkArchive(pak_path.read_bytes())
-        for entry in archive.files:
-            if entry["name"].replace("\\", "/").lower().endswith("meta.lsx"):
-                xml_txt = archive.extract_file(entry).decode("utf-8", errors="ignore")
-                return _extract_meta_from_xml_text(xml_txt, pak_path.stem)
+        with LspkArchive.open(pak_path, use_mmap=True) as archive:
+            for entry in archive.files:
+                if entry["name"].replace("\\", "/").lower().endswith("meta.lsx"):
+                    xml_txt = archive.extract_file(entry).decode("utf-8", errors="ignore")
+                    return _extract_meta_from_xml_text(xml_txt, pak_path.stem)
     except (OSError, struct.error, zlib.error, BG3BinaryError):
         pass
     return None
