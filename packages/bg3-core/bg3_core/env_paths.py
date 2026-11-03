@@ -56,7 +56,9 @@ def get_xdg_cache_home(app: str = "bg3") -> Path:
         base = Path(val.strip())
     elif os.name == "nt":
         localapp = os.environ.get("LOCALAPPDATA")
-        base = Path(localapp) if localapp and localapp.strip() else Path.home() / "AppData" / "Local"
+        base = (
+            Path(localapp) if localapp and localapp.strip() else Path.home() / "AppData" / "Local"
+        )
         return base / app / "cache"
     else:
         base = Path.home() / ".cache"
@@ -70,7 +72,9 @@ def get_xdg_data_home(app: str = "bg3") -> Path:
         base = Path(val.strip())
     elif os.name == "nt":
         localapp = os.environ.get("LOCALAPPDATA")
-        base = Path(localapp) if localapp and localapp.strip() else Path.home() / "AppData" / "Local"
+        base = (
+            Path(localapp) if localapp and localapp.strip() else Path.home() / "AppData" / "Local"
+        )
         return base / app / "data"
     else:
         base = Path.home() / ".local" / "share"
@@ -84,7 +88,9 @@ def get_xdg_state_home(app: str = "bg3") -> Path:
         base = Path(val.strip())
     elif os.name == "nt":
         localapp = os.environ.get("LOCALAPPDATA")
-        base = Path(localapp) if localapp and localapp.strip() else Path.home() / "AppData" / "Local"
+        base = (
+            Path(localapp) if localapp and localapp.strip() else Path.home() / "AppData" / "Local"
+        )
         return base / app / "state"
     else:
         base = Path.home() / ".local" / "state"
@@ -127,10 +133,14 @@ CACHE_DIR = get_xdg_cache_home()
 def load_env_file(env_path: Optional[Path] = None) -> Dict[str, str]:
     """Load key-value pairs from XDG config or explicit env_path. In-repo .env is strictly ignored."""
     env: Dict[str, str] = {}
-    candidates = [env_path] if env_path else [
-        get_xdg_config_home() / "env",
-        Path.home() / ".config" / "modio" / "env",
-    ]
+    candidates = (
+        [env_path]
+        if env_path
+        else [
+            get_xdg_config_home() / "env",
+            Path.home() / ".config" / "modio" / "env",
+        ]
+    )
     for path in candidates:
         if path and path.is_file():
             try:
@@ -147,7 +157,9 @@ def load_env_file(env_path: Optional[Path] = None) -> Dict[str, str]:
     return env
 
 
-def get_env_var(key: str, default: Optional[str] = None, env_path: Optional[Path] = None) -> Optional[str]:
+def get_env_var(
+    key: str, default: Optional[str] = None, env_path: Optional[Path] = None
+) -> Optional[str]:
     """Retrieve a configuration value from os.environ or XDG config files."""
     val = os.environ.get(key)
     if val is not None and val.strip():
@@ -241,13 +253,22 @@ def normalize_mod_key(value: str) -> str:
     return re.sub(r"[^a-z0-9]", "", cleaned.casefold())
 
 
+def _is_plausible_mod_dir(path: Path) -> bool:
+    """Check if directory contains BG3 mod structure (Mods, Projects, Public, Localization, or meta.lsx)."""
+    if not path.is_dir():
+        return False
+    indicators = ("Mods", "Projects", "Public", "Localization", "meta.lsx", ".test_deps.json")
+    return any((path / ind).exists() for ind in indicators)
+
+
 def resolve_mod_dir(
     identifier: str,
     roots: Optional[Sequence[Path]] = None,
     allow_substring: bool = True,
     prefer_my_mods: Optional[bool] = None,
+    allow_external: bool = False,
 ) -> Optional[Path]:
-    """Resolve a mod directory across my_mods/ and mods/ by path, slug, Name, or <ModName>_<UUID>."""
+    """Resolve a mod directory across authored/ and subscribed/ by path, slug, Name, or <ModName>_<UUID>."""
     if roots is None:
         my_mods = get_authored_mods_dir()
         mods = get_subscribed_mods_dir()
@@ -263,7 +284,15 @@ def resolve_mod_dir(
 
     direct = Path(identifier)
     if direct.is_dir():
-        return direct.resolve()
+        resolved_direct = direct.resolve()
+        is_within_roots = any(
+            (resolved_direct == r.resolve() or resolved_direct.is_relative_to(r.resolve()))
+            for r in roots
+            if r.is_dir()
+        )
+        has_traversal = ".." in Path(identifier).parts
+        if is_within_roots or allow_external or (not has_traversal and _is_plausible_mod_dir(resolved_direct)):
+            return resolved_direct
 
     query_raw = identifier.strip()
     query_norm = normalize_mod_key(query_raw)
@@ -272,9 +301,12 @@ def resolve_mod_dir(
     for root in roots:
         if not root.is_dir():
             continue
-        exact = root / query_raw
-        if exact.is_dir():
-            return exact.resolve()
+        try:
+            exact = (root / query_raw).resolve()
+            if (exact == root.resolve() or exact.is_relative_to(root.resolve())) and exact.is_dir():
+                return exact
+        except (ValueError, RuntimeError):
+            pass
 
         for child in sorted(root.iterdir()):
             if not child.is_dir():
@@ -318,7 +350,9 @@ def detect_bg3_appdata_dirs() -> List[Path]:
         candidates.append(home / "AppData" / "Local" / "Larian Studios" / "Baldur's Gate 3")
 
     # WSL /mnt/c/Users/* detection
-    for wsl_match in sorted(glob.glob("/mnt/c/Users/*/AppData/Local/Larian Studios/Baldur's Gate 3")):
+    for wsl_match in sorted(
+        glob.glob("/mnt/c/Users/*/AppData/Local/Larian Studios/Baldur's Gate 3")
+    ):
         candidates.append(Path(wsl_match))
 
     # Linux Steam Proton prefix

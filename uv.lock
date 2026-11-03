@@ -86,7 +86,7 @@ wheels = [
 
 [[package]]
 name = "bg3"
-version = "1.0.0b1"
+version = "1.0.0"
 source = { editable = "packages/bg3-core" }
 
 [package.optional-dependencies]
@@ -112,7 +112,7 @@ provides-extras = ["authoring", "theorycraft", "all"]
 
 [[package]]
 name = "bg3-authoring"
-version = "1.0.0b1"
+version = "1.0.0"
 source = { editable = "packages/bg3-authoring" }
 dependencies = [
     { name = "bg3" },
@@ -123,7 +123,7 @@ requires-dist = [{ name = "bg3", editable = "packages/bg3-core" }]
 
 [[package]]
 name = "bg3-theorycraft"
-version = "1.0.0b1"
+version = "1.0.0"
 source = { editable = "packages/bg3-theorycraft" }
 dependencies = [
     { name = "bg3" },

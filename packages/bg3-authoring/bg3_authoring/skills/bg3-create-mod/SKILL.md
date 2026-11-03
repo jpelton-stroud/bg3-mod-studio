@@ -1,11 +1,11 @@
 ---
 name: bg3-create-mod
-description: Orchestrate concurrent subagents to grill, plan, scaffold, author, and validate BG3 mods in my_mods/<ModSlug>. Use on /bg3-create-mod or when creating new BG3 mods.
+description: Orchestrate concurrent subagents to grill, plan, scaffold, author, and validate BG3 mods in Mods/authored/<ModSlug>. Use on /bg3-create-mod or when creating new BG3 mods.
 ---
 
 # BG3 Mod Creator Orchestrator (`bg3-create-mod`)
 
-Top-level orchestration skill for Stage 1 of the BG3 mod creation lifecycle. Translates creative concepts into fully authored, statically verified mods inside `my_mods/<ModSlug>`.
+Top-level orchestration skill for Stage 1 of the BG3 mod creation lifecycle. Translates creative concepts into fully authored, statically verified mods inside `Mods/authored/<ModSlug>`.
 
 Refer to companion resources:
 - Interview Protocol: [Design Interview Protocol](./references/grill_me_interview_protocol.md)
@@ -33,8 +33,10 @@ flowchart TD
 Conduct structured design interview following [Design Interview Protocol](./references/grill_me_interview_protocol.md). Formulate technical specification and await explicit user approval before scaffolding.
 
 ### 2. Workspace Scaffolding
-After approval, run the scaffolding tool:
-- Execute `bg3 mod create "<ModName>" [--slug "<slug>"] --description "<Desc>" [--unlock-level-curve] --json`
+After approval, run the scaffolding recipe:
+```bash
+bg3 mod create "<ModName>" --description "<Desc>" --json
+```
 
 ### 3. Concurrent Subagent Dispatch
 Launch the 4 specialist subagents in parallel following [Subagent Launch Templates](./resources/subagent_templates.md) (Stats & Spells, Progression & Lists, Localization, Documentation). Ensure all subagents inherit model configuration (`Model: "inherit"`). Await reactive completion notifications without polling.

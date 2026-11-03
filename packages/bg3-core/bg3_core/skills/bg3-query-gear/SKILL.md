@@ -23,6 +23,14 @@ flowchart TD
 ```
 
 ### 1. Query Translation
+Translate natural language queries into deterministic commands:
+```bash
+bg3 query --boost "SpellSaveDC" --json
+bg3 query --slot "Amulet" --json
+bg3 query --passive "ExtraAttack" --json
+bg3 query --slot "Boots" --rarity "Legendary" --json
+bg3 query --search "necrotic" --json
+```
 
 | User Intent | CLI Command |
 | :--- | :--- |
@@ -41,5 +49,5 @@ Structure recommendations with Item Name, Slot, Mod Source, Key Effects, and Bui
 
 Always verify query results before presenting to user:
 1. Verify `bg3 query` exits with code 0.
-2. If the query database is empty or missing, rebuild it with `bg3 query --reindex`.
+2. If the query catalog is empty or missing, rebuild index via `bg3 modio update-catalog --json`.
 3. Confirm returned items exist in `Mods/subscribed/library.md` or `Mods/subscribed/`.

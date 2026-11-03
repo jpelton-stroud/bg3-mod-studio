@@ -7,6 +7,8 @@ custom mod purge, and non-interactive safety guards in bg3_core.setup_environmen
 """
 
 import io
+import os
+import stat
 import subprocess
 import sys
 import tempfile
@@ -15,10 +17,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 from bg3_core.cli.setup_environment import (
-    handle_custom_mods_purge,
     handle_subscription_sync,
-    prompt_custom_mods_purge,
     prompt_subscription_sync,
+    run_wizard,
 )
 
 
@@ -29,6 +30,7 @@ class SetupEnvironmentQATests(unittest.TestCase):
 
     def tearDown(self):
         self._stdout_patcher.stop()
+
     def test_prompt_subscription_sync_non_interactive(self):
         # Non-interactive mode must return option "3" (continue without sync)
         choice = prompt_subscription_sync(non_interactive=True)
@@ -56,52 +58,22 @@ class SetupEnvironmentQATests(unittest.TestCase):
         self.assertEqual(prompt_subscription_sync(non_interactive=False), "1")
         self.assertEqual(prompt_subscription_sync(non_interactive=True), "3")
 
-    def test_prompt_custom_mods_purge_non_interactive(self):
-        # Non-interactive mode must return "n" to avoid data destruction
-        choice = prompt_custom_mods_purge(non_interactive=True)
-        self.assertEqual(choice, "n")
-
-    @patch("builtins.input", side_effect=[""])
-    def test_prompt_custom_mods_purge_default(self, _mock_input):
-        # Pressing Enter defaults to "y"
-        choice = prompt_custom_mods_purge(non_interactive=False)
-        self.assertEqual(choice, "y")
-
-    @patch("builtins.input", side_effect=["n"])
-    def test_prompt_custom_mods_purge_no(self, _mock_input):
-        choice = prompt_custom_mods_purge(non_interactive=False)
-        self.assertEqual(choice, "n")
-
-    @patch("builtins.input", side_effect=[EOFError])
-    def test_prompt_custom_mods_purge_eof(self, _mock_input):
-        self.assertEqual(prompt_custom_mods_purge(non_interactive=False), "y")
-        self.assertEqual(prompt_custom_mods_purge(non_interactive=True), "n")
-
     def test_handle_subscription_sync_dry_run(self):
         # Must execute without raising exceptions in dry-run mode for all choices
         for choice in ("1", "2", "3", "4"):
             with self.subTest(choice=choice):
                 handle_subscription_sync(choice, dry_run=True)
 
-    def test_handle_custom_mods_purge_live(self):
+    def test_run_wizard_omits_legacy_custom_mods_purge(self):
+        """Assert that run_wizard completes without prompting for or executing legacy custom mods purge."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_root = Path(temp_dir)
-            mock_my_mods = temp_root / "my_mods"
-            mock_my_mods.mkdir()
-            (mock_my_mods / "sample-mod").mkdir()
-            (mock_my_mods / "sample-mod" / "meta.lsx").write_text("<save/>", encoding="utf-8")
-            (mock_my_mods / "notes.txt").write_text("notes", encoding="utf-8")
-
             with patch("bg3_core.cli.setup_environment.WORKSPACE_ROOT", temp_root):
-                # When choice is 'n', nothing is removed
-                handle_custom_mods_purge("n", dry_run=False)
-                self.assertTrue((mock_my_mods / "sample-mod").is_dir())
-                self.assertTrue((mock_my_mods / "notes.txt").is_file())
-
-                # When choice is 'y', all contents inside my_mods are removed
-                handle_custom_mods_purge("y", dry_run=False)
-                self.assertTrue(mock_my_mods.is_dir())
-                self.assertEqual(list(mock_my_mods.iterdir()), [])
+                # Run wizard in non-interactive dry-run mode
+                run_wizard(dry_run=True, non_interactive=True)
+                output = self.mock_stdout.getvalue()
+                self.assertNotIn("Custom Mods Cleanup", output)
+                self.assertNotIn("Would purge custom mods", output)
 
     def test_cli_env_integration(self):
         repo_root = Path(__file__).resolve().parent.parent
@@ -130,14 +102,20 @@ class SetupEnvironmentQATests(unittest.TestCase):
 
         # 3. python3 -m bg3_core.cli.setup_environment --dry-run --non-interactive
         proc_dry = subprocess.run(
-            [sys.executable, "-m", "bg3_core.cli.setup_environment", "--dry-run", "--non-interactive"],
+            [
+                sys.executable,
+                "-m",
+                "bg3_core.cli.setup_environment",
+                "--dry-run",
+                "--non-interactive",
+            ],
             cwd=repo_root,
             capture_output=True,
             text=True,
             check=True,
         )
         self.assertIn("Continuing setup without subscription sync.", proc_dry.stdout)
-        self.assertIn("Continuing without purging custom mods.", proc_dry.stdout)
+        self.assertNotIn("purging custom mods", proc_dry.stdout)
 
     def test_legacy_env_is_not_auto_migrated(self):
         """Verify that a legacy repo-level .env is ignored and not unlinked."""
@@ -149,8 +127,10 @@ class SetupEnvironmentQATests(unittest.TestCase):
 
             from bg3_core.cli.setup_environment import check_environment_status
 
-            with patch("bg3_core.cli.setup_environment.WORKSPACE_ROOT", tmp_root), \
-                 patch("bg3_core.cli.setup_environment.ENV_PATH", target_config):
+            with (
+                patch("bg3_core.cli.setup_environment.WORKSPACE_ROOT", tmp_root),
+                patch("bg3_core.cli.setup_environment.ENV_PATH", target_config),
+            ):
                 check_environment_status(as_json=True)
                 self.assertFalse(target_config.is_file())
                 self.assertTrue(legacy_file.is_file())
@@ -164,8 +144,10 @@ class SetupEnvironmentQATests(unittest.TestCase):
 
             from bg3_core.cli.setup_environment import run_wizard
 
-            with patch("bg3_core.cli.setup_environment.WORKSPACE_ROOT", tmp_root), \
-                 patch("bg3_core.cli.setup_environment.ENV_PATH", target_env):
+            with (
+                patch("bg3_core.cli.setup_environment.WORKSPACE_ROOT", tmp_root),
+                patch("bg3_core.cli.setup_environment.ENV_PATH", target_env),
+            ):
                 run_wizard(
                     dry_run=False,
                     non_interactive=True,
@@ -173,10 +155,28 @@ class SetupEnvironmentQATests(unittest.TestCase):
                     studio_dir_override=str(custom_studio),
                 )
                 self.assertTrue(target_env.is_file())
-                self.assertIn(f"BG3_STUDIO_DIR={custom_studio}", target_env.read_text(encoding="utf-8"))
+                self.assertIn(
+                    f"BG3_STUDIO_DIR={custom_studio}", target_env.read_text(encoding="utf-8")
+                )
                 self.assertTrue((custom_studio / "Build_Guides").is_dir())
                 self.assertTrue((custom_studio / "Mods" / "subscribed").is_dir())
                 self.assertTrue((custom_studio / "Mods" / "authored").is_dir())
+
+    def test_write_env_file_directory_and_file_permissions(self):
+        """Verify write_env_file hardens directory (0700) and file (0600) permissions."""
+        from bg3_core.cli.setup_environment import write_env_file
+
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp) / ".config" / "bg3"
+            env_file = config_dir / "env"
+            write_env_file(env_file, "TEST_KEY=12345\n")
+
+            self.assertTrue(env_file.is_file())
+            if hasattr(os, "stat"):
+                dir_mode = stat.S_IMODE(config_dir.stat().st_mode)
+                file_mode = stat.S_IMODE(env_file.stat().st_mode)
+                self.assertEqual(dir_mode, 0o700)
+                self.assertEqual(file_mode, 0o600)
 
 
 if __name__ == "__main__":

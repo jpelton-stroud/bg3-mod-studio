@@ -2,7 +2,7 @@
 """
 packages/bg3-authoring/bg3_authoring/add_mod_dependency.py
 -----------------------------------------------------------
-Appends community or core mod dependencies and test dependencies to an existing custom mod in my_mods/.
+Appends community or core mod dependencies and test dependencies to an existing custom mod in `$BG3_STUDIO_DIR/Mods/authored/`.
 
 Features:
 - Resolves dependency metadata (UUID, Version64, MD5, Folder, Name, PublishHandle)
@@ -271,10 +271,10 @@ def resolve_cli_targets(args: argparse.Namespace) -> Tuple[List[str], List[str]]
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="bg3 mod add-dependency",
-        description="Add community or core mod dependencies and test dependencies to an existing custom mod in my_mods/.",
+        description="Add community or core mod dependencies and test dependencies to an existing custom mod in $BG3_STUDIO_DIR/Mods/authored/.",
     )
     parser.add_argument("pos_mod", nargs="?", default=None, help="Target mod name or slug (optional if --mod is specified)")
-    parser.add_argument("--mod", default=None, help="Custom mod name, slug, or folder in my_mods/")
+    parser.add_argument("--mod", default=None, help="Custom mod name, slug, or folder in $BG3_STUDIO_DIR/Mods/authored/")
     parser.add_argument("--dep", "--dependency", dest="dep", action="append", default=[], help="Dependency mod name(s), slug(s), or UUID(s) (comma-separated or repeated)")
     parser.add_argument("--test-dep", "--test-deps", dest="test_dep", action="append", default=[], help="Test dependency mod name(s), slug(s), or UUID(s) (comma-separated or repeated)")
     parser.add_argument(
@@ -294,7 +294,7 @@ def main() -> None:
     try:
         target_mod = args.mod or args.pos_mod or detect_mod_from_cwd()
         if not target_mod:
-            raise ValueError("Target mod must be specified via --mod <name>, positional argument, or by running inside a mod folder in my_mods/.")
+            raise ValueError("Target mod must be specified via --mod <name>, positional argument, or by running inside an authored mod folder.")
 
         mod_dir = resolve_mod_dir(target_mod, prefer_my_mods=True)
         if not mod_dir or not mod_dir.is_dir():

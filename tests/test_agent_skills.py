@@ -193,12 +193,15 @@ class TestAgentSkills(unittest.TestCase):
         import json
         import subprocess
 
-        validator_path = Path.home() / ".agents" / "skills-global" / "create-agent-rules-and-skills" / "scripts" / "validate_rule_or_skill.py"
-        if not validator_path.exists():
-            validator_path = Path.home() / ".gemini" / "config" / "skills" / "create-agent-rules-and-skills" / "scripts" / "validate_rule_or_skill.py"
-
-        if not validator_path.exists():
-            self.skipTest(f"Validator script not found at {validator_path}")
+        candidates = [
+            Path.home() / ".agents" / "skills-sdk" / "agent-config" / "scripts" / "validate_rule_or_skill.py",
+            Path.home() / "projects" / "agent-config" / "src" / "skills-sdk" / "agent-config" / "scripts" / "validate_rule_or_skill.py",
+            Path.home() / ".agents" / "skills-global" / "create-agent-rules-and-skills" / "scripts" / "validate_rule_or_skill.py",
+            Path.home() / ".gemini" / "config" / "skills" / "create-agent-rules-and-skills" / "scripts" / "validate_rule_or_skill.py",
+        ]
+        validator_path = next((p for p in candidates if p.exists()), None)
+        if not validator_path:
+            self.skipTest("Validator script validate_rule_or_skill.py not found in environment")
 
         failures = []
         for sf in self.skill_files:

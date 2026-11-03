@@ -4,7 +4,7 @@ bump_mod_version.py
 -------------------
 Inspects and updates semantic version numbers and Larian Version64 integers
 atomically across `Mods/<UUID>/meta.lsx` (and legacy `Projects/<UUID>/meta.lsx`),
-and keeps `my_mods/<slug>/README.md` in sync so documentation and metadata never drift.
+and keeps `$BG3_STUDIO_DIR/Mods/authored/<slug>/README.md` in sync so documentation and metadata never drift.
 
 Features:
 - Encodes and decodes 64-bit integer versions: (major << 55) | (minor << 47) | (revision << 31) | build
@@ -33,7 +33,7 @@ WORKSPACE_ROOT = REPO_ROOT
 
 
 def find_mod_directories(mod_query: str = "") -> List[Path]:
-    """Find mod directories in my_mods matching query or return all."""
+    """Find mod directories in authored mods matching query or return all."""
     if not mod_query:
         if not MY_MODS_DIR.exists():
             return []
@@ -153,7 +153,7 @@ def bump_version(
 ) -> dict:
     matched = find_mod_directories(mod_name)
     if not matched:
-        raise ValueError(f"No mod found in my_mods/ matching query '{mod_name}'.")
+        raise ValueError(f"No mod found in authored mods matching query '{mod_name}'.")
 
     target_mod = matched[0]
     meta_files = get_meta_files(target_mod)
@@ -235,7 +235,7 @@ def main() -> None:
         description="Auto-generate and bump semantic versions and Larian Version64 integers in BG3 mods."
     )
     parser.add_argument(
-        "--mod", required=True, help="Mod name or folder in my_mods/ (e.g. paladins-call)"
+        "--mod", required=True, help="Mod name or folder in $BG3_STUDIO_DIR/Mods/authored/ (e.g. paladins-call)"
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(

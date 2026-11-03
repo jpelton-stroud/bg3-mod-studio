@@ -75,10 +75,10 @@ The orchestrator immediately initiates a structured interview to resolve design 
 The agent synthesizes decisions into a technical mod specification plan. **Execution pauses until you explicitly approve the plan** via the interactive UI prompt.
 
 ### Step 3: Workspace Scaffolding
-Upon approval, the agent generates the standardized directory hierarchy in `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/<ModSlug>/` via `bg3 mod scaffold`:
-- `Projects/<UUID>/meta.lsx` & `Mods/<UUID>/meta.lsx` (with auto-generated deterministic UUIDv4 and Larian `Version64` tags)
-- `Public/<UUID>/Stats/Generated/Data/` (for engine stats and spells)
-- `Public/<UUID>/RootTemplates/_merged.lsx` (for 3D GameObject templates)
+Upon approval, the agent generates the standardized directory hierarchy in `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/<ModSlug>/` via `bg3 mod create`:
+- `Projects/<ModName>_<UUID>/meta.lsx` & `Mods/<ModName>_<UUID>/meta.lsx` (with auto-generated deterministic UUIDv4 and Larian `Version64` tags)
+- `Public/<ModName>_<UUID>/Stats/Generated/Data/` (for engine stats and spells)
+- `Public/<ModName>_<UUID>/RootTemplates/_merged.lsx` (for 3D GameObject templates)
 - `Localization/English/<ModName>.xml` (for localized text handles)
 - `.test_deps.json` (optional manifest for test-only prerequisite dependencies)
 - `Mods/authored/<ModSlug>/README.md` (rich mod specification document)
@@ -96,7 +96,7 @@ The orchestrator launches specialized background subagents concurrently to autho
 #### Subagent Output Snippets
 
 ```text
-// Public/<UUID>/Stats/Generated/Data/Weapon.txt
+// Public/<ModName>_<UUID>/Stats/Generated/Data/Weapon.txt
 new entry "MAG_ArcaneBlade"
 type "Weapon"
 using "WPN_Longsword_1"
@@ -119,7 +119,7 @@ data "Description" "ha3316e15g6546g48bag9827gc56306e90e78;1"
 ### Step 5: Comprehensive Workspace Static Verification Gate
 The orchestrator awaits completion from all parallel subagents and executes comprehensive read-only static verification strictly within `$XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/<ModSlug>/` without modifying game `Data/` or `AppData/`:
 1. **LSX & XML Integrity**: Verifies well-formedness and schema compliance via `bg3 mod validate <slug>`.
-2. **Metadata Parity**: Asserts identical UUID, author, and `Version64` tags between `Projects/<UUID>/meta.lsx` and `Mods/<UUID>/meta.lsx`.
+2. **Metadata Parity**: Asserts identical UUID, author, and `Version64` tags between `Projects/<ModName>_<UUID>/meta.lsx` and `Mods/<ModName>_<UUID>/meta.lsx`.
 3. **String Handle Parity**: Verifies that every `DisplayName` and `Description` handle referenced across stat entries exists in `Localization/English/<ModName>.xml` via `bg3 mod sync-loca <slug> --check`.
 4. **Spell List Parity**: Confirms spell identifiers referenced in `SpellLists.lsx` match declared spell definitions.
 5. **Library Conflict Pre-Check**: Checks candidate stats and RootTemplates against over 2,200 cataloged community mods in `Mods/subscribed/library.md` via `bg3 mod conflict <slug> --against-library`.
@@ -202,7 +202,7 @@ When in-game testing is complete and verified, prepare the mod for publication:
 
 The `bg3-release-prep` skill automates all release checks and prepares staging for **User-Action Gate 3 (Toolkit Publishing)**:
 
-1. **Atomic Semantic Version64 Bumping**: Increments version numbers and atomically encodes the 64-bit integer across `Mods/<UUID>/meta.lsx`, `Projects/<UUID>/meta.lsx`, and synchronizes the version in `Mods/authored/<slug>/README.md` via `bg3 mod bump-version <slug> patch`.
+1. **Atomic Semantic Version64 Bumping**: Increments version numbers and atomically encodes the 64-bit integer across `Mods/<ModName>_<UUID>/meta.lsx`, `Projects/<ModName>_<UUID>/meta.lsx`, and synchronizes the version in `Mods/authored/<slug>/README.md` via `bg3 mod bump-version <slug> patch`.
 2. **Localization Pruning & Binary Compilation**: Prunes unused string handles and compiles `English/<ModName>.xml` into a binary `.loca` file via `bg3 mod sync-loca <slug> --prune --compile`.
 3. **Strict Linting & Conflict Gate**: Runs zero-tolerance validation (`bg3 mod validate <slug> --strict`) and library collision audits (`bg3 mod conflict <slug> --against-library`).
 4. **mod.io HTML Description Rendering**: Converts `Mods/authored/<ModSlug>/README.md` into GitHub-Flavored Markdown HTML via `bg3 mod render-desc <slug> --write`, generating `modio_description.html` formatted for storefront display.

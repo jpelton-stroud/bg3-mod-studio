@@ -3,7 +3,7 @@
 query_mod_database.py - High-speed BiS gear, spell, and mechanics query engine.
 
 Indexes Weapon.txt, Armor.txt, Object.txt, Passive.txt, and Status_BOOST.txt
-across all cataloged community mods in mods/ (ignoring my_mods/).
+across all cataloged community mods in $BG3_STUDIO_DIR/Mods/subscribed/.
 Uses directory mtime caching ($XDG_CACHE_HOME/bg3/mod_database.json) for sub-10ms response times.
 """
 

@@ -28,8 +28,10 @@ flowchart TD
 
 ### 1. Hybrid Conflict Inspection
 Run deterministic inspection against cataloged workspace mods or candidate pairs:
-- **Candidate vs Tracked Library**: Execute `bg3 mod conflict "<MOD_SLUG>" --against-library --json`
-- **Candidate vs Candidate**: Execute `bg3 mod conflict "<MOD1>" --mod2 "<MOD2>" --json`
+```bash
+bg3 mod conflict "<MOD_SLUG>" --against-library --json
+bg3 mod conflict "<MOD1>" --mod2 "<MOD2>" --json
+```
 
 ### 2. Remediation & Authoring Handoff
 When actionable stat or progression collisions occur, mitigate them via load order positioning or hand off to authoring tools:

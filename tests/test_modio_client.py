@@ -258,6 +258,60 @@ class ModioClientTests(unittest.TestCase):
             with self.assertRaises(ModioError):
                 upload_mod_file(mod_id=42, file_path=p, client=ModioClient(token=""))
 
+    def test_sanitize_url_redacts_credentials(self):
+        from bg3_core.modio.modio_client import sanitize_url
+
+        self.assertEqual(sanitize_url(""), "")
+        self.assertEqual(
+            sanitize_url("https://example.com/download?api_key=secret123"),
+            "https://example.com/download?api_key=[REDACTED]",
+        )
+        self.assertEqual(
+            sanitize_url("https://example.com/api?version=1&token=abc-999&extra=foo"),
+            "https://example.com/api?version=1&token=[REDACTED]&extra=foo",
+        )
+        self.assertEqual(
+            sanitize_url("https://example.com/file?pat=pat_val&secret=sec_val"),
+            "https://example.com/file?pat=[REDACTED]&secret=[REDACTED]",
+        )
+
+    def test_download_file_rejects_non_https_schemes(self):
+        client = ModioClient("token")
+        with self.assertRaises(ModioError) as cm:
+            client.download_file("http://example.com/mod.pak")
+        self.assertIn("Only https:// is supported", str(cm.exception))
+
+        with self.assertRaises(ModioError) as cm:
+            client.download_file("file:///local/test/data")
+        self.assertIn("Only https:// is supported", str(cm.exception))
+
+    def test_download_file_redacts_api_key_on_http_error(self):
+        raw_key = "secret_api_key_xyz123"
+        url = f"https://example.com/download?file=1&api_key={raw_key}"
+        error = urllib.error.HTTPError(
+            url,
+            403,
+            "Forbidden",
+            {},
+            io.BytesIO(b"Access denied"),
+        )
+        opener = Mock(side_effect=error)
+        client = ModioClient("token", opener=opener)
+
+        with self.assertRaises(ModioError) as cm:
+            client.download_file(url)
+
+        self.assertNotIn(raw_key, str(cm.exception))
+        self.assertIn("[REDACTED]", str(cm.exception))
+        self.assertNotIn(raw_key, error.filename)
+        self.assertIn("[REDACTED]", error.filename)
+
+    def test_request_rejects_insecure_http_endpoint(self):
+        client = ModioClient("token")
+        with self.assertRaises(ModioError) as cm:
+            client.request("GET", "http://api.mod.io/v1/games")
+        self.assertIn("Insecure endpoint URL scheme", str(cm.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

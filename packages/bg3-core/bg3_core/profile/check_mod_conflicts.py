@@ -19,7 +19,6 @@ Modes:
 import argparse
 import json
 import sys
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +27,7 @@ from bg3_core.binary.larian_parsers import (
     parse_progressions_lsx,
     parse_root_templates_lsx,
     parse_stats_txt,
+    safe_xml_parse,
 )
 from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import (
@@ -205,7 +205,7 @@ def get_mod_extracted_data(mod_dir: Path) -> dict[str, Any]:
 
         if patterns:
             try:
-                tree = ET.parse(f)
+                tree = safe_xml_parse(f)
                 for cat, node_id in patterns:
                     extracted = _extract_nodes_from_tree(tree, node_id, f.name)
                     data[cat].update(extracted)
@@ -327,7 +327,7 @@ def extract_lsx_named_nodes(
         if exclude_pattern and exclude_pattern.lower() in rel:
             continue
         try:
-            tree = ET.parse(f)
+            tree = safe_xml_parse(f)
             results.update(_extract_nodes_from_tree(tree, node_id, f.name))
         except Exception:
             pass

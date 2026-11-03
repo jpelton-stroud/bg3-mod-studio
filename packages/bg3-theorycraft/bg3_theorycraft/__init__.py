@@ -46,6 +46,8 @@ from bg3_theorycraft.simulate_build_synergy import (
     simulate_turn_1_dpr,
 )
 
+__version__ = "1.0.0"
+
 __all__ = [
     "ActionBudget",
     "BG3BuildValidationError",
@@ -77,4 +79,5 @@ __all__ = [
     "parse_boost_effects",
     "simulate_build",
     "simulate_turn_1_dpr",
+    "__version__",
 ]

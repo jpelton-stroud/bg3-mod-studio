@@ -166,7 +166,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Inject custom mod items into BG3 treasure tables and vendor inventories."
     )
-    parser.add_argument("--mod", help="Target mod name/slug in my_mods/ or directory path.")
+    parser.add_argument("--mod", help="Target mod name/slug in $BG3_STUDIO_DIR/Mods/authored/ or directory path.")
     parser.add_argument("--item", help="Item identifier (e.g. MAG_Sword_01 or I_MAG_Sword_01).")
     parser.add_argument(
         "--container",

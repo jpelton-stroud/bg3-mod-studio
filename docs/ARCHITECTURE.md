@@ -3,7 +3,7 @@
 This document details the system architecture, component layering, data pipelines, and engine structural contracts of the **Baldur's Gate 3 Mod Studio & Mod.io Toolkit**.
 
 > [!NOTE]
-> For user guides, autonomous agent slash commands, example prompts, and the CLI flags reference for all 30 studio automation tools, refer to the [Features & Functionality Guide](FEATURES.md).
+> For user guides, autonomous agent slash commands, example prompts, and the CLI flags reference for all 65 studio automation tools, refer to the [Features & Functionality Guide](FEATURES.md).
 
 ---
 
@@ -30,7 +30,7 @@ flowchart TD
         MyMods["Custom Authored Mods\n($XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/authored/<slug>/)"]
         ModsLib["Community Mod Library\n($XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Mods/subscribed/library.md)"]
         Sandboxes["Theorycrafting Sandbox\n($XDG_DOCUMENTS_DIR/BG3_Mod_Studio/Build_Guides/)"]
-        XDGConfig["XDG Base Directory Spec\n(~/.config/bg3/env [0600], ~/.cache/bg3/)"]
+        XDGConfig["XDG Base Directory Spec\n(~/.config/bg3/ [0700], env [0600], ~/.cache/bg3/)"]
     end
 
     subgraph Tier4["4. Engine & Game Boundary"]
@@ -271,7 +271,7 @@ The community mod library indexes over 2,200 unique community gear items, passiv
   - Backup copies (`.bak`) are created automatically whenever localization handles or `modsettings.lsx` orders are mutated.
 - **XDG Base Directory Compliance & Path Portability**:
   - Fully compliant with the **XDG Base Directory Specification** via `packages/bg3-core/bg3_core/env_paths.py`.
-  - Credentials and environment variables are stored in `$XDG_CONFIG_HOME/bg3/env` (default: `~/.config/bg3/env`) with strict POSIX mode `0600` file permissions.
+  - Credentials and environment variables are stored in `$XDG_CONFIG_HOME/bg3/env` (default: `~/.config/bg3/env`) with strict POSIX mode `0600` file permissions and parent directory mode `0700`.
   - Application caches and temporary artifacts resolve to `$XDG_CACHE_HOME/bg3/` (default: `~/.cache/bg3/`).
   - In-repo `.env` and `.cache` files are completely eliminated from lookup hierarchies.
   - Global `--config <path>` override allows targeting arbitrary configuration files in CI/CD or container environments.

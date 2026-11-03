@@ -58,9 +58,15 @@ RESET = "\033[0m"
 
 
 def print_banner() -> None:
-    print(f"\n{BOLD}{CYAN}========================================================================{RESET}")
-    print(f"{BOLD}{CYAN}      Baldur's Gate 3 Mod Studio & Mod.io Toolkit Setup Wizard          {RESET}")
-    print(f"{BOLD}{CYAN}========================================================================{RESET}\n")
+    print(
+        f"\n{BOLD}{CYAN}========================================================================{RESET}"
+    )
+    print(
+        f"{BOLD}{CYAN}      Baldur's Gate 3 Mod Studio & Mod.io Toolkit Setup Wizard          {RESET}"
+    )
+    print(
+        f"{BOLD}{CYAN}========================================================================{RESET}\n"
+    )
 
 
 def parse_env_file(path: Path) -> dict:
@@ -205,8 +211,12 @@ def prompt_secret(prompt_text: str, current_val: str = "") -> str:
 
 
 def write_env_file(path: Path, content: str) -> None:
-    """Write the environment configuration file readable/writable by the owner only (0600)."""
+    """Write the environment configuration file readable/writable by the owner only (0600) and directory (0700)."""
     path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        os.chmod(path.parent, 0o700)
+    except OSError:
+        pass
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         f.write(content)
@@ -231,15 +241,22 @@ def check_environment_status(as_json: bool = False, config_path: Optional[Path] 
             "config_exists": False,
         }
         if as_json:
-            print(json.dumps({
-                "env_path": str(target_env),
-                "configured": False,
-                "error": f"No environment configuration found at {target_env}.",
-                "xdg": xdg_info,
-            }, indent=2))
+            print(
+                json.dumps(
+                    {
+                        "env_path": str(target_env),
+                        "configured": False,
+                        "error": f"No environment configuration found at {target_env}.",
+                        "xdg": xdg_info,
+                    },
+                    indent=2,
+                )
+            )
         else:
             print(f"\n{BOLD}=== Environment Configuration Status ==={RESET}")
-            print(f"{YELLOW}[!] No configuration found at {target_env}. Run 'bg3 env setup' to configure.{RESET}")
+            print(
+                f"{YELLOW}[!] No configuration found at {target_env}. Run 'bg3 env setup' to configure.{RESET}"
+            )
             print(f"XDG_CONFIG_HOME:  {cfg_home}")
             print(f"XDG_CACHE_HOME:   {cache_home}")
             print(f"XDG_DATA_HOME:    {data_home}")
@@ -261,7 +278,9 @@ def check_environment_status(as_json: bool = False, config_path: Optional[Path] 
         "BG3_SUBSCRIBED_MODS_DIR",
         env.get("BG3_LIBRARY_DIR", str(get_subscribed_mods_dir(target_env))),
     )
-    subscribed_mods_dir_exists = Path(subscribed_mods_dir).exists() if subscribed_mods_dir else False
+    subscribed_mods_dir_exists = (
+        Path(subscribed_mods_dir).exists() if subscribed_mods_dir else False
+    )
     authored_mods_dir = env.get(
         "BG3_AUTHORED_MODS_DIR",
         env.get("BG3_MODS_DIR", str(get_authored_mods_dir(target_env))),
@@ -308,16 +327,24 @@ def check_environment_status(as_json: bool = False, config_path: Optional[Path] 
     print(f"XDG_CACHE_HOME:   {cache_home}")
     print(f"XDG_DATA_HOME:    {data_home}")
     print(f"XDG_STATE_HOME:   {state_home}")
-    print(f"MODIO_API_KEY:    {'Configured (' + api_key[:4] + '***) [' + key_source + ']' if api_key else RED + 'Missing' + RESET}")
-    print(f"MODIO_PAT:        {'Configured (***) [' + pat_source + ']' if pat else YELLOW + 'Not set (Optional)' + RESET}")
+    print(
+        f"MODIO_API_KEY:    {'Configured (' + api_key[:4] + '***) [' + key_source + ']' if api_key else RED + 'Missing' + RESET}"
+    )
+    print(
+        f"MODIO_PAT:        {'Configured (***) [' + pat_source + ']' if pat else YELLOW + 'Not set (Optional)' + RESET}"
+    )
     print(f"BG3_DATA_DIR:     {data_dir if data_dir else RED + 'Missing' + RESET}")
     if data_dir:
-        status_text = f"{GREEN}Exists{RESET}" if data_dir_exists else f"{YELLOW}Not found on disk{RESET}"
+        status_text = (
+            f"{GREEN}Exists{RESET}" if data_dir_exists else f"{YELLOW}Not found on disk{RESET}"
+        )
         print(f"  └ Directory:    {status_text}")
     print(f"BG3_MOD_AUTHOR:   {author if author else 'default'}")
     print(f"BG3_STUDIO_DIR:   {studio_dir if studio_dir else YELLOW + 'Default' + RESET}")
     if studio_dir:
-        s_status = f"{GREEN}Exists{RESET}" if studio_dir_exists else f"{YELLOW}Not found on disk{RESET}"
+        s_status = (
+            f"{GREEN}Exists{RESET}" if studio_dir_exists else f"{YELLOW}Not found on disk{RESET}"
+        )
         print(f"  └ Studio Root:  {s_status}")
     print("")
 
@@ -345,10 +372,16 @@ def configure_github_remote(non_interactive: bool = False) -> None:
     if auth_check.returncode != 0:
         return
 
-    print(f"\n{BOLD}{CYAN}------------------------------------------------------------------------{RESET}")
+    print(
+        f"\n{BOLD}{CYAN}------------------------------------------------------------------------{RESET}"
+    )
     print(f"{BOLD}GitHub Remote Configuration{RESET}")
-    print("GitHub CLI (`gh`) is authenticated and no remote repository is configured for this workspace.")
-    choice = prompt_input("Would you like to create and link a remote GitHub repository now? (y/n)", "n").lower()
+    print(
+        "GitHub CLI (`gh`) is authenticated and no remote repository is configured for this workspace."
+    )
+    choice = prompt_input(
+        "Would you like to create and link a remote GitHub repository now? (y/n)", "n"
+    ).lower()
     if choice not in ("y", "yes"):
         return
 
@@ -385,10 +418,14 @@ def prompt_subscription_sync(non_interactive: bool = False) -> str:
     if non_interactive:
         return "3"
 
-    print(f"\n{BOLD}{CYAN}------------------------------------------------------------------------{RESET}")
+    print(
+        f"\n{BOLD}{CYAN}------------------------------------------------------------------------{RESET}"
+    )
     print(f"{BOLD}5. mod.io Subscription Sync & Library Management{RESET}")
     print("Would you like to run `modio_sync` now to sync your existing subscriptions?")
-    print("  1) Yes, sync my existing subscriptions and prune mods to which I'm not subscribed [Default]")
+    print(
+        "  1) Yes, sync my existing subscriptions and prune mods to which I'm not subscribed [Default]"
+    )
     print("  2) Yes, sync my existing subscriptions, but *don't* prune")
     print("  3) No, don't sync my subscriptions now")
     print("  4) No, and purge any mods currently listed in `mods/library.md`")
@@ -427,58 +464,14 @@ def handle_subscription_sync(choice: str, dry_run: bool = False) -> None:
         print("Continuing setup without subscription sync.")
 
     elif choice == "4":
-        print(f"\n{YELLOW}Purging all mods currently found in mods/ and resetting mods/library.md...{RESET}")
+        print(
+            f"\n{YELLOW}Purging all mods currently found in mods/ and resetting mods/library.md...{RESET}"
+        )
         result = purge_library_mods(dry_run=dry_run)
         mode_prefix = f"{CYAN}[DRY-RUN] {RESET}" if dry_run else ""
-        print(f"{mode_prefix}{GREEN}✓ Purged {result['purged_count']} mod folder(s) and reset library.md.{RESET}")
-
-
-def prompt_custom_mods_purge(non_interactive: bool = False) -> str:
-    """Prompt user for purging custom mods currently residing in my_mods/.
-
-    Returns 'y' or 'n'.
-    """
-    if non_interactive:
-        return "n"
-
-    print(f"\n{BOLD}{CYAN}------------------------------------------------------------------------{RESET}")
-    print(f"{BOLD}6. Custom Mods Cleanup{RESET}")
-    while True:
-        try:
-            choice = input(
-                f"{BOLD}Would you like to purge custom mods currently residing in the `my_mods/` folder? (Y/n){RESET} [Y]: "
-            ).strip().lower()
-        except EOFError:
-            return "n" if non_interactive else "y"
-        if not choice or choice in ("y", "yes"):
-            return "y"
-        if choice in ("n", "no"):
-            return "n"
-        print(f"{YELLOW}Please enter 'y' or 'n' (or press Enter for default Y).{RESET}")
-
-
-def handle_custom_mods_purge(choice: str, dry_run: bool = False) -> None:
-    """Purge custom mods residing in my_mods/ folder."""
-    if choice != "y":
-        print("Continuing without purging custom mods.")
-        return
-
-    my_mods_dir = WORKSPACE_ROOT / "my_mods"
-    if dry_run:
-        print(f"{CYAN}[DRY-RUN] Would purge custom mods in {my_mods_dir} (rm -rf my_mods/*){RESET}")
-        return
-
-    print(f"Purging custom mods residing in {my_mods_dir}...")
-    if my_mods_dir.is_dir():
-        for child in sorted(my_mods_dir.iterdir()):
-            try:
-                if child.is_dir():
-                    shutil.rmtree(child)
-                else:
-                    child.unlink()
-            except Exception as e:
-                print(f"{YELLOW}Warning: Could not remove {child}: {e}{RESET}")
-    print(f"{GREEN}✓ Successfully purged custom mods in my_mods/.{RESET}")
+        print(
+            f"{mode_prefix}{GREEN}✓ Purged {result['purged_count']} mod folder(s) and reset library.md.{RESET}"
+        )
 
 
 def run_wizard(
@@ -493,7 +486,9 @@ def run_wizard(
     existing_env = parse_env_file(target_env)
     if not existing_env and (WORKSPACE_ROOT / ".env").is_file():
         existing_env = parse_env_file(WORKSPACE_ROOT / ".env")
-        print(f"{YELLOW}[!] Detected legacy repository-level .env. Migrating values to {target_env}.{RESET}")
+        print(
+            f"{YELLOW}[!] Detected legacy repository-level .env. Migrating values to {target_env}.{RESET}"
+        )
 
     default_data_dir = detect_default_data_dir()
     default_studio_dir = str(get_xdg_documents_home() / "BG3_Mod_Studio")
@@ -551,7 +546,9 @@ def run_wizard(
         target_path = Path(data_dir)
         if not target_path.exists():
             print(f"{YELLOW}Notice: Path does not exist currently: {target_path}{RESET}")
-            print("This is normal if the game is installed in a custom library or not currently mounted.")
+            print(
+                "This is normal if the game is installed in a custom library or not currently mounted."
+            )
             confirm = prompt_input("Keep this path? (Y/n)", "y").lower()
             if confirm not in ("y", "yes", ""):
                 data_dir = prompt_input("Re-enter BG3_DATA_DIR", default_data_dir)
@@ -562,14 +559,20 @@ def run_wizard(
         print(f"\n{BOLD}4. Default Mod Author Identity{RESET}")
         print("Default author name stamped into meta.lsx when generating new mod scaffolds.")
         current_author = existing_env.get("BG3_MOD_AUTHOR", "default")
-        author = prompt_input("Enter default BG3_MOD_AUTHOR (leave blank or 'default')", current_author)
+        author = prompt_input(
+            "Enter default BG3_MOD_AUTHOR (leave blank or 'default')", current_author
+        )
         if not author:
             author = "default"
 
         # 5. BG3_STUDIO_DIR
         print(f"\n{BOLD}5. BG3 Mod Studio Target Directory{RESET}")
-        print("Root directory where all user-generated content (build guides, subscribed mods, authored mods) is stored.")
-        current_studio_dir = studio_dir_override or existing_env.get("BG3_STUDIO_DIR", default_studio_dir)
+        print(
+            "Root directory where all user-generated content (build guides, subscribed mods, authored mods) is stored."
+        )
+        current_studio_dir = studio_dir_override or existing_env.get(
+            "BG3_STUDIO_DIR", default_studio_dir
+        )
         studio_dir = prompt_input("Enter target directory for BG3_Mod_Studio", current_studio_dir)
 
     studio_path = Path(os.path.expandvars(os.path.expanduser(studio_dir.strip())))
@@ -599,8 +602,11 @@ def run_wizard(
 
     if dry_run:
         print(f"\n{CYAN}[DRY-RUN] Would write to {target_env} (secrets masked):{RESET}")
-        print(content.replace(f"MODIO_API_KEY={api_key}", f"MODIO_API_KEY={mask_secret(api_key)}")
-                     .replace(f"MODIO_PAT={pat}", f"MODIO_PAT={mask_secret(pat)}"))
+        print(
+            content.replace(
+                f"MODIO_API_KEY={api_key}", f"MODIO_API_KEY={mask_secret(api_key)}"
+            ).replace(f"MODIO_PAT={pat}", f"MODIO_PAT={mask_secret(pat)}")
+        )
         print(f"{CYAN}[DRY-RUN] Would scaffold directories under {studio_path}:{RESET}")
         print(f"  - {studio_path / 'Build_Guides'}")
         print(f"  - {studio_path / 'Mods' / 'subscribed'}")
@@ -608,7 +614,9 @@ def run_wizard(
         print(f"  - {studio_path / '.agents' / 'skills'}")
     else:
         write_env_file(target_env, content)
-        print(f"\n{GREEN}✓ Environment configuration saved successfully to {target_env} (mode 600)!{RESET}")
+        print(
+            f"\n{GREEN}✓ Environment configuration saved successfully to {target_env} (mode 600)!{RESET}"
+        )
         legacy_file = WORKSPACE_ROOT / ".env"
         if legacy_file.is_file():
             try:
@@ -626,9 +634,12 @@ def run_wizard(
         # Deploy bundled agent skills into studio workspace
         try:
             from bg3_core.cli.skills_installer import install_agent_skills
+
             skill_res = install_agent_skills(target_dir=studio_path / ".agents" / "skills")
             count = len(skill_res.get("installed", [])) + len(skill_res.get("updated", []))
-            print(f"{GREEN}✓ Deployed {count} agent skills to {studio_path / '.agents' / 'skills'}.{RESET}")
+            print(
+                f"{GREEN}✓ Deployed {count} agent skills to {studio_path / '.agents' / 'skills'}.{RESET}"
+            )
         except Exception as e:
             print(f"{YELLOW}Warning: Could not install agent skills: {e}{RESET}")
 
@@ -638,10 +649,6 @@ def run_wizard(
     # 5. mod.io Subscription Sync & Library Management
     sync_choice = prompt_subscription_sync(non_interactive=non_interactive)
     handle_subscription_sync(sync_choice, dry_run=dry_run)
-
-    # 6. Custom Mods Cleanup
-    purge_choice = prompt_custom_mods_purge(non_interactive=non_interactive)
-    handle_custom_mods_purge(purge_choice, dry_run=dry_run)
 
     print(f"\n{BOLD}{GREEN}Setup completed successfully!{RESET}")
     print("You can run 'bg3 env check' anytime to review your configuration.")
@@ -710,4 +717,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

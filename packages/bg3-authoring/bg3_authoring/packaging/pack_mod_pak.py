@@ -212,8 +212,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Pure-Python LSPK v18 .pak package builder for Baldur's Gate 3 mods."
     )
-    parser.add_argument("mod_pos", nargs="?", default=None, help="Mod name/slug in my_mods/ or directory path.")
-    parser.add_argument("--mod", default=None, help="Mod name/slug in my_mods/ or directory path.")
+    parser.add_argument("mod_pos", nargs="?", default=None, help="Mod name/slug in $BG3_STUDIO_DIR/Mods/authored/ or directory path.")
+    parser.add_argument("--mod", default=None, help="Mod name/slug in $BG3_STUDIO_DIR/Mods/authored/ or directory path.")
     parser.add_argument("--out", help="Output .pak file path (default: dist/<mod_slug>.pak).")
     parser.add_argument("--output-dir", help="Output directory for generated .pak file.")
     parser.add_argument(

@@ -52,7 +52,7 @@ def build_load_order_parser() -> argparse.ArgumentParser:
         "--enable",
         "--activate",
         dest="enable",
-        help="Enable a mod by name/slug from my_mods/, mods/, or AppData Mods",
+        help="Enable a mod by name/slug from authored, subscribed, or AppData Mods",
     )
     parser.add_argument(
         "--order", type=int, help="Target load order index (>= 1) when enabling or reordering a mod"
@@ -333,7 +333,7 @@ def _dispatch_enable(
     """Handle enabling a mod, its declared dependencies, and test dependencies."""
     mod_meta = get_mod_metadata_from_workspace(args.enable)
     if not mod_meta:
-        msg = f"Mod '{args.enable}' not found in my_mods/, mods/, or AppData Mods."
+        msg = f"Mod '{args.enable}' not found in authored, subscribed, or AppData Mods."
         if args.json:
             print(json.dumps({"error": msg, "success": False}, indent=2))
         else:

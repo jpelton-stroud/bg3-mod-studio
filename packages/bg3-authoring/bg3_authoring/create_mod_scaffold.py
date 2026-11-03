@@ -2,7 +2,7 @@
 """
 create_mod_scaffold.py
 ----------------------
-Generates a standard Baldur's Gate 3 mod project scaffold under `my_mods/<ModSlug>` with internal Larian structures under `<ModName>_<UUID>`.
+Generates a standard Baldur's Gate 3 mod project scaffold under `$BG3_STUDIO_DIR/Mods/authored/<ModSlug>` with internal Larian structures under `<ModName>_<UUID>`.
 
 Features:
 - Generates valid UUIDv4 for module identity and pre-allocated localization handles
@@ -406,10 +406,10 @@ def main() -> None:
     env_vars = load_env_defaults()
     default_author = os.environ.get("BG3_MOD_AUTHOR") or env_vars.get("BG3_MOD_AUTHOR") or "MTGHillGiant"
 
-    parser = argparse.ArgumentParser(description="Scaffold a new Baldur's Gate 3 mod directory under my_mods/")
+    parser = argparse.ArgumentParser(description="Scaffold a new Baldur's Gate 3 mod directory under $BG3_STUDIO_DIR/Mods/authored/")
     parser.add_argument("pos_name", nargs="?", default=None, help="Mod name (PascalCase/CamelCase, e.g. ArcaneProgression)")
     parser.add_argument("--name", default=None, help="Mod name (PascalCase/CamelCase, e.g. ArcaneProgression)")
-    parser.add_argument("--slug", default=None, help="Main folder slug under my_mods/ (e.g. arcane-progression; auto-generated if omitted)")
+    parser.add_argument("--slug", default=None, help="Main folder slug under authored mods directory (e.g. arcane-progression; auto-generated if omitted)")
     parser.add_argument("--uuid", default=None, help="Specific UUIDv4 (auto-generated if omitted)")
     parser.add_argument("--author", default=default_author, help=f"Mod author name (default: {default_author})")
     parser.add_argument("--description", default="", help="Mod description")
