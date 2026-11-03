@@ -131,6 +131,20 @@ def clean_loc_text(text: str) -> str:
     return re.sub(r"</?LSTag[^>]*>", "", text).strip()
 
 
+def _extract_content_text(elem: ET.Element) -> str:
+    """Extract complete text from a <content> element, preserving inner child XML markup and tails."""
+    if len(elem) == 0:
+        return elem.text or ""
+    parts: list[str] = []
+    if elem.text:
+        parts.append(elem.text)
+    for child in elem:
+        parts.append(ET.tostring(child, encoding="unicode", method="xml"))
+        if child.tail:
+            parts.append(child.tail)
+    return "".join(parts)
+
+
 def parse_localization_xml(xml_bytes: bytes, strip_tags: bool = True) -> Dict[str, str]:
     """Parse Larian <contentList> XML bytes into a handle -> text dictionary."""
     loc_dict: Dict[str, str] = {}
@@ -140,7 +154,7 @@ def parse_localization_xml(xml_bytes: bytes, strip_tags: bool = True) -> Dict[st
         root = ET.fromstring(xml_bytes.decode("utf-8", errors="ignore"))
         for elem in root.findall(".//content"):
             handle = elem.get("contentuid")
-            text = elem.text or ""
+            text = _extract_content_text(elem)
             if handle:
                 loc_dict[handle] = clean_loc_text(text) if strip_tags else text
     except (ET.ParseError, OSError, ValueError):
@@ -204,7 +218,7 @@ def compile_xml_bytes_to_loca(xml_bytes: bytes) -> bytes:
             version = int(elem.get("version") or "1")
         except ValueError:
             version = 1
-        text = elem.text or ""
+        text = _extract_content_text(elem)
         encoded_text = text.encode("utf-8") + b"\x00"
         entries.append((handle, version, encoded_text))
 
@@ -235,7 +249,7 @@ def compile_xml_to_loca(xml_path: Path, loca_path: Optional[Path] = None) -> Pat
 
 
 def update_localization_xml(loc_file: Path, entries: List[Tuple[str, str]], dry_run: bool = False) -> None:
-    """Appends content tags for handles and text to the Localization XML file."""
+    """Appends content tags for handles and text to the Localization XML file atomically."""
     if dry_run or not entries:
         return
 
@@ -263,7 +277,16 @@ def update_localization_xml(loc_file: Path, entries: List[Tuple[str, str]], dry_
     else:
         new_content = content + "\n" + addition_block + "</contentList>\n"
 
-    loc_file.write_text(new_content, encoding="utf-8")
+    temp_file = loc_file.with_suffix(f"{loc_file.suffix}.tmp")
+    try:
+        temp_file.write_text(new_content, encoding="utf-8")
+        temp_file.replace(loc_file)
+    finally:
+        if temp_file.exists():
+            try:
+                temp_file.unlink()
+            except OSError:
+                pass
 
 
 # ----------------------------------------------------------------------

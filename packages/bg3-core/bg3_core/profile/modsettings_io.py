@@ -192,7 +192,7 @@ def create_default_modsettings(path: Path) -> None:
 
 
 def save_modsettings(path: Path, tree: Any) -> None:
-    """Save modsettings.lsx with clean 4-space indentation and standard Larian XML declaration."""
+    """Save modsettings.lsx with clean 4-space indentation and standard Larian XML declaration atomically."""
     backup_file(path)
     if hasattr(ET, "indent"):
         ET.indent(tree, space="    ")
@@ -203,7 +203,19 @@ def save_modsettings(path: Path, tree: Any) -> None:
         header_end = raw.find(b"?>")
         if header_end != -1:
             raw = b'<?xml version="1.0" encoding="UTF-8"?>' + raw[header_end + 2 :]
-    path.write_bytes(raw.rstrip() + b"\n")
+    payload = raw.rstrip() + b"\n"
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = path.with_suffix(f"{path.suffix}.tmp")
+    try:
+        temp_path.write_bytes(payload)
+        temp_path.replace(path)
+    finally:
+        if temp_path.exists():
+            try:
+                temp_path.unlink()
+            except OSError:
+                pass
 
 
 def parse_modsettings(path: Path) -> dict:
@@ -448,8 +460,13 @@ def resolve_all_dependencies(
 
 
 def backup_file(path: Path) -> Path:
-    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    now = datetime.datetime.now()
+    ts = now.strftime("%Y%m%d_%H%M%S_%f")
     backup_path = path.with_suffix(f".lsx.{ts}.bak")
+    counter = 1
+    while backup_path.exists():
+        backup_path = path.with_suffix(f".lsx.{ts}_{counter}.bak")
+        counter += 1
     shutil.copy2(path, backup_path)
     return backup_path
 

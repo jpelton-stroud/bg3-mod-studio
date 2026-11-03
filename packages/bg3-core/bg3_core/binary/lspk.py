@@ -85,12 +85,16 @@ def lz4_block_compress(data: bytes) -> bytes:
 
 def zstd_decompress(compressed_data: bytes, uncompressed_size: int) -> bytes:
     """Decompress Zstandard frame data using system libzstd via stdlib ctypes."""
-    if _LIBZSTD is None or uncompressed_size <= 0:
-        return compressed_data
+    if uncompressed_size <= 0:
+        return b""
+    if _LIBZSTD is None:
+        raise BG3BinaryError(
+            "Cannot decompress Zstandard payload: system libzstd dynamic library is not installed or available."
+        )
     buf = ctypes.create_string_buffer(uncompressed_size)
     res = _LIBZSTD.ZSTD_decompress(buf, uncompressed_size, compressed_data, len(compressed_data))
     if res > uncompressed_size:
-        raise ValueError(f"ZSTD_decompress error code: {res}")
+        raise BG3BinaryError(f"Zstandard decompression error code: {res}")
     return buf.raw[:res]
 
 
@@ -200,23 +204,52 @@ def decompress_pak_file_data(
     if method == 0 or (disk_size == uncomp_size and raw[:4] != b"\x28\xb5\x2f\xfd"):
         return raw
     elif method == 1:
-        return zlib.decompress(raw)
+        try:
+            res = zlib.decompress(raw)
+            if len(res) != uncomp_size:
+                raise BG3BinaryError(
+                    f"zlib decompression size mismatch: expected {uncomp_size}, got {len(res)}"
+                )
+            return res
+        except (zlib.error, BG3BinaryError) as e:
+            raise BG3BinaryError(f"zlib decompression failed at offset {offset}: {e}") from e
     elif method == 2:
         try:
-            return lz4_frame_or_block_decompress(raw, uncomp_size)
-        except (ValueError, struct.error, zlib.error, OSError, RuntimeError):
+            res = lz4_frame_or_block_decompress(raw, uncomp_size)
+            if len(res) == uncomp_size:
+                return res
             if len(raw) > 4:
                 try:
-                    return lz4_block_decompress(raw[4:], uncomp_size)
+                    res2 = lz4_block_decompress(raw[4:], uncomp_size)
+                    if len(res2) == uncomp_size:
+                        return res2
                 except (ValueError, struct.error, zlib.error, OSError, RuntimeError):
                     pass
-            return raw
+            raise BG3BinaryError(
+                f"LZ4 decompression size mismatch: expected {uncomp_size}, got {len(res)}"
+            )
+        except (ValueError, struct.error, zlib.error, OSError, RuntimeError, BG3BinaryError) as e:
+            if len(raw) > 4:
+                try:
+                    res2 = lz4_block_decompress(raw[4:], uncomp_size)
+                    if len(res2) == uncomp_size:
+                        return res2
+                except (ValueError, struct.error, zlib.error, OSError, RuntimeError):
+                    pass
+            raise BG3BinaryError(f"LZ4 decompression failed at offset {offset}: {e}") from e
     elif method == 3 or raw[:4] == b"\x28\xb5\x2f\xfd":
         try:
-            return zstd_decompress(raw, uncomp_size)
-        except (ValueError, struct.error, zlib.error, OSError, RuntimeError):
-            return raw
-    return raw
+            res = zstd_decompress(raw, uncomp_size)
+            if len(res) != uncomp_size:
+                raise BG3BinaryError(
+                    f"Zstandard decompression size mismatch: expected {uncomp_size}, got {len(res)}"
+                )
+            return res
+        except (ValueError, struct.error, zlib.error, OSError, RuntimeError, BG3BinaryError) as e:
+            if isinstance(e, BG3BinaryError):
+                raise
+            raise BG3BinaryError(f"Zstandard decompression failed at offset {offset}: {e}") from e
+    raise BG3BinaryError(f"Unsupported compression method {method} at offset {offset}")
 
 
 class LspkArchive:

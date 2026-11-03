@@ -17,6 +17,7 @@ from bg3_core.binary.larian_parsers import (
     parse_stats_txt,
     parse_version_str,
     split_larian_items,
+    update_localization_xml,
 )
 from bg3_core.env_paths import MY_MODS_DIR, normalize_mod_key, resolve_mod_dir
 
@@ -73,6 +74,28 @@ class LarianParsersTests(unittest.TestCase):
                 parse_localization_bytes(loca_path.read_bytes(), loca_path.name),
                 parsed,
             )
+
+    def test_loca_compile_preserves_child_xml_and_tails(self):
+        xml_content = b"""<?xml version="1.0" encoding="utf-8"?>
+<contentList>
+    <content contentuid="h_rich_text" version="1">Prefix <font color="#ff0000">Red Text</font> and suffix tail.</content>
+</contentList>
+"""
+        loca_bytes = compile_xml_bytes_to_loca(xml_content)
+        parsed = parse_loca_bytes(loca_bytes, strip_tags=False)
+        self.assertIn('Prefix <font color="#ff0000">Red Text</font> and suffix tail.', parsed["h_rich_text"])
+
+    def test_update_localization_xml_atomicity(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            loc_file = Path(tmp) / "Localization" / "English" / "mod.xml"
+            entries = [("h_handle1", "Text 1"), ("h_handle2", "Text 2")]
+            update_localization_xml(loc_file, entries)
+            self.assertTrue(loc_file.is_file())
+            content = loc_file.read_text(encoding="utf-8")
+            self.assertIn('contentuid="h_handle1"', content)
+            self.assertIn('contentuid="h_handle2"', content)
+            # Ensure no stray .tmp files remained
+            self.assertEqual(list(loc_file.parent.glob("*.tmp")), [])
 
     def test_parse_real_community_loca_file(self):
         real_loca = (

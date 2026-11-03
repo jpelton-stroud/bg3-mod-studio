@@ -130,11 +130,11 @@ def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict[str, str]]:
             mod_uuid = uuid_suffix.group(1)
         elif md5_pos >= 24:
             guid_bytes = payload[md5_pos - 24 : md5_pos - 8]
-            try:
-                mod_uuid = str(uuid.UUID(bytes_le=guid_bytes))
-            except ValueError:
-                d1, d2, d3, d4, d5, d6, d7 = struct.unpack("<IHHHHHH", guid_bytes)
-                mod_uuid = f"{d1:08x}-{d2:04x}-{d3:04x}-{d4:04x}-{d5:04x}{d6:04x}{d7:04x}"
+            if len(guid_bytes) == 16:
+                try:
+                    mod_uuid = str(uuid.UUID(bytes_le=guid_bytes))
+                except ValueError:
+                    pass
         if md5_pos >= 8:
             ver_int = struct.unpack("<q", payload[md5_pos - 8 : md5_pos])[0]
             ver_str = str(ver_int)

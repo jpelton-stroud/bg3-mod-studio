@@ -10,8 +10,10 @@ from unittest.mock import patch
 
 from bg3_core.profile.manage_load_order import (
     auto_sort_load_order,
+    backup_file,
     create_default_modsettings,
     parse_modsettings,
+    save_modsettings,
     topological_sort_mods,
 )
 
@@ -122,6 +124,28 @@ class TestManageLoadOrderAutoSort(unittest.TestCase):
             idx_b = parsed_sorted["order"].index(uuid_b)
             idx_a = parsed_sorted["order"].index(uuid_a)
             self.assertLess(idx_b, idx_a, "Prerequisite ModB must be ordered before dependent ModA")
+
+    def test_backup_file_microsecond_collision_deduplication(self) -> None:
+        create_default_modsettings(self.modsettings_path)
+        # Call backup_file in rapid succession
+        b1 = backup_file(self.modsettings_path)
+        b2 = backup_file(self.modsettings_path)
+        b3 = backup_file(self.modsettings_path)
+        self.assertTrue(b1.is_file())
+        self.assertTrue(b2.is_file())
+        self.assertTrue(b3.is_file())
+        # All three must be distinct files
+        self.assertEqual(len({b1, b2, b3}), 3)
+
+    def test_save_modsettings_atomic_replace(self) -> None:
+        create_default_modsettings(self.modsettings_path)
+        import xml.etree.ElementTree as ET
+        tree = ET.parse(self.modsettings_path)
+        save_modsettings(self.modsettings_path, tree)
+        self.assertTrue(self.modsettings_path.is_file())
+        # Confirm no leftover temporary files in directory
+        tmp_files = list(self.modsettings_path.parent.glob("*.tmp"))
+        self.assertEqual(tmp_files, [])
 
 
 if __name__ == "__main__":

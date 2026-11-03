@@ -298,7 +298,8 @@ def restore_quarantined_paks(
     dry_run: bool = False,
 ) -> list[dict]:
     """
-    Restores all quarantined .pak archives from Mods_Disabled/ back into mods_dir.
+    Restores all quarantined .pak archives from Mods_Disabled/ back into their
+    original source directories recorded in quarantine_manifest.json (defaulting to mods_dir).
     """
     quarantine_dir = quarantine_base or mods_dir.parent / "Mods_Disabled"
     if not quarantine_dir.is_dir():
@@ -306,11 +307,23 @@ def restore_quarantined_paks(
 
     restored = []
     manifest_path = quarantine_dir / "quarantine_manifest.json"
+    manifest_data: dict[str, dict] = {}
+    if manifest_path.is_file():
+        try:
+            manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            manifest_data = {}
 
     for pak_path in sorted(quarantine_dir.glob("*.pak")):
         if not pak_path.is_file():
             continue
         dest = mods_dir / pak_path.name
+        record_info = manifest_data.get(pak_path.name)
+        if record_info and record_info.get("source"):
+            src_candidate = Path(record_info["source"])
+            if src_candidate.parent.exists() or not dry_run:
+                dest = src_candidate
+
         record = {
             "filename": pak_path.name,
             "source": str(pak_path),
@@ -318,7 +331,7 @@ def restore_quarantined_paks(
         }
         restored.append(record)
         if not dry_run:
-            mods_dir.mkdir(parents=True, exist_ok=True)
+            dest.parent.mkdir(parents=True, exist_ok=True)
             if dest.exists():
                 dest.unlink()
             shutil.move(str(pak_path), str(dest))

@@ -293,6 +293,29 @@ class TestManageLoadOrderQuarantine(unittest.TestCase):
         self.assertIn(CORE_SYSTEM_MODULES[0]["UUID"], order_uuids_post)
         self.assertIn("11111111-2222-3333-4444-555555555555", order_uuids_post)
 
+    def test_restore_quarantined_paks_uses_manifest_origin(self):
+        """Verify restore_quarantined_paks restores files to original path recorded in manifest."""
+        custom_origin_dir = self.test_root / "CustomSource"
+        custom_origin_dir.mkdir(parents=True, exist_ok=True)
+        pak_path = custom_origin_dir / "CustomMod.pak"
+        create_dummy_pak(pak_path, "CustomMod", "99999999-9999-9999-9999-999999999999")
+
+        quarantine_dir = self.test_root / "Mods_Disabled"
+        quarantine_unrelated_paks(custom_origin_dir, keep_uuids=set(), quarantine_base=quarantine_dir)
+
+        manifest_path = quarantine_dir / "quarantine_manifest.json"
+        self.assertTrue(manifest_path.is_file())
+        self.assertTrue((quarantine_dir / "CustomMod.pak").is_file())
+        self.assertFalse(pak_path.exists())
+
+        # Restore using a different default mods_dir
+        restore_quarantined_paks(self.mods_dir, quarantine_base=quarantine_dir)
+
+        # File should be restored to custom_origin_dir because of manifest, NOT self.mods_dir
+        self.assertTrue(pak_path.is_file())
+        self.assertFalse((self.mods_dir / "CustomMod.pak").exists())
+        self.assertFalse(manifest_path.exists())
+
 
 if __name__ == "__main__":
     unittest.main()
