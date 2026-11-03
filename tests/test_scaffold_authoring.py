@@ -362,6 +362,77 @@ class TestDiagnosticsConflictDetection(unittest.TestCase):
         self.assertEqual(len(res["feat_collisions"]), 1)
         self.assertEqual(res["feat_collisions"][0]["name"], "CollidingFeat")
 
+    def test_mod_conflict_single_pass_ast_caching(self):
+        from bg3_core.profile.check_mod_conflicts import clear_mod_cache, get_mod_extracted_data
+
+        clear_mod_cache()
+        cd_dir = self.mod1 / "Public" / self.mod1.name / "ClassDescriptions"
+        cd_dir.mkdir(parents=True, exist_ok=True)
+        (cd_dir / "ClassDescriptions.lsx").write_text("""<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="8" revision="0" build="700"/>
+    <region id="ClassDescriptions">
+        <node id="root">
+            <children>
+                <node id="ClassDescription">
+                    <attribute id="Name" type="FixedString" value="SinglePassClass"/>
+                    <attribute id="UUID" type="guid" value="aaaa1111-2222-3333-4444-555555555555"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>""", encoding="utf-8")
+
+        data = get_mod_extracted_data(self.mod1)
+        self.assertIn("SinglePassClass", data["classes"])
+        self.assertEqual(data["classes"]["SinglePassClass"]["uuid"], "aaaa1111-2222-3333-4444-555555555555")
+
+        # Second call returns cached object
+        data_cached = get_mod_extracted_data(self.mod1)
+        self.assertIs(data, data_cached)
+
+    def test_diagnose_toolkit_logs_single_pass_indexing(self):
+        from unittest.mock import patch
+
+        from bg3_authoring.diagnostics.diagnose_toolkit_logs import index_mod_content
+
+        txt_file = self.mod1 / "test_stats.txt"
+        txt_file.write_text('new entry "Test_Spell_Token"\ntype "SpellData"\n', encoding="utf-8")
+        lsx_file = self.mod1 / "test_meta.lsx"
+        lsx_file.write_text('<attribute id="Name" value="Test_Token_Lsx"/>\n', encoding="utf-8")
+        xml_file = self.mod1 / "test_loca.xml"
+        xml_file.write_text('<content contentuid="h12345678">Loca text</content>\n', encoding="utf-8")
+
+        with patch("bg3_authoring.diagnostics.diagnose_toolkit_logs.get_authored_mods_dir", return_value=self.test_path):
+            index = index_mod_content(None)
+            self.assertIn("Test_Spell_Token", index)
+            self.assertIn("Test_Token_Lsx", index)
+            self.assertIn("h12345678", index)
+
+    def test_validate_mod_precompiled_regex(self):
+        from bg3_authoring.diagnostics.validate_mod import check_uuid_uniqueness
+
+        meta_dir = self.mod1 / "Mods" / self.mod1.name
+        meta_dir.mkdir(parents=True, exist_ok=True)
+        (meta_dir / "meta.lsx").write_text("""<?xml version="1.0" encoding="utf-8"?>
+<save>
+    <region id="Config">
+        <node id="root">
+            <children>
+                <node id="ModuleInfo">
+                    <attribute id="Folder" type="LSString" value="Mod1"/>
+                    <attribute id="Name" type="LSString" value="Mod1"/>
+                    <attribute id="UUID" type="FixedString" value="aaaa1111-2222-3333-4444-555555555555"/>
+                    <attribute id="Version64" type="int64" value="36028797018963968"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>""", encoding="utf-8")
+
+        dupes = check_uuid_uniqueness([self.mod1])
+        self.assertEqual(dupes, [])
+
 
 class TestUnifiedScaffoldAssetAPI(unittest.TestCase):
     """Direct unit tests for unified scaffold_asset programmatic API."""

@@ -68,29 +68,160 @@ def resolve_mod_path(query: str) -> Path:
     return res
 
 
-def extract_stats_entries(mod_dir: Path) -> dict[str, dict]:
-    """
-    Extracts all 'new entry "<Name>"' from any .txt files in the mod.
-    Handles both my_mods (Public/*/Stats/Generated/Data) and mods (data/).
-    """
-    entries = {}
-    txt_files = list(mod_dir.rglob("*.txt"))
+_MOD_DATA_CACHE: dict[Path, dict[str, Any]] = {}
 
-    for f in txt_files:
-        # Ignore readme or task files
-        if f.name.lower() in ("readme.txt", "task.txt", "license.txt"):
+
+def clear_mod_cache() -> None:
+    """Clear cached mod AST and stat extractions."""
+    _MOD_DATA_CACHE.clear()
+
+
+def _extract_nodes_from_tree(tree: Any, node_id: str, file_name: str) -> dict[str, dict]:
+    """Extracts attribute records for matching node IDs from an ElementTree."""
+    results: dict[str, dict] = {}
+    for node in tree.findall(f".//node[@id='{node_id}']"):
+        name = ""
+        uuid_val = ""
+        for attr in node.findall("attribute"):
+            aid = attr.get("id")
+            val = attr.get("value", "").strip()
+            if aid in ("Name", "LevelMapSeries"):
+                name = val
+            elif aid == "UUID":
+                uuid_val = val
+        key = name or uuid_val
+        if key:
+            results[key] = {
+                "name": name,
+                "uuid": uuid_val,
+                "file": file_name,
+            }
+    return results
+
+
+def get_mod_extracted_data(mod_dir: Path) -> dict[str, Any]:
+    """Extract and cache all AST nodes, stats, progressions, and DLLs for a mod in a single filesystem pass."""
+    resolved_path = mod_dir.resolve()
+    if resolved_path in _MOD_DATA_CACHE:
+        return _MOD_DATA_CACHE[resolved_path]
+
+    data: dict[str, Any] = {
+        "stats": {},
+        "progs": {},
+        "root_templates": {},
+        "classes": {},
+        "feats": {},
+        "resources": {},
+        "level_maps": {},
+        "tags": {},
+        "races": {},
+        "origins": {},
+        "dlls": [],
+    }
+
+    if not mod_dir.is_dir():
+        _MOD_DATA_CACHE[resolved_path] = data
+        return data
+
+    # Single-pass traversal of mod_dir
+    txt_files: list[Path] = []
+    lsx_files: list[tuple[Path, str]] = []
+
+    for f in mod_dir.rglob("*"):
+        if not f.is_file():
             continue
+        suffix = f.suffix.lower()
+        if suffix in (".dll", ".so", ".exe"):
+            data["dlls"].append(str(f.relative_to(mod_dir)))
+        elif suffix == ".txt":
+            if f.name.lower() not in ("readme.txt", "task.txt", "license.txt"):
+                txt_files.append(f)
+        elif suffix == ".lsx":
+            lsx_files.append((f, str(f.relative_to(mod_dir)).lower()))
+
+    # Process .txt stat files
+    for f in txt_files:
         try:
             parsed = parse_stats_txt(f.read_bytes())
             for current_entry in parsed.keys():
-                entries[current_entry] = {
+                data["stats"][current_entry] = {
                     "entry": current_entry,
                     "file": f.name,
                     "rel_path": str(f.relative_to(mod_dir)),
                 }
         except Exception:
             pass
-    return entries
+
+    # Process .lsx files
+    for f, rel in lsx_files:
+        # Progressions
+        if "progression" in rel:
+            try:
+                nodes = parse_progressions_lsx(f.read_bytes())
+                for p in nodes:
+                    p_name = p.get("Name", "")
+                    p_level = p.get("Level", "")
+                    p_uuid = p.get("UUID", "")
+                    if p_name and p_level:
+                        key = (p_name, p_level)
+                        data["progs"][key] = {
+                            "name": p_name,
+                            "level": p_level,
+                            "uuid": p_uuid,
+                            "file": f.name,
+                        }
+            except Exception:
+                pass
+
+        # Root templates
+        if "roottemplate" in rel or f.name.lower() == "_merged.lsx":
+            try:
+                parsed_rt = parse_root_templates_lsx(f.read_bytes())
+                for map_key, attrs in parsed_rt.items():
+                    data["root_templates"][map_key] = {
+                        "map_key": map_key,
+                        "name": attrs.get("Name", ""),
+                        "file": f.name,
+                    }
+            except Exception:
+                pass
+
+        # Named LSX nodes
+        patterns: list[tuple[str, str]] = []
+        if "classdescription" in rel:
+            patterns.append(("classes", "ClassDescription"))
+        if "feat" in rel and "featdescription" not in rel:
+            patterns.append(("feats", "Feat"))
+        if "actionresource" in rel:
+            patterns.append(("resources", "ActionResourceDefinition"))
+        if "levelmap" in rel:
+            patterns.append(("level_maps", "LevelMapSeries"))
+        if "tags" in rel:
+            patterns.append(("tags", "Tag"))
+        if "race" in rel and "racedescription" not in rel:
+            patterns.append(("races", "Race"))
+        if "origin" in rel:
+            patterns.append(("origins", "Origin"))
+
+        if patterns:
+            try:
+                tree = ET.parse(f)
+                for cat, node_id in patterns:
+                    extracted = _extract_nodes_from_tree(tree, node_id, f.name)
+                    data[cat].update(extracted)
+            except Exception:
+                pass
+
+    _MOD_DATA_CACHE[resolved_path] = data
+    return data
+
+
+def extract_stats_entries(mod_dir: Path) -> dict[str, dict]:
+    """
+    Extracts all 'new entry "<Name>"' from any .txt files in the mod.
+    Handles both my_mods (Public/*/Stats/Generated/Data) and mods (data/).
+    """
+    return get_mod_extracted_data(mod_dir)["stats"]
 
 
 def extract_progressions(mod_dir: Path) -> dict[tuple[str, str], dict]:
@@ -98,60 +229,19 @@ def extract_progressions(mod_dir: Path) -> dict[tuple[str, str], dict]:
     Extracts progression nodes from Progressions.lsx.
     Maps (Name, Level) -> progression details.
     """
-    progressions = {}
-    lsx_files = list(mod_dir.rglob("*Progression*.lsx"))
-
-    for f in lsx_files:
-        try:
-            nodes = parse_progressions_lsx(f.read_bytes())
-            for p in nodes:
-                p_name = p.get("Name", "")
-                p_level = p.get("Level", "")
-                p_uuid = p.get("UUID", "")
-                if p_name and p_level:
-                    key = (p_name, p_level)
-                    progressions[key] = {
-                        "name": p_name,
-                        "level": p_level,
-                        "uuid": p_uuid,
-                        "file": f.name,
-                    }
-        except Exception:
-            pass
-    return progressions
+    return get_mod_extracted_data(mod_dir)["progs"]
 
 
 def extract_root_templates(mod_dir: Path) -> dict[str, dict]:
     """
     Extracts GameObjects MapKey UUIDs from RootTemplates LSX files.
     """
-    templates = {}
-    lsx_files = [
-        f
-        for f in mod_dir.rglob("*.lsx")
-        if "roottemplate" in str(f.relative_to(mod_dir)).lower() or f.name.lower() == "_merged.lsx"
-    ]
-    for f in lsx_files:
-        try:
-            parsed = parse_root_templates_lsx(f.read_bytes())
-            for map_key, attrs in parsed.items():
-                templates[map_key] = {
-                    "map_key": map_key,
-                    "name": attrs.get("Name", ""),
-                    "file": f.name,
-                }
-        except Exception:
-            pass
-    return templates
+    return get_mod_extracted_data(mod_dir)["root_templates"]
 
 
 def check_native_dlls(mod_dir: Path) -> list[str]:
     """Detects .dll or .so binary files indicating native PC code / BG3SE requirement."""
-    binaries = []
-    for f in mod_dir.rglob("*"):
-        if f.is_file() and f.suffix.lower() in (".dll", ".so", ".exe"):
-            binaries.append(str(f.relative_to(mod_dir)))
-    return binaries
+    return get_mod_extracted_data(mod_dir)["dlls"]
 
 
 def get_mod_dependencies(mod_dir: Path) -> list[str]:
@@ -210,8 +300,26 @@ def find_missing_local_dependencies(mod_dir: Path) -> list[str]:
 def extract_lsx_named_nodes(
     mod_dir: Path, file_pattern: str, node_id: str, exclude_pattern: str | None = None
 ) -> dict[str, dict]:
-    """Extracts named nodes from specific LSX files."""
-    results = {}
+    """Extracts named nodes from specific LSX files, leveraging in-memory cached AST data."""
+    data = get_mod_extracted_data(mod_dir)
+    fp_lower = file_pattern.lower()
+    if fp_lower == "classdescription" and node_id == "ClassDescription":
+        return data["classes"]
+    if fp_lower == "feat" and node_id == "Feat" and exclude_pattern == "FeatDescription":
+        return data["feats"]
+    if fp_lower == "actionresource" and node_id == "ActionResourceDefinition":
+        return data["resources"]
+    if fp_lower == "levelmap" and node_id == "LevelMapSeries":
+        return data["level_maps"]
+    if fp_lower == "tags" and node_id == "Tag":
+        return data["tags"]
+    if fp_lower == "race" and node_id == "Race" and exclude_pattern == "RaceDescription":
+        return data["races"]
+    if fp_lower == "origin" and node_id == "Origin":
+        return data["origins"]
+
+    # Fallback for ad-hoc node queries
+    results: dict[str, dict] = {}
     for f in mod_dir.rglob("*.lsx"):
         rel = str(f.relative_to(mod_dir)).lower()
         if file_pattern.lower() not in rel:
@@ -220,23 +328,7 @@ def extract_lsx_named_nodes(
             continue
         try:
             tree = ET.parse(f)
-            for node in tree.findall(f".//node[@id='{node_id}']"):
-                name = ""
-                uuid_val = ""
-                for attr in node.findall("attribute"):
-                    aid = attr.get("id")
-                    val = attr.get("value", "").strip()
-                    if aid in ("Name", "LevelMapSeries"):
-                        name = val
-                    elif aid == "UUID":
-                        uuid_val = val
-                key = name or uuid_val
-                if key:
-                    results[key] = {
-                        "name": name,
-                        "uuid": uuid_val,
-                        "file": f.name,
-                    }
+            results.update(_extract_nodes_from_tree(tree, node_id, f.name))
         except Exception:
             pass
     return results
@@ -255,41 +347,6 @@ def find_node_overlaps(nodes1: dict, nodes2: dict) -> list[dict]:
             }
         )
     return overlaps
-
-
-_MOD_DATA_CACHE: dict[Path, dict[str, Any]] = {}
-
-
-def clear_mod_cache() -> None:
-    """Clear cached mod AST and stat extractions."""
-    _MOD_DATA_CACHE.clear()
-
-
-def get_mod_extracted_data(mod_dir: Path) -> dict[str, Any]:
-    """Extract and cache all AST nodes, stats, progressions, and DLLs for a mod."""
-    resolved_path = mod_dir.resolve()
-    if resolved_path in _MOD_DATA_CACHE:
-        return _MOD_DATA_CACHE[resolved_path]
-
-    data = {
-        "stats": extract_stats_entries(mod_dir),
-        "progs": extract_progressions(mod_dir),
-        "root_templates": extract_root_templates(mod_dir),
-        "classes": extract_lsx_named_nodes(mod_dir, "ClassDescription", "ClassDescription"),
-        "feats": extract_lsx_named_nodes(
-            mod_dir, "Feat", "Feat", exclude_pattern="FeatDescription"
-        ),
-        "resources": extract_lsx_named_nodes(mod_dir, "ActionResource", "ActionResourceDefinition"),
-        "level_maps": extract_lsx_named_nodes(mod_dir, "LevelMap", "LevelMapSeries"),
-        "tags": extract_lsx_named_nodes(mod_dir, "Tags", "Tag"),
-        "races": extract_lsx_named_nodes(
-            mod_dir, "Race", "Race", exclude_pattern="RaceDescription"
-        ),
-        "origins": extract_lsx_named_nodes(mod_dir, "Origin", "Origin"),
-        "dlls": check_native_dlls(mod_dir),
-    }
-    _MOD_DATA_CACHE[resolved_path] = data
-    return data
 
 
 def compare_two_mods(mod1_dir: Path, mod2_dir: Path) -> dict:

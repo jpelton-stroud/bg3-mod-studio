@@ -333,43 +333,43 @@ def index_mod_content(mod_name: Optional[str] = None) -> Dict[str, List[Tuple[st
     val_regex = re.compile(r'value="([^"]+)"')
     handle_regex = re.compile(r'(?:contentuid|handle)="([^"]+)"', re.IGNORECASE)
 
+    valid_exts = {".txt", ".lsx", ".xml"}
     for m_name, m_path in target_dirs:
-        for ext in [".txt", ".lsx", ".xml"]:
-            for fpath in m_path.rglob(f"*{ext}"):
-                if not fpath.is_file():
-                    continue
-                try:
-                    rel_path = str(fpath.relative_to(m_path))
-                    with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
-                        for l_idx, line in enumerate(f, 1):
-                            line_lower = line.lower()
-                            # Index stat keys, boost names, handles
-                            if "new entry" in line_lower or "using " in line_lower or "type " in line_lower:
-                                parts = line.split('"')
-                                if len(parts) >= 2:
-                                    token = parts[1].strip()
-                                    if token and token.lower() not in COMMON_EXCLUDES:
-                                        index.setdefault(token, []).append((m_name, l_idx, rel_path))
-                            # Index attribute values (split by semicolon/comma/parens)
-                            for m in val_regex.finditer(line):
-                                val = m.group(1).strip()
-                                for item in re.split(r"[;,()]", val):
-                                    item = item.strip()
-                                    if len(item) >= 4 and not guid_regex.match(item) and item.lower() not in COMMON_EXCLUDES:
-                                        index.setdefault(item, []).append((m_name, l_idx, rel_path))
-                            # Index explicit localization handles
-                            for m in handle_regex.finditer(line):
-                                h_val = m.group(1).strip()
-                                if h_val and h_val.lower() not in COMMON_EXCLUDES:
-                                    index.setdefault(h_val, []).append((m_name, l_idx, rel_path))
-                            # Index tokens with underscores, hyphens, handles, or PascalCase
-                            for m in token_regex.finditer(line):
-                                t = m.group(1)
-                                if len(t) >= 4 and t.lower() not in COMMON_EXCLUDES:
-                                    if "_" in t or "-" in t or t.startswith("h") or any(c.isupper() for c in t[1:]):
-                                        index.setdefault(t, []).append((m_name, l_idx, rel_path))
-                except Exception:
-                    pass
+        for fpath in m_path.rglob("*"):
+            if not fpath.is_file() or fpath.suffix.lower() not in valid_exts:
+                continue
+            try:
+                rel_path = str(fpath.relative_to(m_path))
+                with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
+                    for l_idx, line in enumerate(f, 1):
+                        line_lower = line.lower()
+                        # Index stat keys, boost names, handles
+                        if "new entry" in line_lower or "using " in line_lower or "type " in line_lower:
+                            parts = line.split('"')
+                            if len(parts) >= 2:
+                                token = parts[1].strip()
+                                if token and token.lower() not in COMMON_EXCLUDES:
+                                    index.setdefault(token, []).append((m_name, l_idx, rel_path))
+                        # Index attribute values (split by semicolon/comma/parens)
+                        for m in val_regex.finditer(line):
+                            val = m.group(1).strip()
+                            for item in re.split(r"[;,()]", val):
+                                item = item.strip()
+                                if len(item) >= 4 and not guid_regex.match(item) and item.lower() not in COMMON_EXCLUDES:
+                                    index.setdefault(item, []).append((m_name, l_idx, rel_path))
+                        # Index explicit localization handles
+                        for m in handle_regex.finditer(line):
+                            h_val = m.group(1).strip()
+                            if h_val and h_val.lower() not in COMMON_EXCLUDES:
+                                index.setdefault(h_val, []).append((m_name, l_idx, rel_path))
+                        # Index tokens with underscores, hyphens, handles, or PascalCase
+                        for m in token_regex.finditer(line):
+                            t = m.group(1)
+                            if len(t) >= 4 and t.lower() not in COMMON_EXCLUDES:
+                                if "_" in t or "-" in t or t.startswith("h") or any(c.isupper() for c in t[1:]):
+                                    index.setdefault(t, []).append((m_name, l_idx, rel_path))
+            except Exception:
+                pass
     return index
 
 
