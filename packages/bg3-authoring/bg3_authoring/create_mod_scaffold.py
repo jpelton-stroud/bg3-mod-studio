@@ -398,7 +398,7 @@ def scaffold_mod(
 
 
 def load_env_defaults() -> dict:
-    """Load key-value pairs from .env if present."""
+    """Load key-value pairs from XDG environment configuration if present."""
     return load_env_file()
 
 

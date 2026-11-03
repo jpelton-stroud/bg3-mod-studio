@@ -450,7 +450,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     err_color = ConsoleColor(stream=sys.stderr)
     token = get_oauth_token()
     if not token:
-        msg = "MODIO_PAT environment variable or .env entry is required; token is never accepted as an argument."
+        msg = "MODIO_PAT environment variable or XDG config entry ($XDG_CONFIG_HOME/bg3/env) is required; token is never accepted as an argument."
         if args.json:
             print(json.dumps({"error": msg, "success": False}, indent=2))
         else:
