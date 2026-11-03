@@ -14,6 +14,44 @@ _TXT_USING_RE = re.compile(r'^using\s+"([^"]+)"', re.IGNORECASE)
 _TXT_DATA_RE = re.compile(r'^data\s+"([^"]+)"\s+"([^"]*)"', re.IGNORECASE)
 
 PATCH_8_VERSION = {"major": "4", "minor": "8", "revision": "0", "build": "700"}
+MAX_XML_PAYLOAD_SIZE: int = 50 * 1024 * 1024  # 50 MB
+_INSECURE_XML_PATTERN = re.compile(r"<!(?:ENTITY|DOCTYPE)\b", re.IGNORECASE)
+
+
+def safe_xml_fromstring(xml_text: str | bytes) -> ET.Element:
+    """Safely parse XML text or bytes, enforcing size bounds and rejecting DTD/entity expansion attacks."""
+    if not xml_text:
+        raise ValueError("Empty XML input")
+    if len(xml_text) > MAX_XML_PAYLOAD_SIZE:
+        raise ValueError(
+            f"XML payload exceeds maximum allowed size ({len(xml_text)} > {MAX_XML_PAYLOAD_SIZE})"
+        )
+
+    if isinstance(xml_text, bytes):
+        if b"<!" in xml_text:
+            decoded_sample = xml_text.decode("utf-8", errors="ignore")
+            if _INSECURE_XML_PATTERN.search(decoded_sample):
+                raise ValueError("Insecure XML: DTD and ENTITY definitions are not permitted.")
+        return ET.fromstring(xml_text.decode("utf-8", errors="replace"))
+    else:
+        if "<!" in xml_text and _INSECURE_XML_PATTERN.search(xml_text):
+            raise ValueError("Insecure XML: DTD and ENTITY definitions are not permitted.")
+        return ET.fromstring(xml_text)
+
+
+def safe_xml_parse(source: Path | str) -> ET.ElementTree:
+    """Safely parse an XML file from disk, enforcing size bounds and entity rejection."""
+    p = Path(source)
+    if not p.is_file():
+        raise FileNotFoundError(f"XML file not found: '{source}'")
+    size = p.stat().st_size
+    if size > MAX_XML_PAYLOAD_SIZE:
+        raise ValueError(
+            f"XML file '{source}' exceeds maximum allowed size ({size} > {MAX_XML_PAYLOAD_SIZE})"
+        )
+    content = p.read_bytes()
+    root = safe_xml_fromstring(content)
+    return ET.ElementTree(root)
 
 
 def generate_larian_handle() -> str:
@@ -70,9 +108,7 @@ def parse_version_str(ver_str: str) -> Tuple[int, int, int, int]:
 # ----------------------------------------------------------------------
 # Parenthesis-Aware Larian Property / Functor Splitting
 # ----------------------------------------------------------------------
-def split_larian_items(
-    raw: str, separators: Tuple[str, ...] = (",", ";")
-) -> List[str]:
+def split_larian_items(raw: str, separators: Tuple[str, ...] = (",", ";")) -> List[str]:
     """Split a string on commas/semicolons ONLY at top level (outside parentheses and quotes)."""
     if not raw or not raw.strip():
         return []
@@ -155,7 +191,7 @@ def parse_localization_xml(xml_bytes: bytes, strip_tags: bool = True) -> Dict[st
     if not xml_bytes:
         return loc_dict
     try:
-        root = ET.fromstring(xml_bytes.decode("utf-8", errors="ignore"))
+        root = safe_xml_fromstring(xml_bytes)
         for elem in root.findall(".//content"):
             handle = elem.get("contentuid")
             text = _extract_content_text(elem)
@@ -196,12 +232,16 @@ def parse_loca_bytes(data: bytes, strip_tags: bool = True) -> Dict[str, str]:
             raw_str = raw_str[:-1]
         decoded = raw_str.decode("utf-8", errors="replace")
         if handle:
-            loc_dict[handle] = clean_loc_text(decoded) if (strip_tags and "<" in decoded) else decoded
+            loc_dict[handle] = (
+                clean_loc_text(decoded) if (strip_tags and "<" in decoded) else decoded
+            )
 
     return loc_dict
 
 
-def parse_localization_bytes(data: bytes, filename: str = "", strip_tags: bool = True) -> Dict[str, str]:
+def parse_localization_bytes(
+    data: bytes, filename: str = "", strip_tags: bool = True
+) -> Dict[str, str]:
     """Parse either XML or binary LOCA localization bytes into a handle -> text dictionary."""
     if not data:
         return {}
@@ -212,7 +252,7 @@ def parse_localization_bytes(data: bytes, filename: str = "", strip_tags: bool =
 
 def compile_xml_bytes_to_loca(xml_bytes: bytes) -> bytes:
     """Compile Larian <contentList> XML bytes into binary LOCA bytes."""
-    root = ET.fromstring(xml_bytes.decode("utf-8"))
+    root = safe_xml_fromstring(xml_bytes)
     entries: List[Tuple[str, int, bytes]] = []
     for elem in root.findall(".//content"):
         handle = (elem.get("contentuid") or "").strip()
@@ -252,7 +292,9 @@ def compile_xml_to_loca(xml_path: Path, loca_path: Optional[Path] = None) -> Pat
     return target
 
 
-def update_localization_xml(loc_file: Path, entries: List[Tuple[str, str]], dry_run: bool = False) -> None:
+def update_localization_xml(
+    loc_file: Path, entries: List[Tuple[str, str]], dry_run: bool = False
+) -> None:
     """Appends content tags for handles and text to the Localization XML file atomically."""
     if dry_run or not entries:
         return
@@ -296,7 +338,9 @@ def update_localization_xml(loc_file: Path, entries: List[Tuple[str, str]], dry_
 # ----------------------------------------------------------------------
 # Stats, Meta, and Progressions Parsers
 # ----------------------------------------------------------------------
-def parse_stats_txt(txt_bytes: bytes, loc_dict: Optional[Dict[str, str]] = None) -> Dict[str, Dict[str, Any]]:
+def parse_stats_txt(
+    txt_bytes: bytes, loc_dict: Optional[Dict[str, str]] = None
+) -> Dict[str, Dict[str, Any]]:
     """Parse Larian stats text (new entry / data lines)."""
     loc_dict = loc_dict or {}
     text = txt_bytes.decode("utf-8", errors="ignore")
@@ -355,8 +399,7 @@ def parse_meta_lsx(lsx_bytes: bytes) -> Dict[str, Any]:
         meta["dependencies"] = []
         return meta
     try:
-        text = lsx_bytes.decode("utf-8", errors="ignore")
-        root = ET.fromstring(text)
+        root = safe_xml_fromstring(lsx_bytes)
         mod_info = root.find(".//node[@id='ModuleInfo']")
         if mod_info is not None:
             for attr in mod_info.findall("./attribute"):
@@ -388,8 +431,7 @@ def parse_root_templates_lsx(lsx_bytes: bytes) -> Dict[str, Dict[str, str]]:
     if not lsx_bytes:
         return templates
     try:
-        text = lsx_bytes.decode("utf-8", errors="ignore")
-        root = ET.fromstring(text)
+        root = safe_xml_fromstring(lsx_bytes)
         for node in root.findall(".//node[@id='GameObjects']"):
             attrs: Dict[str, str] = {}
             for attr in node.findall("./attribute"):
@@ -411,8 +453,7 @@ def parse_progressions_lsx(lsx_bytes: bytes) -> List[Dict[str, str]]:
     if not lsx_bytes:
         return progressions
     try:
-        text = lsx_bytes.decode("utf-8", errors="ignore")
-        root = ET.fromstring(text)
+        root = safe_xml_fromstring(lsx_bytes)
         for node in root.findall(".//node[@id='Progression']"):
             p: Dict[str, str] = {}
             for attr in node.findall("./attribute"):

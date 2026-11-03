@@ -119,9 +119,13 @@ class TestXDGPaths(unittest.TestCase):
             bg3_cfg_dir = tmp_xdg / "bg3"
             bg3_cfg_dir.mkdir(parents=True)
             env_file = bg3_cfg_dir / "env"
-            env_file.write_text("MODIO_API_KEY=test_api_key_123\nMODIO_PAT=test_pat_456\n", encoding="utf-8")
+            env_file.write_text(
+                "MODIO_API_KEY=test_api_key_123\nMODIO_PAT=test_pat_456\n", encoding="utf-8"
+            )
 
-            with patch.dict(os.environ, {"XDG_CONFIG_HOME": str(tmp_xdg), "MODIO_API_KEY": "", "MODIO_PAT": ""}):
+            with patch.dict(
+                os.environ, {"XDG_CONFIG_HOME": str(tmp_xdg), "MODIO_API_KEY": "", "MODIO_PAT": ""}
+            ):
                 env = load_env_file()
                 self.assertEqual(env.get("MODIO_API_KEY"), "test_api_key_123")
                 self.assertEqual(env.get("MODIO_PAT"), "test_pat_456")
@@ -156,9 +160,15 @@ class TestXDGPaths(unittest.TestCase):
             with patch.dict(os.environ, {"XDG_DOCUMENTS_DIR": str(tmp_docs), "BG3_STUDIO_DIR": ""}):
                 self.assertEqual(get_xdg_documents_home(), tmp_docs)
                 self.assertEqual(get_studio_dir(), tmp_docs / "BG3_Mod_Studio")
-                self.assertEqual(get_build_guides_dir(), tmp_docs / "BG3_Mod_Studio" / "Build_Guides")
-                self.assertEqual(get_subscribed_mods_dir(), tmp_docs / "BG3_Mod_Studio" / "Mods" / "subscribed")
-                self.assertEqual(get_authored_mods_dir(), tmp_docs / "BG3_Mod_Studio" / "Mods" / "authored")
+                self.assertEqual(
+                    get_build_guides_dir(), tmp_docs / "BG3_Mod_Studio" / "Build_Guides"
+                )
+                self.assertEqual(
+                    get_subscribed_mods_dir(), tmp_docs / "BG3_Mod_Studio" / "Mods" / "subscribed"
+                )
+                self.assertEqual(
+                    get_authored_mods_dir(), tmp_docs / "BG3_Mod_Studio" / "Mods" / "authored"
+                )
 
             # Custom BG3_STUDIO_DIR override
             custom_studio = Path(tmp) / "custom_studio"
@@ -169,12 +179,15 @@ class TestXDGPaths(unittest.TestCase):
                 self.assertEqual(get_authored_mods_dir(), custom_studio / "Mods" / "authored")
 
             # Individual subfolder overrides
-            with patch.dict(os.environ, {
-                "BG3_STUDIO_DIR": str(custom_studio),
-                "BG3_BUILD_GUIDES_DIR": str(Path(tmp) / "guides"),
-                "BG3_SUBSCRIBED_MODS_DIR": str(Path(tmp) / "sub"),
-                "BG3_AUTHORED_MODS_DIR": str(Path(tmp) / "auth"),
-            }):
+            with patch.dict(
+                os.environ,
+                {
+                    "BG3_STUDIO_DIR": str(custom_studio),
+                    "BG3_BUILD_GUIDES_DIR": str(Path(tmp) / "guides"),
+                    "BG3_SUBSCRIBED_MODS_DIR": str(Path(tmp) / "sub"),
+                    "BG3_AUTHORED_MODS_DIR": str(Path(tmp) / "auth"),
+                },
+            ):
                 self.assertEqual(get_build_guides_dir(), Path(tmp) / "guides")
                 self.assertEqual(get_subscribed_mods_dir(), Path(tmp) / "sub")
                 self.assertEqual(get_authored_mods_dir(), Path(tmp) / "auth")
@@ -183,8 +196,18 @@ class TestXDGPaths(unittest.TestCase):
         """Test library catalog path resolution and environment overrides."""
         with tempfile.TemporaryDirectory() as tmp:
             tmp_docs = Path(tmp) / "Documents"
-            with patch.dict(os.environ, {"XDG_DOCUMENTS_DIR": str(tmp_docs), "BG3_STUDIO_DIR": "", "BG3_LIBRARY_CATALOG_PATH": "", "BG3_LIBRARY_PATH": ""}):
-                expected_default = tmp_docs / "BG3_Mod_Studio" / "Mods" / "subscribed" / "library.md"
+            with patch.dict(
+                os.environ,
+                {
+                    "XDG_DOCUMENTS_DIR": str(tmp_docs),
+                    "BG3_STUDIO_DIR": "",
+                    "BG3_LIBRARY_CATALOG_PATH": "",
+                    "BG3_LIBRARY_PATH": "",
+                },
+            ):
+                expected_default = (
+                    tmp_docs / "BG3_Mod_Studio" / "Mods" / "subscribed" / "library.md"
+                )
                 self.assertEqual(get_library_catalog_path(), expected_default)
 
             # Override via BG3_LIBRARY_CATALOG_PATH
@@ -193,7 +216,10 @@ class TestXDGPaths(unittest.TestCase):
                 self.assertEqual(get_library_catalog_path(), custom_catalog)
 
             # Override via BG3_LIBRARY_PATH
-            with patch.dict(os.environ, {"BG3_LIBRARY_CATALOG_PATH": "", "BG3_LIBRARY_PATH": str(custom_catalog)}):
+            with patch.dict(
+                os.environ,
+                {"BG3_LIBRARY_CATALOG_PATH": "", "BG3_LIBRARY_PATH": str(custom_catalog)},
+            ):
                 self.assertEqual(get_library_catalog_path(), custom_catalog)
 
     def test_zero_repo_root_fallbacks(self):
@@ -232,6 +258,45 @@ class TestXDGPaths(unittest.TestCase):
                     leaks.append(f"{py_file.relative_to(repo_root)}: contains '{pattern}'")
 
         self.assertEqual(leaks, [], f"Found forbidden path traversal patterns: {leaks}")
+
+    def test_resolve_mod_dir_root_containment_and_traversal(self):
+        """Verify resolve_mod_dir strictly enforces root containment unless allow_external=True."""
+        from bg3_core.env_paths import resolve_mod_dir
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_p = Path(tmp)
+            authored = tmp_p / "Mods" / "authored"
+            subscribed = tmp_p / "Mods" / "subscribed"
+            authored.mkdir(parents=True)
+            subscribed.mkdir(parents=True)
+
+            mod_internal = authored / "MyMod"
+            mod_internal.mkdir()
+
+            external_dir = tmp_p / "SecretDir"
+            external_dir.mkdir()
+
+            roots = (authored, subscribed)
+
+            # Valid internal resolutions
+            self.assertEqual(resolve_mod_dir("MyMod", roots=roots), mod_internal.resolve())
+            self.assertEqual(
+                resolve_mod_dir(str(mod_internal), roots=roots), mod_internal.resolve()
+            )
+
+            # External path traversal rejected by default
+            self.assertIsNone(resolve_mod_dir(str(external_dir), roots=roots))
+            self.assertIsNone(resolve_mod_dir("../../../", roots=roots))
+
+            # External path allowed only when explicitly requested
+            self.assertEqual(
+                resolve_mod_dir(str(external_dir), roots=roots, allow_external=True),
+                external_dir.resolve(),
+            )
+
+            # prefer_my_mods raises FileNotFoundError on external traversal
+            with self.assertRaises(FileNotFoundError):
+                resolve_mod_dir(str(external_dir), roots=roots, prefer_my_mods=True)
 
 
 if __name__ == "__main__":

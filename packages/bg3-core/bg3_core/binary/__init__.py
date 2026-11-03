@@ -15,6 +15,8 @@ from bg3_core.binary.larian_parsers import (
     generate_larian_handle,
     has_balanced_parens,
     parse_meta_lsx,
+    safe_xml_fromstring,
+    safe_xml_parse,
     split_larian_items,
     update_localization_xml,
 )
@@ -93,6 +95,8 @@ __all__ = [
     "generate_larian_handle",
     "has_balanced_parens",
     "parse_meta_lsx",
+    "safe_xml_fromstring",
+    "safe_xml_parse",
     "split_larian_items",
     "update_localization_xml",
 ]

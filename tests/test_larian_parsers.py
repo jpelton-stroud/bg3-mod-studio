@@ -83,7 +83,9 @@ class LarianParsersTests(unittest.TestCase):
 """
         loca_bytes = compile_xml_bytes_to_loca(xml_content)
         parsed = parse_loca_bytes(loca_bytes, strip_tags=False)
-        self.assertIn('Prefix <font color="#ff0000">Red Text</font> and suffix tail.', parsed["h_rich_text"])
+        self.assertIn(
+            'Prefix <font color="#ff0000">Red Text</font> and suffix tail.', parsed["h_rich_text"]
+        )
 
     def test_update_localization_xml_atomicity(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -224,6 +226,52 @@ data "Description" "h5678;2"
         self.assertEqual(progressions[0]["Name"], "Paladin")
         self.assertEqual(progressions[0]["Level"], "1")
         self.assertEqual(progressions[0]["TableUUID"], "aaaa-bbbb-cccc-dddd")
+
+    def test_safe_xml_rejects_entity_expansion_and_dtd(self):
+        """Verify safe_xml_fromstring and safe_xml_parse reject DTD and entity expansion attacks."""
+        from bg3_core.binary.larian_parsers import safe_xml_fromstring, safe_xml_parse
+
+        bomb_xml = """<?xml version="1.0"?>
+<!DOCTYPE lolz [
+ <!ENTITY lol "lol">
+ <!ENTITY lol2 "&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;">
+]>
+<save>&lol2;</save>"""
+
+        with self.assertRaises(ValueError) as cm:
+            safe_xml_fromstring(bomb_xml)
+        self.assertIn("Insecure XML", str(cm.exception))
+
+        with self.assertRaises(ValueError) as cm:
+            safe_xml_fromstring(bomb_xml.encode("utf-8"))
+        self.assertIn("Insecure XML", str(cm.exception))
+
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "bomb.xml"
+            p.write_text(bomb_xml, encoding="utf-8")
+            with self.assertRaises(ValueError) as cm:
+                safe_xml_parse(p)
+            self.assertIn("Insecure XML", str(cm.exception))
+
+    def test_safe_xml_rejects_oversized_payloads(self):
+        """Verify safe_xml_fromstring enforces maximum payload bounds."""
+        from bg3_core.binary.larian_parsers import MAX_XML_PAYLOAD_SIZE, safe_xml_fromstring
+
+        oversized = "<save>" + (" " * (MAX_XML_PAYLOAD_SIZE + 1)) + "</save>"
+        with self.assertRaises(ValueError) as cm:
+            safe_xml_fromstring(oversized)
+        self.assertIn("exceeds maximum allowed size", str(cm.exception))
+
+    def test_safe_xml_parse_valid_document(self):
+        """Verify safe_xml_parse correctly loads benign XML files."""
+        from bg3_core.binary.larian_parsers import safe_xml_parse
+
+        valid_xml = '<?xml version="1.0" encoding="utf-8"?><save><region id="Config"><node id="root"/></region></save>'
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Path(tmp) / "valid.lsx"
+            f.write_text(valid_xml, encoding="utf-8")
+            tree = safe_xml_parse(f)
+            self.assertIsNotNone(tree.getroot().find(".//node[@id='root']"))
 
 
 if __name__ == "__main__":
