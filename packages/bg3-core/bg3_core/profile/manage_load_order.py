@@ -16,6 +16,7 @@ Features:
 
 import argparse
 import datetime
+import heapq
 import io
 import json
 import os
@@ -1089,18 +1090,17 @@ def topological_sort_mods(
             return (1, name)
         return (2, name)
 
-    queue = [u for u, deg in in_degree.items() if deg == 0]
-    queue.sort(key=priority_key)
+    heap = [(priority_key(u), u) for u, deg in in_degree.items() if deg == 0]
+    heapq.heapify(heap)
 
     sorted_custom: list[str] = []
-    while queue:
-        curr = queue.pop(0)
+    while heap:
+        _, curr = heapq.heappop(heap)
         sorted_custom.append(curr)
         for neighbor in adj[curr]:
             in_degree[neighbor] -= 1
             if in_degree[neighbor] == 0:
-                queue.append(neighbor)
-                queue.sort(key=priority_key)
+                heapq.heappush(heap, (priority_key(neighbor), neighbor))
 
     if len(sorted_custom) < len(custom_uuids):
         remaining = [u for u in custom_uuids if u not in sorted_custom]

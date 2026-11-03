@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.modio.query_mod_database import build_or_load_index
 
+from bg3_theorycraft.exceptions import BG3BuildValidationError
 from bg3_theorycraft.models import (
     ActionBudget,
     CombatSequence,
@@ -501,10 +502,8 @@ def _simulate_ranged_burst_sequence(
 
     w_spec = weapon_damage or gear_effects.get("weapon_damage", "1d10")
     w_count, w_sides = _parse_weapon_dice(w_spec, default=(1, 10))
-    if savage_attacker:
-        weapon_base_die = calculate_savage_attacker_average(w_count, w_sides)
-    else:
-        weapon_base_die = w_count * (w_sides + 1) / 2.0
+    # Savage Attacker strictly applies to melee weapon attacks in D&D 5e / BG3
+    weapon_base_die = w_count * (w_sides + 1) / 2.0
 
     dmg_bonus = gear_effects.get("damage_bonus", 0)
     rogue_lvl = classes.get("rogue", 0)
@@ -522,9 +521,7 @@ def _simulate_ranged_burst_sequence(
 
     attack_flat = dex_mod + dmg_bonus
     per_attack_base = weapon_base_die + attack_flat
-    per_attack_crit_extra = (
-        weapon_base_die * 2 if savage_attacker else (w_count * (w_sides + 1) / 2.0)
-    )
+    per_attack_crit_extra = w_count * (w_sides + 1) / 2.0
 
     total_dpr = (
         total_attacks * ((p_hit * per_attack_base) + (p_crit * per_attack_crit_extra))
@@ -575,23 +572,40 @@ def _calculate_barbarian_rage_bonus(barbarian_lvl: int) -> int:
     return 0
 
 
-def _calculate_divine_smite_dice_avg(classes: Dict[str, int]) -> float:
-    """Calculate Divine Smite average damage dice using highest available spell slot."""
+def _calculate_divine_smite_damage_pool(classes: Dict[str, int], total_attacks: int) -> tuple[float, float]:
+    """Calculate total Divine Smite base and crit damage pools across turn 1 attacks.
+
+    Consumes available spell slots from highest to lowest, capped by total_attacks.
+    Returns (total_smite_pool, per_attack_smite_avg).
+    """
     paladin_lvl = classes.get("paladin", 0)
-    if paladin_lvl < 2:
-        return 0.0
+    if paladin_lvl < 2 or total_attacks <= 0:
+        return 0.0, 0.0
+
     _, slots = calculate_spell_slots(classes)
     pact_count, pact_level = calculate_pact_slots(classes.get("warlock", 0))
-    highest_slot = 0
-    for i in range(len(slots) - 1, -1, -1):
-        if slots[i] > 0:
-            highest_slot = i + 1
-            break
-    highest_slot = max(highest_slot, pact_level if pact_count > 0 else 0)
-    # Divine Smite: 2d8 for 1st level slot, +1d8 per slot level above 1st, max 5d8
-    smite_slot_effective = min(4, max(1, highest_slot if highest_slot > 0 else 1))
-    smite_dice_count = 1 + smite_slot_effective
-    return smite_dice_count * 4.5
+
+    available_slots: list[int] = []
+    for lvl in range(len(slots) - 1, -1, -1):
+        available_slots.extend([lvl + 1] * slots[lvl])
+    if pact_count > 0 and pact_level > 0:
+        available_slots.extend([pact_level] * pact_count)
+    available_slots.sort(reverse=True)
+
+    if not available_slots:
+        return 0.0, 0.0
+
+    slots_used = available_slots[:total_attacks]
+    # Divine Smite: 2d8 for 1st level slot, +1d8 per slot level above 1st, max 5d8 (4th level)
+    total_smite_damage = sum((1 + min(4, max(1, s))) * 4.5 for s in slots_used)
+    per_attack_smite_avg = total_smite_damage / total_attacks
+    return total_smite_damage, per_attack_smite_avg
+
+
+def _calculate_divine_smite_dice_avg(classes: Dict[str, int]) -> float:
+    """Calculate Divine Smite average damage dice using highest available spell slot."""
+    _, per_attack = _calculate_divine_smite_damage_pool(classes, total_attacks=1)
+    return per_attack
 
 
 def _simulate_melee_burst_sequence(
@@ -631,7 +645,7 @@ def _simulate_melee_burst_sequence(
     barbarian_lvl = classes.get("barbarian", 0)
     rage_bonus = _calculate_barbarian_rage_bonus(barbarian_lvl)
     paladin_lvl = classes.get("paladin", 0)
-    smite_dice_avg = _calculate_divine_smite_dice_avg(classes)
+    smite_pool, smite_dice_avg = _calculate_divine_smite_damage_pool(classes, total_attacks)
 
     rogue_lvl = classes.get("rogue", 0)
     sneak_attack_avg = math.ceil(rogue_lvl / 2) * 3.5 if rogue_lvl >= 1 else 0.0
@@ -653,7 +667,7 @@ def _simulate_melee_burst_sequence(
     attack_flat = main_mod + dmg_bonus + rage_bonus
     per_attack_base = weapon_base_die + attack_flat + smite_dice_avg
     per_attack_crit_extra = (
-        (weapon_base_die * 2 if savage_attacker else (weapon_dice_count * (weapon_die_sides + 1) / 2.0))
+        (weapon_base_die if savage_attacker else (weapon_dice_count * (weapon_die_sides + 1) / 2.0))
         + smite_dice_avg
     )
 
@@ -665,7 +679,8 @@ def _simulate_melee_burst_sequence(
     )
 
     max_crit_burst = (
-        total_attacks * (((weapon_base_die + smite_dice_avg) * 2) + attack_flat)
+        total_attacks * ((weapon_base_die * 2) + attack_flat)
+        + (smite_pool * 2)
         + (sneak_attack_avg * 2)
         + (superiority_avg * 2)
     )
@@ -705,14 +720,18 @@ def simulate_turn_1_dpr(
     roll_mode: str = "normal",
     savage_attacker: bool = False,
     weapon_damage: str | None = None,
+    action_econ: Optional[ActionBudget] = None,
+    resources: Optional[ResourcePools] = None,
 ) -> CombatSequence:
     """Calculates Turn 1 Damage Per Round factoring in class abilities, resources,
 
     roll state (Advantage/Disadvantage), and Savage Attacker dice math.
     """
     crit_threshold = 20 - int(gear_effects.get("crit_threshold", 0))
-    action_econ = calculate_action_economy(classes)
-    resources = calculate_resource_pools(classes)
+    if action_econ is None:
+        action_econ = calculate_action_economy(classes)
+    if resources is None:
+        resources = calculate_resource_pools(classes)
 
     if sequence_type == "eldritch_blast":
         return _simulate_eldritch_blast_sequence(
@@ -773,6 +792,8 @@ def calculate_ac_curve(
     max_ac: int = 25,
 ) -> List[Dict[str, Any]]:
     """Calculates Damage Per Round and Hit Chances across an AC curve (10-25)."""
+    action_econ = calculate_action_economy(classes)
+    resources = calculate_resource_pools(classes)
     curve: List[Dict[str, Any]] = []
     for ac in range(min_ac, max_ac + 1):
         sim = simulate_turn_1_dpr(
@@ -784,6 +805,8 @@ def calculate_ac_curve(
             target_ac=ac,
             roll_mode=roll_mode,
             savage_attacker=savage_attacker,
+            action_econ=action_econ,
+            resources=resources,
         )
         curve.append(
             {
@@ -813,7 +836,7 @@ def simulate_build(
     """
     total_level = sum(classes.values())
     if total_level > 20:
-        raise ValueError(f"Total character level cannot exceed 20 (got {total_level}).")
+        raise BG3BuildValidationError(f"Total character level cannot exceed 20 (got {total_level}).")
 
     gear_effects, loaded_gear = load_gear_boosts(gear_items or [], workspace_root=workspace_root)
 

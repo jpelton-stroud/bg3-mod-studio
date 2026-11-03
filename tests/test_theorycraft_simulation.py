@@ -521,6 +521,66 @@ class TestTheorycraftCLI(unittest.TestCase):
         )
         self.assertEqual(melee_res.damage_breakdown.weapon_base_avg, 6.5)
 
+    def test_savage_attacker_crit_and_melee_rules(self) -> None:
+        """Verify Savage Attacker applies strictly to melee and does not double crit dice twice."""
+        gear: dict[str, int] = {}
+        # 1. Ranged burst with savage_attacker=True should NOT apply savage attacker (still 5.5)
+        ranged_res = simulate_turn_1_dpr(
+            "ranged_burst",
+            classes={"fighter": 5},
+            stats={"Str": 10, "Dex": 18, "Con": 14, "Int": 10, "Wis": 10, "Cha": 10},
+            gear_effects=gear,
+            prof=3,
+            target_ac=15,
+            savage_attacker=True,
+            weapon_damage="1d10",
+        )
+        self.assertEqual(ranged_res.damage_breakdown.weapon_base_avg, 5.5)
+        self.assertEqual(ranged_res.damage_breakdown.crit_damage_per_attack, 5.5)
+
+        # 2. Melee burst with savage_attacker=True: crit damage adds weapon_base_avg, not 2x
+        melee_res = simulate_turn_1_dpr(
+            "melee_burst",
+            classes={"fighter": 5},
+            stats={"Str": 18, "Dex": 10, "Con": 14, "Int": 10, "Wis": 10, "Cha": 10},
+            gear_effects=gear,
+            prof=3,
+            target_ac=15,
+            savage_attacker=True,
+            weapon_damage="1d12",
+        )
+        # 1d12 Savage Attacker avg is ~8.486
+        ev_1d12_savage = calculate_savage_attacker_average(1, 12)
+        self.assertAlmostEqual(melee_res.damage_breakdown.weapon_base_avg, ev_1d12_savage, places=2)
+        self.assertAlmostEqual(melee_res.damage_breakdown.crit_damage_per_attack, ev_1d12_savage, places=2)
+
+    def test_divine_smite_slot_capping(self) -> None:
+        """Verify Divine Smite damage across multiple attacks is strictly bounded by available spell slots."""
+        # Paladin 2 has two 1st-level spell slots (2d8 = 9.0 damage each -> total 18.0)
+        # Fighter 5 gives Extra Attack (2 attacks) + Action Surge -> 4 weapon attacks in turn 1
+        res = simulate_turn_1_dpr(
+            "melee_burst",
+            classes={"paladin": 2, "fighter": 5},
+            stats={"Str": 16, "Dex": 10, "Con": 14, "Int": 10, "Wis": 10, "Cha": 14},
+            gear_effects={},
+            prof=3,
+            target_ac=10,
+        )
+        self.assertEqual(res.beams_or_attacks, 4)
+        # Across 4 attacks, total smite contribution should be exactly 18.0 (4.5 per attack)
+        self.assertEqual(res.damage_breakdown.smite_avg, 4.5)
+        self.assertEqual(res.damage_breakdown.smite_avg * res.beams_or_attacks, 18.0)
+
+    def test_domain_validation_exception_raised(self) -> None:
+        """Verify BG3BuildValidationError is raised when character level exceeds 20."""
+        from bg3_theorycraft.exceptions import BG3BuildValidationError
+
+        with self.assertRaises(BG3BuildValidationError):
+            simulate_build(
+                classes={"paladin": 15, "sorcerer": 10},  # total 25 > 20
+                stats={"Str": 16, "Dex": 10, "Con": 14, "Int": 10, "Wis": 10, "Cha": 14},
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

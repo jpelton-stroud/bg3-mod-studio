@@ -1,24 +1,44 @@
 """Integration tests for bg3 unified CLI entrypoint."""
 
+import io
 import json
 import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+
+from bg3_core.cli.router import main
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+class _ProcResult:
+    def __init__(self, returncode: int, stdout: str, stderr: str) -> None:
+        self.returncode = returncode
+        self.stdout = stdout
+        self.stderr = stderr
 
 
 class TestBg3CliIntegration(unittest.TestCase):
 
     def run_cli(self, args, stdin=None):
-        return subprocess.run(
-            [sys.executable, "-m", "bg3_core.cli"] + args,
-            capture_output=True,
-            text=True,
-            input=stdin,
-            cwd=REPO_ROOT,
-        )
+        stdout_buf = io.StringIO()
+        stderr_buf = io.StringIO()
+        stdin_stream = io.StringIO(stdin or "")
+        test_argv = ["bg3"] + list(args)
+        returncode = 0
+
+        with patch("sys.argv", test_argv), \
+             patch("sys.stdout", stdout_buf), \
+             patch("sys.stderr", stderr_buf), \
+             patch("sys.stdin", stdin_stream):
+            try:
+                main()
+            except SystemExit as e:
+                returncode = e.code if isinstance(e.code, int) else (1 if e.code else 0)
+
+        return _ProcResult(returncode, stdout_buf.getvalue(), stderr_buf.getvalue())
 
     def test_help_screen(self):
         proc = self.run_cli(["--help"])

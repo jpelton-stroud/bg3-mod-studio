@@ -21,6 +21,7 @@ import json
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 from bg3_core.binary.larian_parsers import (
     parse_meta_lsx,
@@ -247,43 +248,76 @@ def find_node_overlaps(nodes1: dict, nodes2: dict) -> list[dict]:
     return overlaps
 
 
+_MOD_DATA_CACHE: dict[Path, dict[str, Any]] = {}
+
+
+def clear_mod_cache() -> None:
+    """Clear cached mod AST and stat extractions."""
+    _MOD_DATA_CACHE.clear()
+
+
+def get_mod_extracted_data(mod_dir: Path) -> dict[str, Any]:
+    """Extract and cache all AST nodes, stats, progressions, and DLLs for a mod."""
+    resolved_path = mod_dir.resolve()
+    if resolved_path in _MOD_DATA_CACHE:
+        return _MOD_DATA_CACHE[resolved_path]
+
+    data = {
+        "stats": extract_stats_entries(mod_dir),
+        "progs": extract_progressions(mod_dir),
+        "root_templates": extract_root_templates(mod_dir),
+        "classes": extract_lsx_named_nodes(mod_dir, "ClassDescription", "ClassDescription"),
+        "feats": extract_lsx_named_nodes(mod_dir, "Feat", "Feat", exclude_pattern="FeatDescription"),
+        "resources": extract_lsx_named_nodes(mod_dir, "ActionResource", "ActionResourceDefinition"),
+        "level_maps": extract_lsx_named_nodes(mod_dir, "LevelMap", "LevelMapSeries"),
+        "tags": extract_lsx_named_nodes(mod_dir, "Tags", "Tag"),
+        "races": extract_lsx_named_nodes(mod_dir, "Race", "Race", exclude_pattern="RaceDescription"),
+        "origins": extract_lsx_named_nodes(mod_dir, "Origin", "Origin"),
+        "dlls": check_native_dlls(mod_dir),
+    }
+    _MOD_DATA_CACHE[resolved_path] = data
+    return data
+
+
 def compare_two_mods(mod1_dir: Path, mod2_dir: Path) -> dict:
     mod1_name = mod1_dir.name
     mod2_name = mod2_dir.name
 
-    stats1 = extract_stats_entries(mod1_dir)
-    stats2 = extract_stats_entries(mod2_dir)
+    data1 = get_mod_extracted_data(mod1_dir)
+    data2 = get_mod_extracted_data(mod2_dir)
 
-    progs1 = extract_progressions(mod1_dir)
-    progs2 = extract_progressions(mod2_dir)
+    stats1 = data1["stats"]
+    stats2 = data2["stats"]
 
-    rt1 = extract_root_templates(mod1_dir)
-    rt2 = extract_root_templates(mod2_dir)
+    progs1 = data1["progs"]
+    progs2 = data2["progs"]
 
-    # New Patch 8 schema extractions
-    classes1 = extract_lsx_named_nodes(mod1_dir, "ClassDescription", "ClassDescription")
-    classes2 = extract_lsx_named_nodes(mod2_dir, "ClassDescription", "ClassDescription")
+    rt1 = data1["root_templates"]
+    rt2 = data2["root_templates"]
 
-    feats1 = extract_lsx_named_nodes(mod1_dir, "Feat", "Feat", exclude_pattern="FeatDescription")
-    feats2 = extract_lsx_named_nodes(mod2_dir, "Feat", "Feat", exclude_pattern="FeatDescription")
+    classes1 = data1["classes"]
+    classes2 = data2["classes"]
 
-    res1 = extract_lsx_named_nodes(mod1_dir, "ActionResource", "ActionResourceDefinition")
-    res2 = extract_lsx_named_nodes(mod2_dir, "ActionResource", "ActionResourceDefinition")
+    feats1 = data1["feats"]
+    feats2 = data2["feats"]
 
-    lmaps1 = extract_lsx_named_nodes(mod1_dir, "LevelMap", "LevelMapSeries")
-    lmaps2 = extract_lsx_named_nodes(mod2_dir, "LevelMap", "LevelMapSeries")
+    res1 = data1["resources"]
+    res2 = data2["resources"]
 
-    tags1 = extract_lsx_named_nodes(mod1_dir, "Tags", "Tag")
-    tags2 = extract_lsx_named_nodes(mod2_dir, "Tags", "Tag")
+    lmaps1 = data1["level_maps"]
+    lmaps2 = data2["level_maps"]
 
-    races1 = extract_lsx_named_nodes(mod1_dir, "Race", "Race", exclude_pattern="RaceDescription")
-    races2 = extract_lsx_named_nodes(mod2_dir, "Race", "Race", exclude_pattern="RaceDescription")
+    tags1 = data1["tags"]
+    tags2 = data2["tags"]
 
-    origins1 = extract_lsx_named_nodes(mod1_dir, "Origin", "Origin")
-    origins2 = extract_lsx_named_nodes(mod2_dir, "Origin", "Origin")
+    races1 = data1["races"]
+    races2 = data2["races"]
 
-    dlls1 = check_native_dlls(mod1_dir)
-    dlls2 = check_native_dlls(mod2_dir)
+    origins1 = data1["origins"]
+    origins2 = data2["origins"]
+
+    dlls1 = data1["dlls"]
+    dlls2 = data2["dlls"]
 
     # 1. Entry overlaps
     stat_collisions = []
