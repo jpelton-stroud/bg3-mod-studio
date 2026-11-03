@@ -21,7 +21,7 @@ graph TD
 
 | Module | Core Responsibility | Key Exported Symbols |
 | :--- | :--- | :--- |
-| `bg3_core.binary.larian_parsers` | Larian binary formats, version encoding, and localization | `DEFAULT_VERSION64`, `encode_version64()`, `decode_version64()`, `calculate_version64()`, `compile_xml_bytes_to_loca()`, `split_larian_items()` |
+| `bg3_core.binary.larian_parsers` | Larian binary formats, version encoding, and localization | `DEFAULT_VERSION64`, `decode_version64()`, `calculate_version64()`, `compile_xml_bytes_to_loca()`, `split_larian_items()`, `safe_xml_fromstring()`, `safe_xml_parse()` |
 | `bg3_core.binary.lspk` | Pure-Python LSPK v18 archive reader, builder, and unpacker | `LspkArchive`, `build_lspk_archive()`, `lz4_block_decompress()`, `lz4_frame_or_block_decompress()`, `decompress_pak_file_data()` |
 | `bg3_core.binary.lsf` | LSF binary document serializer, deserializer, and AST node model | `LsfDocument`, `LsfNode`, `LsfAttribute` |
 | `bg3_core.exceptions` | Unified domain exception hierarchy dual-inheriting standard Python exceptions | `BG3Error`, `BG3BinaryError`, `BG3PackagingError`, `BG3ProfileError`, `BG3CatalogError`, `BG3EnvironmentError` |
