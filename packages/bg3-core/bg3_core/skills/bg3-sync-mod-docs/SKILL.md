@@ -1,6 +1,6 @@
 ---
 name: bg3-sync-mod-docs
-description: Orchestrate concurrent subagents to ingest, extract, validate, and update BG3 mod documentation into mods/<name>/README.md and update library.md. Use on /bg3-sync-mod-docs or when cataloging mods.
+description: Orchestrate concurrent subagents to ingest, extract, validate, and update BG3 mod documentation into Mods/subscribed/<slug>/README.md and library.md.
 ---
 
 # BG3 Mod Documentation & Update Orchestrator (`bg3-sync-mod-docs`)
@@ -54,4 +54,4 @@ Deliver an executive summary table detailing mod name, status (`🟢 Up-to-date`
 Always verify catalog and cache updates before concluding:
 1. Verify `bg3 modio update-catalog` exits with code 0.
 2. Confirm all documented mods appear in `Mods/subscribed/library.md` under correct categories.
-3. Validate that relative links to `mods/<slug>/README.md` resolve to existing files.
+3. Validate that relative links to `Mods/subscribed/<slug>/README.md` resolve to existing files.

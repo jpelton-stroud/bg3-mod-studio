@@ -300,6 +300,32 @@ sys.exit(dispatch_command(args, emitter))
         self.assertIn("build.simulate", theory_eps)
         self.assertIn("build.sim", theory_eps)
 
+    def test_mod_subparser_expanded_flag_schemas(self):
+        """Assert that mod subparsers expose complete operational flags in --help output."""
+        # diagnose-logs
+        proc = self.run_cli(["mod", "diagnose-logs", "--help"])
+        self.assertEqual(proc.returncode, 0)
+        for flag in ["--toolkit-dir", "--type", "--severity", "--subsystem", "--mod", "--follow", "--list-logs"]:
+            self.assertIn(flag, proc.stdout)
+
+        # sync-game
+        proc = self.run_cli(["mod", "sync-game", "--help"])
+        self.assertEqual(proc.returncode, 0)
+        for flag in ["--source-dir", "--data-dir", "--mods", "--clean-legacy", "--clean-custom", "--clean-mod", "--bump-build", "--watch"]:
+            self.assertIn(flag, proc.stdout)
+
+        # pack
+        proc = self.run_cli(["mod", "pack", "--help"])
+        self.assertEqual(proc.returncode, 0)
+        for flag in ["--out", "--output-dir", "--publish-local", "--clean-local", "--include-projects", "--uncompressed"]:
+            self.assertIn(flag, proc.stdout)
+
+        # create
+        proc = self.run_cli(["mod", "create", "--help"])
+        self.assertEqual(proc.returncode, 0)
+        for flag in ["--slug", "--uuid", "--unlock-level-curve", "--dependency", "--output-dir", "--type"]:
+            self.assertIn(flag, proc.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,6 @@
 ---
 name: bg3-sync-single-mod
-description: Fetch, unpack, validate, document, or update a single BG3 mod from mod.io into mods/<name>/README.md with rich feature schemas. Use on /bg3-sync-single-mod or via orchestrator.
+description: Fetch, unpack, validate, document, or update a single BG3 mod from mod.io into Mods/subscribed/<slug>/README.md with rich feature schemas.
 ---
 
 # Single BG3 Mod Documentation & Update Specialist (`bg3-sync-single-mod`)

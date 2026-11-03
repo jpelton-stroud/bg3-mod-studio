@@ -29,9 +29,9 @@ def find_mod_dir(mod_query: str) -> Path:
 
     my_mods_dir = Path(os.environ.get("BG3_MODS_DIR", MY_MODS_DIR))
     if not my_mods_dir.exists():
-        raise FileNotFoundError(f"my_mods directory does not exist at {my_mods_dir}")
+        raise FileNotFoundError(f"Authored mods directory does not exist at {my_mods_dir}")
 
-    raise ValueError(f"No mod found in my_mods/ matching query '{mod_query}'.")
+    raise ValueError(f"No mod found in authored mods matching query '{mod_query}'.")
 
 
 def render_inline_markdown(text: str) -> str:
@@ -232,7 +232,7 @@ def main() -> None:
         description="Export a mod's README.md as a publishing-ready HTML document."
     )
     parser.add_argument("mod_pos", nargs="?", help="Mod name or directory (positional)")
-    parser.add_argument("--mod", dest="mod_flag", help="Mod name, directory in my_mods/, or mod directory path")
+    parser.add_argument("--mod", dest="mod_flag", help="Mod name, directory in $BG3_STUDIO_DIR/Mods/authored/, or mod directory path")
     parser.add_argument("--write", action="store_true", help="Write modio_description.html beside README.md")
     parser.add_argument("--json", action="store_true", help="Emit structured output information as JSON")
     args = parser.parse_args()

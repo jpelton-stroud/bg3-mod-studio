@@ -433,54 +433,6 @@ def handle_subscription_sync(choice: str, dry_run: bool = False) -> None:
         print(f"{mode_prefix}{GREEN}✓ Purged {result['purged_count']} mod folder(s) and reset library.md.{RESET}")
 
 
-def prompt_custom_mods_purge(non_interactive: bool = False) -> str:
-    """Prompt user for purging custom mods currently residing in my_mods/.
-
-    Returns 'y' or 'n'.
-    """
-    if non_interactive:
-        return "n"
-
-    print(f"\n{BOLD}{CYAN}------------------------------------------------------------------------{RESET}")
-    print(f"{BOLD}6. Custom Mods Cleanup{RESET}")
-    while True:
-        try:
-            choice = input(
-                f"{BOLD}Would you like to purge custom mods currently residing in the `my_mods/` folder? (Y/n){RESET} [Y]: "
-            ).strip().lower()
-        except EOFError:
-            return "n" if non_interactive else "y"
-        if not choice or choice in ("y", "yes"):
-            return "y"
-        if choice in ("n", "no"):
-            return "n"
-        print(f"{YELLOW}Please enter 'y' or 'n' (or press Enter for default Y).{RESET}")
-
-
-def handle_custom_mods_purge(choice: str, dry_run: bool = False) -> None:
-    """Purge custom mods residing in my_mods/ folder."""
-    if choice != "y":
-        print("Continuing without purging custom mods.")
-        return
-
-    my_mods_dir = WORKSPACE_ROOT / "my_mods"
-    if dry_run:
-        print(f"{CYAN}[DRY-RUN] Would purge custom mods in {my_mods_dir} (rm -rf my_mods/*){RESET}")
-        return
-
-    print(f"Purging custom mods residing in {my_mods_dir}...")
-    if my_mods_dir.is_dir():
-        for child in sorted(my_mods_dir.iterdir()):
-            try:
-                if child.is_dir():
-                    shutil.rmtree(child)
-                else:
-                    child.unlink()
-            except Exception as e:
-                print(f"{YELLOW}Warning: Could not remove {child}: {e}{RESET}")
-    print(f"{GREEN}✓ Successfully purged custom mods in my_mods/.{RESET}")
-
-
 def run_wizard(
     dry_run: bool = False,
     non_interactive: bool = False,
@@ -638,10 +590,6 @@ def run_wizard(
     # 5. mod.io Subscription Sync & Library Management
     sync_choice = prompt_subscription_sync(non_interactive=non_interactive)
     handle_subscription_sync(sync_choice, dry_run=dry_run)
-
-    # 6. Custom Mods Cleanup
-    purge_choice = prompt_custom_mods_purge(non_interactive=non_interactive)
-    handle_custom_mods_purge(purge_choice, dry_run=dry_run)
 
     print(f"\n{BOLD}{GREEN}Setup completed successfully!{RESET}")
     print("You can run 'bg3 env check' anytime to review your configuration.")

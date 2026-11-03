@@ -7,7 +7,7 @@ When executing `--confirm`, the API updates:
 - **Community Options**: Enables Allow comments, Allow dependants, and Allow to be added to collections.
 - **Credit Options**: Enables all non-commercial reuse and credit variants.
 - **Visibility**: Sets to `1` (Public).
-- **Description**: Uploaded from `my_mods/<slug>/modio_description.html`.
+- **Description**: Uploaded from `Mods/authored/<slug>/modio_description.html`.
 
 ---
 

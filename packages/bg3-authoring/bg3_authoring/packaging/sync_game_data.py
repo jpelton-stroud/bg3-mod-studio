@@ -2,7 +2,7 @@
 """
 sync_game_data.py
 --------------------
-Synchronizes custom Baldur's Gate 3 mods authored in `my_mods/` subdirectories
+Synchronizes custom Baldur's Gate 3 mods authored in `$BG3_STUDIO_DIR/Mods/authored/` subdirectories
 directly into the game's Data directory (C:\\Program Files (x86)\\Steam\\steamapps\\common\\Baldurs Gate 3\\Data)
 for loading, editing, and publishing via the Baldur's Gate 3 Toolkit and mod.io.
 
@@ -350,7 +350,7 @@ def clean_legacy(
 
 
 def get_custom_mod_prefixes(source_dir: Path | None = None) -> list[str]:
-    """Dynamically collects mod directory and folder prefixes from my_mods/."""
+    """Dynamically collects mod directory and folder prefixes from authored mods."""
     prefixes: list[str] = []
     root = source_dir or Path(get_env_var("BG3_MODS_DIR") or get_authored_mods_dir())
     if root.is_dir():
@@ -657,7 +657,7 @@ def watch_and_sync(source_dir: Path, data_dir: Path, mod_filter: list[Any] | Non
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Sync custom BG3 mods from my_mods/ to Steam Baldurs Gate 3/Data directory"
+        description="Sync custom BG3 mods from $BG3_STUDIO_DIR/Mods/authored/ to Steam Baldurs Gate 3/Data directory"
     )
     parser.add_argument(
         "--source-dir",
@@ -690,6 +690,12 @@ def main() -> None:
         action="store_true",
         default=True,
         help="Clean up legacy mod folders/files in Steam Data (default: True)",
+    )
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        dest="clean_legacy",
+        help="Clean up legacy mod folders/files in Steam Data (alias for --clean-legacy)",
     )
     parser.add_argument(
         "--no-clean-legacy",
@@ -737,7 +743,7 @@ def main() -> None:
             if candidate.is_dir():
                 mod_dir = candidate
         if not mod_dir:
-            msg = f"Mod '{args.clean_mod}' not found in my_mods/ or library."
+            msg = f"Mod '{args.clean_mod}' not found in authored mods or library."
             if args.json:
                 print(json.dumps({"error": msg, "success": False}, indent=2))
             else:

@@ -15,10 +15,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 from bg3_core.cli.setup_environment import (
-    handle_custom_mods_purge,
     handle_subscription_sync,
-    prompt_custom_mods_purge,
     prompt_subscription_sync,
+    run_wizard,
 )
 
 
@@ -56,52 +55,22 @@ class SetupEnvironmentQATests(unittest.TestCase):
         self.assertEqual(prompt_subscription_sync(non_interactive=False), "1")
         self.assertEqual(prompt_subscription_sync(non_interactive=True), "3")
 
-    def test_prompt_custom_mods_purge_non_interactive(self):
-        # Non-interactive mode must return "n" to avoid data destruction
-        choice = prompt_custom_mods_purge(non_interactive=True)
-        self.assertEqual(choice, "n")
-
-    @patch("builtins.input", side_effect=[""])
-    def test_prompt_custom_mods_purge_default(self, _mock_input):
-        # Pressing Enter defaults to "y"
-        choice = prompt_custom_mods_purge(non_interactive=False)
-        self.assertEqual(choice, "y")
-
-    @patch("builtins.input", side_effect=["n"])
-    def test_prompt_custom_mods_purge_no(self, _mock_input):
-        choice = prompt_custom_mods_purge(non_interactive=False)
-        self.assertEqual(choice, "n")
-
-    @patch("builtins.input", side_effect=[EOFError])
-    def test_prompt_custom_mods_purge_eof(self, _mock_input):
-        self.assertEqual(prompt_custom_mods_purge(non_interactive=False), "y")
-        self.assertEqual(prompt_custom_mods_purge(non_interactive=True), "n")
-
     def test_handle_subscription_sync_dry_run(self):
         # Must execute without raising exceptions in dry-run mode for all choices
         for choice in ("1", "2", "3", "4"):
             with self.subTest(choice=choice):
                 handle_subscription_sync(choice, dry_run=True)
 
-    def test_handle_custom_mods_purge_live(self):
+    def test_run_wizard_omits_legacy_custom_mods_purge(self):
+        """Assert that run_wizard completes without prompting for or executing legacy custom mods purge."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_root = Path(temp_dir)
-            mock_my_mods = temp_root / "my_mods"
-            mock_my_mods.mkdir()
-            (mock_my_mods / "sample-mod").mkdir()
-            (mock_my_mods / "sample-mod" / "meta.lsx").write_text("<save/>", encoding="utf-8")
-            (mock_my_mods / "notes.txt").write_text("notes", encoding="utf-8")
-
             with patch("bg3_core.cli.setup_environment.WORKSPACE_ROOT", temp_root):
-                # When choice is 'n', nothing is removed
-                handle_custom_mods_purge("n", dry_run=False)
-                self.assertTrue((mock_my_mods / "sample-mod").is_dir())
-                self.assertTrue((mock_my_mods / "notes.txt").is_file())
-
-                # When choice is 'y', all contents inside my_mods are removed
-                handle_custom_mods_purge("y", dry_run=False)
-                self.assertTrue(mock_my_mods.is_dir())
-                self.assertEqual(list(mock_my_mods.iterdir()), [])
+                # Run wizard in non-interactive dry-run mode
+                run_wizard(dry_run=True, non_interactive=True)
+                output = self.mock_stdout.getvalue()
+                self.assertNotIn("Custom Mods Cleanup", output)
+                self.assertNotIn("Would purge custom mods", output)
 
     def test_cli_env_integration(self):
         repo_root = Path(__file__).resolve().parent.parent
@@ -137,7 +106,7 @@ class SetupEnvironmentQATests(unittest.TestCase):
             check=True,
         )
         self.assertIn("Continuing setup without subscription sync.", proc_dry.stdout)
-        self.assertIn("Continuing without purging custom mods.", proc_dry.stdout)
+        self.assertNotIn("purging custom mods", proc_dry.stdout)
 
     def test_legacy_env_is_not_auto_migrated(self):
         """Verify that a legacy repo-level .env is ignored and not unlinked."""

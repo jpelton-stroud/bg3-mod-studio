@@ -24,7 +24,7 @@ flowchart TD
     Sync --> UserAction["3. User Loads Mod in Glasses.exe"]
     UserAction --> Triage["4. Diagnose Toolkit Runtime Logs"]
     Triage --> Clean{"Logs Clean?"}
-    Clean -->|"Fixes Needed"| Patch["Patch in my_mods/ and Re-sync"]
+    Clean -->|"Fixes Needed"| Patch["Patch in Mods/authored/ and Re-sync"]
     Patch --> Preflight
     Clean -->|"Clean / Skipped"| Gate["5. Stage 3 Testing Handoff"]
 ```

@@ -1,11 +1,11 @@
 ---
 name: bg3-create-mod
-description: Orchestrate concurrent subagents to grill, plan, scaffold, author, and validate BG3 mods in my_mods/<ModSlug>. Use on /bg3-create-mod or when creating new BG3 mods.
+description: Orchestrate concurrent subagents to grill, plan, scaffold, author, and validate BG3 mods in Mods/authored/<ModSlug>. Use on /bg3-create-mod or when creating new BG3 mods.
 ---
 
 # BG3 Mod Creator Orchestrator (`bg3-create-mod`)
 
-Top-level orchestration skill for Stage 1 of the BG3 mod creation lifecycle. Translates creative concepts into fully authored, statically verified mods inside `my_mods/<ModSlug>`.
+Top-level orchestration skill for Stage 1 of the BG3 mod creation lifecycle. Translates creative concepts into fully authored, statically verified mods inside `Mods/authored/<ModSlug>`.
 
 Refer to companion resources:
 - Interview Protocol: [Design Interview Protocol](./references/grill_me_interview_protocol.md)

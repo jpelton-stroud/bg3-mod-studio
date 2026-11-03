@@ -31,7 +31,7 @@ All subagents must be launched with `"Model": "inherit"` and `"Workspace": "inhe
     {
       "TypeName": "self",
       "Role": "Documentation Specialist - <ModName>",
-      "Prompt": "Draft the root README.md for my_mods/<ModSlug>/README.md adhering to the Rich Feature Schema:\n- Overview & lore context\n- Verified feature tables (Stat ID, Slot/Type, Mechanics, Acquisition)\n- Installation & Xbox Series S compatibility notes\n- Render mod.io description preview: bg3 mod render-desc <ModSlug> --write --json",
+      "Prompt": "Draft the root README.md for Mods/authored/<ModSlug>/README.md adhering to the Rich Feature Schema:\n- Overview & lore context\n- Verified feature tables (Stat ID, Slot/Type, Mechanics, Acquisition)\n- Installation & Xbox Series S compatibility notes\n- Render mod.io description preview: bg3 mod render-desc <ModSlug> --write --json",
       "Workspace": "inherit",
       "Model": "inherit"
     }

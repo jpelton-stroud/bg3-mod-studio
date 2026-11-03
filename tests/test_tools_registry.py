@@ -92,6 +92,21 @@ class TestToolsRegistry(unittest.TestCase):
         self.assertEqual(len(res["help_errors"]), 0)
         self.assertGreaterEqual(res["total_registered"], 50)
 
+    def test_subparser_flags_exposed_in_registry(self):
+        """Assert that dynamically discovered tool registry entries expose newly aligned flags."""
+        expected = {
+            "mod diagnose-logs": ["--toolkit-dir", "--type", "--severity", "--subsystem", "--mod", "--follow", "--list-logs"],
+            "mod sync-game": ["--source-dir", "--data-dir", "--mods", "--clean-legacy", "--clean-custom", "--clean-mod", "--bump-build", "--watch"],
+            "mod pack": ["--out", "--output-dir", "--publish-local", "--clean-local", "--include-projects", "--uncompressed"],
+            "mod create": ["--slug", "--uuid", "--unlock-level-curve", "--dependency", "--output-dir", "--type"],
+        }
+        for tool_name, exp_flags in expected.items():
+            tool = find_tool(self.registry, tool_name)
+            self.assertIsNotNone(tool, f"Tool {tool_name} not found in registry")
+            registered_flags = {f["name"] for f in tool.get("flags", [])}
+            for ef in exp_flags:
+                self.assertIn(ef, registered_flags, f"Flag {ef} missing from {tool_name} registry entry")
+
 
 if __name__ == "__main__":
     unittest.main()

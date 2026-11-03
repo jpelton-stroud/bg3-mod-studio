@@ -48,7 +48,7 @@ CREDIT_OPTIONS_MASK = sum(NONCOMMERCIAL_CREDIT_OPTIONS.values())
 def resolve_local_mod(query: str, mods_dir: Optional[Path] = None) -> Path:
     query_key = normalize_name(query.strip())
     if not query_key:
-        raise ModioError("Provide a mod name or slug from my_mods/.")
+        raise ModioError("Provide a mod name or slug from $BG3_STUDIO_DIR/Mods/authored/.")
     target_dir = Path(mods_dir) if mods_dir is not None else Path(os.environ.get("BG3_MODS_DIR", MY_MODS_DIR))
     if not target_dir.is_dir():
         raise ModioError(f"Mod directory does not exist: {target_dir}")
@@ -333,7 +333,7 @@ def main() -> int:
             "Writes require --confirm after interactive user approval."
         )
     )
-    parser.add_argument("--mod", required=True, help="Exact mod folder name or slug within my_mods/")
+    parser.add_argument("--mod", required=True, help="Exact mod folder name or slug within $BG3_STUDIO_DIR/Mods/authored/")
     parser.add_argument(
         "--tags",
         action="append",
