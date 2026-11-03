@@ -16,10 +16,7 @@ import math
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
-
-from bg3_core.cli.common import ConsoleColor, ExitCode
-from bg3_core.modio.query_mod_database import build_or_load_index
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from bg3_theorycraft.damage_types import (
     DamageType,
@@ -33,6 +30,16 @@ from bg3_theorycraft.models import (
     ResourcePools,
     SimulationResult,
 )
+
+
+def build_or_load_index(*args: Any, **kwargs: Any) -> Any:
+    """Lazy proxy to bg3_core.modio.query_mod_database.build_or_load_index to avoid eager import coupling."""
+    try:
+        from bg3_core.modio.query_mod_database import build_or_load_index as _impl
+
+        return _impl(*args, **kwargs)
+    except Exception:
+        return []
 
 # Caster classification for multiclass spell slot calculation
 CASTER_WEIGHTS: Dict[str, float] = {
@@ -346,7 +353,9 @@ def parse_boost_effects(boost_str: str) -> Dict[str, Any]:
 
 
 def load_gear_boosts(
-    gear_items: List[str], workspace_root: Optional[Path] = None
+    gear_items: List[str],
+    workspace_root: Optional[Path] = None,
+    entries: Optional[Sequence[Dict[str, Any]]] = None,
 ) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     """Programmatically queries cataloged mod equipment using bg3_core.query_mod_database."""
     gear_data: List[Dict[str, Any]] = []
@@ -364,8 +373,13 @@ def load_gear_boosts(
     if not gear_items:
         return combined_effects, gear_data
 
-    # Query mod entries via bg3_core.query_mod_database
-    entries = build_or_load_index(workspace_root=workspace_root)
+    # Query mod entries via bg3_core.query_mod_database if entries not provided
+    if entries is None:
+        try:
+            entries = build_or_load_index(workspace_root=workspace_root)
+        except Exception:
+            entries = []
+
     if not entries:
         return combined_effects, gear_data
 
@@ -994,12 +1008,24 @@ def simulate_build(
 
 def format_simulation_summary(
     res: SimulationResult,
-    color: Optional[ConsoleColor] = None,
+    color: Optional[Any] = None,
     target_ac: Optional[int] = None,
 ) -> str:
     """Format character simulation results into human-readable terminal output."""
     if color is None:
-        color = ConsoleColor(stream=sys.stdout)
+        try:
+            from bg3_core.cli.common import ConsoleColor
+
+            color = ConsoleColor(stream=sys.stdout)
+        except Exception:
+            class _NoColor:
+                def bold(self, s: str) -> str: return s
+                def green(self, s: str) -> str: return s
+                def yellow(self, s: str) -> str: return s
+                def red(self, s: str) -> str: return s
+                def cyan(self, s: str) -> str: return s
+
+            color = _NoColor()
 
     lines: list[str] = []
     class_str = " / ".join(f"{c.capitalize()} {lvl}" for c, lvl in res.classes.items())
@@ -1171,6 +1197,23 @@ def main() -> int:
             include_ac_curve=args.ac_curve,
         )
 
+        try:
+            from bg3_core.cli.common import ConsoleColor, ExitCode
+        except Exception:
+            class ExitCode:  # type: ignore[no-redef]
+                OK = 0
+                GENERAL = 1
+
+            class ConsoleColor:  # type: ignore[no-redef]
+                def __init__(self, stream: Any = None) -> None:
+                    pass
+
+                def bold(self, s: str) -> str:
+                    return s
+
+                def red(self, s: str) -> str:
+                    return s
+
         if args.json:
             print(json.dumps(res.to_dict(), indent=2))
         else:
@@ -1180,14 +1223,23 @@ def main() -> int:
         return ExitCode.OK
 
     except Exception as e:
-        if args.json:
-            print(json.dumps({"error": str(e), "success": False}, indent=2))
-        else:
-            err_color = ConsoleColor(stream=sys.stderr)
-            print(f"{err_color.red('[ERROR]')} {e}", file=sys.stderr)
-        return ExitCode.GENERAL
+        try:
+            from bg3_core.cli.common import ConsoleColor, ExitCode
+        except Exception:
+            class ExitCode:  # type: ignore[no-redef]
+                OK = 0
+                GENERAL = 1
 
-    except Exception as e:
+            class ConsoleColor:  # type: ignore[no-redef]
+                def __init__(self, stream: Any = None) -> None:
+                    pass
+
+                def bold(self, s: str) -> str:
+                    return s
+
+                def red(self, s: str) -> str:
+                    return s
+
         if args.json:
             print(json.dumps({"error": str(e), "success": False}, indent=2))
         else:

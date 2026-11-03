@@ -15,7 +15,7 @@ from bg3_core.binary.larian_parsers import (
     split_larian_items,
 )
 from bg3_core.binary.lsf import LsfAttribute, LsfDocument, LsfNode
-from bg3_core.binary.lspk import LspkArchive, build_lspk_archive
+from bg3_core.binary.lspk import LspkArchive, build_lspk_archive, write_lspk_archive
 from bg3_core.cli.common import ConsoleColor, ExitCode, OutputEmitter
 from bg3_core.cli.skills_installer import discover_bundled_skills, install_agent_skills
 from bg3_core.env_paths import (
@@ -78,4 +78,5 @@ __all__ = [
     "normalize_mod_key",
     "parse_meta_lsx",
     "split_larian_items",
+    "write_lspk_archive",
 ]

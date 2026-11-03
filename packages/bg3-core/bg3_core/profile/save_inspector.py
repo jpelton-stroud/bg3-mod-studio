@@ -20,7 +20,8 @@ import zlib
 from pathlib import Path
 from typing import Any, Generator
 
-from bg3_core.binary.lspk import LspkArchive, write_lspk_archive
+from bg3_core.binary.lsf import LsfDocument, LsfNode
+from bg3_core.binary.lspk import LspkArchive, lz4_frame_or_block_decompress, write_lspk_archive
 from bg3_core.cli.common import ConsoleColor, ExitCode
 from bg3_core.env_paths import detect_bg3_appdata_dirs
 from bg3_core.exceptions import BG3BinaryError, BG3PackagingError
@@ -70,8 +71,6 @@ def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict[str, str]]:
     """Extracts ModuleShortDesc entries from binary LSOF meta.lsf via AST traversal with regex fallback."""
     # 1. Primary path: Pure-Python LSF AST decompiler
     try:
-        from bg3_core.binary.lsf import LsfDocument
-
         doc = LsfDocument.from_bytes(lsf_bytes)
         mod_nodes = doc.find_all("ModuleShortDesc")
         if mod_nodes:
@@ -96,8 +95,6 @@ def _parse_lsf_save_mods(lsf_bytes: bytes) -> list[dict[str, str]]:
         pass
 
     # 2. Fallback path: Raw binary payload scanning
-    from bg3_core.binary.lspk import lz4_frame_or_block_decompress
-
     payload = lsf_bytes
     if len(lsf_bytes) >= 64 and lsf_bytes[:4] == b"LSOF":
         try:
@@ -240,7 +237,7 @@ def audit_against_modsettings(
     save_mods: list[dict[str, Any]], workspace_root: Path | None = None
 ) -> dict[str, Any]:
     """Compares save mod list against active modsettings.lsx."""
-    from bg3_core.profile.manage_load_order import (
+    from bg3_core.profile.modsettings_io import (
         CORE_GUSTAV_NAMES,
         detect_modsettings_path,
         parse_modsettings,
@@ -367,8 +364,6 @@ def prune_missing_mods_from_save(
                 raw = archive.extract_file(entry)
 
                 if norm.endswith("meta.lsf"):
-                    from bg3_core.binary.lsf import LsfDocument, LsfNode
-
                     doc = LsfDocument.from_bytes(raw)
 
                     def _prune_lsf_node(node: LsfNode) -> None:

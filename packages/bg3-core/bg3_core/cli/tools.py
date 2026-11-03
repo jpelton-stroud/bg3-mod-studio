@@ -120,7 +120,7 @@ def _resolve_target_module_flags(group_name: str, subcmd_name: Optional[str] = N
     try:
         import importlib
 
-        from bg3_core.cli import COMMAND_REGISTRY, DIRECT_COMMANDS
+        from bg3_core.cli.router import COMMAND_REGISTRY, DIRECT_COMMANDS
 
         spec = None
         if subcmd_name:
@@ -180,7 +180,7 @@ def extract_registry_from_parser(parser: Optional[argparse.ArgumentParser] = Non
     canonical tool registry without any legacy script aliases.
     """
     if parser is None:
-        from bg3_core.cli import build_parser
+        from bg3_core.cli.router import build_parser
         parser = build_parser()
 
     tools: List[Dict[str, Any]] = []
@@ -363,7 +363,7 @@ def list_tools(registry: Dict[str, Any], category: Optional[str] = None) -> List
 
 def verify_registry(registry: Dict[str, Any]) -> Dict[str, Any]:
     """Verify that all registered CLI commands are valid, documented, and executable in-process."""
-    from bg3_core.cli import build_parser
+    from bg3_core.cli.router import build_parser
 
     parser = build_parser()
     tools = registry.get("tools", [])
